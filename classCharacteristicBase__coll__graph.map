@@ -1,14 +1,16 @@
 <map id="CharacteristicBase" name="CharacteristicBase">
-<area shape="rect" id="node1" title="Non&#45;template base class for Characteristics." alt="" coords="1193,69,1337,95"/>
-<area shape="rect" id="node2" href="$classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,5,780,31"/>
-<area shape="rect" id="node3" href="$classService.html" title="Base class for a BLE service." alt="" coords="1016,69,1087,95"/>
-<area shape="rect" id="node4" href="$classBaseClass.html" title=" " alt="" coords="689,65,815,91"/>
-<area shape="rect" id="node5" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,115,781,140"/>
-<area shape="rect" id="node6" href="$classBaseClass.html" title=" " alt="" coords="365,57,491,83"/>
-<area shape="rect" id="node7" href="$classfixed__tuple.html" title=" " alt="" coords="327,107,529,147"/>
-<area shape="rect" id="node8" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="184,115,277,140"/>
-<area shape="rect" id="node9" title=" " alt="" coords="5,115,135,140"/>
-<area shape="rect" id="node10" href="$classtuple.html" title=" " alt="" coords="643,171,861,196"/>
-<area shape="rect" id="node11" title=" " alt="" coords="330,171,526,211"/>
-<area shape="rect" id="node12" href="$structStatus.html" title="Status of a Characteristic." alt="" coords="1020,119,1083,144"/>
+<area shape="rect" id="node1" title="Base class for a BLE characteristic." alt="" coords="1396,96,1540,121"/>
+<area shape="rect" id="node2" href="$structcharacteristic__config__t.html" title=" " alt="" coords="1041,5,1210,31"/>
+<area shape="rect" id="node3" title=" " alt="" coords="1016,55,1235,109"/>
+<area shape="rect" id="node4" href="$classService.html" title="Base class for a BLE service." alt="" coords="1090,133,1161,159"/>
+<area shape="rect" id="node5" href="$classBaseClass.html" title=" " alt="" coords="689,59,815,84"/>
+<area shape="rect" id="node6" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,108,781,133"/>
+<area shape="rect" id="node7" href="$classBaseClass.html" title=" " alt="" coords="365,68,491,93"/>
+<area shape="rect" id="node8" href="$classfixed__tuple.html" title=" " alt="" coords="327,118,529,158"/>
+<area shape="rect" id="node9" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="184,125,277,151"/>
+<area shape="rect" id="node10" title=" " alt="" coords="5,125,135,151"/>
+<area shape="rect" id="node11" href="$classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,157,780,183"/>
+<area shape="rect" id="node12" href="$classtuple.html" title=" " alt="" coords="643,207,861,232"/>
+<area shape="rect" id="node13" title=" " alt="" coords="330,199,526,239"/>
+<area shape="rect" id="node14" href="$structcs__data__t.html" title="Packets (structs) that are used internally in the firmware, and can be changed freely." alt="" coords="1083,183,1167,208"/>
 </map>

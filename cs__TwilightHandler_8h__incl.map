@@ -1,0 +1,52 @@
+<map id="source/include/behaviour/cs_TwilightHandler.h" name="source/include/behaviour/cs_TwilightHandler.h">
+<area shape="rect" id="node1" title=" " alt="" coords="2317,5,2502,45"/>
+<area shape="rect" id="node2" href="$cs__BehaviourStore_8h.html" title=" " alt="" coords="2223,93,2447,119"/>
+<area shape="rect" id="node11" href="$cs__Time_8h.html" title=" " alt="" coords="1371,621,1493,647"/>
+<area shape="rect" id="node30" href="$cs__PresenceDescription_8h.html" title=" " alt="" coords="2513,768,2764,793"/>
+<area shape="rect" id="node37" title=" " alt="" coords="2423,548,2497,573"/>
+<area shape="rect" id="node39" href="$cs__Component_8h.html" title=" " alt="" coords="2674,548,2865,573"/>
+<area shape="rect" id="node40" href="$cs__EventListener_8h.html" title=" " alt="" coords="1136,167,1328,192"/>
+<area shape="rect" id="node3" href="$cs__ExtendedSwitchBehaviour_8h.html" title=" " alt="" coords="2081,387,2297,427"/>
+<area shape="rect" id="node4" href="$cs__SwitchBehaviour_8h.html" title=" " alt="" coords="2117,475,2350,500"/>
+<area shape="rect" id="node6" href="$cs__TestAccess_8h.html" title=" " alt="" coords="2284,841,2439,867"/>
+<area shape="rect" id="node14" title=" " alt="" coords="2015,768,2071,793"/>
+<area shape="rect" id="node15" title=" " alt="" coords="2535,621,2598,647"/>
+<area shape="rect" id="node24" href="$cs__ErrorCodes_8h.html" title=" " alt="" coords="2043,1223,2226,1248"/>
+<area shape="rect" id="node38" href="$cs__TwilightBehaviour_8h.html" title=" " alt="" coords="1295,475,1535,500"/>
+<area shape="rect" id="node5" href="$cs__Behaviour_8h.html" title=" " alt="" coords="1319,548,1510,573"/>
+<area shape="rect" id="node12" title=" " alt="" coords="1734,1369,1805,1395"/>
+<area shape="rect" id="node16" href="$cs__Logger_8h.html" title=" " alt="" coords="2163,915,2314,940"/>
+<area shape="rect" id="node28" href="$cs__PresenceCondition_8h.html" title=" " alt="" coords="2018,621,2257,647"/>
+<area shape="rect" id="node29" href="$cs__PresencePredicate_8h.html" title=" " alt="" coords="2069,695,2307,720"/>
+<area shape="rect" id="node34" href="$cs__WireFormat_8h.html" title=" " alt="" coords="1786,548,1942,573"/>
+<area shape="rect" id="node7" href="$cs__DayOfWeek_8h.html" title=" " alt="" coords="1118,695,1285,720"/>
+<area shape="rect" id="node13" href="$cs__TimeOfDay_8h.html" title=" " alt="" coords="1360,695,1520,720"/>
+<area shape="rect" id="node8" href="$cs__Math_8h.html" title=" " alt="" coords="1205,768,1318,793"/>
+<area shape="rect" id="node10" title=" " alt="" coords="701,1223,768,1248"/>
+<area shape="rect" id="node9" title=" " alt="" coords="1219,841,1304,867"/>
+<area shape="rect" id="node17" href="$cs__Strings_8h.html" title=" " alt="" coords="2177,995,2301,1021"/>
+<area shape="rect" id="node18" href="$cs__SerialTypes_8h.html" title=" " alt="" coords="2107,1296,2293,1321"/>
+<area shape="rect" id="node19" href="$cs__UartMsgTypes_8h.html" title=" " alt="" coords="1463,995,1667,1021"/>
+<area shape="rect" id="node26" href="$cs__LogPlainText_8h.html" title=" " alt="" coords="1970,988,2153,1028"/>
+<area shape="rect" id="node20" href="$cs__Config_8h.html" title=" " alt="" coords="1671,1223,1793,1248"/>
+<area shape="rect" id="node22" href="$cs__Packets_8h.html" title=" " alt="" coords="1479,1149,1641,1175"/>
+<area shape="rect" id="node25" href="$cs__PacketsInternal_8h.html" title=" " alt="" coords="1152,1076,1355,1101"/>
+<area shape="rect" id="node21" href="$cs__Typedefs_8h.html" title=" " alt="" coords="1623,1296,1793,1321"/>
+<area shape="rect" id="node23" href="$cs__CommandTypes_8h.html" title=" " alt="" coords="1329,1223,1545,1248"/>
+<area shape="rect" id="node27" href="$cs__LogUtils_8h.html" title=" " alt="" coords="1965,1076,2158,1101"/>
+<area shape="rect" id="node31" href="$cs__Utils_8h.html" title=" " alt="" coords="2615,841,2726,867"/>
+<area shape="rect" id="node32" href="$cs__Nordic_8h.html" title=" " alt="" coords="2502,915,2623,940"/>
+<area shape="rect" id="node33" title=" " alt="" coords="2648,915,2707,940"/>
+<area shape="rect" id="node35" title=" " alt="" coords="1569,621,1639,647"/>
+<area shape="rect" id="node36" title=" " alt="" coords="1663,621,1739,647"/>
+<area shape="rect" id="node41" href="$cs__Event_8h.html" title=" " alt="" coords="979,240,1119,265"/>
+<area shape="rect" id="node42" href="$cs__Types_8h.html" title=" " alt="" coords="973,313,1126,339"/>
+<area shape="rect" id="node43" href="$cs__BehaviourMutation_8h.html" title=" " alt="" coords="603,394,851,419"/>
+<area shape="rect" id="node44" href="$cs__TrackableEvent_8h.html" title=" " alt="" coords="875,387,1061,427"/>
+<area shape="rect" id="node45" href="$cs__MeshMsgEvent_8h.html" title=" " alt="" coords="731,995,925,1021"/>
+<area shape="rect" id="node46" href="$cs__AssetFilterPackets_8h.html" title=" " alt="" coords="195,475,426,500"/>
+<area shape="rect" id="node47" href="$cs__BleCentralPackets_8h.html" title=" " alt="" coords="144,995,365,1021"/>
+<area shape="rect" id="node48" href="$cs__CrownstoneCentralPackets_8h.html" title=" " alt="" coords="441,988,655,1028"/>
+<area shape="rect" id="node49" href="$cs__TimeSyncMessage_8h.html" title=" " alt="" coords="924,1149,1135,1175"/>
+<area shape="rect" id="node50" title=" " alt="" coords="1085,394,1177,419"/>
+</map>

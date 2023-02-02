@@ -103,6 +103,8 @@ $(document).ready(function(){initNavTree('classBleHandler.html',''); initResizab
   <div class="headertitle"><div class="title">BleHandler Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__Handlers_8h_source.html">cs_Handlers.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -112,20 +114,88 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a221310c23642dfa7d8f361e039dca68d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBleHandler.html#a221310c23642dfa7d8f361e039dca68d">handleEventDecoupled</a> (const ble_evt_t *event)</td></tr>
 <tr class="memdesc:a221310c23642dfa7d8f361e039dca68d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle BLE events.  <a href="classBleHandler.html#a221310c23642dfa7d8f361e039dca68d">More...</a><br /></td></tr>
 <tr class="separator:a221310c23642dfa7d8f361e039dca68d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81e9c4ea781471d0e8440245bb9a5563"><td class="memItemLeft" align="right" valign="top"><a id="a81e9c4ea781471d0e8440245bb9a5563" name="a81e9c4ea781471d0e8440245bb9a5563"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>handlePhyRequest</b> (uint16_t connectionHandle, const ble_gap_evt_phy_update_request_t &amp;request)</td></tr>
+<tr class="memitem:a81e9c4ea781471d0e8440245bb9a5563"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBleHandler.html#a81e9c4ea781471d0e8440245bb9a5563">handlePhyRequest</a> (uint16_t connectionHandle, const ble_gap_evt_phy_update_request_t &amp;request)</td></tr>
 <tr class="separator:a81e9c4ea781471d0e8440245bb9a5563"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:addaed856be11c5f26caf708b793de8c7"><td class="memItemLeft" align="right" valign="top"><a id="addaed856be11c5f26caf708b793de8c7" name="addaed856be11c5f26caf708b793de8c7"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>handleDataLengthRequest</b> (uint16_t connectionHandle, const ble_gap_evt_data_length_update_request_t &amp;request)</td></tr>
+<tr class="memitem:addaed856be11c5f26caf708b793de8c7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBleHandler.html#addaed856be11c5f26caf708b793de8c7">handleDataLengthRequest</a> (uint16_t connectionHandle, const ble_gap_evt_data_length_update_request_t &amp;request)</td></tr>
 <tr class="separator:addaed856be11c5f26caf708b793de8c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae1a16923df8c620ccf8cab81fa03b6e7"><td class="memItemLeft" align="right" valign="top"><a id="ae1a16923df8c620ccf8cab81fa03b6e7" name="ae1a16923df8c620ccf8cab81fa03b6e7"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>handleMtuRequest</b> (uint16_t connectionHandle, const ble_gatts_evt_exchange_mtu_request_t &amp;request)</td></tr>
+<tr class="memitem:ae1a16923df8c620ccf8cab81fa03b6e7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBleHandler.html#ae1a16923df8c620ccf8cab81fa03b6e7">handleMtuRequest</a> (uint16_t connectionHandle, const ble_gatts_evt_exchange_mtu_request_t &amp;request)</td></tr>
 <tr class="separator:ae1a16923df8c620ccf8cab81fa03b6e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae39d0e92c3973ed2421937384d021750"><td class="memItemLeft" align="right" valign="top"><a id="ae39d0e92c3973ed2421937384d021750" name="ae39d0e92c3973ed2421937384d021750"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>disconnect</b> (uint16_t connectionHandle, uint8_t reason)</td></tr>
+<tr class="memitem:ae39d0e92c3973ed2421937384d021750"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBleHandler.html#ae39d0e92c3973ed2421937384d021750">disconnect</a> (uint16_t connectionHandle, uint8_t reason)</td></tr>
 <tr class="separator:ae39d0e92c3973ed2421937384d021750"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="ae39d0e92c3973ed2421937384d021750" name="ae39d0e92c3973ed2421937384d021750"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae39d0e92c3973ed2421937384d021750">&#9670;&#160;</a></span>disconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void BleHandler::disconnect </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>reason</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="addaed856be11c5f26caf708b793de8c7" name="addaed856be11c5f26caf708b793de8c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addaed856be11c5f26caf708b793de8c7">&#9670;&#160;</a></span>handleDataLengthRequest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void BleHandler::handleDataLengthRequest </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ble_gap_evt_data_length_update_request_t &amp;&#160;</td>
+          <td class="paramname"><em>request</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="aa8b80c7e8004e59f6413c8fa9c505dbc" name="aa8b80c7e8004e59f6413c8fa9c505dbc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa8b80c7e8004e59f6413c8fa9c505dbc">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -181,6 +251,78 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>disconnect</b>
 
 <p>Handle BLE events. </p>
 <p >Must be called from main thread. </p>
+
+</div>
+</div>
+<a id="ae1a16923df8c620ccf8cab81fa03b6e7" name="ae1a16923df8c620ccf8cab81fa03b6e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1a16923df8c620ccf8cab81fa03b6e7">&#9670;&#160;</a></span>handleMtuRequest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void BleHandler::handleMtuRequest </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ble_gatts_evt_exchange_mtu_request_t &amp;&#160;</td>
+          <td class="paramname"><em>request</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a81e9c4ea781471d0e8440245bb9a5563" name="a81e9c4ea781471d0e8440245bb9a5563"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81e9c4ea781471d0e8440245bb9a5563">&#9670;&#160;</a></span>handlePhyRequest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void BleHandler::handlePhyRequest </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ble_gap_evt_phy_update_request_t &amp;&#160;</td>
+          <td class="paramname"><em>request</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

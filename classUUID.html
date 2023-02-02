@@ -99,6 +99,9 @@ $(document).ready(function(){initNavTree('classUUID.html',''); initResizable(); 
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classUUID-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">UUID Class Reference</div></div>
 </div><!--header-->
@@ -111,42 +114,64 @@ $(document).ready(function(){initNavTree('classUUID.html',''); initResizable(); 
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a56b6dfa8d38418093502ad169a814dfb"><td class="memItemLeft" align="right" valign="top"><a id="a56b6dfa8d38418093502ad169a814dfb" name="a56b6dfa8d38418093502ad169a814dfb"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>UUID</b> ()</td></tr>
-<tr class="memdesc:a56b6dfa8d38418093502ad169a814dfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. <br /></td></tr>
+<tr class="memitem:a56b6dfa8d38418093502ad169a814dfb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a56b6dfa8d38418093502ad169a814dfb">UUID</a> ()</td></tr>
+<tr class="memdesc:a56b6dfa8d38418093502ad169a814dfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classUUID.html#a56b6dfa8d38418093502ad169a814dfb">More...</a><br /></td></tr>
 <tr class="separator:a56b6dfa8d38418093502ad169a814dfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a39bf742a66259e5ac37d262bf738ad46"><td class="memItemLeft" align="right" valign="top"><a id="a39bf742a66259e5ac37d262bf738ad46" name="a39bf742a66259e5ac37d262bf738ad46"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>UUID</b> (ble_uuid_t uuid)</td></tr>
+<tr class="memitem:a39bf742a66259e5ac37d262bf738ad46"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a39bf742a66259e5ac37d262bf738ad46">UUID</a> (ble_uuid_t uuid)</td></tr>
 <tr class="separator:a39bf742a66259e5ac37d262bf738ad46"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a250f748d6c1df5751fdd1eaf140dc405"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a250f748d6c1df5751fdd1eaf140dc405">fromFullUuid</a> (const char *fullUuid)</td></tr>
+<tr class="memitem:a250f748d6c1df5751fdd1eaf140dc405"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a250f748d6c1df5751fdd1eaf140dc405">fromFullUuid</a> (const char *fullUuid)</td></tr>
 <tr class="memdesc:a250f748d6c1df5751fdd1eaf140dc405"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> from a 128b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> string.  <a href="classUUID.html#a250f748d6c1df5751fdd1eaf140dc405">More...</a><br /></td></tr>
 <tr class="separator:a250f748d6c1df5751fdd1eaf140dc405"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac899616b24f8b1b9feb02fe5eacc14a0"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#ac899616b24f8b1b9feb02fe5eacc14a0">fromFullUuid</a> (const ble_uuid128_t &amp;fullUuid)</td></tr>
+<tr class="memitem:ac899616b24f8b1b9feb02fe5eacc14a0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#ac899616b24f8b1b9feb02fe5eacc14a0">fromFullUuid</a> (const ble_uuid128_t &amp;fullUuid)</td></tr>
 <tr class="memdesc:ac899616b24f8b1b9feb02fe5eacc14a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> from a 128b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>.  <a href="classUUID.html#ac899616b24f8b1b9feb02fe5eacc14a0">More...</a><br /></td></tr>
 <tr class="separator:ac899616b24f8b1b9feb02fe5eacc14a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab00a821303025ca8fe82ce3571a6b73f"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#ab00a821303025ca8fe82ce3571a6b73f">fromShortUuid</a> (uint16_t shortUuid)</td></tr>
+<tr class="memitem:ab00a821303025ca8fe82ce3571a6b73f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#ab00a821303025ca8fe82ce3571a6b73f">fromShortUuid</a> (uint16_t shortUuid)</td></tr>
 <tr class="memdesc:ab00a821303025ca8fe82ce3571a6b73f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> from a 16b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>.  <a href="classUUID.html#ab00a821303025ca8fe82ce3571a6b73f">More...</a><br /></td></tr>
 <tr class="separator:ab00a821303025ca8fe82ce3571a6b73f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa44be4187159548f89828fe879b09a9"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#aaa44be4187159548f89828fe879b09a9">fromBaseUuid</a> (const <a class="el" href="classUUID.html">UUID</a> &amp;baseUuid, uint16_t shortUuid)</td></tr>
+<tr class="memitem:aaa44be4187159548f89828fe879b09a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#aaa44be4187159548f89828fe879b09a9">fromBaseUuid</a> (const <a class="el" href="classUUID.html">UUID</a> &amp;baseUuid, uint16_t shortUuid)</td></tr>
 <tr class="memdesc:aaa44be4187159548f89828fe879b09a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> derived from an existing 128b base <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>.  <a href="classUUID.html#aaa44be4187159548f89828fe879b09a9">More...</a><br /></td></tr>
 <tr class="separator:aaa44be4187159548f89828fe879b09a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07a1a33f18ef3d35967bb4dc9f3421f4"><td class="memItemLeft" align="right" valign="top"><a id="a07a1a33f18ef3d35967bb4dc9f3421f4" name="a07a1a33f18ef3d35967bb4dc9f3421f4"></a>
-ble_uuid_t&#160;</td><td class="memItemRight" valign="bottom"><b>getUuid</b> () const</td></tr>
-<tr class="memdesc:a07a1a33f18ef3d35967bb4dc9f3421f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> that can be used for soft device operations. <br /></td></tr>
+<tr class="memitem:a07a1a33f18ef3d35967bb4dc9f3421f4"><td class="memItemLeft" align="right" valign="top">ble_uuid_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a07a1a33f18ef3d35967bb4dc9f3421f4">getUuid</a> () const</td></tr>
+<tr class="memdesc:a07a1a33f18ef3d35967bb4dc9f3421f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> that can be used for soft device operations.  <a href="classUUID.html#a07a1a33f18ef3d35967bb4dc9f3421f4">More...</a><br /></td></tr>
 <tr class="separator:a07a1a33f18ef3d35967bb4dc9f3421f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2f1248d449af2e115760bb15184410b"><td class="memItemLeft" align="right" valign="top"><a id="ad2f1248d449af2e115760bb15184410b" name="ad2f1248d449af2e115760bb15184410b"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>UUID</b> (const char *fullUuid)</td></tr>
-<tr class="memdesc:ad2f1248d449af2e115760bb15184410b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience constructors, will crash the firmware instead of returning an error code. <br /></td></tr>
+<tr class="memitem:ad2f1248d449af2e115760bb15184410b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#ad2f1248d449af2e115760bb15184410b">UUID</a> (const char *fullUuid)</td></tr>
+<tr class="memdesc:ad2f1248d449af2e115760bb15184410b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience constructors, will crash the firmware instead of returning an error code.  <a href="classUUID.html#ad2f1248d449af2e115760bb15184410b">More...</a><br /></td></tr>
 <tr class="separator:ad2f1248d449af2e115760bb15184410b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa0a06aa4bbd541a60ffc1c035e71404"><td class="memItemLeft" align="right" valign="top"><a id="aaa0a06aa4bbd541a60ffc1c035e71404" name="aaa0a06aa4bbd541a60ffc1c035e71404"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>UUID</b> (uint16_t shortUuid)</td></tr>
+<tr class="memitem:aaa0a06aa4bbd541a60ffc1c035e71404"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#aaa0a06aa4bbd541a60ffc1c035e71404">UUID</a> (uint16_t shortUuid)</td></tr>
 <tr class="separator:aaa0a06aa4bbd541a60ffc1c035e71404"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0bd4b4c6867834516d7fbd11bf2c7793"><td class="memItemLeft" align="right" valign="top"><a id="a0bd4b4c6867834516d7fbd11bf2c7793" name="a0bd4b4c6867834516d7fbd11bf2c7793"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>UUID</b> (const <a class="el" href="classUUID.html">UUID</a> &amp;baseUuid, uint16_t shortUuid)</td></tr>
+<tr class="memitem:a0bd4b4c6867834516d7fbd11bf2c7793"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a0bd4b4c6867834516d7fbd11bf2c7793">UUID</a> (const <a class="el" href="classUUID.html">UUID</a> &amp;baseUuid, uint16_t shortUuid)</td></tr>
 <tr class="separator:a0bd4b4c6867834516d7fbd11bf2c7793"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9a4ae6628c74409e29069c8d1b35aef"><td class="memItemLeft" align="right" valign="top"><a id="ae9a4ae6628c74409e29069c8d1b35aef" name="ae9a4ae6628c74409e29069c8d1b35aef"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const <a class="el" href="classUUID.html">UUID</a> &amp;other)</td></tr>
+<tr class="memitem:ae9a4ae6628c74409e29069c8d1b35aef"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#ae9a4ae6628c74409e29069c8d1b35aef">operator==</a> (const <a class="el" href="classUUID.html">UUID</a> &amp;other)</td></tr>
 <tr class="separator:ae9a4ae6628c74409e29069c8d1b35aef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a415cbe5030545604ce15b254233e2d1d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a415cbe5030545604ce15b254233e2d1d">fromShortUuidInternal</a> (uint16_t shortUuid)</td></tr>
+<tr class="separator:a415cbe5030545604ce15b254233e2d1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80d9b05289bcfe06dd1cf58ee4645638"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a80d9b05289bcfe06dd1cf58ee4645638">fromBaseUuidInternal</a> (const <a class="el" href="classUUID.html">UUID</a> &amp;baseUuid, uint16_t shortUuid)</td></tr>
+<tr class="separator:a80d9b05289bcfe06dd1cf58ee4645638"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b047dc6fdd6ac101f40a82063215271"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a8b047dc6fdd6ac101f40a82063215271">fromFullUuidInternal</a> (const ble_uuid128_t &amp;fullUuid)</td></tr>
+<tr class="separator:a8b047dc6fdd6ac101f40a82063215271"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a660ba71ab4e9a2b7d026bff871473333"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a660ba71ab4e9a2b7d026bff871473333">add</a> (const ble_uuid128_t &amp;fullUuid)</td></tr>
+<tr class="memdesc:a660ba71ab4e9a2b7d026bff871473333"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers the 128b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>, without checking if already registered.  <a href="classUUID.html#a660ba71ab4e9a2b7d026bff871473333">More...</a><br /></td></tr>
+<tr class="separator:a660ba71ab4e9a2b7d026bff871473333"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe9ba03d8e684132fd7132100d852a11"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#afe9ba03d8e684132fd7132100d852a11">getFromCache</a> (const ble_uuid128_t &amp;fullUuid)</td></tr>
+<tr class="memdesc:afe9ba03d8e684132fd7132100d852a11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the 128b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> has been registered, and sets _uuid if so.  <a href="classUUID.html#afe9ba03d8e684132fd7132100d852a11">More...</a><br /></td></tr>
+<tr class="separator:afe9ba03d8e684132fd7132100d852a11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
+Static Private Member Functions</h2></td></tr>
+<tr class="memitem:a9530e083eb863762534ddb4a58241221"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a9530e083eb863762534ddb4a58241221">rem</a> (const ble_uuid_t &amp;uuid)</td></tr>
+<tr class="memdesc:a9530e083eb863762534ddb4a58241221"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a 128b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> from the soft device.  <a href="classUUID.html#a9530e083eb863762534ddb4a58241221">More...</a><br /></td></tr>
+<tr class="separator:a9530e083eb863762534ddb4a58241221"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa566f493b7ca2ed8e547d637d8ad79ce"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#aa566f493b7ca2ed8e547d637d8ad79ce">fromNrfCode</a> (<a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> nrfCode)</td></tr>
+<tr class="memdesc:aa566f493b7ca2ed8e547d637d8ad79ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the CS return code from an nrf return code.  <a href="classUUID.html#aa566f493b7ca2ed8e547d637d8ad79ce">More...</a><br /></td></tr>
+<tr class="separator:aa566f493b7ca2ed8e547d637d8ad79ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a2f457a720f8398f41c53b55d49766ebc"><td class="memItemLeft" align="right" valign="top">ble_uuid_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUUID.html#a2f457a720f8398f41c53b55d49766ebc">_uuid</a> = {.uuid = 0, .type = BLE_UUID_TYPE_UNKNOWN}</td></tr>
+<tr class="separator:a2f457a720f8398f41c53b55d49766ebc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that enables the use of 128 bit service UUIDs. </p>
@@ -156,7 +181,140 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const
 <p >The Softdevice functions only deal with 16b UUIDS, so they introduced 1 extra byte (the 'type' field) to indicate the base <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>. This base <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> has to be registered first, but can then be used with different 16b fields. A base <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> would look like XXXX0000-XXXX-XXXX-XXXX-XXXXXXXXXXXX. The 0000 part is then replaced by the 16b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>.</p>
 <p >A typical example is a BLE service with multiple characteristics. All of them will have the same base <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>, but different 16b UUIDs.</p>
 <p >TODO: rename to cs_ServiceUuid TODO: maybe change function names "from...." to something else and make clear you can call them multiple times. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a56b6dfa8d38418093502ad169a814dfb" name="a56b6dfa8d38418093502ad169a814dfb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56b6dfa8d38418093502ad169a814dfb">&#9670;&#160;</a></span>UUID() <span class="overload">[1/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUUID.html">UUID::UUID</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Constructor. </p>
+
+</div>
+</div>
+<a id="a39bf742a66259e5ac37d262bf738ad46" name="a39bf742a66259e5ac37d262bf738ad46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39bf742a66259e5ac37d262bf738ad46">&#9670;&#160;</a></span>UUID() <span class="overload">[2/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUUID.html">UUID::UUID</a> </td>
+          <td>(</td>
+          <td class="paramtype">ble_uuid_t&#160;</td>
+          <td class="paramname"><em>uuid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad2f1248d449af2e115760bb15184410b" name="ad2f1248d449af2e115760bb15184410b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2f1248d449af2e115760bb15184410b">&#9670;&#160;</a></span>UUID() <span class="overload">[3/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUUID.html">UUID::UUID</a> </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>fullUuid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Convenience constructors, will crash the firmware instead of returning an error code. </p>
+
+</div>
+</div>
+<a id="aaa0a06aa4bbd541a60ffc1c035e71404" name="aaa0a06aa4bbd541a60ffc1c035e71404"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa0a06aa4bbd541a60ffc1c035e71404">&#9670;&#160;</a></span>UUID() <span class="overload">[4/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUUID.html">UUID::UUID</a> </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>shortUuid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0bd4b4c6867834516d7fbd11bf2c7793" name="a0bd4b4c6867834516d7fbd11bf2c7793"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bd4b4c6867834516d7fbd11bf2c7793">&#9670;&#160;</a></span>UUID() <span class="overload">[5/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUUID.html">UUID::UUID</a> </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classUUID.html">UUID</a> &amp;&#160;</td>
+          <td class="paramname"><em>baseUuid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>shortUuid</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a660ba71ab4e9a2b7d026bff871473333" name="a660ba71ab4e9a2b7d026bff871473333"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a660ba71ab4e9a2b7d026bff871473333">&#9670;&#160;</a></span>add()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UUID::add </td>
+          <td>(</td>
+          <td class="paramtype">const ble_uuid128_t &amp;&#160;</td>
+          <td class="paramname"><em>fullUuid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Registers the 128b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>, without checking if already registered. </p>
+<dl class="section return"><dt>Returns</dt><dd>NRF return code. </dd></dl>
+
+</div>
+</div>
 <a id="aaa44be4187159548f89828fe879b09a9" name="aaa44be4187159548f89828fe879b09a9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaa44be4187159548f89828fe879b09a9">&#9670;&#160;</a></span>fromBaseUuid()</h2>
 
@@ -164,7 +322,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t UUID::fromBaseUuid </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UUID::fromBaseUuid </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classUUID.html">UUID</a> &amp;&#160;</td>
           <td class="paramname"><em>baseUuid</em>, </td>
@@ -194,6 +352,42 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const
 
 </div>
 </div>
+<a id="a80d9b05289bcfe06dd1cf58ee4645638" name="a80d9b05289bcfe06dd1cf58ee4645638"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80d9b05289bcfe06dd1cf58ee4645638">&#9670;&#160;</a></span>fromBaseUuidInternal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UUID::fromBaseUuidInternal </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classUUID.html">UUID</a> &amp;&#160;</td>
+          <td class="paramname"><em>baseUuid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>shortUuid</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ac899616b24f8b1b9feb02fe5eacc14a0" name="ac899616b24f8b1b9feb02fe5eacc14a0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac899616b24f8b1b9feb02fe5eacc14a0">&#9670;&#160;</a></span>fromFullUuid() <span class="overload">[1/2]</span></h2>
 
@@ -201,7 +395,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t UUID::fromFullUuid </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UUID::fromFullUuid </td>
           <td>(</td>
           <td class="paramtype">const ble_uuid128_t &amp;&#160;</td>
           <td class="paramname"><em>fullUuid</em></td><td>)</td>
@@ -231,7 +425,7 @@ ERR_SUCCESS When the <a class="el" href="classUUID.html" title="Class that enabl
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t UUID::fromFullUuid </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UUID::fromFullUuid </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>fullUuid</em></td><td>)</td>
@@ -254,6 +448,60 @@ ERR_SUCCESS When the <a class="el" href="classUUID.html" title="Class that enabl
 
 </div>
 </div>
+<a id="a8b047dc6fdd6ac101f40a82063215271" name="a8b047dc6fdd6ac101f40a82063215271"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b047dc6fdd6ac101f40a82063215271">&#9670;&#160;</a></span>fromFullUuidInternal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UUID::fromFullUuidInternal </td>
+          <td>(</td>
+          <td class="paramtype">const ble_uuid128_t &amp;&#160;</td>
+          <td class="paramname"><em>fullUuid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa566f493b7ca2ed8e547d637d8ad79ce" name="aa566f493b7ca2ed8e547d637d8ad79ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa566f493b7ca2ed8e547d637d8ad79ce">&#9670;&#160;</a></span>fromNrfCode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UUID::fromNrfCode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td>
+          <td class="paramname"><em>nrfCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the CS return code from an nrf return code. </p>
+
+</div>
+</div>
 <a id="ab00a821303025ca8fe82ce3571a6b73f" name="ab00a821303025ca8fe82ce3571a6b73f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab00a821303025ca8fe82ce3571a6b73f">&#9670;&#160;</a></span>fromShortUuid()</h2>
 
@@ -261,7 +509,7 @@ ERR_SUCCESS When the <a class="el" href="classUUID.html" title="Class that enabl
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t UUID::fromShortUuid </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UUID::fromShortUuid </td>
           <td>(</td>
           <td class="paramtype">uint16_t&#160;</td>
           <td class="paramname"><em>shortUuid</em></td><td>)</td>
@@ -277,6 +525,150 @@ ERR_SUCCESS When the <a class="el" href="classUUID.html" title="Class that enabl
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a415cbe5030545604ce15b254233e2d1d" name="a415cbe5030545604ce15b254233e2d1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a415cbe5030545604ce15b254233e2d1d">&#9670;&#160;</a></span>fromShortUuidInternal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UUID::fromShortUuidInternal </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>shortUuid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afe9ba03d8e684132fd7132100d852a11" name="afe9ba03d8e684132fd7132100d852a11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe9ba03d8e684132fd7132100d852a11">&#9670;&#160;</a></span>getFromCache()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UUID::getFromCache </td>
+          <td>(</td>
+          <td class="paramtype">const ble_uuid128_t &amp;&#160;</td>
+          <td class="paramname"><em>fullUuid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Checks if the 128b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> has been registered, and sets _uuid if so. </p>
+<dl class="section return"><dt>Returns</dt><dd>NRF return code. </dd></dl>
+
+</div>
+</div>
+<a id="a07a1a33f18ef3d35967bb4dc9f3421f4" name="a07a1a33f18ef3d35967bb4dc9f3421f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07a1a33f18ef3d35967bb4dc9f3421f4">&#9670;&#160;</a></span>getUuid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">ble_uuid_t UUID::getUuid </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> that can be used for soft device operations. </p>
+
+</div>
+</div>
+<a id="ae9a4ae6628c74409e29069c8d1b35aef" name="ae9a4ae6628c74409e29069c8d1b35aef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9a4ae6628c74409e29069c8d1b35aef">&#9670;&#160;</a></span>operator==()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UUID::operator== </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classUUID.html">UUID</a> &amp;&#160;</td>
+          <td class="paramname"><em>other</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9530e083eb863762534ddb4a58241221" name="a9530e083eb863762534ddb4a58241221"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9530e083eb863762534ddb4a58241221">&#9670;&#160;</a></span>rem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UUID::rem </td>
+          <td>(</td>
+          <td class="paramtype">const ble_uuid_t &amp;&#160;</td>
+          <td class="paramname"><em>uuid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Removes a 128b <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> from the soft device. </p>
+<dl class="section return"><dt>Returns</dt><dd>CS return code. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a2f457a720f8398f41c53b55d49766ebc" name="a2f457a720f8398f41c53b55d49766ebc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f457a720f8398f41c53b55d49766ebc">&#9670;&#160;</a></span>_uuid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ble_uuid_t UUID::_uuid = {.uuid = 0, .type = BLE_UUID_TYPE_UNKNOWN}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

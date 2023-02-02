@@ -1,4 +1,8 @@
 <map id="ADC" name="ADC">
-<area shape="rect" id="node1" title="Analog&#45;Digital conversion." alt="" coords="35,79,86,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node1" title="Analog&#45;Digital conversion." alt="" coords="631,84,681,109"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="299,5,409,31"/>
+<area shape="rect" id="node3" href="$structadc__config__t.html" title="Struct to configure the ADC." alt="" coords="302,55,406,80"/>
+<area shape="rect" id="node4" href="$structadc__channel__config__t.html" title="Struct to configure an ADC channel." alt="" coords="5,55,168,80"/>
+<area shape="rect" id="node5" href="$structadc__channel__config__result__t.html" title="Result struct after configuring an ADC channel." alt="" coords="279,105,429,145"/>
+<area shape="rect" id="node6" href="$classCircularBuffer.html" title=" " alt="" coords="279,169,429,209"/>
 </map>

@@ -100,6 +100,9 @@ $(document).ready(function(){initNavTree('classTrackedDevices.html',''); initRes
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classTrackedDevices-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">TrackedDevices Class Reference</div></div>
 </div><!--header-->
@@ -123,13 +126,19 @@ Collaboration diagram for TrackedDevices:</div>
 <div class="dyncontent">
 <div class="center"><img src="classTrackedDevices__coll__graph.png" border="0" usemap="#aTrackedDevices_coll__map" alt="Collaboration graph"/></div>
 <map name="aTrackedDevices_coll__map" id="aTrackedDevices_coll__map">
-<area shape="rect" title="Class that keeps up devices to be tracked." alt="" coords="5,79,129,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="12,5,123,31"/>
+<area shape="rect" title="Class that keeps up devices to be tracked." alt="" coords="20,401,144,427"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,306,116,331"/>
+<area shape="rect" href="classStore.html" title=" " alt="" coords="141,299,343,339"/>
+<area shape="rect" href="structTrackedDevice.html" title=" " alt="" coords="183,211,301,236"/>
+<area shape="rect" href="structinternal__register__tracked__device__packet__t.html" title=" " alt="" coords="150,108,334,148"/>
+<area shape="rect" href="structregister__tracked__device__packet__t.html" title=" " alt="" coords="153,5,331,45"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:ae9c7227f2cd1edfde5452409c30838a3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#ae9c7227f2cd1edfde5452409c30838a3">TrackedDevices</a> ()</td></tr>
+<tr class="separator:ae9c7227f2cd1edfde5452409c30838a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad8203587cfccfeb582c9a15f7852da8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#aad8203587cfccfeb582c9a15f7852da8">init</a> ()</td></tr>
 <tr class="memdesc:aad8203587cfccfeb582c9a15f7852da8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init class.  <a href="classTrackedDevices.html#aad8203587cfccfeb582c9a15f7852da8">More...</a><br /></td></tr>
 <tr class="separator:aad8203587cfccfeb582c9a15f7852da8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -137,23 +146,22 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a18061a1c52ff1209695c9d069fb462a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classTrackedDevices.html#a18061a1c52ff1209695c9d069fb462a3">More...</a><br /></td></tr>
 <tr class="separator:a18061a1c52ff1209695c9d069fb462a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:acbd8967ebddb691198948581a5d26771"><td class="memItemLeft" align="right" valign="top"><a id="acbd8967ebddb691198948581a5d26771" name="acbd8967ebddb691198948581a5d26771"></a>
-static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_TRACKED_DEVICES</b> = 20</td></tr>
-<tr class="memdesc:acbd8967ebddb691198948581a5d26771"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of registered tracked devices. <br /></td></tr>
+<tr class="memitem:acbd8967ebddb691198948581a5d26771"><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#acbd8967ebddb691198948581a5d26771">MAX_TRACKED_DEVICES</a> = 20</td></tr>
+<tr class="memdesc:acbd8967ebddb691198948581a5d26771"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of registered tracked devices.  <a href="classTrackedDevices.html#acbd8967ebddb691198948581a5d26771">More...</a><br /></td></tr>
 <tr class="separator:acbd8967ebddb691198948581a5d26771"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af11cd02043a933bf483395bfada1baa8"><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#af11cd02043a933bf483395bfada1baa8">LOCATION_ID_TTL_MINUTES</a> = 5</td></tr>
 <tr class="memdesc:af11cd02043a933bf483395bfada1baa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">After N minutes not hearing anything from the device, the location ID will be set to 0 (in sphere).  <a href="classTrackedDevices.html#af11cd02043a933bf483395bfada1baa8">More...</a><br /></td></tr>
@@ -161,6 +169,100 @@ static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_T
 <tr class="memitem:a8b0e884f9b34a0b723613fdc1a2fa1cc"><td class="memItemLeft" align="right" valign="top">static const uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a8b0e884f9b34a0b723613fdc1a2fa1cc">HEARTBEAT_TTL_MINUTES_MAX</a> = 60</td></tr>
 <tr class="memdesc:a8b0e884f9b34a0b723613fdc1a2fa1cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max heartbeat TTL in minutes.  <a href="classTrackedDevices.html#a8b0e884f9b34a0b723613fdc1a2fa1cc">More...</a><br /></td></tr>
 <tr class="separator:a8b0e884f9b34a0b723613fdc1a2fa1cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a04d89791050bba42cca58b60dbdd0231"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a04d89791050bba42cca58b60dbdd0231">findOrAdd</a> (<a class="el" href="cs__Typedefs_8h.html#a8cce901dd6421378b58ffdd117e5842f">device_id_t</a> deviceId)</td></tr>
+<tr class="memdesc:a04d89791050bba42cca58b60dbdd0231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find device with given ID, else add a new device with given ID.  <a href="classTrackedDevices.html#a04d89791050bba42cca58b60dbdd0231">More...</a><br /></td></tr>
+<tr class="separator:a04d89791050bba42cca58b60dbdd0231"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b88732a6874266a2a65ef9fda051d61"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a6b88732a6874266a2a65ef9fda051d61">find</a> (<a class="el" href="cs__Typedefs_8h.html#a8cce901dd6421378b58ffdd117e5842f">device_id_t</a> deviceId)</td></tr>
+<tr class="memdesc:a6b88732a6874266a2a65ef9fda051d61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find and return device with given id.  <a href="classTrackedDevices.html#a6b88732a6874266a2a65ef9fda051d61">More...</a><br /></td></tr>
+<tr class="separator:a6b88732a6874266a2a65ef9fda051d61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52053eaf106cf6feef9d733da8554be7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a52053eaf106cf6feef9d733da8554be7">findToken</a> (uint8_t *deviceToken, uint8_t size)</td></tr>
+<tr class="memdesc:a52053eaf106cf6feef9d733da8554be7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find and return device with given token.  <a href="classTrackedDevices.html#a52053eaf106cf6feef9d733da8554be7">More...</a><br /></td></tr>
+<tr class="separator:a52053eaf106cf6feef9d733da8554be7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e9527f2f95f3d1701749658f9a9f5e3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a6e9527f2f95f3d1701749658f9a9f5e3">add</a> ()</td></tr>
+<tr class="memdesc:a6e9527f2f95f3d1701749658f9a9f5e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add device to list.  <a href="classTrackedDevices.html#a6e9527f2f95f3d1701749658f9a9f5e3">More...</a><br /></td></tr>
+<tr class="separator:a6e9527f2f95f3d1701749658f9a9f5e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0867bb034f48165be263fb7feb6d01a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#ad0867bb034f48165be263fb7feb6d01a">handleRegister</a> (<a class="el" href="structinternal__register__tracked__device__packet__t.html">internal_register_tracked_device_packet_t</a> &amp;packet)</td></tr>
+<tr class="separator:ad0867bb034f48165be263fb7feb6d01a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7650154c6fae1720b20d432f036d2063"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a7650154c6fae1720b20d432f036d2063">handleUpdate</a> (<a class="el" href="cs__PacketsInternal_8h.html#a130e28cf7f062994e2e0699149ed8eed">internal_update_tracked_device_packet_t</a> &amp;packet)</td></tr>
+<tr class="separator:a7650154c6fae1720b20d432f036d2063"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03105cd44473976b9a40c4761b29f8ec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a03105cd44473976b9a40c4761b29f8ec">handleMeshRegister</a> (<a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a28b87afba825a91c817765e9ed4cd2a3">EVT_MESH_TRACKED_DEVICE_REGISTER</a>) &amp;packet)</td></tr>
+<tr class="separator:a03105cd44473976b9a40c4761b29f8ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf86370185b09df6ad2005dda965f5ca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#abf86370185b09df6ad2005dda965f5ca">handleMeshToken</a> (<a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a13b5e55f3c7a766f52961ef055b7ac8e">EVT_MESH_TRACKED_DEVICE_TOKEN</a>) &amp;packet)</td></tr>
+<tr class="separator:abf86370185b09df6ad2005dda965f5ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab27c4c00a1b0d59ef61d03640a0aa98e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#ab27c4c00a1b0d59ef61d03640a0aa98e">handleMeshListSize</a> (<a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1adc5de1f9cfc7e89f0d9e711e001900ad">EVT_MESH_TRACKED_DEVICE_LIST_SIZE</a>) &amp;packet)</td></tr>
+<tr class="separator:ab27c4c00a1b0d59ef61d03640a0aa98e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b9ce2f2e008ec854b46f73aaac6fa80"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a1b9ce2f2e008ec854b46f73aaac6fa80">handleScannedDevice</a> (<a class="el" href="structadv__background__parsed__v1__t.html">adv_background_parsed_v1_t</a> &amp;packet)</td></tr>
+<tr class="separator:a1b9ce2f2e008ec854b46f73aaac6fa80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdca23971d1eacf054511560e3e0434e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#afdca23971d1eacf054511560e3e0434e">handleHeartbeat</a> (<a class="el" href="structinternal__tracked__device__heartbeat__packet__t.html">internal_tracked_device_heartbeat_packet_t</a> &amp;packet)</td></tr>
+<tr class="separator:afdca23971d1eacf054511560e3e0434e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14ac63da0de0d39550f16b8588f5abd6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a14ac63da0de0d39550f16b8588f5abd6">handleHeartbeat</a> (<a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;device, uint8_t locationId, uint8_t ttlMinutes, bool fromMesh)</td></tr>
+<tr class="separator:a14ac63da0de0d39550f16b8588f5abd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87499ed52a1fada4ccd7cdcc664221f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a87499ed52a1fada4ccd7cdcc664221f4">handleMeshHeartbeat</a> (<a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1accb32c34950e2ef5e3cfa6608f973193">EVT_MESH_TRACKED_DEVICE_HEARTBEAT</a>) &amp;packet)</td></tr>
+<tr class="separator:a87499ed52a1fada4ccd7cdcc664221f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee0cade7d26c97edf25862c558b238bb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#aee0cade7d26c97edf25862c558b238bb">hasAccess</a> (<a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;device, uint8_t accessLevel)</td></tr>
+<tr class="memdesc:aee0cade7d26c97edf25862c558b238bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true when given access level is equal or higher than device access level.  <a href="classTrackedDevices.html#aee0cade7d26c97edf25862c558b238bb">More...</a><br /></td></tr>
+<tr class="separator:aee0cade7d26c97edf25862c558b238bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba595ea7b9d2b18b9de461b401844f26"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#aba595ea7b9d2b18b9de461b401844f26">isTokenOkToSet</a> (<a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;device, uint8_t *deviceToken, uint8_t size)</td></tr>
+<tr class="memdesc:aba595ea7b9d2b18b9de461b401844f26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true when no other device has this token.  <a href="classTrackedDevices.html#aba595ea7b9d2b18b9de461b401844f26">More...</a><br /></td></tr>
+<tr class="separator:aba595ea7b9d2b18b9de461b401844f26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f931be4dacf73af522b6aa6364e0f7a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a8f931be4dacf73af522b6aa6364e0f7a">print</a> (<a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;device)</td></tr>
+<tr class="separator:a8f931be4dacf73af522b6aa6364e0f7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af034a9db0ebd0342ed19ea510a666b9d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#af034a9db0ebd0342ed19ea510a666b9d">tickMinute</a> ()</td></tr>
+<tr class="memdesc:af034a9db0ebd0342ed19ea510a666b9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A minute has passed.  <a href="classTrackedDevices.html#af034a9db0ebd0342ed19ea510a666b9d">More...</a><br /></td></tr>
+<tr class="separator:af034a9db0ebd0342ed19ea510a666b9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6b9d9891d31a08b28ee50e9ea22df9f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#af6b9d9891d31a08b28ee50e9ea22df9f">tickSecond</a> ()</td></tr>
+<tr class="memdesc:af6b9d9891d31a08b28ee50e9ea22df9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send location of devices with non-timed out heartbeat.  <a href="classTrackedDevices.html#af6b9d9891d31a08b28ee50e9ea22df9f">More...</a><br /></td></tr>
+<tr class="separator:af6b9d9891d31a08b28ee50e9ea22df9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a670586e86be274e6e3ac31746edd46d5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a670586e86be274e6e3ac31746edd46d5">checkSynced</a> ()</td></tr>
+<tr class="memdesc:a670586e86be274e6e3ac31746edd46d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if tracked device list is synced yet.  <a href="classTrackedDevices.html#a670586e86be274e6e3ac31746edd46d5">More...</a><br /></td></tr>
+<tr class="separator:a670586e86be274e6e3ac31746edd46d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9caef327982a010e48a0866c47382a6b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a9caef327982a010e48a0866c47382a6b">sendBackgroundAdv</a> (<a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;device, uint8_t *macAddress, int8_t rssi)</td></tr>
+<tr class="memdesc:a9caef327982a010e48a0866c47382a6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send background adv event.  <a href="classTrackedDevices.html#a9caef327982a010e48a0866c47382a6b">More...</a><br /></td></tr>
+<tr class="separator:a9caef327982a010e48a0866c47382a6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68c31b0574eeedd9faa5d2cdb5093127"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a68c31b0574eeedd9faa5d2cdb5093127">sendHeartbeatLocation</a> (<a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;device, bool fromMesh, bool simulated)</td></tr>
+<tr class="memdesc:a68c31b0574eeedd9faa5d2cdb5093127"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send profile location to event dispatcher.  <a href="classTrackedDevices.html#a68c31b0574eeedd9faa5d2cdb5093127">More...</a><br /></td></tr>
+<tr class="separator:a68c31b0574eeedd9faa5d2cdb5093127"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9f6f57ecce698e94f58679a8e18a133"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#af9f6f57ecce698e94f58679a8e18a133">sendHeartbeatToMesh</a> (<a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;device)</td></tr>
+<tr class="memdesc:af9f6f57ecce698e94f58679a8e18a133"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send the heartbeat msg to the mesh.  <a href="classTrackedDevices.html#af9f6f57ecce698e94f58679a8e18a133">More...</a><br /></td></tr>
+<tr class="separator:af9f6f57ecce698e94f58679a8e18a133"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0c638feb14d289734b0b31382ae5a9b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#aa0c638feb14d289734b0b31382ae5a9b">sendRegisterToMesh</a> (<a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;device)</td></tr>
+<tr class="memdesc:aa0c638feb14d289734b0b31382ae5a9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send tracked device register msg to mesh.  <a href="classTrackedDevices.html#aa0c638feb14d289734b0b31382ae5a9b">More...</a><br /></td></tr>
+<tr class="separator:aa0c638feb14d289734b0b31382ae5a9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9dba1ad3feac2739009853b1f89c40b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#ac9dba1ad3feac2739009853b1f89c40b">sendTokenToMesh</a> (<a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;device)</td></tr>
+<tr class="memdesc:ac9dba1ad3feac2739009853b1f89c40b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send tracked device token msg to mesh.  <a href="classTrackedDevices.html#ac9dba1ad3feac2739009853b1f89c40b">More...</a><br /></td></tr>
+<tr class="separator:ac9dba1ad3feac2739009853b1f89c40b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bd81006b7b14f3af7284ace3db476a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a6bd81006b7b14f3af7284ace3db476a3">sendListSizeToMesh</a> (uint8_t deviceCount)</td></tr>
+<tr class="memdesc:a6bd81006b7b14f3af7284ace3db476a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send tracked devices list size to mesh.  <a href="classTrackedDevices.html#a6bd81006b7b14f3af7284ace3db476a3">More...</a><br /></td></tr>
+<tr class="separator:a6bd81006b7b14f3af7284ace3db476a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3385f84a00e99c54ce07abf445b1dee3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a3385f84a00e99c54ce07abf445b1dee3">sendDeviceList</a> ()</td></tr>
+<tr class="memdesc:a3385f84a00e99c54ce07abf445b1dee3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send all tracked devices to mesh.  <a href="classTrackedDevices.html#a3385f84a00e99c54ce07abf445b1dee3">More...</a><br /></td></tr>
+<tr class="separator:a3385f84a00e99c54ce07abf445b1dee3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a30708fe949f4c49f4ef6c97e4c470b71"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a30708fe949f4c49f4ef6c97e4c470b71">ticksLeftSecond</a> = <a class="el" href="classTrackedDevices.html#a06f34d62be2b32200b98104061d5d78f">TICKS_PER_SECOND</a></td></tr>
+<tr class="separator:a30708fe949f4c49f4ef6c97e4c470b71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5d8c210e90a7d7fae819f9c04e7597d"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#aa5d8c210e90a7d7fae819f9c04e7597d">ticksLeftMinute</a> = <a class="el" href="classTrackedDevices.html#ac97b6ace0da1b6194b97e1fc9e39e2f5">TICKS_PER_MINUTES</a></td></tr>
+<tr class="separator:aa5d8c210e90a7d7fae819f9c04e7597d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab806f01025d4acf04e172862f8d8ac0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classStore.html">Store</a>&lt; <a class="el" href="structTrackedDevice.html">TrackedDevice</a>, <a class="el" href="classTrackedDevices.html#acbd8967ebddb691198948581a5d26771">MAX_TRACKED_DEVICES</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#aab806f01025d4acf04e172862f8d8ac0">_store</a></td></tr>
+<tr class="memdesc:aab806f01025d4acf04e172862f8d8ac0"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of all tracked devices.  <a href="classTrackedDevices.html#aab806f01025d4acf04e172862f8d8ac0">More...</a><br /></td></tr>
+<tr class="separator:aab806f01025d4acf04e172862f8d8ac0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa288cd63aedbd26432a907ea5f8cad4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#afa288cd63aedbd26432a907ea5f8cad4">_deviceListIsSynced</a> = false</td></tr>
+<tr class="memdesc:afa288cd63aedbd26432a907ea5f8cad4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether there has been a successful sync of tracked devices.  <a href="classTrackedDevices.html#afa288cd63aedbd26432a907ea5f8cad4">More...</a><br /></td></tr>
+<tr class="separator:afa288cd63aedbd26432a907ea5f8cad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a231a3b452bd095d1c43dfd78cfa4b86b"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a231a3b452bd095d1c43dfd78cfa4b86b">_expectedDeviceListSize</a> = 0xFF</td></tr>
+<tr class="memdesc:a231a3b452bd095d1c43dfd78cfa4b86b"><td class="mdescLeft">&#160;</td><td class="mdescRight">When syncing, the remote crownstone will tell how many devices there are.  <a href="classTrackedDevices.html#a231a3b452bd095d1c43dfd78cfa4b86b">More...</a><br /></td></tr>
+<tr class="separator:a231a3b452bd095d1c43dfd78cfa4b86b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a06f34d62be2b32200b98104061d5d78f"><td class="memItemLeft" align="right" valign="top">static const uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#a06f34d62be2b32200b98104061d5d78f">TICKS_PER_SECOND</a> = (1000 / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a>)</td></tr>
+<tr class="separator:a06f34d62be2b32200b98104061d5d78f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac97b6ace0da1b6194b97e1fc9e39e2f5"><td class="memItemLeft" align="right" valign="top">static const uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTrackedDevices.html#ac97b6ace0da1b6194b97e1fc9e39e2f5">TICKS_PER_MINUTES</a> = (60 * 1000 / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a>)</td></tr>
+<tr class="separator:ac97b6ace0da1b6194b97e1fc9e39e2f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that keeps up devices to be tracked. </p>
@@ -172,7 +274,177 @@ static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_T
 <li>Handle scans with device token only as data, and dispatch background broadcast event, by adding cached data.</li>
 <li>Handle device heartbeats, which are treated as if the device was scanned, by dispatching profile location event. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ae9c7227f2cd1edfde5452409c30838a3" name="ae9c7227f2cd1edfde5452409c30838a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9c7227f2cd1edfde5452409c30838a3">&#9670;&#160;</a></span>TrackedDevices()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTrackedDevices.html">TrackedDevices::TrackedDevices</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a6e9527f2f95f3d1701749658f9a9f5e3" name="a6e9527f2f95f3d1701749658f9a9f5e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e9527f2f95f3d1701749658f9a9f5e3">&#9670;&#160;</a></span>add()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> * TrackedDevices::add </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add device to list. </p>
+<p >Returns invalidated entry when added. Returns null if couldn't be added. </p>
+
+</div>
+</div>
+<a id="a670586e86be274e6e3ac31746edd46d5" name="a670586e86be274e6e3ac31746edd46d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a670586e86be274e6e3ac31746edd46d5">&#9670;&#160;</a></span>checkSynced()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::checkSynced </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if tracked device list is synced yet. </p>
+
+</div>
+</div>
+<a id="a6b88732a6874266a2a65ef9fda051d61" name="a6b88732a6874266a2a65ef9fda051d61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b88732a6874266a2a65ef9fda051d61">&#9670;&#160;</a></span>find()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> * TrackedDevices::find </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8cce901dd6421378b58ffdd117e5842f">device_id_t</a>&#160;</td>
+          <td class="paramname"><em>deviceId</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Find and return device with given id. </p>
+<p >Returns null if it couldn't be found. </p>
+
+</div>
+</div>
+<a id="a04d89791050bba42cca58b60dbdd0231" name="a04d89791050bba42cca58b60dbdd0231"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04d89791050bba42cca58b60dbdd0231">&#9670;&#160;</a></span>findOrAdd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> * TrackedDevices::findOrAdd </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8cce901dd6421378b58ffdd117e5842f">device_id_t</a>&#160;</td>
+          <td class="paramname"><em>deviceId</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Find device with given ID, else add a new device with given ID. </p>
+<p >Returns device with given ID when found or added. Returns null if couldn't be added. </p>
+
+</div>
+</div>
+<a id="a52053eaf106cf6feef9d733da8554be7" name="a52053eaf106cf6feef9d733da8554be7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52053eaf106cf6feef9d733da8554be7">&#9670;&#160;</a></span>findToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> * TrackedDevices::findToken </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>deviceToken</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Find and return device with given token. </p>
+<p >Returns null if it couldn't be found. </p>
+
+</div>
+</div>
 <a id="a18061a1c52ff1209695c9d069fb462a3" name="a18061a1c52ff1209695c9d069fb462a3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a18061a1c52ff1209695c9d069fb462a3">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -203,6 +475,300 @@ static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_T
 
 </div>
 </div>
+<a id="afdca23971d1eacf054511560e3e0434e" name="afdca23971d1eacf054511560e3e0434e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdca23971d1eacf054511560e3e0434e">&#9670;&#160;</a></span>handleHeartbeat() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> TrackedDevices::handleHeartbeat </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structinternal__tracked__device__heartbeat__packet__t.html">internal_tracked_device_heartbeat_packet_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a14ac63da0de0d39550f16b8588f5abd6" name="a14ac63da0de0d39550f16b8588f5abd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14ac63da0de0d39550f16b8588f5abd6">&#9670;&#160;</a></span>handleHeartbeat() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> TrackedDevices::handleHeartbeat </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>locationId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>ttlMinutes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>fromMesh</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a87499ed52a1fada4ccd7cdcc664221f4" name="a87499ed52a1fada4ccd7cdcc664221f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87499ed52a1fada4ccd7cdcc664221f4">&#9670;&#160;</a></span>handleMeshHeartbeat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::handleMeshHeartbeat </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1accb32c34950e2ef5e3cfa6608f973193">EVT_MESH_TRACKED_DEVICE_HEARTBEAT</a>) &amp;&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab27c4c00a1b0d59ef61d03640a0aa98e" name="ab27c4c00a1b0d59ef61d03640a0aa98e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab27c4c00a1b0d59ef61d03640a0aa98e">&#9670;&#160;</a></span>handleMeshListSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::handleMeshListSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1adc5de1f9cfc7e89f0d9e711e001900ad">EVT_MESH_TRACKED_DEVICE_LIST_SIZE</a>) &amp;&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a03105cd44473976b9a40c4761b29f8ec" name="a03105cd44473976b9a40c4761b29f8ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03105cd44473976b9a40c4761b29f8ec">&#9670;&#160;</a></span>handleMeshRegister()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::handleMeshRegister </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a28b87afba825a91c817765e9ed4cd2a3">EVT_MESH_TRACKED_DEVICE_REGISTER</a>) &amp;&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abf86370185b09df6ad2005dda965f5ca" name="abf86370185b09df6ad2005dda965f5ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf86370185b09df6ad2005dda965f5ca">&#9670;&#160;</a></span>handleMeshToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::handleMeshToken </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a13b5e55f3c7a766f52961ef055b7ac8e">EVT_MESH_TRACKED_DEVICE_TOKEN</a>) &amp;&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad0867bb034f48165be263fb7feb6d01a" name="ad0867bb034f48165be263fb7feb6d01a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0867bb034f48165be263fb7feb6d01a">&#9670;&#160;</a></span>handleRegister()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> TrackedDevices::handleRegister </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structinternal__register__tracked__device__packet__t.html">internal_register_tracked_device_packet_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1b9ce2f2e008ec854b46f73aaac6fa80" name="a1b9ce2f2e008ec854b46f73aaac6fa80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b9ce2f2e008ec854b46f73aaac6fa80">&#9670;&#160;</a></span>handleScannedDevice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::handleScannedDevice </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structadv__background__parsed__v1__t.html">adv_background_parsed_v1_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7650154c6fae1720b20d432f036d2063" name="a7650154c6fae1720b20d432f036d2063"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7650154c6fae1720b20d432f036d2063">&#9670;&#160;</a></span>handleUpdate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> TrackedDevices::handleUpdate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__PacketsInternal_8h.html#a130e28cf7f062994e2e0699149ed8eed">internal_update_tracked_device_packet_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aee0cade7d26c97edf25862c558b238bb" name="aee0cade7d26c97edf25862c558b238bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee0cade7d26c97edf25862c558b238bb">&#9670;&#160;</a></span>hasAccess()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TrackedDevices::hasAccess </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>accessLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return true when given access level is equal or higher than device access level. </p>
+
+</div>
+</div>
 <a id="aad8203587cfccfeb582c9a15f7852da8" name="aad8203587cfccfeb582c9a15f7852da8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aad8203587cfccfeb582c9a15f7852da8">&#9670;&#160;</a></span>init()</h2>
 
@@ -223,7 +789,436 @@ static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_T
 
 </div>
 </div>
+<a id="aba595ea7b9d2b18b9de461b401844f26" name="aba595ea7b9d2b18b9de461b401844f26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba595ea7b9d2b18b9de461b401844f26">&#9670;&#160;</a></span>isTokenOkToSet()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TrackedDevices::isTokenOkToSet </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>deviceToken</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true when no other device has this token. </p>
+
+</div>
+</div>
+<a id="a8f931be4dacf73af522b6aa6364e0f7a" name="a8f931be4dacf73af522b6aa6364e0f7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f931be4dacf73af522b6aa6364e0f7a">&#9670;&#160;</a></span>print()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::print </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9caef327982a010e48a0866c47382a6b" name="a9caef327982a010e48a0866c47382a6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9caef327982a010e48a0866c47382a6b">&#9670;&#160;</a></span>sendBackgroundAdv()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::sendBackgroundAdv </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>macAddress</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int8_t&#160;</td>
+          <td class="paramname"><em>rssi</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send background adv event. </p>
+<p >Checks if all fields are set. </p>
+
+</div>
+</div>
+<a id="a3385f84a00e99c54ce07abf445b1dee3" name="a3385f84a00e99c54ce07abf445b1dee3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3385f84a00e99c54ce07abf445b1dee3">&#9670;&#160;</a></span>sendDeviceList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::sendDeviceList </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send all tracked devices to mesh. </p>
+
+</div>
+</div>
+<a id="a68c31b0574eeedd9faa5d2cdb5093127" name="a68c31b0574eeedd9faa5d2cdb5093127"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68c31b0574eeedd9faa5d2cdb5093127">&#9670;&#160;</a></span>sendHeartbeatLocation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::sendHeartbeatLocation </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>fromMesh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>simulated</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send profile location to event dispatcher. </p>
+<p >Checks if all fields are set. Set fromMesh to true when location is based on a mesh message. Set simulated to true when the location is from the heartbeat TTL, not from a command or broadcast. </p>
+
+</div>
+</div>
+<a id="af9f6f57ecce698e94f58679a8e18a133" name="af9f6f57ecce698e94f58679a8e18a133"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9f6f57ecce698e94f58679a8e18a133">&#9670;&#160;</a></span>sendHeartbeatToMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::sendHeartbeatToMesh </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send the heartbeat msg to the mesh. </p>
+
+</div>
+</div>
+<a id="a6bd81006b7b14f3af7284ace3db476a3" name="a6bd81006b7b14f3af7284ace3db476a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bd81006b7b14f3af7284ace3db476a3">&#9670;&#160;</a></span>sendListSizeToMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::sendListSizeToMesh </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>deviceCount</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send tracked devices list size to mesh. </p>
+
+</div>
+</div>
+<a id="aa0c638feb14d289734b0b31382ae5a9b" name="aa0c638feb14d289734b0b31382ae5a9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0c638feb14d289734b0b31382ae5a9b">&#9670;&#160;</a></span>sendRegisterToMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::sendRegisterToMesh </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send tracked device register msg to mesh. </p>
+
+</div>
+</div>
+<a id="ac9dba1ad3feac2739009853b1f89c40b" name="ac9dba1ad3feac2739009853b1f89c40b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9dba1ad3feac2739009853b1f89c40b">&#9670;&#160;</a></span>sendTokenToMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::sendTokenToMesh </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structTrackedDevice.html">TrackedDevice</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send tracked device token msg to mesh. </p>
+
+</div>
+</div>
+<a id="af034a9db0ebd0342ed19ea510a666b9d" name="af034a9db0ebd0342ed19ea510a666b9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af034a9db0ebd0342ed19ea510a666b9d">&#9670;&#160;</a></span>tickMinute()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::tickMinute </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A minute has passed. </p>
+<p >Decrease TTL of all devices by 1. Decrease location timeout of all device by 1. Decrease heartbeat TTL. </p>
+
+</div>
+</div>
+<a id="af6b9d9891d31a08b28ee50e9ea22df9f" name="af6b9d9891d31a08b28ee50e9ea22df9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6b9d9891d31a08b28ee50e9ea22df9f">&#9670;&#160;</a></span>tickSecond()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TrackedDevices::tickSecond </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send location of devices with non-timed out heartbeat. </p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="afa288cd63aedbd26432a907ea5f8cad4" name="afa288cd63aedbd26432a907ea5f8cad4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa288cd63aedbd26432a907ea5f8cad4">&#9670;&#160;</a></span>_deviceListIsSynced</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool TrackedDevices::_deviceListIsSynced = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether there has been a successful sync of tracked devices. </p>
+<p >For now, this means just getting a list of devices from another crownstone, after boot. </p>
+
+</div>
+</div>
+<a id="a231a3b452bd095d1c43dfd78cfa4b86b" name="a231a3b452bd095d1c43dfd78cfa4b86b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a231a3b452bd095d1c43dfd78cfa4b86b">&#9670;&#160;</a></span>_expectedDeviceListSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t TrackedDevices::_expectedDeviceListSize = 0xFF</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>When syncing, the remote crownstone will tell how many devices there are. </p>
+<p >This number is cached in this variable, so we know when we're synced. </p>
+
+</div>
+</div>
+<a id="aab806f01025d4acf04e172862f8d8ac0" name="aab806f01025d4acf04e172862f8d8ac0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab806f01025d4acf04e172862f8d8ac0">&#9670;&#160;</a></span>_store</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStore.html">Store</a>&lt;<a class="el" href="structTrackedDevice.html">TrackedDevice</a>, <a class="el" href="classTrackedDevices.html#acbd8967ebddb691198948581a5d26771">MAX_TRACKED_DEVICES</a>&gt; TrackedDevices::_store</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>List of all tracked devices. </p>
+<p >Device ID should be unique. </p>
+
+</div>
+</div>
 <a id="a8b0e884f9b34a0b723613fdc1a2fa1cc" name="a8b0e884f9b34a0b723613fdc1a2fa1cc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8b0e884f9b34a0b723613fdc1a2fa1cc">&#9670;&#160;</a></span>HEARTBEAT_TTL_MINUTES_MAX</h2>
 
@@ -271,6 +1266,118 @@ static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_T
 
 <p>After N minutes not hearing anything from the device, the location ID will be set to 0 (in sphere). </p>
 <p >This prevents sending out old locations. </p>
+
+</div>
+</div>
+<a id="acbd8967ebddb691198948581a5d26771" name="acbd8967ebddb691198948581a5d26771"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acbd8967ebddb691198948581a5d26771">&#9670;&#160;</a></span>MAX_TRACKED_DEVICES</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t TrackedDevices::MAX_TRACKED_DEVICES = 20</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Maximum number of registered tracked devices. </p>
+
+</div>
+</div>
+<a id="ac97b6ace0da1b6194b97e1fc9e39e2f5" name="ac97b6ace0da1b6194b97e1fc9e39e2f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac97b6ace0da1b6194b97e1fc9e39e2f5">&#9670;&#160;</a></span>TICKS_PER_MINUTES</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint16_t TrackedDevices::TICKS_PER_MINUTES = (60 * 1000 / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a>)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a06f34d62be2b32200b98104061d5d78f" name="a06f34d62be2b32200b98104061d5d78f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06f34d62be2b32200b98104061d5d78f">&#9670;&#160;</a></span>TICKS_PER_SECOND</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint16_t TrackedDevices::TICKS_PER_SECOND = (1000 / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a>)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa5d8c210e90a7d7fae819f9c04e7597d" name="aa5d8c210e90a7d7fae819f9c04e7597d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5d8c210e90a7d7fae819f9c04e7597d">&#9670;&#160;</a></span>ticksLeftMinute</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t TrackedDevices::ticksLeftMinute = <a class="el" href="classTrackedDevices.html#ac97b6ace0da1b6194b97e1fc9e39e2f5">TICKS_PER_MINUTES</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a30708fe949f4c49f4ef6c97e4c470b71" name="a30708fe949f4c49f4ef6c97e4c470b71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30708fe949f4c49f4ef6c97e4c470b71">&#9670;&#160;</a></span>ticksLeftSecond</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t TrackedDevices::ticksLeftSecond = <a class="el" href="classTrackedDevices.html#a06f34d62be2b32200b98104061d5d78f">TICKS_PER_SECOND</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

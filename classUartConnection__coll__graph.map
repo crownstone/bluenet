@@ -1,4 +1,8 @@
 <map id="UartConnection" name="UartConnection">
-<area shape="rect" id="node1" title="Class that:" alt="" coords="5,79,128,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="11,5,122,31"/>
+<area shape="rect" id="node1" title="Class that:" alt="" coords="170,196,293,221"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,108,116,133"/>
+<area shape="rect" id="node3" href="$structuart__msg__status__reply__t.html" title=" " alt="" coords="140,108,323,133"/>
+<area shape="rect" id="node4" href="$unionuart__msg__status__reply__flags__t.html" title=" " alt="" coords="146,5,317,45"/>
+<area shape="rect" id="node5" href="$structuart__msg__status__user__t.html" title=" " alt="" coords="347,108,524,133"/>
+<area shape="rect" id="node6" href="$unionuart__msg__status__user__flags__t.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Jan 17,..." alt="" coords="353,5,518,45"/>
 </map>

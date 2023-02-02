@@ -1,4 +1,6 @@
 <map id="SystemTime" name="SystemTime">
-<area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="9,79,112,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="168,123,271,148"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,13,116,38"/>
+<area shape="rect" id="node3" href="$structhigh__resolution__time__stamp__t.html" title="Versioned timestamp with milliseconds precision." alt="" coords="140,5,299,45"/>
+<area shape="rect" id="node4" href="$classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick&#45;event or tick count and execute..." alt="" coords="323,13,409,38"/>
 </map>

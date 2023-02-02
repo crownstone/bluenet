@@ -100,6 +100,7 @@ $(document).ready(function(){initNavTree('classComponent.html',''); initResizabl
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classComponent-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Component Class Reference</div></div>
 </div><!--header-->
@@ -129,6 +130,14 @@ Inheritance diagram for Component:</div>
 <area shape="rect" href="classTwilightHandler.html" title=" " alt="" coords="188,548,311,573"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for Component:</div>
+<div class="dyncontent">
+<div class="center"><img src="classComponent__coll__graph.png" border="0" usemap="#aComponent_coll__map" alt="Collaboration graph"/></div>
+<map name="aComponent_coll__map" id="aComponent_coll__map">
+<area shape="rect" title="Helper class to manage decoupling of components." alt="" coords="5,5,103,31"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -136,25 +145,30 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab7c92af073ee6d4e4b7e8eeb71a8c4d8"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">getComponent</a> (<a class="el" href="classComponent.html">Component</a> *requester=nullptr)</td></tr>
 <tr class="memdesc:ab7c92af073ee6d4e4b7e8eeb71a8c4d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a component of type T* from _parent-&gt;children(), If not found try again with ancestors: _parent-&gt; ... -&gt;_parent-&gt;children().  <a href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">More...</a><br /></td></tr>
 <tr class="separator:ab7c92af073ee6d4e4b7e8eeb71a8c4d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa51b4a1259d0c5f2c022d8afbb44f0bb"><td class="memItemLeft" align="right" valign="top">virtual cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a> ()</td></tr>
+<tr class="memitem:aa51b4a1259d0c5f2c022d8afbb44f0bb"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a> ()</td></tr>
 <tr class="memdesc:aa51b4a1259d0c5f2c022d8afbb44f0bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Components can implement this if they need to get references to sibling or if they need to do specific initialization.  <a href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">More...</a><br /></td></tr>
 <tr class="separator:aa51b4a1259d0c5f2c022d8afbb44f0bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cd21445768610fd3db1b15a9c851416"><td class="memItemLeft" align="right" valign="top"><a id="a9cd21445768610fd3db1b15a9c851416" name="a9cd21445768610fd3db1b15a9c851416"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>parentAllChildren</b> ()</td></tr>
-<tr class="memdesc:a9cd21445768610fd3db1b15a9c851416"><td class="mdescLeft">&#160;</td><td class="mdescRight">utility that loops over all elements of <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321" title="Components with children can override this method to return them.">getChildren()</a> and setParent on the non-nullptr ones. <br /></td></tr>
+<tr class="memitem:a9cd21445768610fd3db1b15a9c851416"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">parentAllChildren</a> ()</td></tr>
+<tr class="memdesc:a9cd21445768610fd3db1b15a9c851416"><td class="mdescLeft">&#160;</td><td class="mdescRight">utility that loops over all elements of <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321" title="Components with children can override this method to return them.">getChildren()</a> and setParent on the non-nullptr ones.  <a href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">More...</a><br /></td></tr>
 <tr class="separator:a9cd21445768610fd3db1b15a9c851416"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad82d7393e339c1b19cc17a0d55b5674d"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#ad82d7393e339c1b19cc17a0d55b5674d">~Component</a> ()=default</td></tr>
+<tr class="separator:ad82d7393e339c1b19cc17a0d55b5674d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a3ec59ae860e2dd270a8c076430df1321"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; <a class="el" href="classComponent.html">Component</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321">getChildren</a> ()</td></tr>
 <tr class="memdesc:a3ec59ae860e2dd270a8c076430df1321"><td class="mdescLeft">&#160;</td><td class="mdescRight">Components with children can override this method to return them.  <a href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321">More...</a><br /></td></tr>
 <tr class="separator:a3ec59ae860e2dd270a8c076430df1321"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15dfa6d3ca6bfe46e46a53811235fdde"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a> ()</td></tr>
+<tr class="memitem:a15dfa6d3ca6bfe46e46a53811235fdde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a> ()</td></tr>
 <tr class="separator:a15dfa6d3ca6bfe46e46a53811235fdde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40f9568b0e447fb079e16dee8428e9f1"><td class="memItemLeft" align="right" valign="top"><a id="a40f9568b0e447fb079e16dee8428e9f1" name="a40f9568b0e447fb079e16dee8428e9f1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a class="el" href="classComponent.html">Component</a> *p)</td></tr>
-<tr class="memdesc:a40f9568b0e447fb079e16dee8428e9f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Children that are instantiated later can also be added individually. <br /></td></tr>
+<tr class="memitem:a40f9568b0e447fb079e16dee8428e9f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">setParent</a> (<a class="el" href="classComponent.html">Component</a> *p)</td></tr>
+<tr class="memdesc:a40f9568b0e447fb079e16dee8428e9f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Children that are instantiated later can also be added individually.  <a href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">More...</a><br /></td></tr>
 <tr class="separator:a40f9568b0e447fb079e16dee8428e9f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:adeed903d66f519f567b29d0de130d0a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classComponent.html">Component</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#adeed903d66f519f567b29d0de130d0a2">_parent</a> = nullptr</td></tr>
+<tr class="separator:adeed903d66f519f567b29d0de130d0a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Helper class to manage decoupling of components. </p>
@@ -167,7 +181,33 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 </ul>
 <p >These parts may depend on each other, but we don't want to expose their existance to the whole firmware through global/static variables.</p>
 <p >Using this class 'sibling components' can query for each others presence in a unified way, without need for static classes or other rigid dependencies. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ad82d7393e339c1b19cc17a0d55b5674d" name="ad82d7393e339c1b19cc17a0d55b5674d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad82d7393e339c1b19cc17a0d55b5674d">&#9670;&#160;</a></span>~Component()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual Component::~Component </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a id="a3ec59ae860e2dd270a8c076430df1321" name="a3ec59ae860e2dd270a8c076430df1321"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3ec59ae860e2dd270a8c076430df1321">&#9670;&#160;</a></span>getChildren()</h2>
 
@@ -232,7 +272,7 @@ template&lt;class T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual cs_ret_code_t Component::init </td>
+          <td class="memname">virtual <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Component::init </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -268,7 +308,7 @@ template&lt;class T &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t Component::initChildren </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Component::initChildren </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -286,6 +326,76 @@ template&lt;class T &gt; </div>
 </ul>
 <p >Components are not required to use this. They can call all inits of children in custom order if they need to. (And implement elegant failure.)</p>
 <p >Initialisation is in order of the elements of the returnvalue of getChildren. </p>
+
+</div>
+</div>
+<a id="a9cd21445768610fd3db1b15a9c851416" name="a9cd21445768610fd3db1b15a9c851416"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cd21445768610fd3db1b15a9c851416">&#9670;&#160;</a></span>parentAllChildren()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Component::parentAllChildren </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>utility that loops over all elements of <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321" title="Components with children can override this method to return them.">getChildren()</a> and setParent on the non-nullptr ones. </p>
+
+</div>
+</div>
+<a id="a40f9568b0e447fb079e16dee8428e9f1" name="a40f9568b0e447fb079e16dee8428e9f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40f9568b0e447fb079e16dee8428e9f1">&#9670;&#160;</a></span>setParent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Component::setParent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classComponent.html">Component</a> *&#160;</td>
+          <td class="paramname"><em>p</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Children that are instantiated later can also be added individually. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="adeed903d66f519f567b29d0de130d0a2" name="adeed903d66f519f567b29d0de130d0a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adeed903d66f519f567b29d0de130d0a2">&#9670;&#160;</a></span>_parent</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classComponent.html">Component</a>* Component::_parent = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

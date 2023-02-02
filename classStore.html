@@ -101,6 +101,7 @@ $(document).ready(function(){initNavTree('classStore.html',''); initResizable();
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classStore-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Store&lt; RecordType, MaxItemCount &gt; Class Template Reference</div></div>
 </div><!--header-->
@@ -119,15 +120,12 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a9a21f0887c2a56d9200dc1b48bb1d077"><td class="memItemLeft" align="right" valign="top"><a id="a9a21f0887c2a56d9200dc1b48bb1d077" name="a9a21f0887c2a56d9200dc1b48bb1d077"></a>
-RecordType *&#160;</td><td class="memItemRight" valign="bottom"><b>begin</b> ()</td></tr>
+<tr class="memitem:a9a21f0887c2a56d9200dc1b48bb1d077"><td class="memItemLeft" align="right" valign="top">RecordType *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#a9a21f0887c2a56d9200dc1b48bb1d077">begin</a> ()</td></tr>
 <tr class="separator:a9a21f0887c2a56d9200dc1b48bb1d077"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8f6a50ad149ec12dfe2e0cb3e24643b"><td class="memItemLeft" align="right" valign="top"><a id="ab8f6a50ad149ec12dfe2e0cb3e24643b" name="ab8f6a50ad149ec12dfe2e0cb3e24643b"></a>
-RecordType *&#160;</td><td class="memItemRight" valign="bottom"><b>end</b> ()</td></tr>
+<tr class="memitem:ab8f6a50ad149ec12dfe2e0cb3e24643b"><td class="memItemLeft" align="right" valign="top">RecordType *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#ab8f6a50ad149ec12dfe2e0cb3e24643b">end</a> ()</td></tr>
 <tr class="separator:ab8f6a50ad149ec12dfe2e0cb3e24643b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad62f180244f7b084ca455bc84fe5a434"><td class="memItemLeft" align="right" valign="top"><a id="ad62f180244f7b084ca455bc84fe5a434" name="ad62f180244f7b084ca455bc84fe5a434"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> ()</td></tr>
-<tr class="memdesc:ad62f180244f7b084ca455bc84fe5a434"><td class="mdescLeft">&#160;</td><td class="mdescRight">invalidate all records. <br /></td></tr>
+<tr class="memitem:ad62f180244f7b084ca455bc84fe5a434"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#ad62f180244f7b084ca455bc84fe5a434">clear</a> ()</td></tr>
+<tr class="memdesc:ad62f180244f7b084ca455bc84fe5a434"><td class="mdescLeft">&#160;</td><td class="mdescRight">invalidate all records.  <a href="classStore.html#ad62f180244f7b084ca455bc84fe5a434">More...</a><br /></td></tr>
 <tr class="separator:ad62f180244f7b084ca455bc84fe5a434"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbf6b600c250e7a1b01962e6847f4607"><td class="memItemLeft" align="right" valign="top">constexpr RecordType *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#afbf6b600c250e7a1b01962e6847f4607">get</a> (const <a class="el" href="classStore.html#a4905d4c95a04755a7e292a472758c24e">IdType</a> &amp;id)</td></tr>
 <tr class="memdesc:afbf6b600c250e7a1b01962e6847f4607"><td class="mdescLeft">&#160;</td><td class="mdescRight">linear search for the first record which has id() == id.  <a href="classStore.html#afbf6b600c250e7a1b01962e6847f4607">More...</a><br /></td></tr>
@@ -146,32 +144,32 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> ()</td></tr
 <tr class="memitem:ab1038cadc6ce9cbb74c057d4360013c0"><td class="memItemLeft" align="right" valign="top">constexpr RecordType *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#ab1038cadc6ce9cbb74c057d4360013c0">add</a> ()</td></tr>
 <tr class="memdesc:ab1038cadc6ce9cbb74c057d4360013c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns a pointer to the first invalid record.  <a href="classStore.html#ab1038cadc6ce9cbb74c057d4360013c0">More...</a><br /></td></tr>
 <tr class="separator:ab1038cadc6ce9cbb74c057d4360013c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90eb46eac5d69f52bb13d5611d48759f"><td class="memItemLeft" align="right" valign="top"><a id="a90eb46eac5d69f52bb13d5611d48759f" name="a90eb46eac5d69f52bb13d5611d48759f"></a>
-constexpr RecordType *&#160;</td><td class="memItemRight" valign="bottom"><b>addAtEnd</b> ()</td></tr>
-<tr class="memdesc:a90eb46eac5d69f52bb13d5611d48759f"><td class="mdescLeft">&#160;</td><td class="mdescRight">increases size of the store if possible and returns the entry at the end(), after invalidating. <br /></td></tr>
+<tr class="memitem:a90eb46eac5d69f52bb13d5611d48759f"><td class="memItemLeft" align="right" valign="top">constexpr RecordType *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#a90eb46eac5d69f52bb13d5611d48759f">addAtEnd</a> ()</td></tr>
+<tr class="memdesc:a90eb46eac5d69f52bb13d5611d48759f"><td class="mdescLeft">&#160;</td><td class="mdescRight">increases size of the store if possible and returns the entry at the <a class="el" href="classStore.html#ab8f6a50ad149ec12dfe2e0cb3e24643b">end()</a>, after invalidating.  <a href="classStore.html#a90eb46eac5d69f52bb13d5611d48759f">More...</a><br /></td></tr>
 <tr class="separator:a90eb46eac5d69f52bb13d5611d48759f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3693309d07bc8b1f27df44a757fa5915"><td class="memItemLeft" align="right" valign="top"><a id="a3693309d07bc8b1f27df44a757fa5915" name="a3693309d07bc8b1f27df44a757fa5915"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>size</b> ()</td></tr>
+<tr class="memitem:a3693309d07bc8b1f27df44a757fa5915"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#a3693309d07bc8b1f27df44a757fa5915">size</a> ()</td></tr>
 <tr class="separator:a3693309d07bc8b1f27df44a757fa5915"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f9ff815b73b38419f79035fd144584d"><td class="memTemplParams" colspan="2"><a id="a5f9ff815b73b38419f79035fd144584d" name="a5f9ff815b73b38419f79035fd144584d"></a>
-template&lt;class UnaryPredicate &gt; </td></tr>
-<tr class="memitem:a5f9ff815b73b38419f79035fd144584d"><td class="memTemplItemLeft" align="right" valign="top">constexpr uint16_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>countIf</b> (UnaryPredicate p)</td></tr>
-<tr class="memdesc:a5f9ff815b73b38419f79035fd144584d"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns number of elements that satisfy the predicate. <br /></td></tr>
+<tr class="memitem:a5f9ff815b73b38419f79035fd144584d"><td class="memTemplParams" colspan="2">template&lt;class UnaryPredicate &gt; </td></tr>
+<tr class="memitem:a5f9ff815b73b38419f79035fd144584d"><td class="memTemplItemLeft" align="right" valign="top">constexpr uint16_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classStore.html#a5f9ff815b73b38419f79035fd144584d">countIf</a> (UnaryPredicate p)</td></tr>
+<tr class="memdesc:a5f9ff815b73b38419f79035fd144584d"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns number of elements that satisfy the predicate.  <a href="classStore.html#a5f9ff815b73b38419f79035fd144584d">More...</a><br /></td></tr>
 <tr class="separator:a5f9ff815b73b38419f79035fd144584d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a852fff870e53d3da2609221ece9d7058"><td class="memItemLeft" align="right" valign="top"><a id="a852fff870e53d3da2609221ece9d7058" name="a852fff870e53d3da2609221ece9d7058"></a>
-constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>count</b> ()</td></tr>
-<tr class="memdesc:a852fff870e53d3da2609221ece9d7058"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns number of valid elements. <br /></td></tr>
+<tr class="memitem:a852fff870e53d3da2609221ece9d7058"><td class="memItemLeft" align="right" valign="top">constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#a852fff870e53d3da2609221ece9d7058">count</a> ()</td></tr>
+<tr class="memdesc:a852fff870e53d3da2609221ece9d7058"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns number of valid elements.  <a href="classStore.html#a852fff870e53d3da2609221ece9d7058">More...</a><br /></td></tr>
 <tr class="separator:a852fff870e53d3da2609221ece9d7058"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e676695fd78e9ffacbc80e8e8e3f388"><td class="memItemLeft" align="right" valign="top"><a id="a8e676695fd78e9ffacbc80e8e8e3f388" name="a8e676695fd78e9ffacbc80e8e8e3f388"></a>
-constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><b>full</b> ()</td></tr>
-<tr class="memdesc:a8e676695fd78e9ffacbc80e8e8e3f388"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns true if all elements are occupied and valid. <br /></td></tr>
+<tr class="memitem:a8e676695fd78e9ffacbc80e8e8e3f388"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#a8e676695fd78e9ffacbc80e8e8e3f388">full</a> ()</td></tr>
+<tr class="memdesc:a8e676695fd78e9ffacbc80e8e8e3f388"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns true if all elements are occupied and valid.  <a href="classStore.html#a8e676695fd78e9ffacbc80e8e8e3f388">More...</a><br /></td></tr>
 <tr class="separator:a8e676695fd78e9ffacbc80e8e8e3f388"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a960d31c52ff462af4b05940bf92415ab"><td class="memItemLeft" align="right" valign="top"><a id="a960d31c52ff462af4b05940bf92415ab" name="a960d31c52ff462af4b05940bf92415ab"></a>
-RecordType&#160;</td><td class="memItemRight" valign="bottom"><b>_records</b> [MaxItemCount] = {}</td></tr>
+<tr class="memitem:a960d31c52ff462af4b05940bf92415ab"><td class="memItemLeft" align="right" valign="top">RecordType&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#a960d31c52ff462af4b05940bf92415ab">_records</a> [MaxItemCount] = {}</td></tr>
 <tr class="separator:a960d31c52ff462af4b05940bf92415ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a6bc603121a25c733cbfc93dd4177e083"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStore.html#a6bc603121a25c733cbfc93dd4177e083">_currentSize</a> = 0</td></tr>
+<tr class="memdesc:a6bc603121a25c733cbfc93dd4177e083"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current maximal number of valid records.  <a href="classStore.html#a6bc603121a25c733cbfc93dd4177e083">More...</a><br /></td></tr>
+<tr class="separator:a6bc603121a25c733cbfc93dd4177e083"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class RecordType, unsigned int MaxItemCount&gt;<br />
@@ -234,6 +232,208 @@ template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
 
 <p>returns a pointer to the first invalid record. </p>
 <p >Returns nullptr if such element doesn't exist. </p>
+
+</div>
+</div>
+<a id="a90eb46eac5d69f52bb13d5611d48759f" name="a90eb46eac5d69f52bb13d5611d48759f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90eb46eac5d69f52bb13d5611d48759f">&#9670;&#160;</a></span>addAtEnd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr RecordType * <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::addAtEnd </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>increases size of the store if possible and returns the entry at the <a class="el" href="classStore.html#ab8f6a50ad149ec12dfe2e0cb3e24643b">end()</a>, after invalidating. </p>
+
+</div>
+</div>
+<a id="a9a21f0887c2a56d9200dc1b48bb1d077" name="a9a21f0887c2a56d9200dc1b48bb1d077"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a21f0887c2a56d9200dc1b48bb1d077">&#9670;&#160;</a></span>begin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RecordType * <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::begin </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad62f180244f7b084ca455bc84fe5a434" name="ad62f180244f7b084ca455bc84fe5a434"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad62f180244f7b084ca455bc84fe5a434">&#9670;&#160;</a></span>clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::clear </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>invalidate all records. </p>
+
+</div>
+</div>
+<a id="a852fff870e53d3da2609221ece9d7058" name="a852fff870e53d3da2609221ece9d7058"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a852fff870e53d3da2609221ece9d7058">&#9670;&#160;</a></span>count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint16_t <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::count </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>returns number of valid elements. </p>
+
+</div>
+</div>
+<a id="a5f9ff815b73b38419f79035fd144584d" name="a5f9ff815b73b38419f79035fd144584d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f9ff815b73b38419f79035fd144584d">&#9670;&#160;</a></span>countIf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+<div class="memtemplate">
+template&lt;class UnaryPredicate &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint16_t <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::countIf </td>
+          <td>(</td>
+          <td class="paramtype">UnaryPredicate&#160;</td>
+          <td class="paramname"><em>p</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>returns number of elements that satisfy the predicate. </p>
+
+</div>
+</div>
+<a id="ab8f6a50ad149ec12dfe2e0cb3e24643b" name="ab8f6a50ad149ec12dfe2e0cb3e24643b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8f6a50ad149ec12dfe2e0cb3e24643b">&#9670;&#160;</a></span>end()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RecordType * <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::end </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8e676695fd78e9ffacbc80e8e8e3f388" name="a8e676695fd78e9ffacbc80e8e8e3f388"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e676695fd78e9ffacbc80e8e8e3f388">&#9670;&#160;</a></span>full()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr bool <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::full </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>returns true if all elements are occupied and valid. </p>
 
 </div>
 </div>
@@ -364,6 +564,77 @@ template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
 
 <p>same as get, but will return pointer to an invalid element if such element exists, possibly incrementing _currentSize. </p>
 <p >Returns nullptr if <a class="el" href="classStore.html#a8e676695fd78e9ffacbc80e8e8e3f388" title="returns true if all elements are occupied and valid.">full()</a>; </p>
+
+</div>
+</div>
+<a id="a3693309d07bc8b1f27df44a757fa5915" name="a3693309d07bc8b1f27df44a757fa5915"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3693309d07bc8b1f27df44a757fa5915">&#9670;&#160;</a></span>size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a6bc603121a25c733cbfc93dd4177e083" name="a6bc603121a25c733cbfc93dd4177e083"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bc603121a25c733cbfc93dd4177e083">&#9670;&#160;</a></span>_currentSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::_currentSize = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current maximal number of valid records. </p>
+<p >if _currentSize is less than MaxItemCount, range based for loops will loop over at most _currentSize items. </p>
+
+</div>
+</div>
+<a id="a960d31c52ff462af4b05940bf92415ab" name="a960d31c52ff462af4b05940bf92415ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a960d31c52ff462af4b05940bf92415ab">&#9670;&#160;</a></span>_records</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class RecordType , unsigned int MaxItemCount&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">RecordType <a class="el" href="classStore.html">Store</a>&lt; RecordType, MaxItemCount &gt;::_records[MaxItemCount] = {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

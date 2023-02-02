@@ -100,6 +100,7 @@ $(document).ready(function(){initNavTree('classAssetFilter.html',''); initResiza
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="classAssetFilter-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">AssetFilter Class Reference</div></div>
 </div><!--header-->
@@ -130,16 +131,15 @@ Collaboration diagram for AssetFilter:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad5860e78ecc25f1136251ed22a4637bc"><td class="memItemLeft" align="right" valign="top"><a id="ad5860e78ecc25f1136251ed22a4637bc" name="ad5860e78ecc25f1136251ed22a4637bc"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>AssetFilter</b> (uint8_t *data)</td></tr>
+<tr class="memitem:ad5860e78ecc25f1136251ed22a4637bc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilter.html#ad5860e78ecc25f1136251ed22a4637bc">AssetFilter</a> (uint8_t *data)</td></tr>
 <tr class="separator:ad5860e78ecc25f1136251ed22a4637bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7336aaa64f94829a6cd44bc1afe2d537"><td class="memItemLeft" align="right" valign="top"><a id="a7336aaa64f94829a6cd44bc1afe2d537" name="a7336aaa64f94829a6cd44bc1afe2d537"></a>
-<a class="el" href="structasset__filter__runtime__data__t.html">asset_filter_runtime_data_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>runtimedata</b> ()</td></tr>
-<tr class="memdesc:a7336aaa64f94829a6cd44bc1afe2d537"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the runtime data. <br /></td></tr>
+<tr class="memitem:aca0ef4054bd6da27d5d417adefac0a26"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilter.html#aca0ef4054bd6da27d5d417adefac0a26">~AssetFilter</a> ()=default</td></tr>
+<tr class="separator:aca0ef4054bd6da27d5d417adefac0a26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7336aaa64f94829a6cd44bc1afe2d537"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structasset__filter__runtime__data__t.html">asset_filter_runtime_data_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilter.html#a7336aaa64f94829a6cd44bc1afe2d537">runtimedata</a> ()</td></tr>
+<tr class="memdesc:a7336aaa64f94829a6cd44bc1afe2d537"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the runtime data.  <a href="classAssetFilter.html#a7336aaa64f94829a6cd44bc1afe2d537">More...</a><br /></td></tr>
 <tr class="separator:a7336aaa64f94829a6cd44bc1afe2d537"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90020fbb09f9b6ee4870b2ece1c8e912"><td class="memItemLeft" align="right" valign="top"><a id="a90020fbb09f9b6ee4870b2ece1c8e912" name="a90020fbb09f9b6ee4870b2ece1c8e912"></a>
-<a class="el" href="classAssetFilterData.html">AssetFilterData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>filterdata</b> ()</td></tr>
-<tr class="memdesc:a90020fbb09f9b6ee4870b2ece1c8e912"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the filter data. <br /></td></tr>
+<tr class="memitem:a90020fbb09f9b6ee4870b2ece1c8e912"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAssetFilterData.html">AssetFilterData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilter.html#a90020fbb09f9b6ee4870b2ece1c8e912">filterdata</a> ()</td></tr>
+<tr class="memdesc:a90020fbb09f9b6ee4870b2ece1c8e912"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the filter data.  <a href="classAssetFilter.html#a90020fbb09f9b6ee4870b2ece1c8e912">More...</a><br /></td></tr>
 <tr class="separator:a90020fbb09f9b6ee4870b2ece1c8e912"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9c3b272bffe3f5b52c469543222dc9a"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilter.html#ae9c3b272bffe3f5b52c469543222dc9a">size</a> () override</td></tr>
 <tr class="memdesc:ae9c3b272bffe3f5b52c469543222dc9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of bytes of the data, according to the metadata contained in it.  <a href="classAssetFilter.html#ae9c3b272bffe3f5b52c469543222dc9a">More...</a><br /></td></tr>
@@ -157,9 +157,27 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:aeba862452cb343e3edcd3918298a33c9"><td class="memItemLeft" align="right" valign="top"><a id="aeba862452cb343e3edcd3918298a33c9" name="aeba862452cb343e3edcd3918298a33c9"></a>
-uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><b>_data</b></td></tr>
+<tr class="memitem:aeba862452cb343e3edcd3918298a33c9"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilter.html#aeba862452cb343e3edcd3918298a33c9">_data</a></td></tr>
 <tr class="separator:aeba862452cb343e3edcd3918298a33c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a8c0f226409ff0da61459f3877b9d3772"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structasset__id__t.html">asset_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilter.html#a8c0f226409ff0da61459f3877b9d3772">assetId</a> (const void *key, size_t keyLengthInBytes, uint32_t *startCrc=nullptr)</td></tr>
+<tr class="memdesc:a8c0f226409ff0da61459f3877b9d3772"><td class="mdescLeft">&#160;</td><td class="mdescRight">A assetId is generated as crc32 from filtered input data.  <a href="classAssetFilter.html#a8c0f226409ff0da61459f3877b9d3772">More...</a><br /></td></tr>
+<tr class="separator:a8c0f226409ff0da61459f3877b9d3772"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60a2b5e4823216b0701e571d36a077bf"><td class="memTemplParams" colspan="2">template&lt;class ReturnType , class ExpressionType &gt; </td></tr>
+<tr class="memitem:a60a2b5e4823216b0701e571d36a077bf"><td class="memTemplItemLeft" align="right" valign="top">ReturnType&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classAssetFilter.html#a60a2b5e4823216b0701e571d36a077bf">prepareFilterInputAndCallDelegate</a> (const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;device, <a class="el" href="classAssetFilterInput.html">AssetFilterInput</a> filterInputDescription, ExpressionType delegateExpression, ReturnType defaultValue)</td></tr>
+<tr class="memdesc:a60a2b5e4823216b0701e571d36a077bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">This method extracts the filters 'input description', prepares the input according to that description and calls the delegate with the prepared data.  <a href="classAssetFilter.html#a60a2b5e4823216b0701e571d36a077bf">More...</a><br /></td></tr>
+<tr class="separator:a60a2b5e4823216b0701e571d36a077bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classFilterInterface"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classFilterInterface')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classFilterInterface.html">FilterInterface</a></td></tr>
+<tr class="memitem:a001bb3f0f15cfa1d091c8f647249c79b inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a001bb3f0f15cfa1d091c8f647249c79b">~FilterInterface</a> ()=default</td></tr>
+<tr class="separator:a001bb3f0f15cfa1d091c8f647249c79b inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb86eb52b13f665defb357a6fff79bbc inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">contains</a> (const void *key, size_t keyLengthInBytes)=0</td></tr>
+<tr class="separator:acb86eb52b13f665defb357a6fff79bbc inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1cc00bd1b1e7f1343c3b16bb9b50f0df inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">size</a> ()=0</td></tr>
+<tr class="separator:a1cc00bd1b1e7f1343c3b16bb9b50f0df inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">isValid</a> ()=0</td></tr>
+<tr class="separator:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that contains all data required for an asset filter: </p>
@@ -167,7 +185,104 @@ uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><b>_data</b></td></
 <li>Runtime data.</li>
 <li>persisted data (filterdata). </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ad5860e78ecc25f1136251ed22a4637bc" name="ad5860e78ecc25f1136251ed22a4637bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5860e78ecc25f1136251ed22a4637bc">&#9670;&#160;</a></span>AssetFilter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetFilter.html">AssetFilter::AssetFilter</a> </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aca0ef4054bd6da27d5d417adefac0a26" name="aca0ef4054bd6da27d5d417adefac0a26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca0ef4054bd6da27d5d417adefac0a26">&#9670;&#160;</a></span>~AssetFilter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">AssetFilter::~AssetFilter </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a8c0f226409ff0da61459f3877b9d3772" name="a8c0f226409ff0da61459f3877b9d3772"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c0f226409ff0da61459f3877b9d3772">&#9670;&#160;</a></span>assetId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="structasset__id__t.html">asset_id_t</a> AssetFilter::assetId </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>keyLengthInBytes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t *&#160;</td>
+          <td class="paramname"><em>startCrc</em> = <code>nullptr</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A assetId is generated as crc32 from filtered input data. </p>
+<p >For output type MAC the data is prepended with a fixed value to avoid collisions with filters with assetId output based on MAC. </p>
+
+</div>
+</div>
 <a id="a0c0ad92783950a0b2b565ee0ebbf3c84" name="a0c0ad92783950a0b2b565ee0ebbf3c84"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0c0ad92783950a0b2b565ee0ebbf3c84">&#9670;&#160;</a></span>contains()</h2>
 
@@ -202,7 +317,7 @@ uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><b>_data</b></td></
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="classFilterInterface.html">FilterInterface</a>.</p>
+<p>Implements <a class="el" href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">FilterInterface</a>.</p>
 
 </div>
 </div>
@@ -224,6 +339,25 @@ uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><b>_data</b></td></
 
 <p>Returns true if the device passes the filter according to its metadata settings. </p>
 <p >Returns false otherwise. </p>
+
+</div>
+</div>
+<a id="a90020fbb09f9b6ee4870b2ece1c8e912" name="a90020fbb09f9b6ee4870b2ece1c8e912"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90020fbb09f9b6ee4870b2ece1c8e912">&#9670;&#160;</a></span>filterdata()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetFilterData.html">AssetFilterData</a> AssetFilter::filterdata </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the filter data. </p>
 
 </div>
 </div>
@@ -271,7 +405,81 @@ uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><b>_data</b></td></
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="classFilterInterface.html">FilterInterface</a>.</p>
+<p>Implements <a class="el" href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">FilterInterface</a>.</p>
+
+</div>
+</div>
+<a id="a60a2b5e4823216b0701e571d36a077bf" name="a60a2b5e4823216b0701e571d36a077bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60a2b5e4823216b0701e571d36a077bf">&#9670;&#160;</a></span>prepareFilterInputAndCallDelegate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class ReturnType , class ExpressionType &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ReturnType AssetFilter::prepareFilterInputAndCallDelegate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classAssetFilterInput.html">AssetFilterInput</a>&#160;</td>
+          <td class="paramname"><em>filterInputDescription</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ExpressionType&#160;</td>
+          <td class="paramname"><em>delegateExpression</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ReturnType&#160;</td>
+          <td class="paramname"><em>defaultValue</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>This method extracts the filters 'input description', prepares the input according to that description and calls the delegate with the prepared data. </p>
+<p >delegateExpression should be of the form (<a class="el" href="classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId.">FilterInterface</a>&amp;, void*, size_t) -&gt; ReturnType.</p>
+<p >The argument that is passed into <code>delegateExpression</code> is based on the AssetFilterInputType of the <code>assetFilter</code>. Buffers are only allocated when strictly necessary. (E.g. MacAddress is already available in the <code>device</code>, but for MaskedAdDataType a buffer of 31 bytes needs to be allocated on the stack.)</p>
+<p >The delegate return type is left as free template parameter so that this template can be used for both <code>contains</code> and <code>assetId</code> return values. </p>
+
+</div>
+</div>
+<a id="a7336aaa64f94829a6cd44bc1afe2d537" name="a7336aaa64f94829a6cd44bc1afe2d537"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7336aaa64f94829a6cd44bc1afe2d537">&#9670;&#160;</a></span>runtimedata()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structasset__filter__runtime__data__t.html">asset_filter_runtime_data_t</a> * AssetFilter::runtimedata </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the runtime data. </p>
 
 </div>
 </div>
@@ -300,7 +508,22 @@ uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><b>_data</b></td></
 
 <p>Number of bytes of the data, according to the metadata contained in it. </p>
 
-<p>Implements <a class="el" href="classFilterInterface.html">FilterInterface</a>.</p>
+<p>Implements <a class="el" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">FilterInterface</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="aeba862452cb343e3edcd3918298a33c9" name="aeba862452cb343e3edcd3918298a33c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeba862452cb343e3edcd3918298a33c9">&#9670;&#160;</a></span>_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t* AssetFilter::_data</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

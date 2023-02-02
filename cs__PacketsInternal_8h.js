@@ -1,0 +1,67 @@
+var cs__PacketsInternal_8h =
+[
+    [ "cs_data_t", "structcs__data__t.html", "structcs__data__t" ],
+    [ "cs_const_data_t", "structcs__const__data__t.html", "structcs__const__data__t" ],
+    [ "cs_result_t", "structcs__result__t.html", "structcs__result__t" ],
+    [ "cs_async_result_t", "structcs__async__result__t.html", "structcs__async__result__t" ],
+    [ "device_address_t", "structdevice__address__t.html", "structdevice__address__t" ],
+    [ "scanned_device_t", "structscanned__device__t.html", "structscanned__device__t" ],
+    [ "internal_multi_switch_item_cmd_t", "structinternal__multi__switch__item__cmd__t.html", "structinternal__multi__switch__item__cmd__t" ],
+    [ "internal_multi_switch_item_t", "structinternal__multi__switch__item__t.html", "structinternal__multi__switch__item__t" ],
+    [ "control_command_packet_t", "structcontrol__command__packet__t.html", "structcontrol__command__packet__t" ],
+    [ "mesh_control_command_packet_t", "structmesh__control__command__packet__t.html", "structmesh__control__command__packet__t" ],
+    [ "cs_mesh_msg_t", "structcs__mesh__msg__t.html", "structcs__mesh__msg__t" ],
+    [ "state_external_stone_t", "structstate__external__stone__t.html", "structstate__external__stone__t" ],
+    [ "ble_connected_t", "structble__connected__t.html", "structble__connected__t" ],
+    [ "adv_background_t", "structadv__background__t.html", "structadv__background__t" ],
+    [ "adv_background_parsed_t", "structadv__background__parsed__t.html", "structadv__background__parsed__t" ],
+    [ "adv_background_parsed_v1_t", "structadv__background__parsed__v1__t.html", "structadv__background__parsed__v1__t" ],
+    [ "profile_location_t", "structprofile__location__t.html", "structprofile__location__t" ],
+    [ "internal_register_tracked_device_packet_t", "structinternal__register__tracked__device__packet__t.html", "structinternal__register__tracked__device__packet__t" ],
+    [ "internal_tracked_device_heartbeat_packet_t", "structinternal__tracked__device__heartbeat__packet__t.html", "structinternal__tracked__device__heartbeat__packet__t" ],
+    [ "adc_channel_config_t", "structadc__channel__config__t.html", "structadc__channel__config__t" ],
+    [ "adc_config_t", "structadc__config__t.html", "structadc__config__t" ],
+    [ "adc_channel_config_result_t", "structadc__channel__config__result__t.html", "structadc__channel__config__result__t" ],
+    [ "adc_buffer_t", "structadc__buffer__t.html", "structadc__buffer__t" ],
+    [ "microapp_advertise_request_t", "structmicroapp__advertise__request__t.html", "structmicroapp__advertise__request__t" ],
+    [ "microapp_upload_internal_t", "structmicroapp__upload__internal__t.html", "structmicroapp__upload__internal__t" ],
+    [ "microapp_message_internal_t", "structmicroapp__message__internal__t.html", "structmicroapp__message__internal__t" ],
+    [ "mesh_topo_mac_result_t", "structmesh__topo__mac__result__t.html", "structmesh__topo__mac__result__t" ],
+    [ "cs_twi_init_t", "structcs__twi__init__t.html", "structcs__twi__init__t" ],
+    [ "cs_twi_write_t", "structcs__twi__write__t.html", "structcs__twi__write__t" ],
+    [ "cs_twi_read_t", "structcs__twi__read__t.html", "structcs__twi__read__t" ],
+    [ "cs_gpio_init_t", "structcs__gpio__init__t.html", "structcs__gpio__init__t" ],
+    [ "cs_gpio_write_t", "structcs__gpio__write__t.html", "structcs__gpio__write__t" ],
+    [ "cs_gpio_read_t", "structcs__gpio__read__t.html", "structcs__gpio__read__t" ],
+    [ "cs_gpio_update_t", "structcs__gpio__update__t.html", "structcs__gpio__update__t" ],
+    [ "CS_ADC_PIN_VDD", "cs__PacketsInternal_8h.html#adb405f959fa69068bd8a91ec32fe8752", null ],
+    [ "CS_ADC_REF_PIN_NOT_AVAILABLE", "cs__PacketsInternal_8h.html#a1d77505380f02df9d56bd2cb9f0d48e3", null ],
+    [ "internal_update_tracked_device_packet_t", "cs__PacketsInternal_8h.html#a130e28cf7f062994e2e0699149ed8eed", null ],
+    [ "CS_ADDRESS_TYPE", "cs__PacketsInternal_8h.html#a6b0e3b00643d035fb36ead0a8e91b88c", [
+      [ "CS_ADDRESS_TYPE_PUBLIC", "cs__PacketsInternal_8h.html#a6b0e3b00643d035fb36ead0a8e91b88cad53b99c9937f6b990db1d5aad8b09588", null ],
+      [ "CS_ADDRESS_TYPE_RANDOM_STATIC", "cs__PacketsInternal_8h.html#a6b0e3b00643d035fb36ead0a8e91b88ca6304e48b94e58ce596126d747fc78f01", null ],
+      [ "CS_ADDRESS_TYPE_RANDOM_PRIVATE_RESOLVABLE", "cs__PacketsInternal_8h.html#a6b0e3b00643d035fb36ead0a8e91b88ca9f8a6a92b87d20d38ba38d33f52e411a", null ],
+      [ "CS_ADDRESS_TYPE_RANDOM_PRIVATE_NON_RESOLVABLE", "cs__PacketsInternal_8h.html#a6b0e3b00643d035fb36ead0a8e91b88caf2f62db6b020055deb3fd92fafdf8c43", null ],
+      [ "CS_ADDRESS_TYPE_ANONYMOUS", "cs__PacketsInternal_8h.html#a6b0e3b00643d035fb36ead0a8e91b88ca57cc70d30c28cd189618219d147018da", null ]
+    ] ],
+    [ "cs_mesh_msg_reliability", "cs__PacketsInternal_8h.html#a8d6c03a6f4592e5c6d53166c29b22209", [
+      [ "CS_MESH_RELIABILITY_INVALID", "cs__PacketsInternal_8h.html#a8d6c03a6f4592e5c6d53166c29b22209ad8f5c4501c719265edf1ab0c86c90c68", null ],
+      [ "CS_MESH_RELIABILITY_LOWEST", "cs__PacketsInternal_8h.html#a8d6c03a6f4592e5c6d53166c29b22209a95603e0bd06f6be7d4f0c43582b88310", null ],
+      [ "CS_MESH_RELIABILITY_LOW", "cs__PacketsInternal_8h.html#a8d6c03a6f4592e5c6d53166c29b22209aedfd4f58125d59607a8e514b74318beb", null ],
+      [ "CS_MESH_RELIABILITY_MEDIUM", "cs__PacketsInternal_8h.html#a8d6c03a6f4592e5c6d53166c29b22209a6805cfa4bd395fd8b27fc441c8358e2d", null ],
+      [ "CS_MESH_RELIABILITY_HIGH", "cs__PacketsInternal_8h.html#a8d6c03a6f4592e5c6d53166c29b22209ad41eeda8b9c911e01eaa190677d6df05", null ]
+    ] ],
+    [ "cs_mesh_msg_urgency", "cs__PacketsInternal_8h.html#afe9d8f527e032abb39541b5053d72fb5", [
+      [ "CS_MESH_URGENCY_LOW", "cs__PacketsInternal_8h.html#afe9d8f527e032abb39541b5053d72fb5a04d011ce53117430beba3f736cb3eda9", null ],
+      [ "CS_MESH_URGENCY_HIGH", "cs__PacketsInternal_8h.html#afe9d8f527e032abb39541b5053d72fb5a392ead44e4fca5a5846fe897f82fff54", null ]
+    ] ],
+    [ "PresenceMutation", "cs__PacketsInternal_8h.html#afd5b91b46ad6ef32715a95158298e4ef", [
+      [ "NothingChanged", "cs__PacketsInternal_8h.html#afd5b91b46ad6ef32715a95158298e4efa7a825c1c7b423bdbbbb07a5ac965d872", null ],
+      [ "Online", "cs__PacketsInternal_8h.html#afd5b91b46ad6ef32715a95158298e4efa54f664c70c22054ea0d8d26fc3997ce7", null ],
+      [ "Offline", "cs__PacketsInternal_8h.html#afd5b91b46ad6ef32715a95158298e4efa8d9da4bc0e49a50e09ac9f7e56789d39", null ],
+      [ "LastUserExitSphere", "cs__PacketsInternal_8h.html#afd5b91b46ad6ef32715a95158298e4efa505744c38d56fb759667661d8156ccba", null ],
+      [ "FirstUserEnterSphere", "cs__PacketsInternal_8h.html#afd5b91b46ad6ef32715a95158298e4efaac40f870dd88bc1474de578d5ecf971a", null ],
+      [ "OccupiedRoomsMaskChanged", "cs__PacketsInternal_8h.html#afd5b91b46ad6ef32715a95158298e4efa13d5ac6c73ea19c4853cb1f5a667b6a1", null ]
+    ] ],
+    [ "cs_multi_switch_item_is_valid", "cs__PacketsInternal_8h.html#a023c61073dc9d35ee330d0b9f873fa85", null ]
+];

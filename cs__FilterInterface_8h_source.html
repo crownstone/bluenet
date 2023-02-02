@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__FilterInterface_8h_source.html',''
   <div class="headertitle"><div class="title">cs_FilterInterface.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__FilterInterface_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: May 27, 2021</span></div>
@@ -109,26 +109,32 @@ $(document).ready(function(){initNavTree('cs__FilterInterface_8h_source.html',''
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;protocol/cs_AssetFilterPackets.h&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;util/cs_Crc32.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__AssetFilterPackets_8h.html">protocol/cs_AssetFilterPackets.h</a>&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Crc32_8h.html">util/cs_Crc32.h</a>&gt;</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="classFilterInterface.html">   16</a></span><span class="keyword">class </span><a class="code hl_class" href="classFilterInterface.html">FilterInterface</a> {</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classFilterInterface.html">~FilterInterface</a>()                                      = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classFilterInterface.html#a001bb3f0f15cfa1d091c8f647249c79b">   18</a></span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classFilterInterface.html#a001bb3f0f15cfa1d091c8f647249c79b">~FilterInterface</a>()                                      = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> contains(<span class="keyword">const</span> <span class="keywordtype">void</span>* key, <span class="keywordtype">size_t</span> keyLengthInBytes) = 0;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">   20</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">contains</a>(<span class="keyword">const</span> <span class="keywordtype">void</span>* key, <span class="keywordtype">size_t</span> keyLengthInBytes) = 0;</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">virtual</span> <span class="keywordtype">size_t</span> size()                                           = 0;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">   22</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">size_t</span> <a class="code hl_function" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">size</a>()                                           = 0;</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> isValid()                                          = 0;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">   24</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">isValid</a>()                                          = 0;</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>};</div>
 <div class="ttc" id="aclassFilterInterface_html"><div class="ttname"><a href="classFilterInterface.html">FilterInterface</a></div><div class="ttdoc">Used in AssetFiltering as a generic way to query a filter for containment and assetId.</div><div class="ttdef"><b>Definition:</b> cs_FilterInterface.h:16</div></div>
+<div class="ttc" id="aclassFilterInterface_html_a001bb3f0f15cfa1d091c8f647249c79b"><div class="ttname"><a href="classFilterInterface.html#a001bb3f0f15cfa1d091c8f647249c79b">FilterInterface::~FilterInterface</a></div><div class="ttdeci">virtual ~FilterInterface()=default</div></div>
+<div class="ttc" id="aclassFilterInterface_html_a1cc00bd1b1e7f1343c3b16bb9b50f0df"><div class="ttname"><a href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">FilterInterface::size</a></div><div class="ttdeci">virtual size_t size()=0</div></div>
+<div class="ttc" id="aclassFilterInterface_html_ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"><div class="ttname"><a href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">FilterInterface::isValid</a></div><div class="ttdeci">virtual bool isValid()=0</div></div>
+<div class="ttc" id="aclassFilterInterface_html_acb86eb52b13f665defb357a6fff79bbc"><div class="ttname"><a href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">FilterInterface::contains</a></div><div class="ttdeci">virtual bool contains(const void *key, size_t keyLengthInBytes)=0</div></div>
+<div class="ttc" id="acs__AssetFilterPackets_8h_html"><div class="ttname"><a href="cs__AssetFilterPackets_8h.html">cs_AssetFilterPackets.h</a></div></div>
+<div class="ttc" id="acs__Crc32_8h_html"><div class="ttname"><a href="cs__Crc32_8h.html">cs_Crc32.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_e8d03031b1e92aeb84120cb3e87677a9.html">util</a></li><li class="navelem"><b>cs_FilterInterface.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_e8d03031b1e92aeb84120cb3e87677a9.html">util</a></li><li class="navelem"><a class="el" href="cs__FilterInterface_8h.html">cs_FilterInterface.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

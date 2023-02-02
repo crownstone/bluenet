@@ -111,20 +111,60 @@ $(document).ready(function(){initNavTree('structcuckoo__extended__fingerprint__t
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a7808af3e6daa1362e6333d97a8b14625"><td class="memItemLeft" align="right" valign="top"><a id="a7808af3e6daa1362e6333d97a8b14625" name="a7808af3e6daa1362e6333d97a8b14625"></a>
-cuckoo_fingerprint_t&#160;</td><td class="memItemRight" valign="bottom"><b>fingerprint</b></td></tr>
+<tr class="memitem:a7808af3e6daa1362e6333d97a8b14625"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcuckoo__extended__fingerprint__t.html#a7808af3e6daa1362e6333d97a8b14625">fingerprint</a></td></tr>
 <tr class="separator:a7808af3e6daa1362e6333d97a8b14625"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e98b9f36cdbd6a978906a0734ed04aa"><td class="memItemLeft" align="right" valign="top"><a id="a5e98b9f36cdbd6a978906a0734ed04aa" name="a5e98b9f36cdbd6a978906a0734ed04aa"></a>
-cuckoo_index_t&#160;</td><td class="memItemRight" valign="bottom"><b>bucketA</b></td></tr>
+<tr class="memitem:a5e98b9f36cdbd6a978906a0734ed04aa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcuckoo__extended__fingerprint__t.html#a5e98b9f36cdbd6a978906a0734ed04aa">bucketA</a></td></tr>
 <tr class="separator:a5e98b9f36cdbd6a978906a0734ed04aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a020c9c5f9530776b4dbd227142e68512"><td class="memItemLeft" align="right" valign="top"><a id="a020c9c5f9530776b4dbd227142e68512" name="a020c9c5f9530776b4dbd227142e68512"></a>
-cuckoo_index_t&#160;</td><td class="memItemRight" valign="bottom"><b>bucketB</b></td></tr>
+<tr class="memitem:a020c9c5f9530776b4dbd227142e68512"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcuckoo__extended__fingerprint__t.html#a020c9c5f9530776b4dbd227142e68512">bucketB</a></td></tr>
 <tr class="separator:a020c9c5f9530776b4dbd227142e68512"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Representation of an object (O) in this filter comprises of a fingerprint (F) and a the bucket index (A) where this fingerprint is located. </p>
 <p >Each object has an alternative location (B). Together (C):= (F,A,B) contains all the information that the filter retains about the original object (O). This data chunk (C) can be reused in several functions and thus got its own struct defintion. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a5e98b9f36cdbd6a978906a0734ed04aa" name="a5e98b9f36cdbd6a978906a0734ed04aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e98b9f36cdbd6a978906a0734ed04aa">&#9670;&#160;</a></span>bucketA</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> cuckoo_extended_fingerprint_t::bucketA</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a020c9c5f9530776b4dbd227142e68512" name="a020c9c5f9530776b4dbd227142e68512"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a020c9c5f9530776b4dbd227142e68512">&#9670;&#160;</a></span>bucketB</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> cuckoo_extended_fingerprint_t::bucketB</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7808af3e6daa1362e6333d97a8b14625" name="a7808af3e6daa1362e6333d97a8b14625"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7808af3e6daa1362e6333d97a8b14625">&#9670;&#160;</a></span>fingerprint</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> cuckoo_extended_fingerprint_t::fingerprint</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>source/include/protocol/<a class="el" href="cs__CuckooFilterStructs_8h_source.html">cs_CuckooFilterStructs.h</a></li>
 </ul>
 </div><!-- contents -->

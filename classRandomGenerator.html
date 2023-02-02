@@ -99,6 +99,7 @@ $(document).ready(function(){initNavTree('classRandomGenerator.html',''); initRe
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classRandomGenerator-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">RandomGenerator Class Reference</div></div>
 </div><!--header-->
@@ -108,19 +109,31 @@ $(document).ready(function(){initNavTree('classRandomGenerator.html',''); initRe
  <a href="classRandomGenerator.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cs__RandomGenerator_8h_source.html">cs_RandomGenerator.h</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for RandomGenerator:</div>
+<div class="dyncontent">
+<div class="center"><img src="classRandomGenerator__coll__graph.png" border="0" usemap="#aRandomGenerator_coll__map" alt="Collaboration graph"/></div>
+<map name="aRandomGenerator_coll__map" id="aRandomGenerator_coll__map">
+<area shape="rect" title="Crownstones pseudo random number generator wrapper." alt="" coords="5,93,147,119"/>
+<area shape="rect" href="classMsws_1_1State.html" title="Wrapper class for internal state of the Msws generator." alt="" coords="25,5,127,31"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:abb58788be396867f73d4c0121ef20de8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRandomGenerator.html#abb58788be396867f73d4c0121ef20de8">RandomGenerator</a> (uint32_t seed)</td></tr>
 <tr class="memdesc:abb58788be396867f73d4c0121ef20de8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The given seed need not be very high quality.  <a href="classRandomGenerator.html#abb58788be396867f73d4c0121ef20de8">More...</a><br /></td></tr>
 <tr class="separator:abb58788be396867f73d4c0121ef20de8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8f0102c7c17f2928672fafca6e48947a"><td class="memItemLeft" align="right" valign="top"><a id="a8f0102c7c17f2928672fafca6e48947a" name="a8f0102c7c17f2928672fafca6e48947a"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>rand</b> ()</td></tr>
-<tr class="memdesc:a8f0102c7c17f2928672fafca6e48947a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a new random number and updates the internal state. <br /></td></tr>
+<tr class="memitem:a8f0102c7c17f2928672fafca6e48947a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRandomGenerator.html#a8f0102c7c17f2928672fafca6e48947a">rand</a> ()</td></tr>
+<tr class="memdesc:a8f0102c7c17f2928672fafca6e48947a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates a new random number and updates the internal state.  <a href="classRandomGenerator.html#a8f0102c7c17f2928672fafca6e48947a">More...</a><br /></td></tr>
 <tr class="separator:a8f0102c7c17f2928672fafca6e48947a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0dd15d323d4380bd014c5b1ea8c2187"><td class="memItemLeft" align="right" valign="top"><a id="aa0dd15d323d4380bd014c5b1ea8c2187" name="aa0dd15d323d4380bd014c5b1ea8c2187"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>operator()</b> ()</td></tr>
+<tr class="memitem:aa0dd15d323d4380bd014c5b1ea8c2187"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRandomGenerator.html#aa0dd15d323d4380bd014c5b1ea8c2187">operator()</a> ()</td></tr>
 <tr class="separator:aa0dd15d323d4380bd014c5b1ea8c2187"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ac2087ef5cc66cd05ffe675a12acdceaa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMsws_1_1State.html">Msws::State</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRandomGenerator.html#ac2087ef5cc66cd05ffe675a12acdceaa">_state</a></td></tr>
+<tr class="separator:ac2087ef5cc66cd05ffe675a12acdceaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Crownstones pseudo random number generator wrapper. </p>
@@ -152,6 +165,82 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>operator()</b> ()
 
 <p>The given seed need not be very high quality. </p>
 <p >The constructor will ensure that the internal state is set up to acceptable values, deterministically generated from the given seed parameter. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa0dd15d323d4380bd014c5b1ea8c2187" name="aa0dd15d323d4380bd014c5b1ea8c2187"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0dd15d323d4380bd014c5b1ea8c2187">&#9670;&#160;</a></span>operator()()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t RandomGenerator::operator() </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8f0102c7c17f2928672fafca6e48947a" name="a8f0102c7c17f2928672fafca6e48947a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f0102c7c17f2928672fafca6e48947a">&#9670;&#160;</a></span>rand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t RandomGenerator::rand </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Generates a new random number and updates the internal state. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ac2087ef5cc66cd05ffe675a12acdceaa" name="ac2087ef5cc66cd05ffe675a12acdceaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2087ef5cc66cd05ffe675a12acdceaa">&#9670;&#160;</a></span>_state</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMsws_1_1State.html">Msws::State</a> RandomGenerator::_state</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

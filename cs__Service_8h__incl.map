@@ -2,15 +2,15 @@
 <area shape="rect" id="node1" title="BLE service." alt="" coords="1539,5,1679,45"/>
 <area shape="rect" id="node2" href="$cs__CharacteristicBase_8h.html" title="Bluetooth Low Energy characteristics." alt="" coords="1307,93,1509,119"/>
 <area shape="rect" id="node38" href="$cs__Stack_8h.html" title="Manufacturing data." alt="" coords="1552,93,1667,119"/>
-<area shape="rect" id="node40" href="$cs__Strings_8h_source.html" title=" " alt="" coords="1886,174,2010,199"/>
-<area shape="rect" id="node41" href="$cs__BaseClass_8h_source.html" title=" " alt="" coords="575,174,758,199"/>
-<area shape="rect" id="node43" href="$cs__Tuple_8h_source.html" title=" " alt="" coords="782,174,933,199"/>
-<area shape="rect" id="node44" href="$cs__Timer_8h_source.html" title=" " alt="" coords="2035,174,2176,199"/>
-<area shape="rect" id="node47" href="$cs__BleError_8h_source.html" title=" " alt="" coords="2201,174,2333,199"/>
-<area shape="rect" id="node3" href="$cs__Nordic_8h_source.html" title=" " alt="" coords="1695,262,1817,287"/>
-<area shape="rect" id="node33" href="$cs__Types_8h_source.html" title=" " alt="" coords="1163,174,1317,199"/>
-<area shape="rect" id="node36" href="$cs__CharacteristicStructs_8h_source.html" title=" " alt="" coords="957,167,1139,207"/>
-<area shape="rect" id="node37" href="$function_8h_source.html" title=" " alt="" coords="1393,174,1538,199"/>
+<area shape="rect" id="node40" href="$cs__Strings_8h.html" title=" " alt="" coords="1886,174,2010,199"/>
+<area shape="rect" id="node41" href="$cs__BaseClass_8h.html" title=" " alt="" coords="575,174,758,199"/>
+<area shape="rect" id="node43" href="$cs__Tuple_8h.html" title=" " alt="" coords="782,174,933,199"/>
+<area shape="rect" id="node44" href="$cs__Timer_8h.html" title=" " alt="" coords="2035,174,2176,199"/>
+<area shape="rect" id="node47" href="$cs__BleError_8h.html" title=" " alt="" coords="2201,174,2333,199"/>
+<area shape="rect" id="node3" href="$cs__Nordic_8h.html" title=" " alt="" coords="1695,262,1817,287"/>
+<area shape="rect" id="node33" href="$cs__Types_8h.html" title=" " alt="" coords="1163,174,1317,199"/>
+<area shape="rect" id="node36" href="$cs__CharacteristicStructs_8h.html" title=" " alt="" coords="957,167,1139,207"/>
+<area shape="rect" id="node37" href="$function_8h.html" title=" " alt="" coords="1393,174,1538,199"/>
 <area shape="rect" id="node4" title=" " alt="" coords="2541,343,2691,368"/>
 <area shape="rect" id="node5" title=" " alt="" coords="2715,343,2843,368"/>
 <area shape="rect" id="node6" title=" " alt="" coords="2867,343,2954,368"/>
@@ -41,12 +41,12 @@
 <area shape="rect" id="node31" title=" " alt="" coords="2245,343,2347,368"/>
 <area shape="rect" id="node32" title=" " alt="" coords="2371,343,2517,368"/>
 <area shape="rect" id="node34" title=" " alt="" coords="893,262,960,287"/>
-<area shape="rect" id="node35" href="$cs__Config_8h_source.html" title=" " alt="" coords="1347,262,1469,287"/>
-<area shape="rect" id="node39" href="$cs__UUID_8h_source.html" title=" " alt="" coords="1697,174,1810,199"/>
+<area shape="rect" id="node35" href="$cs__Config_8h.html" title=" " alt="" coords="1347,262,1469,287"/>
+<area shape="rect" id="node39" href="$cs__UUID_8h.html" title=" " alt="" coords="1697,174,1810,199"/>
 <area shape="rect" id="node50" title=" " alt="" coords="1613,174,1672,199"/>
 <area shape="rect" id="node42" title=" " alt="" coords="755,262,818,287"/>
 <area shape="rect" id="node45" title=" " alt="" coords="1925,255,2123,295"/>
 <area shape="rect" id="node46" title=" " alt="" coords="2147,255,2306,295"/>
-<area shape="rect" id="node48" href="$cs__CLogger_8h_source.html" title=" " alt="" coords="3536,343,3696,368"/>
-<area shape="rect" id="node49" href="$cs__Error_8h_source.html" title=" " alt="" coords="3042,262,3153,287"/>
+<area shape="rect" id="node48" href="$cs__CLogger_8h.html" title=" " alt="" coords="3536,343,3696,368"/>
+<area shape="rect" id="node49" href="$cs__Error_8h.html" title=" " alt="" coords="3042,262,3153,287"/>
 </map>

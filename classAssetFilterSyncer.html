@@ -100,6 +100,9 @@ $(document).ready(function(){initNavTree('classAssetFilterSyncer.html',''); init
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="#pri-types">Private Types</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classAssetFilterSyncer-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">AssetFilterSyncer Class Reference</div></div>
 </div><!--header-->
@@ -124,58 +127,164 @@ Collaboration diagram for AssetFilterSyncer:</div>
 <div class="dyncontent">
 <div class="center"><img src="classAssetFilterSyncer__coll__graph.png" border="0" usemap="#aAssetFilterSyncer_coll__map" alt="Collaboration graph"/></div>
 <map name="aAssetFilterSyncer_coll__map" id="aAssetFilterSyncer_coll__map">
-<area shape="rect" title="Class that takes care of synchronizing the asset filters between crownstones." alt="" coords="57,79,192,104"/>
+<area shape="rect" title="Class that takes care of synchronizing the asset filters between crownstones." alt="" coords="45,168,180,193"/>
 <area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
-<area shape="rect" href="classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
+<area shape="rect" href="classAssetFilterStore.html" title="Keeps up the asset filters." alt="" coords="51,80,175,105"/>
+<area shape="rect" href="classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="152,5,249,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a96685337aaeeb95b9b89799dff0dc2cb"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a96685337aaeeb95b9b89799dff0dc2cb">init</a> ()</td></tr>
+<tr class="memitem:a96685337aaeeb95b9b89799dff0dc2cb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a96685337aaeeb95b9b89799dff0dc2cb">init</a> ()</td></tr>
 <tr class="memdesc:a96685337aaeeb95b9b89799dff0dc2cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the class:  <a href="classAssetFilterSyncer.html#a96685337aaeeb95b9b89799dff0dc2cb">More...</a><br /></td></tr>
 <tr class="separator:a96685337aaeeb95b9b89799dff0dc2cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea1867e282a769f0a258b4db280331d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#aea1867e282a769f0a258b4db280331d7">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;evt)</td></tr>
 <tr class="memdesc:aea1867e282a769f0a258b4db280331d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classAssetFilterSyncer.html#aea1867e282a769f0a258b4db280331d7">More...</a><br /></td></tr>
 <tr class="separator:aea1867e282a769f0a258b4db280331d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classComponent"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classComponent')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classComponent.html">Component</a></td></tr>
 <tr class="memitem:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">getComponent</a> (<a class="el" href="classComponent.html">Component</a> *requester=nullptr)</td></tr>
 <tr class="memdesc:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a component of type T* from _parent-&gt;children(), If not found try again with ancestors: _parent-&gt; ... -&gt;_parent-&gt;children().  <a href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">More...</a><br /></td></tr>
 <tr class="separator:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a> ()</td></tr>
+<tr class="memitem:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a> ()</td></tr>
 <tr class="memdesc:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Components can implement this if they need to get references to sibling or if they need to do specific initialization.  <a href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">More...</a><br /></td></tr>
 <tr class="separator:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top"><a id="a9cd21445768610fd3db1b15a9c851416" name="a9cd21445768610fd3db1b15a9c851416"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>parentAllChildren</b> ()</td></tr>
-<tr class="memdesc:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">utility that loops over all elements of <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321" title="Components with children can override this method to return them.">getChildren()</a> and setParent on the non-nullptr ones. <br /></td></tr>
+<tr class="memitem:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">parentAllChildren</a> ()</td></tr>
+<tr class="memdesc:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">utility that loops over all elements of <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321" title="Components with children can override this method to return them.">getChildren()</a> and setParent on the non-nullptr ones.  <a href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">More...</a><br /></td></tr>
 <tr class="separator:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad82d7393e339c1b19cc17a0d55b5674d inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#ad82d7393e339c1b19cc17a0d55b5674d">~Component</a> ()=default</td></tr>
+<tr class="separator:ad82d7393e339c1b19cc17a0d55b5674d inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a1a8b81fb6f60683a15358ab22a609690"><td class="memItemLeft" align="right" valign="top"><a id="a1a8b81fb6f60683a15358ab22a609690" name="a1a8b81fb6f60683a15358ab22a609690"></a>
-static constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS</b> = 5 * 60</td></tr>
-<tr class="memdesc:a1a8b81fb6f60683a15358ab22a609690"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interval at which the master version is broadcasted. <br /></td></tr>
+<tr class="memitem:a1a8b81fb6f60683a15358ab22a609690"><td class="memItemLeft" align="right" valign="top">static constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a1a8b81fb6f60683a15358ab22a609690">VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS</a> = 5 * 60</td></tr>
+<tr class="memdesc:a1a8b81fb6f60683a15358ab22a609690"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interval at which the master version is broadcasted.  <a href="classAssetFilterSyncer.html#a1a8b81fb6f60683a15358ab22a609690">More...</a><br /></td></tr>
 <tr class="separator:a1a8b81fb6f60683a15358ab22a609690"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4bc1d3048f806230dbdae0035b250c86"><td class="memItemLeft" align="right" valign="top"><a id="a4bc1d3048f806230dbdae0035b250c86" name="a4bc1d3048f806230dbdae0035b250c86"></a>
-static constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>VERSION_BROADCAST_LOW_INTERVAL_SECONDS</b> = 1</td></tr>
+<tr class="memitem:a4bc1d3048f806230dbdae0035b250c86"><td class="memItemLeft" align="right" valign="top">static constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a4bc1d3048f806230dbdae0035b250c86">VERSION_BROADCAST_LOW_INTERVAL_SECONDS</a> = 1</td></tr>
 <tr class="separator:a4bc1d3048f806230dbdae0035b250c86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad8aefe8b60bb215e09e64bb7248695fd"><td class="memItemLeft" align="right" valign="top"><a id="ad8aefe8b60bb215e09e64bb7248695fd" name="ad8aefe8b60bb215e09e64bb7248695fd"></a>
-static constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>VERSION_BROADCAST_INTERVAL_RESET_SECONDS</b> = 60</td></tr>
-<tr class="memdesc:ad8aefe8b60bb215e09e64bb7248695fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">How long the low interval will be used after setting it to low interval. <br /></td></tr>
+<tr class="memitem:ad8aefe8b60bb215e09e64bb7248695fd"><td class="memItemLeft" align="right" valign="top">static constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#ad8aefe8b60bb215e09e64bb7248695fd">VERSION_BROADCAST_INTERVAL_RESET_SECONDS</a> = 60</td></tr>
+<tr class="memdesc:ad8aefe8b60bb215e09e64bb7248695fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">How long the low interval will be used after setting it to low interval.  <a href="classAssetFilterSyncer.html#ad8aefe8b60bb215e09e64bb7248695fd">More...</a><br /></td></tr>
 <tr class="separator:ad8aefe8b60bb215e09e64bb7248695fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private Types</h2></td></tr>
+<tr class="memitem:a79db7ac59dfe239479be386f2997ad8d"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8d">SyncStep</a> { <br />
+&#160;&#160;<a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8dab50339a10e1de285ac99d4c3990b8693">NONE</a>
+, <a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8dab57e2519e26151feacdbe52076bc39ec">CONNECT</a>
+, <a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8dacf2ec47b3618948c8f803f7b66afeb4f">GET_FILTER_SUMMARIES</a>
+, <a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8daee5142688370b14904aeccd0e79c2d4f">REMOVE_FILTERS</a>
+, <br />
+&#160;&#160;<a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8da6a40a057b8dd3a218240fd506825ed19">UPLOAD_FILTERS</a>
+, <a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8da1d0ba376e273b9d622641124d8c59264">COMMIT</a>
+, <a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8dadd7cd0eb57db08d4f98abc48e5593462">DISCONNECT</a>
+<br />
+ }</td></tr>
+<tr class="memdesc:a79db7ac59dfe239479be386f2997ad8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Async steps that are taken when synchronizing filters to another crownstone.  <a href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8d">More...</a><br /></td></tr>
+<tr class="separator:a79db7ac59dfe239479be386f2997ad8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b779027a96550efbd2c5910a56447bd"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a4b779027a96550efbd2c5910a56447bd">VersionCompare</a> { <a class="el" href="classAssetFilterSyncer.html#a4b779027a96550efbd2c5910a56447bdab5a732549319af0ddb6913df89efc0df">UNKOWN</a>
+, <a class="el" href="classAssetFilterSyncer.html#a4b779027a96550efbd2c5910a56447bdab1f680800cb490281abf6424510c85e5">OLDER</a>
+, <a class="el" href="classAssetFilterSyncer.html#a4b779027a96550efbd2c5910a56447bda969f331a87d8c958473c32b4d0e61a44">EQUAL</a>
+, <a class="el" href="classAssetFilterSyncer.html#a4b779027a96550efbd2c5910a56447bdac62122d172b000396b6b38a9e959fad3">NEWER</a>
+ }</td></tr>
+<tr class="memdesc:a4b779027a96550efbd2c5910a56447bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Results of comparing master version with another crownstone.  <a href="classAssetFilterSyncer.html#a4b779027a96550efbd2c5910a56447bd">More...</a><br /></td></tr>
+<tr class="separator:a4b779027a96550efbd2c5910a56447bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a358b10a40c271c580b975bf5a9ff318e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a358b10a40c271c580b975bf5a9ff318e">sendVersion</a> (bool reliable)</td></tr>
+<tr class="memdesc:a358b10a40c271c580b975bf5a9ff318e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sends the master version and CRC over the mesh.  <a href="classAssetFilterSyncer.html#a358b10a40c271c580b975bf5a9ff318e">More...</a><br /></td></tr>
+<tr class="separator:a358b10a40c271c580b975bf5a9ff318e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf9bc3b3cf5c1e7a8c8cd8c8ec41925a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#acf9bc3b3cf5c1e7a8c8cd8c8ec41925a">sendVersionAtLowInterval</a> ()</td></tr>
+<tr class="memdesc:acf9bc3b3cf5c1e7a8c8cd8c8ec41925a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send version at a low interval for some time.  <a href="classAssetFilterSyncer.html#acf9bc3b3cf5c1e7a8c8cd8c8ec41925a">More...</a><br /></td></tr>
+<tr class="separator:acf9bc3b3cf5c1e7a8c8cd8c8ec41925a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0324a291582fcbe3c7eaa2aa591ecb62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a0324a291582fcbe3c7eaa2aa591ecb62">setStep</a> (<a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8d">SyncStep</a> step)</td></tr>
+<tr class="memdesc:a0324a291582fcbe3c7eaa2aa591ecb62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the current step of the sync process.  <a href="classAssetFilterSyncer.html#a0324a291582fcbe3c7eaa2aa591ecb62">More...</a><br /></td></tr>
+<tr class="separator:a0324a291582fcbe3c7eaa2aa591ecb62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab85018f218471929699fccb8b4fa7131"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#ab85018f218471929699fccb8b4fa7131">reset</a> ()</td></tr>
+<tr class="memdesc:ab85018f218471929699fccb8b4fa7131"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abort the sync process.  <a href="classAssetFilterSyncer.html#ab85018f218471929699fccb8b4fa7131">More...</a><br /></td></tr>
+<tr class="separator:ab85018f218471929699fccb8b4fa7131"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b6dc9af872f07f6f2a82439971ad70e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAssetFilterSyncer.html#a4b779027a96550efbd2c5910a56447bd">VersionCompare</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a4b6dc9af872f07f6f2a82439971ad70e">compareToMyVersion</a> (<a class="el" href="cs__AssetFilterPackets_8h.html#ad8c6abfe78f888d1c61700dd0ebc05b2">asset_filter_cmd_protocol_t</a> protocol, uint16_t masterVersion, uint32_t masterCrc)</td></tr>
+<tr class="memdesc:a4b6dc9af872f07f6f2a82439971ad70e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare given master version with the master version of this crownstone.  <a href="classAssetFilterSyncer.html#a4b6dc9af872f07f6f2a82439971ad70e">More...</a><br /></td></tr>
+<tr class="separator:a4b6dc9af872f07f6f2a82439971ad70e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae80b4396a684beec50b830df3e408759"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#ae80b4396a684beec50b830df3e408759">syncFilters</a> (<a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> stoneId)</td></tr>
+<tr class="memdesc:ae80b4396a684beec50b830df3e408759"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start updating filters of another crownstone.  <a href="classAssetFilterSyncer.html#ae80b4396a684beec50b830df3e408759">More...</a><br /></td></tr>
+<tr class="separator:ae80b4396a684beec50b830df3e408759"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a657937bbb29e5dc73a8cf04285740bed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a657937bbb29e5dc73a8cf04285740bed">connect</a> (<a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> stoneId)</td></tr>
+<tr class="memdesc:a657937bbb29e5dc73a8cf04285740bed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Steps of the sync process.  <a href="classAssetFilterSyncer.html#a657937bbb29e5dc73a8cf04285740bed">More...</a><br /></td></tr>
+<tr class="separator:a657937bbb29e5dc73a8cf04285740bed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab35e35d41b86e1fe052b543bdfa497b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#ab35e35d41b86e1fe052b543bdfa497b2">removeNextFilter</a> ()</td></tr>
+<tr class="separator:ab35e35d41b86e1fe052b543bdfa497b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb3f68f2c37d65b391bf7c1c2c9e0449"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#abb3f68f2c37d65b391bf7c1c2c9e0449">uploadNextFilter</a> ()</td></tr>
+<tr class="separator:abb3f68f2c37d65b391bf7c1c2c9e0449"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52db5c362c83d59135c1cb2f4f5a622a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a52db5c362c83d59135c1cb2f4f5a622a">commit</a> ()</td></tr>
+<tr class="separator:a52db5c362c83d59135c1cb2f4f5a622a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0f4153757a170af21e20bb463b00226"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#aa0f4153757a170af21e20bb463b00226">disconnect</a> ()</td></tr>
+<tr class="separator:aa0f4153757a170af21e20bb463b00226"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a359578dc462201198e35667d99eb5bce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a359578dc462201198e35667d99eb5bce">done</a> ()</td></tr>
+<tr class="memdesc:a359578dc462201198e35667d99eb5bce"><td class="mdescLeft">&#160;</td><td class="mdescRight">When the whole sync process to a stone was successful, call <a class="el" href="classAssetFilterSyncer.html#a359578dc462201198e35667d99eb5bce" title="When the whole sync process to a stone was successful, call done().">done()</a>.  <a href="classAssetFilterSyncer.html#a359578dc462201198e35667d99eb5bce">More...</a><br /></td></tr>
+<tr class="separator:a359578dc462201198e35667d99eb5bce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5cb17c07baf1a5ed38717e074902d8f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#aa5cb17c07baf1a5ed38717e074902d8f">onVersion</a> (<a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> stoneId, <a class="el" href="structcs__mesh__model__msg__asset__filter__version__t.html">cs_mesh_model_msg_asset_filter_version_t</a> &amp;packet)</td></tr>
+<tr class="memdesc:aa5cb17c07baf1a5ed38717e074902d8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a received version mesh message.  <a href="classAssetFilterSyncer.html#aa5cb17c07baf1a5ed38717e074902d8f">More...</a><br /></td></tr>
+<tr class="separator:aa5cb17c07baf1a5ed38717e074902d8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94d0694f41d4cc44c1d78413925e230d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a94d0694f41d4cc44c1d78413925e230d">onModificationInProgress</a> (bool inProgress)</td></tr>
+<tr class="memdesc:a94d0694f41d4cc44c1d78413925e230d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a possible change of "filter modification in progress".  <a href="classAssetFilterSyncer.html#a94d0694f41d4cc44c1d78413925e230d">More...</a><br /></td></tr>
+<tr class="separator:a94d0694f41d4cc44c1d78413925e230d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d757e5cfd69b887907e15fd5fdcb392"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a8d757e5cfd69b887907e15fd5fdcb392">onConnectResult</a> (<a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> retCode)</td></tr>
+<tr class="memdesc:a8d757e5cfd69b887907e15fd5fdcb392"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle steps of the sync process.  <a href="classAssetFilterSyncer.html#a8d757e5cfd69b887907e15fd5fdcb392">More...</a><br /></td></tr>
+<tr class="separator:a8d757e5cfd69b887907e15fd5fdcb392"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5448a520487c74d06cb55d144f72a258"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a5448a520487c74d06cb55d144f72a258">onDisconnect</a> ()</td></tr>
+<tr class="separator:a5448a520487c74d06cb55d144f72a258"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace76c982bece25074d14e9d2bcc48a4b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#ace76c982bece25074d14e9d2bcc48a4b">onWriteResult</a> (<a class="el" href="structcs__central__write__result__t.html">cs_central_write_result_t</a> &amp;result)</td></tr>
+<tr class="separator:ace76c982bece25074d14e9d2bcc48a4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89149c5cc186c4856915b1b144fa1b07"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a89149c5cc186c4856915b1b144fa1b07">onFilterSummaries</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;payload)</td></tr>
+<tr class="separator:a89149c5cc186c4856915b1b144fa1b07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf5c19486ddc30dfd0616f9eeeedf6de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#acf5c19486ddc30dfd0616f9eeeedf6de">onTick</a> (uint32_t tickCount)</td></tr>
+<tr class="memdesc:acf5c19486ddc30dfd0616f9eeeedf6de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle the tick event.  <a href="classAssetFilterSyncer.html#acf5c19486ddc30dfd0616f9eeeedf6de">More...</a><br /></td></tr>
+<tr class="separator:acf5c19486ddc30dfd0616f9eeeedf6de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a709431985ce400696c80b7adbc29e88f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAssetFilterStore.html">AssetFilterStore</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a709431985ce400696c80b7adbc29e88f">_store</a> = nullptr</td></tr>
+<tr class="memdesc:a709431985ce400696c80b7adbc29e88f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the (intialized) filter store.  <a href="classAssetFilterSyncer.html#a709431985ce400696c80b7adbc29e88f">More...</a><br /></td></tr>
+<tr class="separator:a709431985ce400696c80b7adbc29e88f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad25230c3593378629217e0c5d70653c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8d">SyncStep</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#ad25230c3593378629217e0c5d70653c4">_step</a> = <a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8dab50339a10e1de285ac99d4c3990b8693">SyncStep::NONE</a></td></tr>
+<tr class="memdesc:ad25230c3593378629217e0c5d70653c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current step.  <a href="classAssetFilterSyncer.html#ad25230c3593378629217e0c5d70653c4">More...</a><br /></td></tr>
+<tr class="separator:ad25230c3593378629217e0c5d70653c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8cc455879e8dadd11b2e4e5d27c33d06"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a8cc455879e8dadd11b2e4e5d27c33d06">_nextFilterIndex</a></td></tr>
+<tr class="memdesc:a8cc455879e8dadd11b2e4e5d27c33d06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Next index of filter IDs to upload/remove array.  <a href="classAssetFilterSyncer.html#a8cc455879e8dadd11b2e4e5d27c33d06">More...</a><br /></td></tr>
+<tr class="separator:a8cc455879e8dadd11b2e4e5d27c33d06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ce315d55f1c965944bc8ef16703b804"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a0ce315d55f1c965944bc8ef16703b804">_nextChunkIndex</a></td></tr>
+<tr class="memdesc:a0ce315d55f1c965944bc8ef16703b804"><td class="mdescLeft">&#160;</td><td class="mdescRight">Next chunk index to upload.  <a href="classAssetFilterSyncer.html#a0ce315d55f1c965944bc8ef16703b804">More...</a><br /></td></tr>
+<tr class="separator:a0ce315d55f1c965944bc8ef16703b804"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64157f22827325d1cb1d665ed4f3bc67"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a64157f22827325d1cb1d665ed4f3bc67">_filterIdsToUpload</a> [<a class="el" href="classAssetFilterStore.html#a973cf2699418841ede35a043c39e4550">AssetFilterStore::MAX_FILTER_IDS</a>]</td></tr>
+<tr class="memdesc:a64157f22827325d1cb1d665ed4f3bc67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filter IDs that should be uploaded.  <a href="classAssetFilterSyncer.html#a64157f22827325d1cb1d665ed4f3bc67">More...</a><br /></td></tr>
+<tr class="separator:a64157f22827325d1cb1d665ed4f3bc67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaff4db7603a9b979e28c40127ab5e09c"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#aaff4db7603a9b979e28c40127ab5e09c">_filterUploadCount</a></td></tr>
+<tr class="separator:aaff4db7603a9b979e28c40127ab5e09c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeea04d58500d1893e3f43ffbe5bc16d6"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#aeea04d58500d1893e3f43ffbe5bc16d6">_filterIdsToRemove</a> [<a class="el" href="classAssetFilterStore.html#a973cf2699418841ede35a043c39e4550">AssetFilterStore::MAX_FILTER_IDS</a>]</td></tr>
+<tr class="memdesc:aeea04d58500d1893e3f43ffbe5bc16d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filter IDs that should be removed.  <a href="classAssetFilterSyncer.html#aeea04d58500d1893e3f43ffbe5bc16d6">More...</a><br /></td></tr>
+<tr class="separator:aeea04d58500d1893e3f43ffbe5bc16d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a771d66372405cdaa95657736cdbb303a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a771d66372405cdaa95657736cdbb303a">_filterRemoveCount</a></td></tr>
+<tr class="separator:a771d66372405cdaa95657736cdbb303a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2848800a98d688be9826429959af3852"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#a2848800a98d688be9826429959af3852">_sendVersionAtLowIntervalCountdown</a> = 0</td></tr>
+<tr class="memdesc:a2848800a98d688be9826429959af3852"><td class="mdescLeft">&#160;</td><td class="mdescRight">Countdown counter that keeps track when the send version interval should go back to normal again.  <a href="classAssetFilterSyncer.html#a2848800a98d688be9826429959af3852">More...</a><br /></td></tr>
+<tr class="separator:a2848800a98d688be9826429959af3852"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7f7970cd53867c5794ee75f2b808380"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFilterSyncer.html#ad7f7970cd53867c5794ee75f2b808380">_sendVersionCountdown</a> = 0</td></tr>
+<tr class="memdesc:ad7f7970cd53867c5794ee75f2b808380"><td class="mdescLeft">&#160;</td><td class="mdescRight">Countdown counter that keeps track when to call sendVersion again.  <a href="classAssetFilterSyncer.html#ad7f7970cd53867c5794ee75f2b808380">More...</a><br /></td></tr>
+<tr class="separator:ad7f7970cd53867c5794ee75f2b808380"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -183,11 +292,10 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a3ec59ae860e2dd270a8c076430df1321 inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; <a class="el" href="classComponent.html">Component</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321">getChildren</a> ()</td></tr>
 <tr class="memdesc:a3ec59ae860e2dd270a8c076430df1321 inherit pro_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Components with children can override this method to return them.  <a href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321">More...</a><br /></td></tr>
 <tr class="separator:a3ec59ae860e2dd270a8c076430df1321 inherit pro_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15dfa6d3ca6bfe46e46a53811235fdde inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a> ()</td></tr>
+<tr class="memitem:a15dfa6d3ca6bfe46e46a53811235fdde inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a> ()</td></tr>
 <tr class="separator:a15dfa6d3ca6bfe46e46a53811235fdde inherit pro_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top"><a id="a40f9568b0e447fb079e16dee8428e9f1" name="a40f9568b0e447fb079e16dee8428e9f1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a class="el" href="classComponent.html">Component</a> *p)</td></tr>
-<tr class="memdesc:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Children that are instantiated later can also be added individually. <br /></td></tr>
+<tr class="memitem:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">setParent</a> (<a class="el" href="classComponent.html">Component</a> *p)</td></tr>
+<tr class="memdesc:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Children that are instantiated later can also be added individually.  <a href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">More...</a><br /></td></tr>
 <tr class="separator:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -196,7 +304,220 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 <li>Regularly informs other crownstones of the master version and CRC.</li>
 <li>Will connect and update the asset filters of a crownstone with an older master version. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a79db7ac59dfe239479be386f2997ad8d" name="a79db7ac59dfe239479be386f2997ad8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79db7ac59dfe239479be386f2997ad8d">&#9670;&#160;</a></span>SyncStep</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8d">AssetFilterSyncer::SyncStep</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Async steps that are taken when synchronizing filters to another crownstone. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a79db7ac59dfe239479be386f2997ad8dab50339a10e1de285ac99d4c3990b8693" name="a79db7ac59dfe239479be386f2997ad8dab50339a10e1de285ac99d4c3990b8693"></a>NONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a79db7ac59dfe239479be386f2997ad8dab57e2519e26151feacdbe52076bc39ec" name="a79db7ac59dfe239479be386f2997ad8dab57e2519e26151feacdbe52076bc39ec"></a>CONNECT&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a79db7ac59dfe239479be386f2997ad8dacf2ec47b3618948c8f803f7b66afeb4f" name="a79db7ac59dfe239479be386f2997ad8dacf2ec47b3618948c8f803f7b66afeb4f"></a>GET_FILTER_SUMMARIES&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a79db7ac59dfe239479be386f2997ad8daee5142688370b14904aeccd0e79c2d4f" name="a79db7ac59dfe239479be386f2997ad8daee5142688370b14904aeccd0e79c2d4f"></a>REMOVE_FILTERS&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a79db7ac59dfe239479be386f2997ad8da6a40a057b8dd3a218240fd506825ed19" name="a79db7ac59dfe239479be386f2997ad8da6a40a057b8dd3a218240fd506825ed19"></a>UPLOAD_FILTERS&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a79db7ac59dfe239479be386f2997ad8da1d0ba376e273b9d622641124d8c59264" name="a79db7ac59dfe239479be386f2997ad8da1d0ba376e273b9d622641124d8c59264"></a>COMMIT&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a79db7ac59dfe239479be386f2997ad8dadd7cd0eb57db08d4f98abc48e5593462" name="a79db7ac59dfe239479be386f2997ad8dadd7cd0eb57db08d4f98abc48e5593462"></a>DISCONNECT&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<a id="a4b779027a96550efbd2c5910a56447bd" name="a4b779027a96550efbd2c5910a56447bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b779027a96550efbd2c5910a56447bd">&#9670;&#160;</a></span>VersionCompare</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="classAssetFilterSyncer.html#a4b779027a96550efbd2c5910a56447bd">AssetFilterSyncer::VersionCompare</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Results of comparing master version with another crownstone. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a4b779027a96550efbd2c5910a56447bdab5a732549319af0ddb6913df89efc0df" name="a4b779027a96550efbd2c5910a56447bdab5a732549319af0ddb6913df89efc0df"></a>UNKOWN&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a4b779027a96550efbd2c5910a56447bdab1f680800cb490281abf6424510c85e5" name="a4b779027a96550efbd2c5910a56447bdab1f680800cb490281abf6424510c85e5"></a>OLDER&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a4b779027a96550efbd2c5910a56447bda969f331a87d8c958473c32b4d0e61a44" name="a4b779027a96550efbd2c5910a56447bda969f331a87d8c958473c32b4d0e61a44"></a>EQUAL&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a4b779027a96550efbd2c5910a56447bdac62122d172b000396b6b38a9e959fad3" name="a4b779027a96550efbd2c5910a56447bdac62122d172b000396b6b38a9e959fad3"></a>NEWER&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a52db5c362c83d59135c1cb2f4f5a622a" name="a52db5c362c83d59135c1cb2f4f5a622a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52db5c362c83d59135c1cb2f4f5a622a">&#9670;&#160;</a></span>commit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::commit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4b6dc9af872f07f6f2a82439971ad70e" name="a4b6dc9af872f07f6f2a82439971ad70e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b6dc9af872f07f6f2a82439971ad70e">&#9670;&#160;</a></span>compareToMyVersion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetFilterSyncer.html#a4b779027a96550efbd2c5910a56447bd">VersionCompare</a> AssetFilterSyncer::compareToMyVersion </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__AssetFilterPackets_8h.html#ad8c6abfe78f888d1c61700dd0ebc05b2">asset_filter_cmd_protocol_t</a>&#160;</td>
+          <td class="paramname"><em>protocol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>masterVersion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>masterCrc</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compare given master version with the master version of this crownstone. </p>
+
+</div>
+</div>
+<a id="a657937bbb29e5dc73a8cf04285740bed" name="a657937bbb29e5dc73a8cf04285740bed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a657937bbb29e5dc73a8cf04285740bed">&#9670;&#160;</a></span>connect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::connect </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>stoneId</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Steps of the sync process. </p>
+
+</div>
+</div>
+<a id="aa0f4153757a170af21e20bb463b00226" name="aa0f4153757a170af21e20bb463b00226"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0f4153757a170af21e20bb463b00226">&#9670;&#160;</a></span>disconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::disconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a359578dc462201198e35667d99eb5bce" name="a359578dc462201198e35667d99eb5bce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a359578dc462201198e35667d99eb5bce">&#9670;&#160;</a></span>done()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::done </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>When the whole sync process to a stone was successful, call <a class="el" href="classAssetFilterSyncer.html#a359578dc462201198e35667d99eb5bce" title="When the whole sync process to a stone was successful, call done().">done()</a>. </p>
+
+</div>
+</div>
 <a id="aea1867e282a769f0a258b4db280331d7" name="aea1867e282a769f0a258b4db280331d7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aea1867e282a769f0a258b4db280331d7">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -237,7 +558,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t AssetFilterSyncer::init </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AssetFilterSyncer::init </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -256,6 +577,700 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 </ul>
 
 <p>Reimplemented from <a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">Component</a>.</p>
+
+</div>
+</div>
+<a id="a8d757e5cfd69b887907e15fd5fdcb392" name="a8d757e5cfd69b887907e15fd5fdcb392"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d757e5cfd69b887907e15fd5fdcb392">&#9670;&#160;</a></span>onConnectResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::onConnectResult </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td>
+          <td class="paramname"><em>retCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle steps of the sync process. </p>
+
+</div>
+</div>
+<a id="a5448a520487c74d06cb55d144f72a258" name="a5448a520487c74d06cb55d144f72a258"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5448a520487c74d06cb55d144f72a258">&#9670;&#160;</a></span>onDisconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::onDisconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a89149c5cc186c4856915b1b144fa1b07" name="a89149c5cc186c4856915b1b144fa1b07"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89149c5cc186c4856915b1b144fa1b07">&#9670;&#160;</a></span>onFilterSummaries()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::onFilterSummaries </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>payload</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a94d0694f41d4cc44c1d78413925e230d" name="a94d0694f41d4cc44c1d78413925e230d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94d0694f41d4cc44c1d78413925e230d">&#9670;&#160;</a></span>onModificationInProgress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::onModificationInProgress </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>inProgress</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle a possible change of "filter modification in progress". </p>
+
+</div>
+</div>
+<a id="acf5c19486ddc30dfd0616f9eeeedf6de" name="acf5c19486ddc30dfd0616f9eeeedf6de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf5c19486ddc30dfd0616f9eeeedf6de">&#9670;&#160;</a></span>onTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::onTick </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tickCount</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle the tick event. </p>
+
+</div>
+</div>
+<a id="aa5cb17c07baf1a5ed38717e074902d8f" name="aa5cb17c07baf1a5ed38717e074902d8f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5cb17c07baf1a5ed38717e074902d8f">&#9670;&#160;</a></span>onVersion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AssetFilterSyncer::onVersion </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>stoneId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__mesh__model__msg__asset__filter__version__t.html">cs_mesh_model_msg_asset_filter_version_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>packet</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle a received version mesh message. </p>
+
+</div>
+</div>
+<a id="ace76c982bece25074d14e9d2bcc48a4b" name="ace76c982bece25074d14e9d2bcc48a4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace76c982bece25074d14e9d2bcc48a4b">&#9670;&#160;</a></span>onWriteResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::onWriteResult </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__central__write__result__t.html">cs_central_write_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab35e35d41b86e1fe052b543bdfa497b2" name="ab35e35d41b86e1fe052b543bdfa497b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab35e35d41b86e1fe052b543bdfa497b2">&#9670;&#160;</a></span>removeNextFilter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::removeNextFilter </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab85018f218471929699fccb8b4fa7131" name="ab85018f218471929699fccb8b4fa7131"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab85018f218471929699fccb8b4fa7131">&#9670;&#160;</a></span>reset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::reset </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Abort the sync process. </p>
+
+</div>
+</div>
+<a id="a358b10a40c271c580b975bf5a9ff318e" name="a358b10a40c271c580b975bf5a9ff318e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a358b10a40c271c580b975bf5a9ff318e">&#9670;&#160;</a></span>sendVersion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::sendVersion </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>reliable</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sends the master version and CRC over the mesh. </p>
+
+</div>
+</div>
+<a id="acf9bc3b3cf5c1e7a8c8cd8c8ec41925a" name="acf9bc3b3cf5c1e7a8c8cd8c8ec41925a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf9bc3b3cf5c1e7a8c8cd8c8ec41925a">&#9670;&#160;</a></span>sendVersionAtLowInterval()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::sendVersionAtLowInterval </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send version at a low interval for some time. </p>
+
+</div>
+</div>
+<a id="a0324a291582fcbe3c7eaa2aa591ecb62" name="a0324a291582fcbe3c7eaa2aa591ecb62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0324a291582fcbe3c7eaa2aa591ecb62">&#9670;&#160;</a></span>setStep()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::setStep </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8d">SyncStep</a>&#160;</td>
+          <td class="paramname"><em>step</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the current step of the sync process. </p>
+
+</div>
+</div>
+<a id="ae80b4396a684beec50b830df3e408759" name="ae80b4396a684beec50b830df3e408759"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae80b4396a684beec50b830df3e408759">&#9670;&#160;</a></span>syncFilters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::syncFilters </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>stoneId</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Start updating filters of another crownstone. </p>
+
+</div>
+</div>
+<a id="abb3f68f2c37d65b391bf7c1c2c9e0449" name="abb3f68f2c37d65b391bf7c1c2c9e0449"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb3f68f2c37d65b391bf7c1c2c9e0449">&#9670;&#160;</a></span>uploadNextFilter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFilterSyncer::uploadNextFilter </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="aeea04d58500d1893e3f43ffbe5bc16d6" name="aeea04d58500d1893e3f43ffbe5bc16d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeea04d58500d1893e3f43ffbe5bc16d6">&#9670;&#160;</a></span>_filterIdsToRemove</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t AssetFilterSyncer::_filterIdsToRemove[<a class="el" href="classAssetFilterStore.html#a973cf2699418841ede35a043c39e4550">AssetFilterStore::MAX_FILTER_IDS</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Filter IDs that should be removed. </p>
+
+</div>
+</div>
+<a id="a64157f22827325d1cb1d665ed4f3bc67" name="a64157f22827325d1cb1d665ed4f3bc67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64157f22827325d1cb1d665ed4f3bc67">&#9670;&#160;</a></span>_filterIdsToUpload</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t AssetFilterSyncer::_filterIdsToUpload[<a class="el" href="classAssetFilterStore.html#a973cf2699418841ede35a043c39e4550">AssetFilterStore::MAX_FILTER_IDS</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Filter IDs that should be uploaded. </p>
+
+</div>
+</div>
+<a id="a771d66372405cdaa95657736cdbb303a" name="a771d66372405cdaa95657736cdbb303a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a771d66372405cdaa95657736cdbb303a">&#9670;&#160;</a></span>_filterRemoveCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t AssetFilterSyncer::_filterRemoveCount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaff4db7603a9b979e28c40127ab5e09c" name="aaff4db7603a9b979e28c40127ab5e09c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaff4db7603a9b979e28c40127ab5e09c">&#9670;&#160;</a></span>_filterUploadCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t AssetFilterSyncer::_filterUploadCount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0ce315d55f1c965944bc8ef16703b804" name="a0ce315d55f1c965944bc8ef16703b804"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ce315d55f1c965944bc8ef16703b804">&#9670;&#160;</a></span>_nextChunkIndex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t AssetFilterSyncer::_nextChunkIndex</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Next chunk index to upload. </p>
+
+</div>
+</div>
+<a id="a8cc455879e8dadd11b2e4e5d27c33d06" name="a8cc455879e8dadd11b2e4e5d27c33d06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8cc455879e8dadd11b2e4e5d27c33d06">&#9670;&#160;</a></span>_nextFilterIndex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t AssetFilterSyncer::_nextFilterIndex</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Next index of filter IDs to upload/remove array. </p>
+
+</div>
+</div>
+<a id="a2848800a98d688be9826429959af3852" name="a2848800a98d688be9826429959af3852"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2848800a98d688be9826429959af3852">&#9670;&#160;</a></span>_sendVersionAtLowIntervalCountdown</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t AssetFilterSyncer::_sendVersionAtLowIntervalCountdown = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Countdown counter that keeps track when the send version interval should go back to normal again. </p>
+
+</div>
+</div>
+<a id="ad7f7970cd53867c5794ee75f2b808380" name="ad7f7970cd53867c5794ee75f2b808380"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7f7970cd53867c5794ee75f2b808380">&#9670;&#160;</a></span>_sendVersionCountdown</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t AssetFilterSyncer::_sendVersionCountdown = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Countdown counter that keeps track when to call sendVersion again. </p>
+
+</div>
+</div>
+<a id="ad25230c3593378629217e0c5d70653c4" name="ad25230c3593378629217e0c5d70653c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad25230c3593378629217e0c5d70653c4">&#9670;&#160;</a></span>_step</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8d">SyncStep</a> AssetFilterSyncer::_step = <a class="el" href="classAssetFilterSyncer.html#a79db7ac59dfe239479be386f2997ad8dab50339a10e1de285ac99d4c3990b8693">SyncStep::NONE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current step. </p>
+
+</div>
+</div>
+<a id="a709431985ce400696c80b7adbc29e88f" name="a709431985ce400696c80b7adbc29e88f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a709431985ce400696c80b7adbc29e88f">&#9670;&#160;</a></span>_store</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetFilterStore.html">AssetFilterStore</a>* AssetFilterSyncer::_store = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Pointer to the (intialized) filter store. </p>
+
+</div>
+</div>
+<a id="ad8aefe8b60bb215e09e64bb7248695fd" name="ad8aefe8b60bb215e09e64bb7248695fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8aefe8b60bb215e09e64bb7248695fd">&#9670;&#160;</a></span>VERSION_BROADCAST_INTERVAL_RESET_SECONDS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint16_t AssetFilterSyncer::VERSION_BROADCAST_INTERVAL_RESET_SECONDS = 60</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>How long the low interval will be used after setting it to low interval. </p>
+
+</div>
+</div>
+<a id="a4bc1d3048f806230dbdae0035b250c86" name="a4bc1d3048f806230dbdae0035b250c86"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bc1d3048f806230dbdae0035b250c86">&#9670;&#160;</a></span>VERSION_BROADCAST_LOW_INTERVAL_SECONDS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint16_t AssetFilterSyncer::VERSION_BROADCAST_LOW_INTERVAL_SECONDS = 1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1a8b81fb6f60683a15358ab22a609690" name="a1a8b81fb6f60683a15358ab22a609690"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a8b81fb6f60683a15358ab22a609690">&#9670;&#160;</a></span>VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint16_t AssetFilterSyncer::VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS = 5 * 60</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Interval at which the master version is broadcasted. </p>
 
 </div>
 </div>

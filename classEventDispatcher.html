@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classEventDispatcher.html',''); initRe
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classEventDispatcher-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">EventDispatcher Class Reference</div></div>
 </div><!--header-->
@@ -109,37 +111,267 @@ $(document).ready(function(){initNavTree('classEventDispatcher.html',''); initRe
  <a href="classEventDispatcher.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cs__EventDispatcher_8h_source.html">cs_EventDispatcher.h</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for EventDispatcher:</div>
+<div class="dyncontent">
+<div class="center"><img src="classEventDispatcher__coll__graph.png" border="0" usemap="#aEventDispatcher_coll__map" alt="Collaboration graph"/></div>
+<map name="aEventDispatcher_coll__map" id="aEventDispatcher_coll__map">
+<area shape="rect" title="Event dispatcher." alt="" coords="5,93,135,119"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="15,5,125,31"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1f168397d7e401a181bfc47f7be2801b"><td class="memItemLeft" align="right" valign="top"><a id="a1f168397d7e401a181bfc47f7be2801b" name="a1f168397d7e401a181bfc47f7be2801b"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>EventDispatcher</b> (<a class="el" href="classEventDispatcher.html">EventDispatcher</a> const &amp;)=delete</td></tr>
+<tr class="memitem:a1f168397d7e401a181bfc47f7be2801b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventDispatcher.html#a1f168397d7e401a181bfc47f7be2801b">EventDispatcher</a> (<a class="el" href="classEventDispatcher.html">EventDispatcher</a> const &amp;)=delete</td></tr>
 <tr class="separator:a1f168397d7e401a181bfc47f7be2801b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7f7831c618297be60c0475cb6f68aad"><td class="memItemLeft" align="right" valign="top"><a id="ad7f7831c618297be60c0475cb6f68aad" name="ad7f7831c618297be60c0475cb6f68aad"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classEventDispatcher.html">EventDispatcher</a> const &amp;)=delete</td></tr>
+<tr class="memitem:ad7f7831c618297be60c0475cb6f68aad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventDispatcher.html#ad7f7831c618297be60c0475cb6f68aad">operator=</a> (<a class="el" href="classEventDispatcher.html">EventDispatcher</a> const &amp;)=delete</td></tr>
 <tr class="separator:ad7f7831c618297be60c0475cb6f68aad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa9b87270250c49f31d4c9d0b092780a5"><td class="memItemLeft" align="right" valign="top"><a id="aa9b87270250c49f31d4c9d0b092780a5" name="aa9b87270250c49f31d4c9d0b092780a5"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>addListener</b> (<a class="el" href="classEventListener.html">EventListener</a> *listener)</td></tr>
-<tr class="memdesc:aa9b87270250c49f31d4c9d0b092780a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a listener. <br /></td></tr>
+<tr class="memitem:aa9b87270250c49f31d4c9d0b092780a5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventDispatcher.html#aa9b87270250c49f31d4c9d0b092780a5">addListener</a> (<a class="el" href="classEventListener.html">EventListener</a> *listener)</td></tr>
+<tr class="memdesc:aa9b87270250c49f31d4c9d0b092780a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a listener.  <a href="classEventDispatcher.html#aa9b87270250c49f31d4c9d0b092780a5">More...</a><br /></td></tr>
 <tr class="separator:aa9b87270250c49f31d4c9d0b092780a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5dd4c72202e2b3d9e43bf402528415a5"><td class="memItemLeft" align="right" valign="top"><a id="a5dd4c72202e2b3d9e43bf402528415a5" name="a5dd4c72202e2b3d9e43bf402528415a5"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>removeListener</b> (<a class="el" href="classEventListener.html">EventListener</a> *listener)</td></tr>
-<tr class="memdesc:a5dd4c72202e2b3d9e43bf402528415a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nulls all elements in _listeners equal to listener. <br /></td></tr>
+<tr class="memitem:a5dd4c72202e2b3d9e43bf402528415a5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventDispatcher.html#a5dd4c72202e2b3d9e43bf402528415a5">removeListener</a> (<a class="el" href="classEventListener.html">EventListener</a> *listener)</td></tr>
+<tr class="memdesc:a5dd4c72202e2b3d9e43bf402528415a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nulls all elements in _listeners equal to listener.  <a href="classEventDispatcher.html#a5dd4c72202e2b3d9e43bf402528415a5">More...</a><br /></td></tr>
 <tr class="separator:a5dd4c72202e2b3d9e43bf402528415a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74b53d85f9a845e717c45c721be48014"><td class="memItemLeft" align="right" valign="top"><a id="a74b53d85f9a845e717c45c721be48014" name="a74b53d85f9a845e717c45c721be48014"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dispatch</b> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
-<tr class="memdesc:a74b53d85f9a845e717c45c721be48014"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatch an event to all registered (non-null) listeners. <br /></td></tr>
+<tr class="memitem:a74b53d85f9a845e717c45c721be48014"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventDispatcher.html#a74b53d85f9a845e717c45c721be48014">dispatch</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
+<tr class="memdesc:a74b53d85f9a845e717c45c721be48014"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatch an event to all registered (non-null) listeners.  <a href="classEventDispatcher.html#a74b53d85f9a845e717c45c721be48014">More...</a><br /></td></tr>
 <tr class="separator:a74b53d85f9a845e717c45c721be48014"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ace9c6478fb5b5b0d86d215a37925cdba"><td class="memItemLeft" align="right" valign="top"><a id="ace9c6478fb5b5b0d86d215a37925cdba" name="ace9c6478fb5b5b0d86d215a37925cdba"></a>
-static <a class="el" href="classEventDispatcher.html">EventDispatcher</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
+<tr class="memitem:ace9c6478fb5b5b0d86d215a37925cdba"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classEventDispatcher.html">EventDispatcher</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventDispatcher.html#ace9c6478fb5b5b0d86d215a37925cdba">getInstance</a> ()</td></tr>
 <tr class="separator:ace9c6478fb5b5b0d86d215a37925cdba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:aec174a9e25796e5727e59f5452817cda"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventDispatcher.html#aec174a9e25796e5727e59f5452817cda">EventDispatcher</a> ()</td></tr>
+<tr class="separator:aec174a9e25796e5727e59f5452817cda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a4c155de9622d59584fd30fb9eb99c6e5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEventListener.html">EventListener</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventDispatcher.html#a4c155de9622d59584fd30fb9eb99c6e5">_listeners</a> [<a class="el" href="cs__EventDispatcher_8h.html#a71dfcf5f1bf27618d48e40888a633b1a">MAX_EVENT_LISTENERS</a>] = {}</td></tr>
+<tr class="memdesc:a4c155de9622d59584fd30fb9eb99c6e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array of listeners.  <a href="classEventDispatcher.html#a4c155de9622d59584fd30fb9eb99c6e5">More...</a><br /></td></tr>
+<tr class="separator:a4c155de9622d59584fd30fb9eb99c6e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c5f2bc3bd3642986d735d3eef4231e2"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventDispatcher.html#a3c5f2bc3bd3642986d735d3eef4231e2">_listenerCount</a></td></tr>
+<tr class="memdesc:a3c5f2bc3bd3642986d735d3eef4231e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count of added listeners.  <a href="classEventDispatcher.html#a3c5f2bc3bd3642986d735d3eef4231e2">More...</a><br /></td></tr>
+<tr class="separator:a3c5f2bc3bd3642986d735d3eef4231e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Event dispatcher. </p>
-</div><hr/>The documentation for this class was generated from the following file:<ul>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="aec174a9e25796e5727e59f5452817cda" name="aec174a9e25796e5727e59f5452817cda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec174a9e25796e5727e59f5452817cda">&#9670;&#160;</a></span>EventDispatcher() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEventDispatcher.html">EventDispatcher::EventDispatcher</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1f168397d7e401a181bfc47f7be2801b" name="a1f168397d7e401a181bfc47f7be2801b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f168397d7e401a181bfc47f7be2801b">&#9670;&#160;</a></span>EventDispatcher() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEventDispatcher.html">EventDispatcher::EventDispatcher</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEventDispatcher.html">EventDispatcher</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa9b87270250c49f31d4c9d0b092780a5" name="aa9b87270250c49f31d4c9d0b092780a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9b87270250c49f31d4c9d0b092780a5">&#9670;&#160;</a></span>addListener()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool EventDispatcher::addListener </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEventListener.html">EventListener</a> *&#160;</td>
+          <td class="paramname"><em>listener</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add a listener. </p>
+
+</div>
+</div>
+<a id="a74b53d85f9a845e717c45c721be48014" name="a74b53d85f9a845e717c45c721be48014"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74b53d85f9a845e717c45c721be48014">&#9670;&#160;</a></span>dispatch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventDispatcher::dispatch </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classevent__t.html">event_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dispatch an event to all registered (non-null) listeners. </p>
+
+</div>
+</div>
+<a id="ace9c6478fb5b5b0d86d215a37925cdba" name="ace9c6478fb5b5b0d86d215a37925cdba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace9c6478fb5b5b0d86d215a37925cdba">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classEventDispatcher.html">EventDispatcher</a> &amp; EventDispatcher::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad7f7831c618297be60c0475cb6f68aad" name="ad7f7831c618297be60c0475cb6f68aad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7f7831c618297be60c0475cb6f68aad">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventDispatcher::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEventDispatcher.html">EventDispatcher</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5dd4c72202e2b3d9e43bf402528415a5" name="a5dd4c72202e2b3d9e43bf402528415a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5dd4c72202e2b3d9e43bf402528415a5">&#9670;&#160;</a></span>removeListener()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventDispatcher::removeListener </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEventListener.html">EventListener</a> *&#160;</td>
+          <td class="paramname"><em>listener</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Nulls all elements in _listeners equal to listener. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a3c5f2bc3bd3642986d735d3eef4231e2" name="a3c5f2bc3bd3642986d735d3eef4231e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c5f2bc3bd3642986d735d3eef4231e2">&#9670;&#160;</a></span>_listenerCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t EventDispatcher::_listenerCount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Count of added listeners. </p>
+
+</div>
+</div>
+<a id="a4c155de9622d59584fd30fb9eb99c6e5" name="a4c155de9622d59584fd30fb9eb99c6e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c155de9622d59584fd30fb9eb99c6e5">&#9670;&#160;</a></span>_listeners</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEventListener.html">EventListener</a>* EventDispatcher::_listeners[<a class="el" href="cs__EventDispatcher_8h.html#a71dfcf5f1bf27618d48e40888a633b1a">MAX_EVENT_LISTENERS</a>] = {}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Array of listeners. </p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>source/include/events/<a class="el" href="cs__EventDispatcher_8h_source.html">cs_EventDispatcher.h</a></li>
 </ul>
 </div><!-- contents -->

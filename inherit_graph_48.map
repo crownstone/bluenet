@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structcharacteristic__config__t.html" title=" " alt="" coords="5,5,175,31"/>
+<area shape="rect" id="node1" href="$classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="5,45,125,70"/>
+<area shape="rect" id="node2" href="$classControlPacketAccessor.html" title=" " alt="" coords="173,5,344,45"/>
+<area shape="rect" id="node3" href="$classResultPacketAccessor.html" title=" " alt="" coords="177,69,341,109"/>
 </map>

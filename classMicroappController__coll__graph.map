@@ -1,6 +1,15 @@
 <map id="MicroappController" name="MicroappController">
-<area shape="rect" id="node1" title="The class MicroappController has functionality to store a second app (and perhaps in the future even ..." alt="" coords="5,256,152,281"/>
-<area shape="rect" id="node2" href="$structmicroapp__data__t.html" title="Keeps up data for a microapp." alt="" coords="13,168,144,193"/>
-<area shape="rect" id="node3" href="$classService.html" title="Base class for a BLE service." alt="" coords="43,80,114,105"/>
-<area shape="rect" id="node4" href="$classBaseClass.html" title=" " alt="" coords="15,5,142,31"/>
+<area shape="rect" id="node1" title="The class MicroappController has functionality to store a second app (and perhaps in the future even ..." alt="" coords="1592,51,1739,76"/>
+<area shape="rect" id="node2" href="$structmicroapp__soft__interrupt__registration__t.html" title="Struct for keeping track of registered interrupts from the microapp." alt="" coords="1187,15,1365,55"/>
+<area shape="rect" id="node3" href="$structmicroapp__data__t.html" title="Keeps up data for a microapp." alt="" coords="1211,80,1341,105"/>
+<area shape="rect" id="node4" href="$classService.html" title="Base class for a BLE service." alt="" coords="1016,80,1087,105"/>
+<area shape="rect" id="node5" href="$classBaseClass.html" title=" " alt="" coords="689,5,815,31"/>
+<area shape="rect" id="node6" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,55,781,80"/>
+<area shape="rect" id="node7" href="$classBaseClass.html" title=" " alt="" coords="365,15,491,40"/>
+<area shape="rect" id="node8" href="$classfixed__tuple.html" title=" " alt="" coords="327,65,529,105"/>
+<area shape="rect" id="node9" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="184,72,277,97"/>
+<area shape="rect" id="node10" title=" " alt="" coords="5,72,135,97"/>
+<area shape="rect" id="node11" href="$classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,104,780,129"/>
+<area shape="rect" id="node12" href="$classtuple.html" title=" " alt="" coords="643,153,861,179"/>
+<area shape="rect" id="node13" title=" " alt="" coords="330,146,526,186"/>
 </map>

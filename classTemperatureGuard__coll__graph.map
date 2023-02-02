@@ -1,0 +1,4 @@
+<map id="TemperatureGuard" name="TemperatureGuard">
+<area shape="rect" id="node1" title="Check if the temperature exceeds a certain threshold." alt="" coords="5,93,148,119"/>
+<area shape="rect" id="node2" href="$classCOMP.html" title="Class that enables you to get events when a the voltage on an AIN pin goes over or below a given thre..." alt="" coords="46,5,107,31"/>
+</map>

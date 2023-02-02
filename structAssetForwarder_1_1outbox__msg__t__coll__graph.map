@@ -1,0 +1,9 @@
+<map id="AssetForwarder::outbox_msg_t" name="AssetForwarder::outbox_msg_t">
+<area shape="rect" id="node1" title=" " alt="" coords="571,68,747,108"/>
+<area shape="rect" id="node2" href="$structasset__record__t.html" title=" " alt="" coords="302,75,419,101"/>
+<area shape="rect" id="node3" href="$structasset__id__t.html" title=" " alt="" coords="35,42,123,67"/>
+<area shape="rect" id="node5" href="$structcs__mesh__model__msg__asset__report__id__t.html" title=" " alt="" coords="259,5,463,45"/>
+<area shape="rect" id="node4" href="$structrssi__and__channel__t.html" title=" " alt="" coords="5,110,152,135"/>
+<area shape="rect" id="node6" href="$structcs__mesh__model__msg__asset__report__mac__t.html" title=" " alt="" coords="259,136,463,176"/>
+<area shape="rect" id="node7" href="$structmac__address__t.html" title="MAC address struct, with some useful functions." alt="" coords="19,189,139,214"/>
+</map>

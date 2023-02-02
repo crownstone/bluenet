@@ -99,10 +99,15 @@ $(document).ready(function(){initNavTree('classServiceData.html',''); initResiza
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classServiceData-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">ServiceData Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__ServiceData_8h_source.html">cs_ServiceData.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ServiceData:</div>
 <div class="dyncontent">
@@ -117,13 +122,33 @@ Collaboration diagram for ServiceData:</div>
 <div class="dyncontent">
 <div class="center"><img src="classServiceData__coll__graph.png" border="0" usemap="#aServiceData_coll__map" alt="Collaboration graph"/></div>
 <map name="aServiceData_coll__map" id="aServiceData_coll__map">
-<area shape="rect" title=" " alt="" coords="10,79,111,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" title=" " alt="" coords="1877,320,1979,345"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="1609,5,1719,31"/>
+<area shape="rect" href="unionservice__data__t.html" title="Service data." alt="" coords="937,345,1055,371"/>
+<area shape="rect" href="structservice__data__encrypted__t.html" title="This data is encrypted." alt="" coords="604,295,793,320"/>
+<area shape="rect" href="structstate__external__stone__t.html" title="Struct to communicate received state of other stones." alt="" coords="911,295,1081,320"/>
+<area shape="rect" href="structservice__data__encrypted__state__t.html" title="State of this crownstone." alt="" coords="308,362,485,402"/>
+<area shape="rect" href="unionservice__data__state__flags__t.html" title=" " alt="" coords="21,234,166,274"/>
+<area shape="rect" href="structservice__data__encrypted__error__t.html" title="In case the crownstone has errors, this will be advertised next to the state." alt="" coords="308,106,485,146"/>
+<area shape="rect" href="structservice__data__encrypted__ext__state__t.html" title="State of another crownstone." alt="" coords="308,170,485,210"/>
+<area shape="rect" href="structservice__data__encrypted__ext__error__t.html" title="Errors of another crownstone." alt="" coords="308,234,485,274"/>
+<area shape="rect" href="structservice__data__encrypted__alternative__state__t.html" title="State of this crownstone." alt="" coords="308,298,485,338"/>
+<area shape="rect" href="structservice__data__setup__state__t.html" title=" " alt="" coords="323,426,471,466"/>
+<area shape="rect" href="unionservice__data__state__extra__flags__t.html" title=" " alt="" coords="21,607,166,647"/>
+<area shape="rect" href="structservice__data__hub__state__t.html" title=" " alt="" coords="303,555,491,580"/>
+<area shape="rect" href="structservice__data__setup__t.html" title="Setup data." alt="" coords="619,385,779,411"/>
+<area shape="rect" href="unionservice__data__hub__state__flags__t.html" title=" " alt="" coords="5,543,181,583"/>
+<area shape="rect" href="structservice__data__encrypted__microapp__t.html" title="Microapp data that will be encrypted." alt="" coords="308,490,485,530"/>
+<area shape="rect" href="unionservice__data__microapp__flags__t.html" title=" " alt="" coords="7,479,180,519"/>
+<area shape="rect" href="classExternalStates.html" title="Class that keeps up states of other stones." alt="" coords="1605,295,1723,320"/>
+<area shape="rect" href="structcs__external__state__item__t.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: May 22,..." alt="" coords="1281,295,1468,320"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a9b86d2d5114aff479ab4fd08063fc453"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a9b86d2d5114aff479ab4fd08063fc453">ServiceData</a> ()</td></tr>
+<tr class="separator:a9b86d2d5114aff479ab4fd08063fc453"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a97da8ef01ca957f4e6dec57f48dbbe53"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a97da8ef01ca957f4e6dec57f48dbbe53">init</a> (uint8_t deviceType)</td></tr>
 <tr class="memdesc:a97da8ef01ca957f4e6dec57f48dbbe53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the service data, make sure you set important fields first.  <a href="classServiceData.html#a97da8ef01ca957f4e6dec57f48dbbe53">More...</a><br /></td></tr>
 <tr class="separator:a97da8ef01ca957f4e6dec57f48dbbe53"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,7 +161,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1c328300de86230e45f1d9eb02a71ae9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a1c328300de86230e45f1d9eb02a71ae9">updateAccumulatedEnergy</a> (int32_t energy)</td></tr>
 <tr class="memdesc:a1c328300de86230e45f1d9eb02a71ae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the energy used field of the service data.  <a href="classServiceData.html#a1c328300de86230e45f1d9eb02a71ae9">More...</a><br /></td></tr>
 <tr class="separator:a1c328300de86230e45f1d9eb02a71ae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a436c4f42c201b6266f15d3c12b741be1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a436c4f42c201b6266f15d3c12b741be1">updateCrownstoneId</a> (stone_id_t crownstoneId)</td></tr>
+<tr class="memitem:a436c4f42c201b6266f15d3c12b741be1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a436c4f42c201b6266f15d3c12b741be1">updateCrownstoneId</a> (<a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> crownstoneId)</td></tr>
 <tr class="memdesc:a436c4f42c201b6266f15d3c12b741be1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the ID field of the service data.  <a href="classServiceData.html#a436c4f42c201b6266f15d3c12b741be1">More...</a><br /></td></tr>
 <tr class="separator:a436c4f42c201b6266f15d3c12b741be1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ad423234dc85aaeae6612fb8b64b0c8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a9ad423234dc85aaeae6612fb8b64b0c8">updateSwitchState</a> (uint8_t switchState)</td></tr>
@@ -148,16 +173,630 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4a75119d3fe3db8289f567fe5a7b9e0e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a4a75119d3fe3db8289f567fe5a7b9e0e">updateServiceData</a> (bool initial)</td></tr>
 <tr class="memdesc:a4a75119d3fe3db8289f567fe5a7b9e0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the service data.  <a href="classServiceData.html#a4a75119d3fe3db8289f567fe5a7b9e0e">More...</a><br /></td></tr>
 <tr class="separator:a4a75119d3fe3db8289f567fe5a7b9e0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d3e96d8a6b0274c0ce6c5d0231b3906"><td class="memItemLeft" align="right" valign="top"><a id="a3d3e96d8a6b0274c0ce6c5d0231b3906" name="a3d3e96d8a6b0274c0ce6c5d0231b3906"></a>
-uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><b>getArray</b> ()</td></tr>
-<tr class="memdesc:a3d3e96d8a6b0274c0ce6c5d0231b3906"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the service data as array. <br /></td></tr>
+<tr class="memitem:a3d3e96d8a6b0274c0ce6c5d0231b3906"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a3d3e96d8a6b0274c0ce6c5d0231b3906">getArray</a> ()</td></tr>
+<tr class="memdesc:a3d3e96d8a6b0274c0ce6c5d0231b3906"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the service data as array.  <a href="classServiceData.html#a3d3e96d8a6b0274c0ce6c5d0231b3906">More...</a><br /></td></tr>
 <tr class="separator:a3d3e96d8a6b0274c0ce6c5d0231b3906"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3af1bac68e252dafc6fb59b8e424f913"><td class="memItemLeft" align="right" valign="top"><a id="a3af1bac68e252dafc6fb59b8e424f913" name="a3af1bac68e252dafc6fb59b8e424f913"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getArraySize</b> ()</td></tr>
-<tr class="memdesc:a3af1bac68e252dafc6fb59b8e424f913"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the size of the service data. <br /></td></tr>
+<tr class="memitem:a3af1bac68e252dafc6fb59b8e424f913"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a3af1bac68e252dafc6fb59b8e424f913">getArraySize</a> ()</td></tr>
+<tr class="memdesc:a3af1bac68e252dafc6fb59b8e424f913"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the size of the service data.  <a href="classServiceData.html#a3af1bac68e252dafc6fb59b8e424f913">More...</a><br /></td></tr>
 <tr class="separator:a3af1bac68e252dafc6fb59b8e424f913"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a1fdd76bf2c9861969e8734100b41c042"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a1fdd76bf2c9861969e8734100b41c042">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a1c85364a8942d4c57b7d103278cd94e0">STATE_ERRORS</a>) _stateErrors</td></tr>
+<tr class="memdesc:a1fdd76bf2c9861969e8734100b41c042"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache the state errors.  <a href="classServiceData.html#a1fdd76bf2c9861969e8734100b41c042">More...</a><br /></td></tr>
+<tr class="separator:a1fdd76bf2c9861969e8734100b41c042"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b74dcea16f487e10c185afd3057450f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a2b74dcea16f487e10c185afd3057450f">fillServiceData</a> (uint32_t timestamp)</td></tr>
+<tr class="memdesc:a2b74dcea16f487e10c185afd3057450f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects a type of data and puts this in the service data.  <a href="classServiceData.html#a2b74dcea16f487e10c185afd3057450f">More...</a><br /></td></tr>
+<tr class="separator:a2b74dcea16f487e10c185afd3057450f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97882657e9ba7057e2119ec71209026b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a97882657e9ba7057e2119ec71209026b">encryptServiceData</a> ()</td></tr>
+<tr class="memdesc:a97882657e9ba7057e2119ec71209026b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt the service data.  <a href="classServiceData.html#a97882657e9ba7057e2119ec71209026b">More...</a><br /></td></tr>
+<tr class="separator:a97882657e9ba7057e2119ec71209026b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a217c8388ce57c99936a85bad45cd4cc6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a217c8388ce57c99936a85bad45cd4cc6">fillWithSetupState</a> (uint32_t timestamp)</td></tr>
+<tr class="memdesc:a217c8388ce57c99936a85bad45cd4cc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the state of this <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in setup mode in the service data.  <a href="classServiceData.html#a217c8388ce57c99936a85bad45cd4cc6">More...</a><br /></td></tr>
+<tr class="separator:a217c8388ce57c99936a85bad45cd4cc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5059851235abf920f917e564a4a9cd6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#ad5059851235abf920f917e564a4a9cd6">fillWithState</a> (uint32_t timestamp)</td></tr>
+<tr class="memdesc:ad5059851235abf920f917e564a4a9cd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the state of this <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in the service data.  <a href="classServiceData.html#ad5059851235abf920f917e564a4a9cd6">More...</a><br /></td></tr>
+<tr class="separator:ad5059851235abf920f917e564a4a9cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75d8b29ea4d316aff4b69c5853eb5306"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a75d8b29ea4d316aff4b69c5853eb5306">fillWithError</a> (uint32_t timestamp)</td></tr>
+<tr class="memdesc:a75d8b29ea4d316aff4b69c5853eb5306"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the error state of this <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in the service data.  <a href="classServiceData.html#a75d8b29ea4d316aff4b69c5853eb5306">More...</a><br /></td></tr>
+<tr class="separator:a75d8b29ea4d316aff4b69c5853eb5306"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9b3f9b2695bdec19de94d0ab31ff727"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#ad9b3f9b2695bdec19de94d0ab31ff727">fillWithExternalState</a> ()</td></tr>
+<tr class="memdesc:ad9b3f9b2695bdec19de94d0ab31ff727"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the state or error state of another <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in the service data.  <a href="classServiceData.html#ad9b3f9b2695bdec19de94d0ab31ff727">More...</a><br /></td></tr>
+<tr class="separator:ad9b3f9b2695bdec19de94d0ab31ff727"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2564a9fe03511e27cfddfa1072b53527"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a2564a9fe03511e27cfddfa1072b53527">fillWithAlternativeState</a> (uint32_t timestamp)</td></tr>
+<tr class="memdesc:a2564a9fe03511e27cfddfa1072b53527"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the alternative state of this <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in the service data.  <a href="classServiceData.html#a2564a9fe03511e27cfddfa1072b53527">More...</a><br /></td></tr>
+<tr class="separator:a2564a9fe03511e27cfddfa1072b53527"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f50d4ce4e59124c4c1f1aac32a4210d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a8f50d4ce4e59124c4c1f1aac32a4210d">fillWithHubState</a> (uint32_t timestamp)</td></tr>
+<tr class="memdesc:a8f50d4ce4e59124c4c1f1aac32a4210d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put the hub state in the service data.  <a href="classServiceData.html#a8f50d4ce4e59124c4c1f1aac32a4210d">More...</a><br /></td></tr>
+<tr class="separator:a8f50d4ce4e59124c4c1f1aac32a4210d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e8a49370df31701e876b368658ff8b0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a5e8a49370df31701e876b368658ff8b0">fillWithMicroapp</a> (uint32_t timestamp)</td></tr>
+<tr class="memdesc:a5e8a49370df31701e876b368658ff8b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Put microapp data in the service data.  <a href="classServiceData.html#a5e8a49370df31701e876b368658ff8b0">More...</a><br /></td></tr>
+<tr class="separator:a5e8a49370df31701e876b368658ff8b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a697e01fbbd535fb5f5d018414f0f6e89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a697e01fbbd535fb5f5d018414f0f6e89">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
+<tr class="memdesc:a697e01fbbd535fb5f5d018414f0f6e89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when there are events to handle.  <a href="classServiceData.html#a697e01fbbd535fb5f5d018414f0f6e89">More...</a><br /></td></tr>
+<tr class="separator:a697e01fbbd535fb5f5d018414f0f6e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51f7c60cd633b713b0a33523e50e36cd"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a51f7c60cd633b713b0a33523e50e36cd">compressPowerUsageMilliWatt</a> (int32_t powerUsageMW)</td></tr>
+<tr class="memdesc:a51f7c60cd633b713b0a33523e50e36cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compress power usage, according to service data protocol v3.  <a href="classServiceData.html#a51f7c60cd633b713b0a33523e50e36cd">More...</a><br /></td></tr>
+<tr class="separator:a51f7c60cd633b713b0a33523e50e36cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac53e46f9a95974dc96e72552c3528506"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#ac53e46f9a95974dc96e72552c3528506">decompressPowerUsage</a> (int16_t compressedPowerUsage)</td></tr>
+<tr class="memdesc:ac53e46f9a95974dc96e72552c3528506"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decompress power usage, according to service data protocol v3.  <a href="classServiceData.html#ac53e46f9a95974dc96e72552c3528506">More...</a><br /></td></tr>
+<tr class="separator:ac53e46f9a95974dc96e72552c3528506"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74454ed15fcefb23f0457463333195cc"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a74454ed15fcefb23f0457463333195cc">timestampToPartialTimestamp</a> (uint32_t timestamp)</td></tr>
+<tr class="memdesc:a74454ed15fcefb23f0457463333195cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert timestamp to a partial timestamp, according to service data protocol v3.  <a href="classServiceData.html#a74454ed15fcefb23f0457463333195cc">More...</a><br /></td></tr>
+<tr class="separator:a74454ed15fcefb23f0457463333195cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1379430c2bb8dad0bf967ea93e5be199"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a1379430c2bb8dad0bf967ea93e5be199">getPartialTimestampOrCounter</a> (uint32_t timestamp, uint32_t counter)</td></tr>
+<tr class="memdesc:a1379430c2bb8dad0bf967ea93e5be199"><td class="mdescLeft">&#160;</td><td class="mdescRight">When a timestamp is available, return partial timestamp, else returns a counter.  <a href="classServiceData.html#a1379430c2bb8dad0bf967ea93e5be199">More...</a><br /></td></tr>
+<tr class="separator:a1379430c2bb8dad0bf967ea93e5be199"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a290966dfbd01683258cf6351cff61b04"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a290966dfbd01683258cf6351cff61b04">getPartialBehaviourHash</a> (uint32_t behaviourHash)</td></tr>
+<tr class="memdesc:a290966dfbd01683258cf6351cff61b04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a part of the behaviour hash.  <a href="classServiceData.html#a290966dfbd01683258cf6351cff61b04">More...</a><br /></td></tr>
+<tr class="separator:a290966dfbd01683258cf6351cff61b04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23303cb7fe02d70709afba83afb39024"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a23303cb7fe02d70709afba83afb39024">sendMeshState</a> (bool event)</td></tr>
+<tr class="memdesc:a23303cb7fe02d70709afba83afb39024"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send the state over the mesh.  <a href="classServiceData.html#a23303cb7fe02d70709afba83afb39024">More...</a><br /></td></tr>
+<tr class="separator:a23303cb7fe02d70709afba83afb39024"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
+Static Private Member Functions</h2></td></tr>
+<tr class="memitem:ae1a76a334018919efdd1cd9ab15b515d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#ae1a76a334018919efdd1cd9ab15b515d">staticTimeout</a> (<a class="el" href="classServiceData.html">ServiceData</a> *ptr)</td></tr>
+<tr class="separator:ae1a76a334018919efdd1cd9ab15b515d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a95cc8d439ab89e52a052e2cdbece6aba"><td class="memItemLeft" align="right" valign="top">app_timer_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a95cc8d439ab89e52a052e2cdbece6aba">_updateTimerData</a></td></tr>
+<tr class="memdesc:a95cc8d439ab89e52a052e2cdbece6aba"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classTimer.html" title="Timer on top of the timer peripheral.">Timer</a> used to periodically update the advertisement.  <a href="classServiceData.html#a95cc8d439ab89e52a052e2cdbece6aba">More...</a><br /></td></tr>
+<tr class="separator:a95cc8d439ab89e52a052e2cdbece6aba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a3d438f12615884b9c0f402c8ecd0f6"><td class="memItemLeft" align="right" valign="top">app_timer_id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a7a3d438f12615884b9c0f402c8ecd0f6">_updateTimerId</a> = NULL</td></tr>
+<tr class="separator:a7a3d438f12615884b9c0f402c8ecd0f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1e316d2a6e1ae1420d2571fd6d0e132"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionservice__data__t.html">service_data_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#ad1e316d2a6e1ae1420d2571fd6d0e132">_serviceData</a></td></tr>
+<tr class="memdesc:ad1e316d2a6e1ae1420d2571fd6d0e132"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the last (current) advertised service data.  <a href="classServiceData.html#ad1e316d2a6e1ae1420d2571fd6d0e132">More...</a><br /></td></tr>
+<tr class="separator:ad1e316d2a6e1ae1420d2571fd6d0e132"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af222d0fa30ee2a39b2df82ed3fb19106"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#af222d0fa30ee2a39b2df82ed3fb19106">_crownstoneId</a> = 0</td></tr>
+<tr class="memdesc:af222d0fa30ee2a39b2df82ed3fb19106"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache own ID.  <a href="classServiceData.html#af222d0fa30ee2a39b2df82ed3fb19106">More...</a><br /></td></tr>
+<tr class="separator:af222d0fa30ee2a39b2df82ed3fb19106"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1848ddb7402eeb51ad2b4d7d6c1d52ea"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a1848ddb7402eeb51ad2b4d7d6c1d52ea">_switchState</a> = 0</td></tr>
+<tr class="memdesc:a1848ddb7402eeb51ad2b4d7d6c1d52ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache switch state.  <a href="classServiceData.html#a1848ddb7402eeb51ad2b4d7d6c1d52ea">More...</a><br /></td></tr>
+<tr class="separator:a1848ddb7402eeb51ad2b4d7d6c1d52ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af01f9122ce1c93ebb8e7ed5ebacc5c26"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionservice__data__state__flags__t.html">service_data_state_flags_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#af01f9122ce1c93ebb8e7ed5ebacc5c26">_flags</a></td></tr>
+<tr class="memdesc:af01f9122ce1c93ebb8e7ed5ebacc5c26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache flags.  <a href="classServiceData.html#af01f9122ce1c93ebb8e7ed5ebacc5c26">More...</a><br /></td></tr>
+<tr class="separator:af01f9122ce1c93ebb8e7ed5ebacc5c26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57ae8a4700828cf11cb41848bc12236b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionservice__data__state__extra__flags__t.html">service_data_state_extra_flags_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a57ae8a4700828cf11cb41848bc12236b">_extraFlags</a></td></tr>
+<tr class="memdesc:a57ae8a4700828cf11cb41848bc12236b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache extra flags.  <a href="classServiceData.html#a57ae8a4700828cf11cb41848bc12236b">More...</a><br /></td></tr>
+<tr class="separator:a57ae8a4700828cf11cb41848bc12236b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36d308ea0d7fb93499b0538a011a3bf2"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a36d308ea0d7fb93499b0538a011a3bf2">_temperature</a> = 0</td></tr>
+<tr class="memdesc:a36d308ea0d7fb93499b0538a011a3bf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache the temperature.  <a href="classServiceData.html#a36d308ea0d7fb93499b0538a011a3bf2">More...</a><br /></td></tr>
+<tr class="separator:a36d308ea0d7fb93499b0538a011a3bf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a568b7f640e14e15ddab69032acdb061b"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a568b7f640e14e15ddab69032acdb061b">_powerFactor</a> = 0</td></tr>
+<tr class="memdesc:a568b7f640e14e15ddab69032acdb061b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache the power factor.  <a href="classServiceData.html#a568b7f640e14e15ddab69032acdb061b">More...</a><br /></td></tr>
+<tr class="separator:a568b7f640e14e15ddab69032acdb061b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c0524575e3e93bfa290332ea2993c1e"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a1c0524575e3e93bfa290332ea2993c1e">_powerUsageReal</a> = 0</td></tr>
+<tr class="memdesc:a1c0524575e3e93bfa290332ea2993c1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache the power usage in mW.  <a href="classServiceData.html#a1c0524575e3e93bfa290332ea2993c1e">More...</a><br /></td></tr>
+<tr class="separator:a1c0524575e3e93bfa290332ea2993c1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21efed6849fa5e6276d2de769cf8ec2a"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a21efed6849fa5e6276d2de769cf8ec2a">_energyUsed</a> = 0</td></tr>
+<tr class="memdesc:a21efed6849fa5e6276d2de769cf8ec2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache the energy used, in units of 64 J.  <a href="classServiceData.html#a21efed6849fa5e6276d2de769cf8ec2a">More...</a><br /></td></tr>
+<tr class="separator:a21efed6849fa5e6276d2de769cf8ec2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71ba33b059e4760ced5d8f3194d4119b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a71ba33b059e4760ced5d8f3194d4119b">_firstErrorTimestamp</a> = 0</td></tr>
+<tr class="memdesc:a71ba33b059e4760ced5d8f3194d4119b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache timestamp of first error.  <a href="classServiceData.html#a71ba33b059e4760ced5d8f3194d4119b">More...</a><br /></td></tr>
+<tr class="separator:a71ba33b059e4760ced5d8f3194d4119b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbf2e429e71f04b56c094206dcff0650"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#abbf2e429e71f04b56c094206dcff0650">_sendStateCountdown</a> = <a class="el" href="cs__Config_8h.html#a6bfc93ab55e58fbc160d240658ba0326">MESH_SEND_STATE_INTERVAL_MS</a> / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a></td></tr>
+<tr class="separator:abbf2e429e71f04b56c094206dcff0650"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab49f859fdb33859ed323cd3056f49c60"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Types_8h.html#a25bbfb7442459b8d546e1f1551835479">OperationMode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#ab49f859fdb33859ed323cd3056f49c60">_operationMode</a> = OperationMode::OPERATION_MODE_UNINITIALIZED</td></tr>
+<tr class="memdesc:ab49f859fdb33859ed323cd3056f49c60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache the operation mode.  <a href="classServiceData.html#ab49f859fdb33859ed323cd3056f49c60">More...</a><br /></td></tr>
+<tr class="separator:ab49f859fdb33859ed323cd3056f49c60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d26d5ce11c6ae405c39f8b0fac172a0"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a7d26d5ce11c6ae405c39f8b0fac172a0">_updateCount</a> = 0</td></tr>
+<tr class="memdesc:a7d26d5ce11c6ae405c39f8b0fac172a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Counter that keeps up the number of times that the advertisement has been updated.  <a href="classServiceData.html#a7d26d5ce11c6ae405c39f8b0fac172a0">More...</a><br /></td></tr>
+<tr class="separator:a7d26d5ce11c6ae405c39f8b0fac172a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a545a8207d3fceae2e915cf1e3975df11"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classExternalStates.html">ExternalStates</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a545a8207d3fceae2e915cf1e3975df11">_externalStates</a></td></tr>
+<tr class="separator:a545a8207d3fceae2e915cf1e3975df11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a283a51873be1732939bc277e81013ba3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a283a51873be1732939bc277e81013ba3">_microappServiceDataSet</a> = false</td></tr>
+<tr class="memdesc:a283a51873be1732939bc277e81013ba3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the microapp wants to advertise service data.  <a href="classServiceData.html#a283a51873be1732939bc277e81013ba3">More...</a><br /></td></tr>
+<tr class="separator:a283a51873be1732939bc277e81013ba3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a135d30d44ddac2832a0e72cc7421d0d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structservice__data__encrypted__microapp__t.html">service_data_encrypted_microapp_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classServiceData.html#a135d30d44ddac2832a0e72cc7421d0d3">_microappServiceData</a></td></tr>
+<tr class="memdesc:a135d30d44ddac2832a0e72cc7421d0d3"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classMicroapp.html" title="Class that enables the feature to run microapps on the firmware.">Microapp</a> data to be advertised in crownstone service data.  <a href="classServiceData.html#a135d30d44ddac2832a0e72cc7421d0d3">More...</a><br /></td></tr>
+<tr class="separator:a135d30d44ddac2832a0e72cc7421d0d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a9b86d2d5114aff479ab4fd08063fc453" name="a9b86d2d5114aff479ab4fd08063fc453"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b86d2d5114aff479ab4fd08063fc453">&#9670;&#160;</a></span>ServiceData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classServiceData.html">ServiceData::ServiceData</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a51f7c60cd633b713b0a33523e50e36cd" name="a51f7c60cd633b713b0a33523e50e36cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51f7c60cd633b713b0a33523e50e36cd">&#9670;&#160;</a></span>compressPowerUsageMilliWatt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int16_t ServiceData::compressPowerUsageMilliWatt </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>powerUsageMW</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compress power usage, according to service data protocol v3. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">powerUsageMW</td><td>Power usage in milliWatt </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Compressed representation of the power usage. </dd></dl>
+
+</div>
+</div>
+<a id="ac53e46f9a95974dc96e72552c3528506" name="ac53e46f9a95974dc96e72552c3528506"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac53e46f9a95974dc96e72552c3528506">&#9670;&#160;</a></span>decompressPowerUsage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t ServiceData::decompressPowerUsage </td>
+          <td>(</td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>compressedPowerUsage</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Decompress power usage, according to service data protocol v3. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">powerUsageMW</td><td>Compressed representation of the power usage. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Power usage in milliWatt. </dd></dl>
+
+</div>
+</div>
+<a id="a97882657e9ba7057e2119ec71209026b" name="a97882657e9ba7057e2119ec71209026b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97882657e9ba7057e2119ec71209026b">&#9670;&#160;</a></span>encryptServiceData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ServiceData::encryptServiceData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Encrypt the service data. </p>
+
+</div>
+</div>
+<a id="a2b74dcea16f487e10c185afd3057450f" name="a2b74dcea16f487e10c185afd3057450f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b74dcea16f487e10c185afd3057450f">&#9670;&#160;</a></span>fillServiceData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ServiceData::fillServiceData </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Selects a type of data and puts this in the service data. </p>
+<dl class="section return"><dt>Returns</dt><dd>True when service data has to be encrypted. </dd></dl>
+
+</div>
+</div>
+<a id="a2564a9fe03511e27cfddfa1072b53527" name="a2564a9fe03511e27cfddfa1072b53527"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2564a9fe03511e27cfddfa1072b53527">&#9670;&#160;</a></span>fillWithAlternativeState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ServiceData::fillWithAlternativeState </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Put the alternative state of this <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in the service data. </p>
+
+</div>
+</div>
+<a id="a75d8b29ea4d316aff4b69c5853eb5306" name="a75d8b29ea4d316aff4b69c5853eb5306"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75d8b29ea4d316aff4b69c5853eb5306">&#9670;&#160;</a></span>fillWithError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ServiceData::fillWithError </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Put the error state of this <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in the service data. </p>
+
+</div>
+</div>
+<a id="ad9b3f9b2695bdec19de94d0ab31ff727" name="ad9b3f9b2695bdec19de94d0ab31ff727"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9b3f9b2695bdec19de94d0ab31ff727">&#9670;&#160;</a></span>fillWithExternalState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ServiceData::fillWithExternalState </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Put the state or error state of another <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in the service data. </p>
+<dl class="section return"><dt>Returns</dt><dd>True when <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> service data has been filled. </dd></dl>
+
+</div>
+</div>
+<a id="a8f50d4ce4e59124c4c1f1aac32a4210d" name="a8f50d4ce4e59124c4c1f1aac32a4210d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f50d4ce4e59124c4c1f1aac32a4210d">&#9670;&#160;</a></span>fillWithHubState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ServiceData::fillWithHubState </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Put the hub state in the service data. </p>
+
+</div>
+</div>
+<a id="a5e8a49370df31701e876b368658ff8b0" name="a5e8a49370df31701e876b368658ff8b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e8a49370df31701e876b368658ff8b0">&#9670;&#160;</a></span>fillWithMicroapp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ServiceData::fillWithMicroapp </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Put microapp data in the service data. </p>
+<dl class="section return"><dt>Returns</dt><dd>True when <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> service data has been filled. </dd></dl>
+
+</div>
+</div>
+<a id="a217c8388ce57c99936a85bad45cd4cc6" name="a217c8388ce57c99936a85bad45cd4cc6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a217c8388ce57c99936a85bad45cd4cc6">&#9670;&#160;</a></span>fillWithSetupState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ServiceData::fillWithSetupState </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Put the state of this <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in setup mode in the service data. </p>
+
+</div>
+</div>
+<a id="ad5059851235abf920f917e564a4a9cd6" name="ad5059851235abf920f917e564a4a9cd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5059851235abf920f917e564a4a9cd6">&#9670;&#160;</a></span>fillWithState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ServiceData::fillWithState </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Put the state of this <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> in the service data. </p>
+
+</div>
+</div>
+<a id="a3d3e96d8a6b0274c0ce6c5d0231b3906" name="a3d3e96d8a6b0274c0ce6c5d0231b3906"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d3e96d8a6b0274c0ce6c5d0231b3906">&#9670;&#160;</a></span>getArray()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t * ServiceData::getArray </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the service data as array. </p>
+
+</div>
+</div>
+<a id="a3af1bac68e252dafc6fb59b8e424f913" name="a3af1bac68e252dafc6fb59b8e424f913"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3af1bac68e252dafc6fb59b8e424f913">&#9670;&#160;</a></span>getArraySize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t ServiceData::getArraySize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the size of the service data. </p>
+
+</div>
+</div>
+<a id="a290966dfbd01683258cf6351cff61b04" name="a290966dfbd01683258cf6351cff61b04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a290966dfbd01683258cf6351cff61b04">&#9670;&#160;</a></span>getPartialBehaviourHash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t ServiceData::getPartialBehaviourHash </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>behaviourHash</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a part of the behaviour hash. </p>
+
+</div>
+</div>
+<a id="a1379430c2bb8dad0bf967ea93e5be199" name="a1379430c2bb8dad0bf967ea93e5be199"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1379430c2bb8dad0bf967ea93e5be199">&#9670;&#160;</a></span>getPartialTimestampOrCounter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t ServiceData::getPartialTimestampOrCounter </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>counter</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>When a timestamp is available, return partial timestamp, else returns a counter. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp</td><td>The timestamp. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">counter</td><td>The counter.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Counter, or the least significant part of the timestamp. </dd></dl>
+
+</div>
+</div>
+<a id="a697e01fbbd535fb5f5d018414f0f6e89" name="a697e01fbbd535fb5f5d018414f0f6e89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a697e01fbbd535fb5f5d018414f0f6e89">&#9670;&#160;</a></span>handleEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ServiceData::handleEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classevent__t.html">event_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Called when there are events to handle. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">evt</td><td>Event type, see cs_EventTypes.h. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">p_data</td><td>Pointer to the data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">length</td><td>Length of the data. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
 <a id="a97da8ef01ca957f4e6dec57f48dbbe53" name="a97da8ef01ca957f4e6dec57f48dbbe53"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a97da8ef01ca957f4e6dec57f48dbbe53">&#9670;&#160;</a></span>init()</h2>
 
@@ -177,7 +816,41 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getArraySize</b> 
 <p>Init the service data, make sure you set important fields first. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">deviceType</td><td>The device type, see <a class="el" href="cs__DeviceTypes_8h_source.html">cs_DeviceTypes.h</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deviceType</td><td>The device type, see <a class="el" href="cs__DeviceTypes_8h.html">cs_DeviceTypes.h</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a23303cb7fe02d70709afba83afb39024" name="a23303cb7fe02d70709afba83afb39024"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23303cb7fe02d70709afba83afb39024">&#9670;&#160;</a></span>sendMeshState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ServiceData::sendMeshState </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send the state over the mesh. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">event</td><td>True when sending state because of an event. </td></tr>
   </table>
   </dd>
 </dl>
@@ -203,10 +876,99 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getArraySize</b> 
 <p>Set the device type field of the service data. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">deviceType</td><td>The device type, see <a class="el" href="cs__DeviceTypes_8h_source.html">cs_DeviceTypes.h</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deviceType</td><td>The device type, see <a class="el" href="cs__DeviceTypes_8h.html">cs_DeviceTypes.h</a> </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ae1a76a334018919efdd1cd9ab15b515d" name="ae1a76a334018919efdd1cd9ab15b515d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1a76a334018919efdd1cd9ab15b515d">&#9670;&#160;</a></span>staticTimeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void ServiceData::staticTimeout </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classServiceData.html">ServiceData</a> *&#160;</td>
+          <td class="paramname"><em>ptr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a74454ed15fcefb23f0457463333195cc" name="a74454ed15fcefb23f0457463333195cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74454ed15fcefb23f0457463333195cc">&#9670;&#160;</a></span>timestampToPartialTimestamp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t ServiceData::timestampToPartialTimestamp </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>timestamp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Convert timestamp to a partial timestamp, according to service data protocol v3. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp</td><td>The timestamp. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The least significant part of the timestamp. </dd></dl>
+
+</div>
+</div>
+<a id="a1fdd76bf2c9861969e8734100b41c042" name="a1fdd76bf2c9861969e8734100b41c042"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fdd76bf2c9861969e8734100b41c042">&#9670;&#160;</a></span>TYPIFY()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ServiceData::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a1c85364a8942d4c57b7d103278cd94e0">STATE_ERRORS</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache the state errors. </p>
 
 </div>
 </div>
@@ -245,7 +1007,7 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getArraySize</b> 
         <tr>
           <td class="memname">void ServiceData::updateCrownstoneId </td>
           <td>(</td>
-          <td class="paramtype">stone_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
           <td class="paramname"><em>crownstoneId</em></td><td>)</td>
           <td></td>
         </tr>
@@ -364,6 +1126,434 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getArraySize</b> 
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="af222d0fa30ee2a39b2df82ed3fb19106" name="af222d0fa30ee2a39b2df82ed3fb19106"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af222d0fa30ee2a39b2df82ed3fb19106">&#9670;&#160;</a></span>_crownstoneId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> ServiceData::_crownstoneId = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache own ID. </p>
+
+</div>
+</div>
+<a id="a21efed6849fa5e6276d2de769cf8ec2a" name="a21efed6849fa5e6276d2de769cf8ec2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21efed6849fa5e6276d2de769cf8ec2a">&#9670;&#160;</a></span>_energyUsed</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t ServiceData::_energyUsed = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache the energy used, in units of 64 J. </p>
+
+</div>
+</div>
+<a id="a545a8207d3fceae2e915cf1e3975df11" name="a545a8207d3fceae2e915cf1e3975df11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a545a8207d3fceae2e915cf1e3975df11">&#9670;&#160;</a></span>_externalStates</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classExternalStates.html">ExternalStates</a> ServiceData::_externalStates</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a57ae8a4700828cf11cb41848bc12236b" name="a57ae8a4700828cf11cb41848bc12236b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57ae8a4700828cf11cb41848bc12236b">&#9670;&#160;</a></span>_extraFlags</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="unionservice__data__state__extra__flags__t.html">service_data_state_extra_flags_t</a> ServiceData::_extraFlags</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache extra flags. </p>
+
+</div>
+</div>
+<a id="a71ba33b059e4760ced5d8f3194d4119b" name="a71ba33b059e4760ced5d8f3194d4119b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71ba33b059e4760ced5d8f3194d4119b">&#9670;&#160;</a></span>_firstErrorTimestamp</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ServiceData::_firstErrorTimestamp = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache timestamp of first error. </p>
+
+</div>
+</div>
+<a id="af01f9122ce1c93ebb8e7ed5ebacc5c26" name="af01f9122ce1c93ebb8e7ed5ebacc5c26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af01f9122ce1c93ebb8e7ed5ebacc5c26">&#9670;&#160;</a></span>_flags</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="unionservice__data__state__flags__t.html">service_data_state_flags_t</a> ServiceData::_flags</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache flags. </p>
+
+</div>
+</div>
+<a id="a135d30d44ddac2832a0e72cc7421d0d3" name="a135d30d44ddac2832a0e72cc7421d0d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a135d30d44ddac2832a0e72cc7421d0d3">&#9670;&#160;</a></span>_microappServiceData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structservice__data__encrypted__microapp__t.html">service_data_encrypted_microapp_t</a> ServiceData::_microappServiceData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classMicroapp.html" title="Class that enables the feature to run microapps on the firmware.">Microapp</a> data to be advertised in crownstone service data. </p>
+
+</div>
+</div>
+<a id="a283a51873be1732939bc277e81013ba3" name="a283a51873be1732939bc277e81013ba3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a283a51873be1732939bc277e81013ba3">&#9670;&#160;</a></span>_microappServiceDataSet</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ServiceData::_microappServiceDataSet = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the microapp wants to advertise service data. </p>
+
+</div>
+</div>
+<a id="ab49f859fdb33859ed323cd3056f49c60" name="ab49f859fdb33859ed323cd3056f49c60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab49f859fdb33859ed323cd3056f49c60">&#9670;&#160;</a></span>_operationMode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Types_8h.html#a25bbfb7442459b8d546e1f1551835479">OperationMode</a> ServiceData::_operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache the operation mode. </p>
+
+</div>
+</div>
+<a id="a568b7f640e14e15ddab69032acdb061b" name="a568b7f640e14e15ddab69032acdb061b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a568b7f640e14e15ddab69032acdb061b">&#9670;&#160;</a></span>_powerFactor</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t ServiceData::_powerFactor = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache the power factor. </p>
+
+</div>
+</div>
+<a id="a1c0524575e3e93bfa290332ea2993c1e" name="a1c0524575e3e93bfa290332ea2993c1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c0524575e3e93bfa290332ea2993c1e">&#9670;&#160;</a></span>_powerUsageReal</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t ServiceData::_powerUsageReal = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache the power usage in mW. </p>
+
+</div>
+</div>
+<a id="abbf2e429e71f04b56c094206dcff0650" name="abbf2e429e71f04b56c094206dcff0650"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbf2e429e71f04b56c094206dcff0650">&#9670;&#160;</a></span>_sendStateCountdown</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ServiceData::_sendStateCountdown = <a class="el" href="cs__Config_8h.html#a6bfc93ab55e58fbc160d240658ba0326">MESH_SEND_STATE_INTERVAL_MS</a> / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad1e316d2a6e1ae1420d2571fd6d0e132" name="ad1e316d2a6e1ae1420d2571fd6d0e132"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1e316d2a6e1ae1420d2571fd6d0e132">&#9670;&#160;</a></span>_serviceData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="unionservice__data__t.html">service_data_t</a> ServiceData::_serviceData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stores the last (current) advertised service data. </p>
+<p >This data will be copied by the advertiser. </p>
+
+</div>
+</div>
+<a id="a1848ddb7402eeb51ad2b4d7d6c1d52ea" name="a1848ddb7402eeb51ad2b4d7d6c1d52ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1848ddb7402eeb51ad2b4d7d6c1d52ea">&#9670;&#160;</a></span>_switchState</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t ServiceData::_switchState = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache switch state. </p>
+
+</div>
+</div>
+<a id="a36d308ea0d7fb93499b0538a011a3bf2" name="a36d308ea0d7fb93499b0538a011a3bf2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36d308ea0d7fb93499b0538a011a3bf2">&#9670;&#160;</a></span>_temperature</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t ServiceData::_temperature = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache the temperature. </p>
+
+</div>
+</div>
+<a id="a7d26d5ce11c6ae405c39f8b0fac172a0" name="a7d26d5ce11c6ae405c39f8b0fac172a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d26d5ce11c6ae405c39f8b0fac172a0">&#9670;&#160;</a></span>_updateCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ServiceData::_updateCount = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Counter that keeps up the number of times that the advertisement has been updated. </p>
+
+</div>
+</div>
+<a id="a95cc8d439ab89e52a052e2cdbece6aba" name="a95cc8d439ab89e52a052e2cdbece6aba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95cc8d439ab89e52a052e2cdbece6aba">&#9670;&#160;</a></span>_updateTimerData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_t ServiceData::_updateTimerData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classTimer.html" title="Timer on top of the timer peripheral.">Timer</a> used to periodically update the advertisement. </p>
+
+</div>
+</div>
+<a id="a7a3d438f12615884b9c0f402c8ecd0f6" name="a7a3d438f12615884b9c0f402c8ecd0f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a3d438f12615884b9c0f402c8ecd0f6">&#9670;&#160;</a></span>_updateTimerId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_id_t ServiceData::_updateTimerId = NULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

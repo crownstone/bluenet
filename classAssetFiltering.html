@@ -100,10 +100,15 @@ $(document).ready(function(){initNavTree('classAssetFiltering.html',''); initRes
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pri-types">Private Types</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classAssetFiltering-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">AssetFiltering Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__AssetFiltering_8h_source.html">cs_AssetFiltering.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for AssetFiltering:</div>
 <div class="dyncontent">
@@ -119,48 +124,61 @@ Collaboration diagram for AssetFiltering:</div>
 <div class="dyncontent">
 <div class="center"><img src="classAssetFiltering__coll__graph.png" border="0" usemap="#aAssetFiltering_coll__map" alt="Collaboration graph"/></div>
 <map name="aAssetFiltering_coll__map" id="aAssetFiltering_coll__map">
-<area shape="rect" title=" " alt="" coords="69,79,180,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
-<area shape="rect" href="classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
+<area shape="rect" title=" " alt="" coords="1484,149,1595,174"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="603,37,714,62"/>
+<area shape="rect" href="classAssetFilterStore.html" title="Keeps up the asset filters." alt="" coords="997,90,1121,115"/>
+<area shape="rect" href="classAssetFilterSyncer.html" title="Class that takes care of synchronizing the asset filters between crownstones." alt="" coords="1215,122,1349,147"/>
+<area shape="rect" href="classAssetForwarder.html" title="AssetForwarder makes it possible for the AssetFiltering to merge mesh messages when they have very si..." alt="" coords="998,151,1121,177"/>
+<area shape="rect" href="classAssetStore.html" title=" " alt="" coords="1013,334,1105,359"/>
+<area shape="rect" href="classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="610,249,707,274"/>
+<area shape="rect" href="structAssetForwarder_1_1outbox__msg__t.html" title=" " alt="" coords="571,139,747,179"/>
+<area shape="rect" href="structasset__record__t.html" title=" " alt="" coords="302,246,419,271"/>
+<area shape="rect" href="classStore.html" title=" " alt="" coords="580,425,737,465"/>
+<area shape="rect" href="structasset__id__t.html" title=" " alt="" coords="35,219,123,245"/>
+<area shape="rect" href="structcs__mesh__model__msg__asset__report__id__t.html" title=" " alt="" coords="259,177,463,217"/>
+<area shape="rect" href="structrssi__and__channel__t.html" title=" " alt="" coords="5,150,152,175"/>
+<area shape="rect" href="structcs__mesh__model__msg__asset__report__mac__t.html" title=" " alt="" coords="259,109,463,149"/>
+<area shape="rect" href="structmac__address__t.html" title="MAC address struct, with some useful functions." alt="" coords="19,71,139,97"/>
+<area shape="rect" href="classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick&#45;event or tick count and execute..." alt="" coords="616,375,701,401"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aeb10245cf67e2451b505fec854f9fdcb"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#aeb10245cf67e2451b505fec854f9fdcb">init</a> ()</td></tr>
+<tr class="memitem:aeb10245cf67e2451b505fec854f9fdcb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#aeb10245cf67e2451b505fec854f9fdcb">init</a> ()</td></tr>
 <tr class="memdesc:aeb10245cf67e2451b505fec854f9fdcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize this class.  <a href="classAssetFiltering.html#aeb10245cf67e2451b505fec854f9fdcb">More...</a><br /></td></tr>
 <tr class="separator:aeb10245cf67e2451b505fec854f9fdcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa04d9dc2f30bbb57db35c364ca9207c2"><td class="memItemLeft" align="right" valign="top"><a id="aa04d9dc2f30bbb57db35c364ca9207c2" name="aa04d9dc2f30bbb57db35c364ca9207c2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInitialized</b> ()</td></tr>
-<tr class="memdesc:aa04d9dc2f30bbb57db35c364ca9207c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if init has been called successfully. <br /></td></tr>
+<tr class="memitem:aa04d9dc2f30bbb57db35c364ca9207c2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#aa04d9dc2f30bbb57db35c364ca9207c2">isInitialized</a> ()</td></tr>
+<tr class="memdesc:aa04d9dc2f30bbb57db35c364ca9207c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if init has been called successfully.  <a href="classAssetFiltering.html#aa04d9dc2f30bbb57db35c364ca9207c2">More...</a><br /></td></tr>
 <tr class="separator:aa04d9dc2f30bbb57db35c364ca9207c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2cf621d072064a7cbed334f27fefed95"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a2cf621d072064a7cbed334f27fefed95">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;evt)</td></tr>
 <tr class="memdesc:a2cf621d072064a7cbed334f27fefed95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classAssetFiltering.html#a2cf621d072064a7cbed334f27fefed95">More...</a><br /></td></tr>
 <tr class="separator:a2cf621d072064a7cbed334f27fefed95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classComponent"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classComponent')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classComponent.html">Component</a></td></tr>
 <tr class="memitem:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">getComponent</a> (<a class="el" href="classComponent.html">Component</a> *requester=nullptr)</td></tr>
 <tr class="memdesc:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a component of type T* from _parent-&gt;children(), If not found try again with ancestors: _parent-&gt; ... -&gt;_parent-&gt;children().  <a href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">More...</a><br /></td></tr>
 <tr class="separator:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a> ()</td></tr>
+<tr class="memitem:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a> ()</td></tr>
 <tr class="memdesc:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Components can implement this if they need to get references to sibling or if they need to do specific initialization.  <a href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">More...</a><br /></td></tr>
 <tr class="separator:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top"><a id="a9cd21445768610fd3db1b15a9c851416" name="a9cd21445768610fd3db1b15a9c851416"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>parentAllChildren</b> ()</td></tr>
-<tr class="memdesc:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">utility that loops over all elements of <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321" title="Components with children can override this method to return them.">getChildren()</a> and setParent on the non-nullptr ones. <br /></td></tr>
+<tr class="memitem:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">parentAllChildren</a> ()</td></tr>
+<tr class="memdesc:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">utility that loops over all elements of <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321" title="Components with children can override this method to return them.">getChildren()</a> and setParent on the non-nullptr ones.  <a href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">More...</a><br /></td></tr>
 <tr class="separator:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad82d7393e339c1b19cc17a0d55b5674d inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#ad82d7393e339c1b19cc17a0d55b5674d">~Component</a> ()=default</td></tr>
+<tr class="separator:ad82d7393e339c1b19cc17a0d55b5674d inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -171,14 +189,126 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a3ec59ae860e2dd270a8c076430df1321 inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; <a class="el" href="classComponent.html">Component</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321">getChildren</a> ()</td></tr>
 <tr class="memdesc:a3ec59ae860e2dd270a8c076430df1321 inherit pro_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Components with children can override this method to return them.  <a href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321">More...</a><br /></td></tr>
 <tr class="separator:a3ec59ae860e2dd270a8c076430df1321 inherit pro_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15dfa6d3ca6bfe46e46a53811235fdde inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a> ()</td></tr>
+<tr class="memitem:a15dfa6d3ca6bfe46e46a53811235fdde inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a> ()</td></tr>
 <tr class="separator:a15dfa6d3ca6bfe46e46a53811235fdde inherit pro_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top"><a id="a40f9568b0e447fb079e16dee8428e9f1" name="a40f9568b0e447fb079e16dee8428e9f1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a class="el" href="classComponent.html">Component</a> *p)</td></tr>
-<tr class="memdesc:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Children that are instantiated later can also be added individually. <br /></td></tr>
+<tr class="memitem:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">setParent</a> (<a class="el" href="classComponent.html">Component</a> *p)</td></tr>
+<tr class="memdesc:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Children that are instantiated later can also be added individually.  <a href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">More...</a><br /></td></tr>
 <tr class="separator:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private Types</h2></td></tr>
+<tr class="memitem:a7da0f56d8217da4cf311d5fddfc8b16f"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a7da0f56d8217da4cf311d5fddfc8b16f">AssetFilteringState</a> { <a class="el" href="classAssetFiltering.html#a7da0f56d8217da4cf311d5fddfc8b16fab50339a10e1de285ac99d4c3990b8693">NONE</a>
+, <a class="el" href="classAssetFiltering.html#a7da0f56d8217da4cf311d5fddfc8b16faa656b0cae2ef29e5d121c6a1edec670b">INIT_FAILED</a>
+, <a class="el" href="classAssetFiltering.html#a7da0f56d8217da4cf311d5fddfc8b16fa64fbc7604c8f0fc7624dad58aa8ebdfa">INIT_SUCCESS</a>
+ }</td></tr>
+<tr class="separator:a7da0f56d8217da4cf311d5fddfc8b16f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a159e401348ef141c6b2452282950bff1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a159e401348ef141c6b2452282950bff1">initInternal</a> ()</td></tr>
+<tr class="memdesc:a159e401348ef141c6b2452282950bff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes this class.  <a href="classAssetFiltering.html#a159e401348ef141c6b2452282950bff1">More...</a><br /></td></tr>
+<tr class="separator:a159e401348ef141c6b2452282950bff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdfca3dbfb12791acaf4df00e0dc1509"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#abdfca3dbfb12791acaf4df00e0dc1509">handleScannedDevice</a> (const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;asset)</td></tr>
+<tr class="memdesc:abdfca3dbfb12791acaf4df00e0dc1509"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatches a TrackedEvent for the given advertisement.  <a href="classAssetFiltering.html#abdfca3dbfb12791acaf4df00e0dc1509">More...</a><br /></td></tr>
+<tr class="separator:abdfca3dbfb12791acaf4df00e0dc1509"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99b836e6ef9d314944e605031d886989"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a99b836e6ef9d314944e605031d886989">checkIfFilterAccepts</a> (uint8_t filterIndex, const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;device)</td></tr>
+<tr class="memdesc:a99b836e6ef9d314944e605031d886989"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the filter with given index accepts the device, call handleAcceptedAsset and.  <a href="classAssetFiltering.html#a99b836e6ef9d314944e605031d886989">More...</a><br /></td></tr>
+<tr class="separator:a99b836e6ef9d314944e605031d886989"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a226411f658022e72032b58af36ae8af0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a226411f658022e72032b58af36ae8af0">handleAcceptedAsset</a> (uint8_t filterIndex, <a class="el" href="classAssetFilter.html">AssetFilter</a> filter, const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;asset)</td></tr>
+<tr class="memdesc:a226411f658022e72032b58af36ae8af0"><td class="mdescLeft">&#160;</td><td class="mdescRight">splits out into subhandlers based on filter output type.  <a href="classAssetFiltering.html#a226411f658022e72032b58af36ae8af0">More...</a><br /></td></tr>
+<tr class="separator:a226411f658022e72032b58af36ae8af0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31e4d7ea46483bfd2d2197c4d963cc19"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a31e4d7ea46483bfd2d2197c4d963cc19">handleAcceptedAssetOutputMac</a> (uint8_t filterId, <a class="el" href="classAssetFilter.html">AssetFilter</a> filter, const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;asset)</td></tr>
+<tr class="separator:a31e4d7ea46483bfd2d2197c4d963cc19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bc0810ff1d68bd55037f76b1e974ae7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a0bc0810ff1d68bd55037f76b1e974ae7">handleAcceptedAssetOutputAssetId</a> (uint8_t filterId, <a class="el" href="classAssetFilter.html">AssetFilter</a> filter, const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;asset)</td></tr>
+<tr class="separator:a0bc0810ff1d68bd55037f76b1e974ae7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24fbd04c251cc78aff28fae4f47f64b7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a24fbd04c251cc78aff28fae4f47f64b7">handleAcceptedAssetOutputAssetIdNearest</a> (uint8_t filterId, <a class="el" href="classAssetFilter.html">AssetFilter</a> filter, const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;asset)</td></tr>
+<tr class="separator:a24fbd04c251cc78aff28fae4f47f64b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdb291ca48b80ee47782f4728431efea"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#afdb291ca48b80ee47782f4728431efea">isAssetRejected</a> (const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;device)</td></tr>
+<tr class="memdesc:afdb291ca48b80ee47782f4728431efea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if there is a filter that rejects this device.  <a href="classAssetFiltering.html#afdb291ca48b80ee47782f4728431efea">More...</a><br /></td></tr>
+<tr class="separator:afdb291ca48b80ee47782f4728431efea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ae6f6692bb5fa46b464750a418ce64941"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAssetFilterStore.html">AssetFilterStore</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#ae6f6692bb5fa46b464750a418ce64941">_filterStore</a> = nullptr</td></tr>
+<tr class="separator:ae6f6692bb5fa46b464750a418ce64941"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41ac3eb286c41b141c30b9e74b24d023"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAssetFilterSyncer.html">AssetFilterSyncer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a41ac3eb286c41b141c30b9e74b24d023">_filterSyncer</a> = nullptr</td></tr>
+<tr class="separator:a41ac3eb286c41b141c30b9e74b24d023"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77eb1648a19168d7e6581c8625f86fc8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAssetForwarder.html">AssetForwarder</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a77eb1648a19168d7e6581c8625f86fc8">_assetForwarder</a> = nullptr</td></tr>
+<tr class="separator:a77eb1648a19168d7e6581c8625f86fc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1cafe7f576b95baf8130adbfe26a7fa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAssetStore.html">AssetStore</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#ad1cafe7f576b95baf8130adbfe26a7fa">_assetStore</a> = nullptr</td></tr>
+<tr class="separator:ad1cafe7f576b95baf8130adbfe26a7fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f7fc6e6507fffc38aaf97f74c1853e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classAssetFiltering.html#a7da0f56d8217da4cf311d5fddfc8b16f">AssetFilteringState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetFiltering.html#a2f7fc6e6507fffc38aaf97f74c1853e0">_initState</a> = <a class="el" href="classAssetFiltering.html#a7da0f56d8217da4cf311d5fddfc8b16fab50339a10e1de285ac99d4c3990b8693">AssetFilteringState::NONE</a></td></tr>
+<tr class="separator:a2f7fc6e6507fffc38aaf97f74c1853e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a7da0f56d8217da4cf311d5fddfc8b16f" name="a7da0f56d8217da4cf311d5fddfc8b16f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7da0f56d8217da4cf311d5fddfc8b16f">&#9670;&#160;</a></span>AssetFilteringState</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="classAssetFiltering.html#a7da0f56d8217da4cf311d5fddfc8b16f">AssetFiltering::AssetFilteringState</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a7da0f56d8217da4cf311d5fddfc8b16fab50339a10e1de285ac99d4c3990b8693" name="a7da0f56d8217da4cf311d5fddfc8b16fab50339a10e1de285ac99d4c3990b8693"></a>NONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a7da0f56d8217da4cf311d5fddfc8b16faa656b0cae2ef29e5d121c6a1edec670b" name="a7da0f56d8217da4cf311d5fddfc8b16faa656b0cae2ef29e5d121c6a1edec670b"></a>INIT_FAILED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a7da0f56d8217da4cf311d5fddfc8b16fa64fbc7604c8f0fc7624dad58aa8ebdfa" name="a7da0f56d8217da4cf311d5fddfc8b16fa64fbc7604c8f0fc7624dad58aa8ebdfa"></a>INIT_SUCCESS&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a99b836e6ef9d314944e605031d886989" name="a99b836e6ef9d314944e605031d886989"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99b836e6ef9d314944e605031d886989">&#9670;&#160;</a></span>checkIfFilterAccepts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool AssetFiltering::checkIfFilterAccepts </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>filterIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if the filter with given index accepts the device, call handleAcceptedAsset and. </p>
+<p >dispatches EVT_ASSET_ACCEPTED if so.</p>
+<p >Returns true if the filter accepts the device and the exclude flag is false. </p>
+
+</div>
+</div>
 <a id="a733e51baa53837154f20c9134bae8ad2" name="a733e51baa53837154f20c9134bae8ad2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a733e51baa53837154f20c9134bae8ad2">&#9670;&#160;</a></span>getChildren()</h2>
 
@@ -205,6 +335,177 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 <p>returns the following child-components in a vector of pointers: _filterStore, _filterSyncer, _assetForwarder, _assetStore _nearestCrownstoneTracker (if included in build) </p>
 
 <p>Reimplemented from <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321">Component</a>.</p>
+
+</div>
+</div>
+<a id="a226411f658022e72032b58af36ae8af0" name="a226411f658022e72032b58af36ae8af0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a226411f658022e72032b58af36ae8af0">&#9670;&#160;</a></span>handleAcceptedAsset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFiltering::handleAcceptedAsset </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>filterIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classAssetFilter.html">AssetFilter</a>&#160;</td>
+          <td class="paramname"><em>filter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>asset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>splits out into subhandlers based on filter output type. </p>
+<p >Performs desired actions for said output type. </p>
+
+</div>
+</div>
+<a id="a0bc0810ff1d68bd55037f76b1e974ae7" name="a0bc0810ff1d68bd55037f76b1e974ae7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bc0810ff1d68bd55037f76b1e974ae7">&#9670;&#160;</a></span>handleAcceptedAssetOutputAssetId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFiltering::handleAcceptedAssetOutputAssetId </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>filterId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classAssetFilter.html">AssetFilter</a>&#160;</td>
+          <td class="paramname"><em>filter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>asset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a24fbd04c251cc78aff28fae4f47f64b7" name="a24fbd04c251cc78aff28fae4f47f64b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24fbd04c251cc78aff28fae4f47f64b7">&#9670;&#160;</a></span>handleAcceptedAssetOutputAssetIdNearest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFiltering::handleAcceptedAssetOutputAssetIdNearest </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>filterId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classAssetFilter.html">AssetFilter</a>&#160;</td>
+          <td class="paramname"><em>filter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>asset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a31e4d7ea46483bfd2d2197c4d963cc19" name="a31e4d7ea46483bfd2d2197c4d963cc19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31e4d7ea46483bfd2d2197c4d963cc19">&#9670;&#160;</a></span>handleAcceptedAssetOutputMac()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFiltering::handleAcceptedAssetOutputMac </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>filterId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classAssetFilter.html">AssetFilter</a>&#160;</td>
+          <td class="paramname"><em>filter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>asset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -238,6 +539,34 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 
 </div>
 </div>
+<a id="abdfca3dbfb12791acaf4df00e0dc1509" name="abdfca3dbfb12791acaf4df00e0dc1509"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdfca3dbfb12791acaf4df00e0dc1509">&#9670;&#160;</a></span>handleScannedDevice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetFiltering::handleScannedDevice </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>asset</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dispatches a TrackedEvent for the given advertisement. </p>
+
+</div>
+</div>
 <a id="aeb10245cf67e2451b505fec854f9fdcb" name="aeb10245cf67e2451b505fec854f9fdcb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aeb10245cf67e2451b505fec854f9fdcb">&#9670;&#160;</a></span>init()</h2>
 
@@ -248,7 +577,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t AssetFiltering::init </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AssetFiltering::init </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -265,6 +594,193 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 <p >Constructs and initializes member classes. Checks result of previous call to init. </p>
 
 <p>Reimplemented from <a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">Component</a>.</p>
+
+</div>
+</div>
+<a id="a159e401348ef141c6b2452282950bff1" name="a159e401348ef141c6b2452282950bff1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a159e401348ef141c6b2452282950bff1">&#9670;&#160;</a></span>initInternal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AssetFiltering::initInternal </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Initializes this class. </p>
+<p >Constructs and initializes member classes. </p>
+
+</div>
+</div>
+<a id="afdb291ca48b80ee47782f4728431efea" name="afdb291ca48b80ee47782f4728431efea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdb291ca48b80ee47782f4728431efea">&#9670;&#160;</a></span>isAssetRejected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool AssetFiltering::isAssetRejected </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>device</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true if there is a filter that rejects this device. </p>
+<p >(Does not check if the filterstore is ready.) </p>
+
+</div>
+</div>
+<a id="aa04d9dc2f30bbb57db35c364ca9207c2" name="aa04d9dc2f30bbb57db35c364ca9207c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa04d9dc2f30bbb57db35c364ca9207c2">&#9670;&#160;</a></span>isInitialized()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool AssetFiltering::isInitialized </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns true if init has been called successfully. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a77eb1648a19168d7e6581c8625f86fc8" name="a77eb1648a19168d7e6581c8625f86fc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77eb1648a19168d7e6581c8625f86fc8">&#9670;&#160;</a></span>_assetForwarder</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetForwarder.html">AssetForwarder</a>* AssetFiltering::_assetForwarder = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad1cafe7f576b95baf8130adbfe26a7fa" name="ad1cafe7f576b95baf8130adbfe26a7fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1cafe7f576b95baf8130adbfe26a7fa">&#9670;&#160;</a></span>_assetStore</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetStore.html">AssetStore</a>* AssetFiltering::_assetStore = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae6f6692bb5fa46b464750a418ce64941" name="ae6f6692bb5fa46b464750a418ce64941"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6f6692bb5fa46b464750a418ce64941">&#9670;&#160;</a></span>_filterStore</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetFilterStore.html">AssetFilterStore</a>* AssetFiltering::_filterStore = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a41ac3eb286c41b141c30b9e74b24d023" name="a41ac3eb286c41b141c30b9e74b24d023"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41ac3eb286c41b141c30b9e74b24d023">&#9670;&#160;</a></span>_filterSyncer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetFilterSyncer.html">AssetFilterSyncer</a>* AssetFiltering::_filterSyncer = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2f7fc6e6507fffc38aaf97f74c1853e0" name="a2f7fc6e6507fffc38aaf97f74c1853e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f7fc6e6507fffc38aaf97f74c1853e0">&#9670;&#160;</a></span>_initState</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetFiltering.html#a7da0f56d8217da4cf311d5fddfc8b16f">AssetFilteringState</a> AssetFiltering::_initState = <a class="el" href="classAssetFiltering.html#a7da0f56d8217da4cf311d5fddfc8b16fab50339a10e1de285ac99d4c3990b8693">AssetFilteringState::NONE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

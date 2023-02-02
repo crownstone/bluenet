@@ -1,0 +1,5 @@
+<map id="PWM" name="PWM">
+<area shape="rect" id="node1" title="Pulse Wide Modulation class." alt="" coords="63,181,118,207"/>
+<area shape="rect" id="node2" href="$structpwm__config__t.html" title=" " alt="" coords="34,93,147,119"/>
+<area shape="rect" id="node3" href="$structpwm__channel__config__t.html" title=" " alt="" coords="5,5,176,31"/>
+</map>

@@ -100,10 +100,14 @@ $(document).ready(function(){initNavTree('classConnectionEncryption.html',''); i
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classConnectionEncryption-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">ConnectionEncryption Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__ConnectionEncryption_8h_source.html">cs_ConnectionEncryption.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ConnectionEncryption:</div>
 <div class="dyncontent">
@@ -118,29 +122,29 @@ Collaboration diagram for ConnectionEncryption:</div>
 <div class="dyncontent">
 <div class="center"><img src="classConnectionEncryption__coll__graph.png" border="0" usemap="#aConnectionEncryption_coll__map" alt="Collaboration graph"/></div>
 <map name="aConnectionEncryption_coll__map" id="aConnectionEncryption_coll__map">
-<area shape="rect" title=" " alt="" coords="5,79,169,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="32,5,143,31"/>
+<area shape="rect" title=" " alt="" coords="117,93,281,119"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" href="structsession__data__t.html" title=" " alt="" coords="140,5,259,31"/>
+<area shape="rect" href="structencryption__nonce__t.html" title="Nonce used for encryption." alt="" coords="282,5,431,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a8f840a634033f4fc8832d338a629a448"><td class="memItemLeft" align="right" valign="top"><a id="a8f840a634033f4fc8832d338a629a448" name="a8f840a634033f4fc8832d338a629a448"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="memdesc:a8f840a634033f4fc8832d338a629a448"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the class, reads from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>. <br /></td></tr>
+<tr class="memitem:a8f840a634033f4fc8832d338a629a448"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a8f840a634033f4fc8832d338a629a448">init</a> ()</td></tr>
+<tr class="memdesc:a8f840a634033f4fc8832d338a629a448"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the class, reads from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>.  <a href="classConnectionEncryption.html#a8f840a634033f4fc8832d338a629a448">More...</a><br /></td></tr>
 <tr class="separator:a8f840a634033f4fc8832d338a629a448"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa62a14d010b606b594665f647a239bd9"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#aa62a14d010b606b594665f647a239bd9">encrypt</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, EncryptionAccessLevel accessLevel, ConnectionEncryptionType encryptionType)</td></tr>
+<tr class="memitem:aa62a14d010b606b594665f647a239bd9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#aa62a14d010b606b594665f647a239bd9">encrypt</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="cs__ConnectionEncryption_8h.html#aaadf8765c49769b8e14b1f07c2bd6082">ConnectionEncryptionType</a> encryptionType)</td></tr>
 <tr class="memdesc:aa62a14d010b606b594665f647a239bd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add headers and encrypt data.  <a href="classConnectionEncryption.html#aa62a14d010b606b594665f647a239bd9">More...</a><br /></td></tr>
 <tr class="separator:aa62a14d010b606b594665f647a239bd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a49c9534f6540c138f4dcdc72aaec87b2"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a49c9534f6540c138f4dcdc72aaec87b2">decrypt</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, EncryptionAccessLevel &amp;accessLevel, ConnectionEncryptionType encryptionType)</td></tr>
+<tr class="memitem:a49c9534f6540c138f4dcdc72aaec87b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a49c9534f6540c138f4dcdc72aaec87b2">decrypt</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> &amp;accessLevel, <a class="el" href="cs__ConnectionEncryption_8h.html#aaadf8765c49769b8e14b1f07c2bd6082">ConnectionEncryptionType</a> encryptionType)</td></tr>
 <tr class="memdesc:a49c9534f6540c138f4dcdc72aaec87b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses headers, decrypts data, and validates decrypted data.  <a href="classConnectionEncryption.html#a49c9534f6540c138f4dcdc72aaec87b2">More...</a><br /></td></tr>
 <tr class="separator:a49c9534f6540c138f4dcdc72aaec87b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb548d1ad73e4137960b45117cfaa47d"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#acb548d1ad73e4137960b45117cfaa47d">setSessionData</a> (<a class="el" href="structsession__data__t.html">session_data_t</a> &amp;sessionData)</td></tr>
+<tr class="memitem:acb548d1ad73e4137960b45117cfaa47d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#acb548d1ad73e4137960b45117cfaa47d">setSessionData</a> (<a class="el" href="structsession__data__t.html">session_data_t</a> &amp;sessionData)</td></tr>
 <tr class="memdesc:acb548d1ad73e4137960b45117cfaa47d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set session data.  <a href="classConnectionEncryption.html#acb548d1ad73e4137960b45117cfaa47d">More...</a><br /></td></tr>
 <tr class="separator:acb548d1ad73e4137960b45117cfaa47d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a038a0eec8e94e2e5434bbe9a4c121e05"><td class="memItemLeft" align="right" valign="top"><a id="a038a0eec8e94e2e5434bbe9a4c121e05" name="a038a0eec8e94e2e5434bbe9a4c121e05"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>disconnect</b> ()</td></tr>
-<tr class="memdesc:a038a0eec8e94e2e5434bbe9a4c121e05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close connection due to insufficient access. <br /></td></tr>
+<tr class="memitem:a038a0eec8e94e2e5434bbe9a4c121e05"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a038a0eec8e94e2e5434bbe9a4c121e05">disconnect</a> ()</td></tr>
+<tr class="memdesc:a038a0eec8e94e2e5434bbe9a4c121e05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close connection due to insufficient access.  <a href="classConnectionEncryption.html#a038a0eec8e94e2e5434bbe9a4c121e05">More...</a><br /></td></tr>
 <tr class="separator:a038a0eec8e94e2e5434bbe9a4c121e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad73c202d79444df64afdcca153aafda7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#ad73c202d79444df64afdcca153aafda7">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event) override</td></tr>
 <tr class="memdesc:ad73c202d79444df64afdcca153aafda7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classConnectionEncryption.html#ad73c202d79444df64afdcca153aafda7">More...</a><br /></td></tr>
@@ -148,17 +152,101 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>disconnect</b> ()</td
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a58278602e4bd82c2574a4cf3561b6d19"><td class="memItemLeft" align="right" valign="top"><a id="a58278602e4bd82c2574a4cf3561b6d19" name="a58278602e4bd82c2574a4cf3561b6d19"></a>
-static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:a58278602e4bd82c2574a4cf3561b6d19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use static variant of singleton, no dynamic memory allocation. <br /></td></tr>
+<tr class="memitem:a58278602e4bd82c2574a4cf3561b6d19"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a58278602e4bd82c2574a4cf3561b6d19">getInstance</a> ()</td></tr>
+<tr class="memdesc:a58278602e4bd82c2574a4cf3561b6d19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use static variant of singleton, no dynamic memory allocation.  <a href="classConnectionEncryption.html#a58278602e4bd82c2574a4cf3561b6d19">More...</a><br /></td></tr>
 <tr class="separator:a58278602e4bd82c2574a4cf3561b6d19"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a917bc895726a33dc4d9be27ad15e37dd"><td class="memItemLeft" align="right" valign="top">static cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a917bc895726a33dc4d9be27ad15e37dd">getEncryptedBufferSize</a> (cs_buffer_size_t plaintextBufferSize, ConnectionEncryptionType encryptionType)</td></tr>
+<tr class="memitem:a917bc895726a33dc4d9be27ad15e37dd"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a917bc895726a33dc4d9be27ad15e37dd">getEncryptedBufferSize</a> (<a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> plaintextBufferSize, <a class="el" href="cs__ConnectionEncryption_8h.html#aaadf8765c49769b8e14b1f07c2bd6082">ConnectionEncryptionType</a> encryptionType)</td></tr>
 <tr class="memdesc:a917bc895726a33dc4d9be27ad15e37dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the required output buffer size when encrypting plaintext.  <a href="classConnectionEncryption.html#a917bc895726a33dc4d9be27ad15e37dd">More...</a><br /></td></tr>
 <tr class="separator:a917bc895726a33dc4d9be27ad15e37dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3eac36092225d25df8eef8a3e33f1280"><td class="memItemLeft" align="right" valign="top">static cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a3eac36092225d25df8eef8a3e33f1280">getPlaintextBufferSize</a> (cs_buffer_size_t encryptedBufferSize, ConnectionEncryptionType encryptionType)</td></tr>
+<tr class="memitem:a3eac36092225d25df8eef8a3e33f1280"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a3eac36092225d25df8eef8a3e33f1280">getPlaintextBufferSize</a> (<a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> encryptedBufferSize, <a class="el" href="cs__ConnectionEncryption_8h.html#aaadf8765c49769b8e14b1f07c2bd6082">ConnectionEncryptionType</a> encryptionType)</td></tr>
 <tr class="memdesc:a3eac36092225d25df8eef8a3e33f1280"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the required output buffer size when decrypting encrypted data.  <a href="classConnectionEncryption.html#a3eac36092225d25df8eef8a3e33f1280">More...</a><br /></td></tr>
 <tr class="separator:a3eac36092225d25df8eef8a3e33f1280"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a8564c2a0d5ad8e088c1b5f2b53378afb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a8564c2a0d5ad8e088c1b5f2b53378afb">ConnectionEncryption</a> ()</td></tr>
+<tr class="separator:a8564c2a0d5ad8e088c1b5f2b53378afb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a531faec329a4b1a522d1cbdb6e4e478b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a531faec329a4b1a522d1cbdb6e4e478b">ConnectionEncryption</a> (<a class="el" href="classConnectionEncryption.html">ConnectionEncryption</a> const &amp;)</td></tr>
+<tr class="separator:a531faec329a4b1a522d1cbdb6e4e478b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3b7bab018976f2b5f4b32c201de5107"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#ac3b7bab018976f2b5f4b32c201de5107">operator=</a> (<a class="el" href="classConnectionEncryption.html">ConnectionEncryption</a> const &amp;)</td></tr>
+<tr class="separator:ac3b7bab018976f2b5f4b32c201de5107"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f8f16dd913c33af9c9687d31f4390a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a1f8f16dd913c33af9c9687d31f4390a4">generateSessionData</a> ()</td></tr>
+<tr class="memdesc:a1f8f16dd913c33af9c9687d31f4390a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate new session data.  <a href="classConnectionEncryption.html#a1f8f16dd913c33af9c9687d31f4390a4">More...</a><br /></td></tr>
+<tr class="separator:a1f8f16dd913c33af9c9687d31f4390a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ab980989082c792d65e35004d6c2614f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structsession__data__t.html">session_data_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#ab980989082c792d65e35004d6c2614f7">_sessionData</a></td></tr>
+<tr class="memdesc:ab980989082c792d65e35004d6c2614f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Session data: data that's valid for a whole session (connection).  <a href="classConnectionEncryption.html#ab980989082c792d65e35004d6c2614f7">More...</a><br /></td></tr>
+<tr class="separator:ab980989082c792d65e35004d6c2614f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a535d007b239bcb57b45d1f1a52626baa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structencryption__nonce__t.html">encryption_nonce_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classConnectionEncryption.html#a535d007b239bcb57b45d1f1a52626baa">_nonce</a></td></tr>
+<tr class="memdesc:a535d007b239bcb57b45d1f1a52626baa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nonce used for encryption and decryption.  <a href="classConnectionEncryption.html#a535d007b239bcb57b45d1f1a52626baa">More...</a><br /></td></tr>
+<tr class="separator:a535d007b239bcb57b45d1f1a52626baa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a8564c2a0d5ad8e088c1b5f2b53378afb" name="a8564c2a0d5ad8e088c1b5f2b53378afb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8564c2a0d5ad8e088c1b5f2b53378afb">&#9670;&#160;</a></span>ConnectionEncryption() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classConnectionEncryption.html">ConnectionEncryption::ConnectionEncryption</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a531faec329a4b1a522d1cbdb6e4e478b" name="a531faec329a4b1a522d1cbdb6e4e478b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a531faec329a4b1a522d1cbdb6e4e478b">&#9670;&#160;</a></span>ConnectionEncryption() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classConnectionEncryption.html">ConnectionEncryption::ConnectionEncryption</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classConnectionEncryption.html">ConnectionEncryption</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a49c9534f6540c138f4dcdc72aaec87b2" name="a49c9534f6540c138f4dcdc72aaec87b2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a49c9534f6540c138f4dcdc72aaec87b2">&#9670;&#160;</a></span>decrypt()</h2>
@@ -167,7 +255,7 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t ConnectionEncryption::decrypt </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ConnectionEncryption::decrypt </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
           <td class="paramname"><em>input</em>, </td>
@@ -181,13 +269,13 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">EncryptionAccessLevel &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> &amp;&#160;</td>
           <td class="paramname"><em>accessLevel</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">ConnectionEncryptionType&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__ConnectionEncryption_8h.html#aaadf8765c49769b8e14b1f07c2bd6082">ConnectionEncryptionType</a>&#160;</td>
           <td class="paramname"><em>encryptionType</em>&#160;</td>
         </tr>
         <tr>
@@ -212,6 +300,25 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
 
 </div>
 </div>
+<a id="a038a0eec8e94e2e5434bbe9a4c121e05" name="a038a0eec8e94e2e5434bbe9a4c121e05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a038a0eec8e94e2e5434bbe9a4c121e05">&#9670;&#160;</a></span>disconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ConnectionEncryption::disconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Close connection due to insufficient access. </p>
+
+</div>
+</div>
 <a id="aa62a14d010b606b594665f647a239bd9" name="aa62a14d010b606b594665f647a239bd9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa62a14d010b606b594665f647a239bd9">&#9670;&#160;</a></span>encrypt()</h2>
 
@@ -219,7 +326,7 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t ConnectionEncryption::encrypt </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ConnectionEncryption::encrypt </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
           <td class="paramname"><em>input</em>, </td>
@@ -233,13 +340,13 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">EncryptionAccessLevel&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
           <td class="paramname"><em>accessLevel</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">ConnectionEncryptionType&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__ConnectionEncryption_8h.html#aaadf8765c49769b8e14b1f07c2bd6082">ConnectionEncryptionType</a>&#160;</td>
           <td class="paramname"><em>encryptionType</em>&#160;</td>
         </tr>
         <tr>
@@ -264,6 +371,34 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
 
 </div>
 </div>
+<a id="a1f8f16dd913c33af9c9687d31f4390a4" name="a1f8f16dd913c33af9c9687d31f4390a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f8f16dd913c33af9c9687d31f4390a4">&#9670;&#160;</a></span>generateSessionData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ConnectionEncryption::generateSessionData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Generate new session data. </p>
+<p >To be called on connect. </p>
+
+</div>
+</div>
 <a id="a917bc895726a33dc4d9be27ad15e37dd" name="a917bc895726a33dc4d9be27ad15e37dd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a917bc895726a33dc4d9be27ad15e37dd">&#9670;&#160;</a></span>getEncryptedBufferSize()</h2>
 
@@ -274,15 +409,15 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static cs_buffer_size_t ConnectionEncryption::getEncryptedBufferSize </td>
+          <td class="memname">static <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> ConnectionEncryption::getEncryptedBufferSize </td>
           <td>(</td>
-          <td class="paramtype">cs_buffer_size_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td>
           <td class="paramname"><em>plaintextBufferSize</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">ConnectionEncryptionType&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__ConnectionEncryption_8h.html#aaadf8765c49769b8e14b1f07c2bd6082">ConnectionEncryptionType</a>&#160;</td>
           <td class="paramname"><em>encryptionType</em>&#160;</td>
         </tr>
         <tr>
@@ -310,6 +445,33 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
 
 </div>
 </div>
+<a id="a58278602e4bd82c2574a4cf3561b6d19" name="a58278602e4bd82c2574a4cf3561b6d19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58278602e4bd82c2574a4cf3561b6d19">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption</a> &amp; ConnectionEncryption::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Use static variant of singleton, no dynamic memory allocation. </p>
+
+</div>
+</div>
 <a id="a3eac36092225d25df8eef8a3e33f1280" name="a3eac36092225d25df8eef8a3e33f1280"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3eac36092225d25df8eef8a3e33f1280">&#9670;&#160;</a></span>getPlaintextBufferSize()</h2>
 
@@ -320,15 +482,15 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static cs_buffer_size_t ConnectionEncryption::getPlaintextBufferSize </td>
+          <td class="memname">static <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> ConnectionEncryption::getPlaintextBufferSize </td>
           <td>(</td>
-          <td class="paramtype">cs_buffer_size_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td>
           <td class="paramname"><em>encryptedBufferSize</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">ConnectionEncryptionType&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__ConnectionEncryption_8h.html#aaadf8765c49769b8e14b1f07c2bd6082">ConnectionEncryptionType</a>&#160;</td>
           <td class="paramname"><em>encryptionType</em>&#160;</td>
         </tr>
         <tr>
@@ -386,6 +548,51 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
 
 </div>
 </div>
+<a id="a8f840a634033f4fc8832d338a629a448" name="a8f840a634033f4fc8832d338a629a448"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f840a634033f4fc8832d338a629a448">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ConnectionEncryption::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize the class, reads from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>. </p>
+
+</div>
+</div>
+<a id="ac3b7bab018976f2b5f4b32c201de5107" name="ac3b7bab018976f2b5f4b32c201de5107"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3b7bab018976f2b5f4b32c201de5107">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ConnectionEncryption::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classConnectionEncryption.html">ConnectionEncryption</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="acb548d1ad73e4137960b45117cfaa47d" name="acb548d1ad73e4137960b45117cfaa47d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acb548d1ad73e4137960b45117cfaa47d">&#9670;&#160;</a></span>setSessionData()</h2>
 
@@ -393,7 +600,7 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t ConnectionEncryption::setSessionData </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ConnectionEncryption::setSessionData </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structsession__data__t.html">session_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>sessionData</em></td><td>)</td>
@@ -413,6 +620,56 @@ static <a class="el" href="classConnectionEncryption.html">ConnectionEncryption<
 <dl class="section return"><dt>Returns</dt><dd>ERR_PROTOCOL_UNSUPPORTED When the protocol is not supported. </dd>
 <dd>
 ERR_SUCCESS When the session data is set. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a535d007b239bcb57b45d1f1a52626baa" name="a535d007b239bcb57b45d1f1a52626baa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a535d007b239bcb57b45d1f1a52626baa">&#9670;&#160;</a></span>_nonce</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structencryption__nonce__t.html">encryption_nonce_t</a> ConnectionEncryption::_nonce</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Nonce used for encryption and decryption. </p>
+<p >Cached because it holds the session nonce. </p>
+
+</div>
+</div>
+<a id="ab980989082c792d65e35004d6c2614f7" name="ab980989082c792d65e35004d6c2614f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab980989082c792d65e35004d6c2614f7">&#9670;&#160;</a></span>_sessionData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsession__data__t.html">session_data_t</a> ConnectionEncryption::_sessionData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Session data: data that's valid for a whole session (connection). </p>
 
 </div>
 </div>

@@ -100,40 +100,50 @@ $(document).ready(function(){initNavTree('cs__Serial_8h_source.html',''); initRe
   <div class="headertitle"><div class="title">cs_Serial.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<a href="cs__Serial_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifdef __cplusplus</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;protocol/cs_SerialTypes.h&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;<a class="code" href="cs__SerialTypes_8h.html">protocol/cs_SerialTypes.h</a>&gt;</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;stdbool.h&gt;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keywordtype">void</span> serial_config(uint8_t pinRx, uint8_t pinTx);</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="cs__Serial_8h.html#a83072afd7bb6738630fb37a359d0e4db">   28</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="cs__Serial_8h.html#a83072afd7bb6738630fb37a359d0e4db">serial_config</a>(uint8_t pinRx, uint8_t pinTx);</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keywordtype">void</span> serial_init(serial_enable_t enabled);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="cs__Serial_8h.html#a21d44b746b6423a68a639e562e8b413c">   34</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="cs__Serial_8h.html#a21d44b746b6423a68a639e562e8b413c">serial_init</a>(<a class="code hl_enumeration" href="cs__SerialTypes_8h.html#a346130c6654d55e5a721d226438f73d7">serial_enable_t</a> enabled);</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keywordtype">void</span> serial_enable(serial_enable_t enabled);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="cs__Serial_8h.html#a1b5475fd1747c08a3c784f884624d3ff">   39</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="cs__Serial_8h.html#a1b5475fd1747c08a3c784f884624d3ff">serial_enable</a>(<a class="code hl_enumeration" href="cs__SerialTypes_8h.html#a346130c6654d55e5a721d226438f73d7">serial_enable_t</a> enabled);</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="keywordtype">void</span> serial_set_read_callback(serial_read_callback callback);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="cs__Serial_8h.html#af271d21633df1f8717206b2c654288a3">   44</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="cs__Serial_8h.html#af271d21633df1f8717206b2c654288a3">serial_set_read_callback</a>(<a class="code hl_typedef" href="cs__SerialTypes_8h.html#a705357fbff5e765013bba375fa777843">serial_read_callback</a> callback);</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>serial_enable_t serial_get_state();</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="cs__Serial_8h.html#a0ddc797ee16c8abe9d2d83db4f9ed041">   49</a></span><a class="code hl_enumeration" href="cs__SerialTypes_8h.html#a346130c6654d55e5a721d226438f73d7">serial_enable_t</a> <a class="code hl_function" href="cs__Serial_8h.html#a0ddc797ee16c8abe9d2d83db4f9ed041">serial_get_state</a>();</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="keywordtype">bool</span> serial_tx_ready();</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="cs__Serial_8h.html#a9610bb52205fccd96a5f92506c310274">   54</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="cs__Serial_8h.html#a9610bb52205fccd96a5f92506c310274">serial_tx_ready</a>();</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="keywordtype">void</span> serial_write(uint8_t val);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="cs__Serial_8h.html#a2c7a6911987f7118fdca101915730157">   59</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="cs__Serial_8h.html#a2c7a6911987f7118fdca101915730157">serial_write</a>(uint8_t val);</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#ifdef __cplusplus</span></div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>}</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="acs__SerialTypes_8h_html"><div class="ttname"><a href="cs__SerialTypes_8h.html">cs_SerialTypes.h</a></div></div>
+<div class="ttc" id="acs__SerialTypes_8h_html_a346130c6654d55e5a721d226438f73d7"><div class="ttname"><a href="cs__SerialTypes_8h.html#a346130c6654d55e5a721d226438f73d7">serial_enable_t</a></div><div class="ttdeci">serial_enable_t</div><div class="ttdef"><b>Definition:</b> cs_SerialTypes.h:35</div></div>
+<div class="ttc" id="acs__SerialTypes_8h_html_a705357fbff5e765013bba375fa777843"><div class="ttname"><a href="cs__SerialTypes_8h.html#a705357fbff5e765013bba375fa777843">serial_read_callback</a></div><div class="ttdeci">void(* serial_read_callback)(uint8_t val)</div><div class="ttdef"><b>Definition:</b> cs_SerialTypes.h:41</div></div>
+<div class="ttc" id="acs__Serial_8h_html_a0ddc797ee16c8abe9d2d83db4f9ed041"><div class="ttname"><a href="cs__Serial_8h.html#a0ddc797ee16c8abe9d2d83db4f9ed041">serial_get_state</a></div><div class="ttdeci">serial_enable_t serial_get_state()</div><div class="ttdoc">Get the state of the serial.</div></div>
+<div class="ttc" id="acs__Serial_8h_html_a1b5475fd1747c08a3c784f884624d3ff"><div class="ttname"><a href="cs__Serial_8h.html#a1b5475fd1747c08a3c784f884624d3ff">serial_enable</a></div><div class="ttdeci">void serial_enable(serial_enable_t enabled)</div><div class="ttdoc">Change what is enabled.</div></div>
+<div class="ttc" id="acs__Serial_8h_html_a21d44b746b6423a68a639e562e8b413c"><div class="ttname"><a href="cs__Serial_8h.html#a21d44b746b6423a68a639e562e8b413c">serial_init</a></div><div class="ttdeci">void serial_init(serial_enable_t enabled)</div><div class="ttdoc">Init the UART.</div></div>
+<div class="ttc" id="acs__Serial_8h_html_a2c7a6911987f7118fdca101915730157"><div class="ttname"><a href="cs__Serial_8h.html#a2c7a6911987f7118fdca101915730157">serial_write</a></div><div class="ttdeci">void serial_write(uint8_t val)</div><div class="ttdoc">Write a single byte.</div></div>
+<div class="ttc" id="acs__Serial_8h_html_a83072afd7bb6738630fb37a359d0e4db"><div class="ttname"><a href="cs__Serial_8h.html#a83072afd7bb6738630fb37a359d0e4db">serial_config</a></div><div class="ttdeci">void serial_config(uint8_t pinRx, uint8_t pinTx)</div><div class="ttdoc">Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 10 Oct....</div></div>
+<div class="ttc" id="acs__Serial_8h_html_a9610bb52205fccd96a5f92506c310274"><div class="ttname"><a href="cs__Serial_8h.html#a9610bb52205fccd96a5f92506c310274">serial_tx_ready</a></div><div class="ttdeci">bool serial_tx_ready()</div><div class="ttdoc">Returns whether serial is ready for TX, and has it enabled.</div></div>
+<div class="ttc" id="acs__Serial_8h_html_af271d21633df1f8717206b2c654288a3"><div class="ttname"><a href="cs__Serial_8h.html#af271d21633df1f8717206b2c654288a3">serial_set_read_callback</a></div><div class="ttdeci">void serial_set_read_callback(serial_read_callback callback)</div><div class="ttdoc">Set the callback.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><b>cs_Serial.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><a class="el" href="cs__Serial_8h.html">cs_Serial.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classTapToToggle.html',''); initResiza
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classTapToToggle-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">TapToToggle Class Reference</div></div>
 </div><!--header-->
@@ -123,37 +125,76 @@ Collaboration diagram for TapToToggle:</div>
 <div class="dyncontent">
 <div class="center"><img src="classTapToToggle__coll__graph.png" border="0" usemap="#aTapToToggle_coll__map" alt="Collaboration graph"/></div>
 <map name="aTapToToggle_coll__map" id="aTapToToggle_coll__map">
-<area shape="rect" title="Class that toggles the switch when a device, like a phone, is held close to the Crownstone." alt="" coords="11,79,111,104"/>
+<area shape="rect" title="Class that toggles the switch when a device, like a phone, is held close to the Crownstone." alt="" coords="73,93,173,119"/>
 <area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" href="structt2t__entry__t.html" title=" " alt="" coords="141,5,234,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a520585534e92d5726fd8ed21a93d34fd"><td class="memItemLeft" align="right" valign="top"><a id="a520585534e92d5726fd8ed21a93d34fd" name="a520585534e92d5726fd8ed21a93d34fd"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (int8_t rssiThreshold)</td></tr>
+<tr class="memitem:a520585534e92d5726fd8ed21a93d34fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a520585534e92d5726fd8ed21a93d34fd">init</a> (int8_t <a class="el" href="classTapToToggle.html#a68110503bb182d867de8396dee32378b">rssiThreshold</a>)</td></tr>
 <tr class="separator:a520585534e92d5726fd8ed21a93d34fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a96feff9b2636da8be58bd861197c9ff2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a96feff9b2636da8be58bd861197c9ff2">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:a96feff9b2636da8be58bd861197c9ff2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classTapToToggle.html#a96feff9b2636da8be58bd861197c9ff2">More...</a><br /></td></tr>
 <tr class="separator:a96feff9b2636da8be58bd861197c9ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ac01a4ce0b75a82fdfdb4b11cb2d30e9c"><td class="memItemLeft" align="right" valign="top"><a id="ac01a4ce0b75a82fdfdb4b11cb2d30e9c" name="ac01a4ce0b75a82fdfdb4b11cb2d30e9c"></a>
-static <a class="el" href="classTapToToggle.html">TapToToggle</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
+<tr class="memitem:ac01a4ce0b75a82fdfdb4b11cb2d30e9c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classTapToToggle.html">TapToToggle</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#ac01a4ce0b75a82fdfdb4b11cb2d30e9c">getInstance</a> ()</td></tr>
 <tr class="separator:ac01a4ce0b75a82fdfdb4b11cb2d30e9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a9fe70c95dfab138c9acd9ffdad55c380"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a9fe70c95dfab138c9acd9ffdad55c380">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a54a2cef534610e9daeed3a5327c76f9c">CONFIG_TAP_TO_TOGGLE_ENABLED</a>) enabled</td></tr>
+<tr class="memdesc:a9fe70c95dfab138c9acd9ffdad55c380"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether tap to toggle is enabled on this crownstone.  <a href="classTapToToggle.html#a9fe70c95dfab138c9acd9ffdad55c380">More...</a><br /></td></tr>
+<tr class="separator:a9fe70c95dfab138c9acd9ffdad55c380"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a778a5a190fed72a2b73027523b496012"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a778a5a190fed72a2b73027523b496012">TapToToggle</a> ()</td></tr>
+<tr class="separator:a778a5a190fed72a2b73027523b496012"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fd5cbc113eb7a2c8d31af971f16d793"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a7fd5cbc113eb7a2c8d31af971f16d793">handleBackgroundAdvertisement</a> (<a class="el" href="structadv__background__parsed__t.html">adv_background_parsed_t</a> *adv)</td></tr>
+<tr class="memdesc:a7fd5cbc113eb7a2c8d31af971f16d793"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle background advertisement.  <a href="classTapToToggle.html#a7fd5cbc113eb7a2c8d31af971f16d793">More...</a><br /></td></tr>
+<tr class="separator:a7fd5cbc113eb7a2c8d31af971f16d793"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0131a6dfbd129055eb04670622177433"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a0131a6dfbd129055eb04670622177433">tick</a> ()</td></tr>
+<tr class="memdesc:a0131a6dfbd129055eb04670622177433"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrease score of each MAC address.  <a href="classTapToToggle.html#a0131a6dfbd129055eb04670622177433">More...</a><br /></td></tr>
+<tr class="separator:a0131a6dfbd129055eb04670622177433"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ae63f171cf4480704b13515de50078218"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structt2t__entry__t.html">t2t_entry_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#ae63f171cf4480704b13515de50078218">list</a> [<a class="el" href="cs__TapToToggle_8h.html#a3b1c49f258ae5e587ad5a3f8b2fcebe4">T2T_LIST_COUNT</a>]</td></tr>
+<tr class="separator:ae63f171cf4480704b13515de50078218"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cf8c63cb5decc061887d47622b36ca5"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a5cf8c63cb5decc061887d47622b36ca5">timeoutCounter</a> = 0</td></tr>
+<tr class="memdesc:a5cf8c63cb5decc061887d47622b36ca5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to count down the timeout.  <a href="classTapToToggle.html#a5cf8c63cb5decc061887d47622b36ca5">More...</a><br /></td></tr>
+<tr class="separator:a5cf8c63cb5decc061887d47622b36ca5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68110503bb182d867de8396dee32378b"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a68110503bb182d867de8396dee32378b">rssiThreshold</a> = 0</td></tr>
+<tr class="memdesc:a68110503bb182d867de8396dee32378b"><td class="mdescLeft">&#160;</td><td class="mdescRight">RSSI threshold, above which score will be added.  <a href="classTapToToggle.html#a68110503bb182d867de8396dee32378b">More...</a><br /></td></tr>
+<tr class="separator:a68110503bb182d867de8396dee32378b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a540c9eba694bf07687aebf65196d26bc"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a540c9eba694bf07687aebf65196d26bc">defaultRssiThreshold</a> = 0</td></tr>
+<tr class="memdesc:a540c9eba694bf07687aebf65196d26bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default RSSI threshold for this board.  <a href="classTapToToggle.html#a540c9eba694bf07687aebf65196d26bc">More...</a><br /></td></tr>
+<tr class="separator:a540c9eba694bf07687aebf65196d26bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f52ac58dfa42a5759092e11357958a8"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a9f52ac58dfa42a5759092e11357958a8">scoreIncrement</a> = <a class="el" href="cs__TapToToggle_8h.html#adfc504dff4e837e11c68e9f72da27bab">T2T_SCORE_INC</a></td></tr>
+<tr class="memdesc:a9f52ac58dfa42a5759092e11357958a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Score is increased with this value when rssi is above rssi threshold.  <a href="classTapToToggle.html#a9f52ac58dfa42a5759092e11357958a8">More...</a><br /></td></tr>
+<tr class="separator:a9f52ac58dfa42a5759092e11357958a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a358a0737ba805ff444db0d9a2049646f"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a358a0737ba805ff444db0d9a2049646f">scoreThreshold</a> = <a class="el" href="cs__TapToToggle_8h.html#af3e4ff3c7f6a91d9735f538ad8b39c54">T2T_SCORE_THRESHOLD</a></td></tr>
+<tr class="memdesc:a358a0737ba805ff444db0d9a2049646f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Threshold above which the toggle is triggered.  <a href="classTapToToggle.html#a358a0737ba805ff444db0d9a2049646f">More...</a><br /></td></tr>
+<tr class="separator:a358a0737ba805ff444db0d9a2049646f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a686a173bc1d666246d4f893fe96e8707"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#a686a173bc1d666246d4f893fe96e8707">scoreMax</a> = <a class="el" href="cs__TapToToggle_8h.html#a7f8bb542dd24b80e13b16f26472276b1">T2T_SCORE_MAX</a></td></tr>
+<tr class="memdesc:a686a173bc1d666246d4f893fe96e8707"><td class="mdescLeft">&#160;</td><td class="mdescRight">Score can't be higher than this value.  <a href="classTapToToggle.html#a686a173bc1d666246d4f893fe96e8707">More...</a><br /></td></tr>
+<tr class="separator:a686a173bc1d666246d4f893fe96e8707"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5284242519f14ae966487b0194a4d84"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTapToToggle.html#ae5284242519f14ae966487b0194a4d84">timeoutTicks</a> = (<a class="el" href="cs__TapToToggle_8h.html#ac021c0b6c2f8c4c473fb48d25c2d981a">T2T_TIMEOUT_MS</a> / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a>)</td></tr>
+<tr class="memdesc:ae5284242519f14ae966487b0194a4d84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimal time in ticks between 2 tap to toggle events.  <a href="classTapToToggle.html#ae5284242519f14ae966487b0194a4d84">More...</a><br /></td></tr>
+<tr class="separator:ae5284242519f14ae966487b0194a4d84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that toggles the switch when a device, like a phone, is held close to the <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a>. </p>
@@ -164,7 +205,87 @@ static <a class="el" href="classTapToToggle.html">TapToToggle</a> &amp;&#160;</t
 <li>When going from below score threshold to above, a toggle is sent. Makes sure there is some time between two toggles.</li>
 <li>Each time a toggle is sent, score additions will be blocked for a certain time. Sends out CMD_SWITCH_TOGGLE to toggle switch. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a778a5a190fed72a2b73027523b496012" name="a778a5a190fed72a2b73027523b496012"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a778a5a190fed72a2b73027523b496012">&#9670;&#160;</a></span>TapToToggle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTapToToggle.html">TapToToggle::TapToToggle</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac01a4ce0b75a82fdfdb4b11cb2d30e9c" name="ac01a4ce0b75a82fdfdb4b11cb2d30e9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac01a4ce0b75a82fdfdb4b11cb2d30e9c">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTapToToggle.html">TapToToggle</a> &amp; TapToToggle::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7fd5cbc113eb7a2c8d31af971f16d793" name="a7fd5cbc113eb7a2c8d31af971f16d793"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7fd5cbc113eb7a2c8d31af971f16d793">&#9670;&#160;</a></span>handleBackgroundAdvertisement()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TapToToggle::handleBackgroundAdvertisement </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structadv__background__parsed__t.html">adv_background_parsed_t</a> *&#160;</td>
+          <td class="paramname"><em>adv</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle background advertisement. </p>
+<p >Checks if RSSI is above threshold. Checks if tap to toggle is enabled in the background advertisement. Checks if timeout is active. Adds to score. Triggers toggle. </p>
+
+</div>
+</div>
 <a id="a96feff9b2636da8be58bd861197c9ff2" name="a96feff9b2636da8be58bd861197c9ff2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a96feff9b2636da8be58bd861197c9ff2">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -193,6 +314,270 @@ static <a class="el" href="classTapToToggle.html">TapToToggle</a> &amp;&#160;</t
 <p >This method is overloaded by all classes that derive from <a class="el" href="classEventListener.html" title="Event listener.">EventListener</a>. They can receive an <a class="el" href="classevent__t.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 9,...">event_t</a> struct and act upon it. These events are dispatched by the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. </p>
 
 <p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="a520585534e92d5726fd8ed21a93d34fd" name="a520585534e92d5726fd8ed21a93d34fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a520585534e92d5726fd8ed21a93d34fd">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TapToToggle::init </td>
+          <td>(</td>
+          <td class="paramtype">int8_t&#160;</td>
+          <td class="paramname"><em>rssiThreshold</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0131a6dfbd129055eb04670622177433" name="a0131a6dfbd129055eb04670622177433"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0131a6dfbd129055eb04670622177433">&#9670;&#160;</a></span>tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TapToToggle::tick </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Decrease score of each MAC address. </p>
+
+</div>
+</div>
+<a id="a9fe70c95dfab138c9acd9ffdad55c380" name="a9fe70c95dfab138c9acd9ffdad55c380"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fe70c95dfab138c9acd9ffdad55c380">&#9670;&#160;</a></span>TYPIFY()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">TapToToggle::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a54a2cef534610e9daeed3a5327c76f9c">CONFIG_TAP_TO_TOGGLE_ENABLED</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether tap to toggle is enabled on this crownstone. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a540c9eba694bf07687aebf65196d26bc" name="a540c9eba694bf07687aebf65196d26bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a540c9eba694bf07687aebf65196d26bc">&#9670;&#160;</a></span>defaultRssiThreshold</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t TapToToggle::defaultRssiThreshold = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Default RSSI threshold for this board. </p>
+
+</div>
+</div>
+<a id="ae63f171cf4480704b13515de50078218" name="ae63f171cf4480704b13515de50078218"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae63f171cf4480704b13515de50078218">&#9670;&#160;</a></span>list</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structt2t__entry__t.html">t2t_entry_t</a> TapToToggle::list[<a class="el" href="cs__TapToToggle_8h.html#a3b1c49f258ae5e587ad5a3f8b2fcebe4">T2T_LIST_COUNT</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a68110503bb182d867de8396dee32378b" name="a68110503bb182d867de8396dee32378b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68110503bb182d867de8396dee32378b">&#9670;&#160;</a></span>rssiThreshold</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t TapToToggle::rssiThreshold = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>RSSI threshold, above which score will be added. </p>
+
+</div>
+</div>
+<a id="a9f52ac58dfa42a5759092e11357958a8" name="a9f52ac58dfa42a5759092e11357958a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f52ac58dfa42a5759092e11357958a8">&#9670;&#160;</a></span>scoreIncrement</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t TapToToggle::scoreIncrement = <a class="el" href="cs__TapToToggle_8h.html#adfc504dff4e837e11c68e9f72da27bab">T2T_SCORE_INC</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Score is increased with this value when rssi is above rssi threshold. </p>
+
+</div>
+</div>
+<a id="a686a173bc1d666246d4f893fe96e8707" name="a686a173bc1d666246d4f893fe96e8707"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a686a173bc1d666246d4f893fe96e8707">&#9670;&#160;</a></span>scoreMax</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t TapToToggle::scoreMax = <a class="el" href="cs__TapToToggle_8h.html#a7f8bb542dd24b80e13b16f26472276b1">T2T_SCORE_MAX</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Score can't be higher than this value. </p>
+
+</div>
+</div>
+<a id="a358a0737ba805ff444db0d9a2049646f" name="a358a0737ba805ff444db0d9a2049646f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a358a0737ba805ff444db0d9a2049646f">&#9670;&#160;</a></span>scoreThreshold</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t TapToToggle::scoreThreshold = <a class="el" href="cs__TapToToggle_8h.html#af3e4ff3c7f6a91d9735f538ad8b39c54">T2T_SCORE_THRESHOLD</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Threshold above which the toggle is triggered. </p>
+
+</div>
+</div>
+<a id="a5cf8c63cb5decc061887d47622b36ca5" name="a5cf8c63cb5decc061887d47622b36ca5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5cf8c63cb5decc061887d47622b36ca5">&#9670;&#160;</a></span>timeoutCounter</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t TapToToggle::timeoutCounter = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used to count down the timeout. </p>
+
+</div>
+</div>
+<a id="ae5284242519f14ae966487b0194a4d84" name="ae5284242519f14ae966487b0194a4d84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5284242519f14ae966487b0194a4d84">&#9670;&#160;</a></span>timeoutTicks</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t TapToToggle::timeoutTicks = (<a class="el" href="cs__TapToToggle_8h.html#ac021c0b6c2f8c4c473fb48d25c2d981a">T2T_TIMEOUT_MS</a> / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a>)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Minimal time in ticks between 2 tap to toggle events. </p>
 
 </div>
 </div>

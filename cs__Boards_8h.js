@@ -1,0 +1,75 @@
+var cs__Boards_8h =
+[
+    [ "boards_config_t", "structboards__config__t.html", "structboards__config__t" ],
+    [ "ACR01B10B", "cs__Boards_8h.html#acde8f739db30ecbf59bae4a12a4916b4", null ],
+    [ "ACR01B10D", "cs__Boards_8h.html#acc229b6f2fe67430d05abc6dbfa9e3b9", null ],
+    [ "ACR01B11A", "cs__Boards_8h.html#ab1ce2a3d58513787c1f0dac3c582b0f9", null ],
+    [ "ACR01B13B", "cs__Boards_8h.html#a0192e1eac30123b32d86178f8ada24c9", null ],
+    [ "ACR01B15A", "cs__Boards_8h.html#a5e4b99422b04c94274c6d12d5b3cd59e", null ],
+    [ "ACR01B1A", "cs__Boards_8h.html#a4effe81ea30a5ca15883d9456d89982a", null ],
+    [ "ACR01B1B", "cs__Boards_8h.html#a4fed979705eb992b0dfcafc0eae39f47", null ],
+    [ "ACR01B1C", "cs__Boards_8h.html#a5a67aa7f85d12048701f90949bb0bd09", null ],
+    [ "ACR01B1D", "cs__Boards_8h.html#a523ed6676c914e827443c2ada2242189", null ],
+    [ "ACR01B1E", "cs__Boards_8h.html#a8423660dd31b5eec4fd390b11a63af58", null ],
+    [ "ACR01B2A", "cs__Boards_8h.html#a817d872c738eec51bd9a705b350924dc", null ],
+    [ "ACR01B2B", "cs__Boards_8h.html#a732fb1e965685d06a770e2bfd7001834", null ],
+    [ "ACR01B2C", "cs__Boards_8h.html#a80e73daf85e613d681e9eecdf3f9aee0", null ],
+    [ "ACR01B2E", "cs__Boards_8h.html#a4af5ce3ea8c324376108435bb7bb7ea4", null ],
+    [ "ACR01B2G", "cs__Boards_8h.html#a2c6053a84bbdfe5dbe6cc7f5c7608613", null ],
+    [ "CR01R02v4", "cs__Boards_8h.html#acda277efc6fdac4ac3dd05596e31f4fb", null ],
+    [ "CS_USB_DONGLE", "cs__Boards_8h.html#a1475e729f410aaa60db33611261454d5", null ],
+    [ "GUIDESTONE", "cs__Boards_8h.html#a479e6c3e6a18178c6801d76bcdb3b2ef", null ],
+    [ "PCA10036", "cs__Boards_8h.html#adb64b486f7b2ff0f68ef59842eda282f", null ],
+    [ "PCA10040", "cs__Boards_8h.html#a74028ff4a5ef1f7232d6e09aced3e104", null ],
+    [ "PCA10056", "cs__Boards_8h.html#aedff10a9e1c802e63b30a6eb6fe4df8a", null ],
+    [ "PCA10100", "cs__Boards_8h.html#a3c40d239d524282ab7082320dbb7f2b1", null ],
+    [ "PIN_NONE", "cs__Boards_8h.html#a61ae8c246db04e2ac956ccf175b217c6", null ],
+    [ "ButtonIndex", "cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aac", [
+      [ "BUTTON0", "cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aaca434a9ffaf13a68c3f80598545c267974", null ],
+      [ "BUTTON1", "cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aacaa9b981eb5c922bb8a465ed598570326e", null ],
+      [ "BUTTON2", "cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aacab4847e21b0ec42aa5494cfca68e0fd7d", null ],
+      [ "BUTTON3", "cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aacab54d1da4e24832ef82c095b0a77b5cb9", null ],
+      [ "BUTTON_COUNT", "cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aaca5eced1b61300568bf3ad61ebe3d7b3d8", null ]
+    ] ],
+    [ "Chipset", "cs__Boards_8h.html#ab4e0d9c187f76c98ee02001405636d94", [
+      [ "CHIPSET_NRF52832", "cs__Boards_8h.html#ab4e0d9c187f76c98ee02001405636d94abcdcbcfd3f184b9ad1c50b16f2a9e8b6", null ],
+      [ "CHIPSET_NRF52833", "cs__Boards_8h.html#ab4e0d9c187f76c98ee02001405636d94a2909b827944fecc040de6aa3ec69dee2", null ],
+      [ "CHIPSET_NRF52840", "cs__Boards_8h.html#ab4e0d9c187f76c98ee02001405636d94a47ef47ac3bff3761d93f5c37d09fba64", null ]
+    ] ],
+    [ "GainIndex", "cs__Boards_8h.html#a8b9c2d634f143d90722e0441f6def9aa", [
+      [ "GAIN_LOW", "cs__Boards_8h.html#a8b9c2d634f143d90722e0441f6def9aaa048c3b7e17c858bf6926f1dfe0e2d3cb", null ],
+      [ "GAIN_MIDDLE", "cs__Boards_8h.html#a8b9c2d634f143d90722e0441f6def9aaaaf07007c259c58692fa629741fca30fb", null ],
+      [ "GAIN_HIGH", "cs__Boards_8h.html#a8b9c2d634f143d90722e0441f6def9aaae288cb9acb6037ed873b199126492029", null ],
+      [ "GAIN_COUNT", "cs__Boards_8h.html#a8b9c2d634f143d90722e0441f6def9aaa122f3d405b3c7e58939f8315b81b2a43", null ],
+      [ "GAIN_SINGLE", "cs__Boards_8h.html#a8b9c2d634f143d90722e0441f6def9aaad63e3bd21486fb326fa90db6cda3a836", null ]
+    ] ],
+    [ "GpioIndex", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195", [
+      [ "GPIO_INDEX0", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195ac09f2fe4d1e044078b10a646738030c3", null ],
+      [ "GPIO_INDEX1", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195a15215262ad82de5f4bc9f64d0dd5a702", null ],
+      [ "GPIO_INDEX2", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195a924e5bb1076cb3e4a53ca84bb57fae46", null ],
+      [ "GPIO_INDEX3", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195ac68c34e2c261a4747091a9180f2bf854", null ],
+      [ "GPIO_INDEX4", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195ae2ca439cecf5b3b51abed6e17df19764", null ],
+      [ "GPIO_INDEX5", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195a8dcd43160ad9d7dc63b0d58b0cb9d029", null ],
+      [ "GPIO_INDEX6", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195a2dee0b2d83451e4be84ed0605208b5c0", null ],
+      [ "GPIO_INDEX7", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195ab6d1abb4cc2f66c9e5a8e8385026d845", null ],
+      [ "GPIO_INDEX8", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195af08d69c8a585f0044e7c1067cc5e9706", null ],
+      [ "GPIO_INDEX9", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195a7a988a94c26f85becd19df518f229e23", null ],
+      [ "GPIO_INDEX_COUNT", "cs__Boards_8h.html#a4c0bb2dd0b8fcca211663fbe311fc195ac684fdd02ccd56cb2e1a2fa17437f2e6", null ]
+    ] ],
+    [ "LedIndex", "cs__Boards_8h.html#a75f9f77ae93bdbeb8fb08d1e05a39fd7", [
+      [ "LED0", "cs__Boards_8h.html#a75f9f77ae93bdbeb8fb08d1e05a39fd7aa688958b70395170ecf516290f2634a5", null ],
+      [ "LED1", "cs__Boards_8h.html#a75f9f77ae93bdbeb8fb08d1e05a39fd7adac6477842247cab1a8c02c65f431b44", null ],
+      [ "LED2", "cs__Boards_8h.html#a75f9f77ae93bdbeb8fb08d1e05a39fd7a8379bbaa96d151e6adac488b2a147b7a", null ],
+      [ "LED3", "cs__Boards_8h.html#a75f9f77ae93bdbeb8fb08d1e05a39fd7a5dec293e081e0fc78369c842fab8452b", null ],
+      [ "LED_COUNT", "cs__Boards_8h.html#a75f9f77ae93bdbeb8fb08d1e05a39fd7a0bc6b9364ec72b19c74a14f15aa3832c", null ],
+      [ "LED_RED", "cs__Boards_8h.html#a75f9f77ae93bdbeb8fb08d1e05a39fd7ad80f13022b6d309268fadc7b1da89cb9", null ],
+      [ "LED_GREEN", "cs__Boards_8h.html#a75f9f77ae93bdbeb8fb08d1e05a39fd7a0ad916c7f80666dc88f6b5b22a72e742", null ]
+    ] ],
+    [ "configure_board", "cs__Boards_8h.html#a7b7dd9d8be5320653d1c87a39b18c987", null ],
+    [ "configure_board_from_hardware_board", "cs__Boards_8h.html#ac5ca35722b383aa550456c139d30e457", null ],
+    [ "configure_board_from_uicr", "cs__Boards_8h.html#a8852b793ed60668ce9aba4aa56bf6c5a", null ],
+    [ "GetGpioPin", "cs__Boards_8h.html#a5f2006a473813a02a0bc10d41440b5f6", null ],
+    [ "GpioToAin", "cs__Boards_8h.html#a4e34593d14967443291b23bd3b0325f8", null ],
+    [ "GpioToAinOnChipset", "cs__Boards_8h.html#a6e3a6ac8c6c7c9e1bd889009d4316114", null ],
+    [ "init", "cs__Boards_8h.html#a50a8ade2c822ebda1f1cf61070b9d7b0", null ]
+];

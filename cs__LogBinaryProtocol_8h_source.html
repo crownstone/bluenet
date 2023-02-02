@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__LogBinaryProtocol_8h_source.html',
   <div class="headertitle"><div class="title">cs_LogBinaryProtocol.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__LogBinaryProtocol_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Sep 1, 2022</span></div>
@@ -109,15 +109,15 @@ $(document).ready(function(){initNavTree('cs__LogBinaryProtocol_8h_source.html',
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;logging/impl/cs_LogUtils.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__LogUtils_8h.html">logging/impl/cs_LogUtils.h</a>&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define _log(level, addNewLine, fmt, ...)                                                                       \</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="cs__LogBinaryProtocol_8h.html#adda35d4e0a5d583f24c687a30b5590a4">   20</a></span><span class="preprocessor">#define _log(level, addNewLine, fmt, ...)                                                                       \</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">    if (level &lt;= SERIAL_VERBOSITY) {                                                                            \</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">        cs_log_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, fmt, ##__VA_ARGS__); \</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">    }</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">// No manual formatting: uses default format based on element type.</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define _logArray0(level, addNewLine, pointer, size)      \</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="cs__LogBinaryProtocol_8h.html#abc503d66306db9fa6741fc9aa0a9f494">   26</a></span><span class="preprocessor">#define _logArray0(level, addNewLine, pointer, size)      \</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">    if (level &lt;= SERIAL_VERBOSITY) {                      \</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">        cs_log_array(                                     \</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">                fileNameHash(__FILE__, sizeof(__FILE__)), \</span></div>
@@ -133,7 +133,7 @@ $(document).ready(function(){initNavTree('cs__LogBinaryProtocol_8h_source.html',
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    }</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">// Manual element format, but default start and end format.</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#define _logArray1(level, addNewLine, pointer, size, elementFmt) \</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="cs__LogBinaryProtocol_8h.html#a8954cc861af20290abe7ee75bd53c748">   42</a></span><span class="preprocessor">#define _logArray1(level, addNewLine, pointer, size, elementFmt) \</span></div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">    if (level &lt;= SERIAL_VERBOSITY) {                             \</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">        cs_log_array(                                            \</span></div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">                fileNameHash(__FILE__, sizeof(__FILE__)),        \</span></div>
@@ -150,7 +150,7 @@ $(document).ready(function(){initNavTree('cs__LogBinaryProtocol_8h_source.html',
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    }</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment">// Manual start and end format. Default element format, based on element type.</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#define _logArray2(level, addNewLine, pointer, size, startFmt, endFmt) \</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="cs__LogBinaryProtocol_8h.html#a06676ed0a8d80d7adf7afebf15050e38">   59</a></span><span class="preprocessor">#define _logArray2(level, addNewLine, pointer, size, startFmt, endFmt) \</span></div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">    if (level &lt;= SERIAL_VERBOSITY) {                                   \</span></div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">        cs_log_array(                                                  \</span></div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">                fileNameHash(__FILE__, sizeof(__FILE__)),              \</span></div>
@@ -166,7 +166,7 @@ $(document).ready(function(){initNavTree('cs__LogBinaryProtocol_8h_source.html',
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    }</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="comment">// Manual start and end format. Default element separation format.</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#define _logArray3(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt) \</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="cs__LogBinaryProtocol_8h.html#a04f9a483d5aa0415d12bf22f74e7d515">   75</a></span><span class="preprocessor">#define _logArray3(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt) \</span></div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">    if (level &lt;= SERIAL_VERBOSITY) {                                               \</span></div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">        cs_log_array(                                                              \</span></div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">                fileNameHash(__FILE__, sizeof(__FILE__)),                          \</span></div>
@@ -183,7 +183,7 @@ $(document).ready(function(){initNavTree('cs__LogBinaryProtocol_8h_source.html',
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    }</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="comment">// Manual format.</span></div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="preprocessor">#define _logArray4(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt, seperationFmt) \</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="cs__LogBinaryProtocol_8h.html#abd069c561bc1d13f166eed5c02799c3b">   92</a></span><span class="preprocessor">#define _logArray4(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt, seperationFmt) \</span></div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">    if (level &lt;= SERIAL_VERBOSITY) {                                                              \</span></div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">        cs_log_array(                                                                             \</span></div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">                fileNameHash(__FILE__, sizeof(__FILE__)),                                         \</span></div>
@@ -200,7 +200,7 @@ $(document).ready(function(){initNavTree('cs__LogBinaryProtocol_8h_source.html',
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="preprocessor">    }</span></div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment">// Manual format.</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#define _logArray5(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt, seperationFmt, reverse) \</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="cs__LogBinaryProtocol_8h.html#af85bd6a454861051f205572bbc318a04">  109</a></span><span class="preprocessor">#define _logArray5(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt, seperationFmt, reverse) \</span></div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="preprocessor">    if (level &lt;= SERIAL_VERBOSITY) {                                                                       \</span></div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="preprocessor">        cs_log_array(                                                                                      \</span></div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="preprocessor">                fileNameHash(__FILE__, sizeof(__FILE__)),                                                  \</span></div>
@@ -217,17 +217,18 @@ $(document).ready(function(){initNavTree('cs__LogBinaryProtocol_8h_source.html',
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="preprocessor">    }</span></div>
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="comment">// Helper function that returns argument 5 (which is one of the _logArrayX definitions).</span></div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="preprocessor">#define _logArrayGetArg5(arg0, arg1, arg2, arg3, arg4, arg5, arg6, ...) arg6</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="cs__LogBinaryProtocol_8h.html#afa6447ac118c3f68d1e484c4d9be4f0d">  126</a></span><span class="preprocessor">#define _logArrayGetArg5(arg0, arg1, arg2, arg3, arg4, arg5, arg6, ...) arg6</span></div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="preprocessor">#define _logArray(level, addNewLine, pointer, ...)                                                         \</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="cs__LogBinaryProtocol_8h.html#afc97a88bdbce7a29ca1fcbe116e31f6a">  128</a></span><span class="preprocessor">#define _logArray(level, addNewLine, pointer, ...)                                                         \</span></div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="preprocessor">    _logArrayGetArg5(__VA_ARGS__, _logArray5, _logArray4, _logArray3, _logArray2, _logArray1, _logArray0)( \</span></div>
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="preprocessor">            level, addNewLine, pointer, __VA_ARGS__)</span></div>
+<div class="ttc" id="acs__LogUtils_8h_html"><div class="ttname"><a href="cs__LogUtils_8h.html">cs_LogUtils.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b25cd48746385db9a78c677f87e228d3.html">logging</a></li><li class="navelem"><a class="el" href="dir_64958c04e82a2c1cf7ed5fc88bb49bfb.html">impl</a></li><li class="navelem"><b>cs_LogBinaryProtocol.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b25cd48746385db9a78c677f87e228d3.html">logging</a></li><li class="navelem"><a class="el" href="dir_64958c04e82a2c1cf7ed5fc88bb49bfb.html">impl</a></li><li class="navelem"><a class="el" href="cs__LogBinaryProtocol_8h.html">cs_LogBinaryProtocol.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

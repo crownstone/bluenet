@@ -1,0 +1,7 @@
+<map id="MeshModelMulticastAcked" name="MeshModelMulticastAcked">
+<area shape="rect" id="node1" title="Class that:" alt="" coords="733,85,929,110"/>
+<area shape="rect" id="node2" title=" " alt="" coords="315,5,537,45"/>
+<area shape="rect" id="node3" href="$structMeshModelMulticastAcked_1_1cs__multicast__acked__queue__item__t.html" title=" " alt="" coords="324,70,528,125"/>
+<area shape="rect" id="node4" href="$structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html" title="Data needed in each model queue." alt="" coords="5,77,197,117"/>
+<area shape="rect" id="node5" href="$classBitmaskVarSize.html" title="Class that holds a bitmask of variable size." alt="" coords="363,149,489,174"/>
+</map>

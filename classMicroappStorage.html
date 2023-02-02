@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classMicroappStorage.html',''); initRe
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classMicroappStorage-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">MicroappStorage Class Reference</div></div>
 </div><!--header-->
@@ -112,9 +114,8 @@ $(document).ready(function(){initNavTree('classMicroappStorage.html',''); initRe
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a26379a15471e09d7428269dbad523338"><td class="memItemLeft" align="right" valign="top"><a id="a26379a15471e09d7428269dbad523338" name="a26379a15471e09d7428269dbad523338"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="memdesc:a26379a15471e09d7428269dbad523338"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize fstorage, allocate buffer. <br /></td></tr>
+<tr class="memitem:a26379a15471e09d7428269dbad523338"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a26379a15471e09d7428269dbad523338">init</a> ()</td></tr>
+<tr class="memdesc:a26379a15471e09d7428269dbad523338"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize fstorage, allocate buffer.  <a href="classMicroappStorage.html#a26379a15471e09d7428269dbad523338">More...</a><br /></td></tr>
 <tr class="separator:a26379a15471e09d7428269dbad523338"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af11bb173bbbadb5a690c081355688bda"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#af11bb173bbbadb5a690c081355688bda">getAppHeader</a> (uint8_t appIndex, <a class="el" href="structmicroapp__binary__header__t.html">microapp_binary_header_t</a> &amp;header)</td></tr>
 <tr class="memdesc:af11bb173bbbadb5a690c081355688bda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a copy of the microapp binary header.  <a href="classMicroappStorage.html#af11bb173bbbadb5a690c081355688bda">More...</a><br /></td></tr>
@@ -125,32 +126,126 @@ cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()<
 <tr class="memitem:af6adb58e5214d21ad2c214bda11dfb06"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#af6adb58e5214d21ad2c214bda11dfb06">isErased</a> (uint8_t appIndex)</td></tr>
 <tr class="memdesc:af6adb58e5214d21ad2c214bda11dfb06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if storage space of this microapp is erased.  <a href="classMicroappStorage.html#af6adb58e5214d21ad2c214bda11dfb06">More...</a><br /></td></tr>
 <tr class="separator:af6adb58e5214d21ad2c214bda11dfb06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a263b4447f1262cf942d2abab900c20ec"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a263b4447f1262cf942d2abab900c20ec">erase</a> (uint8_t appIndex)</td></tr>
+<tr class="memitem:a263b4447f1262cf942d2abab900c20ec"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a263b4447f1262cf942d2abab900c20ec">erase</a> (uint8_t appIndex)</td></tr>
 <tr class="memdesc:a263b4447f1262cf942d2abab900c20ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erases storage space of given app.  <a href="classMicroappStorage.html#a263b4447f1262cf942d2abab900c20ec">More...</a><br /></td></tr>
 <tr class="separator:a263b4447f1262cf942d2abab900c20ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbcb5700cf0f7b1425ec2f032a89321a"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#adbcb5700cf0f7b1425ec2f032a89321a">writeChunk</a> (uint8_t appIndex, uint16_t offset, const uint8_t *data, uint16_t size)</td></tr>
+<tr class="memitem:adbcb5700cf0f7b1425ec2f032a89321a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#adbcb5700cf0f7b1425ec2f032a89321a">writeChunk</a> (uint8_t appIndex, uint16_t offset, const uint8_t *data, uint16_t size)</td></tr>
 <tr class="memdesc:adbcb5700cf0f7b1425ec2f032a89321a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a chunk to flash.  <a href="classMicroappStorage.html#adbcb5700cf0f7b1425ec2f032a89321a">More...</a><br /></td></tr>
 <tr class="separator:adbcb5700cf0f7b1425ec2f032a89321a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a237ccf3b7bb00136a73efef1d5bf1e67"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a237ccf3b7bb00136a73efef1d5bf1e67">validateApp</a> (uint8_t appIndex)</td></tr>
+<tr class="memitem:a237ccf3b7bb00136a73efef1d5bf1e67"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a237ccf3b7bb00136a73efef1d5bf1e67">validateApp</a> (uint8_t appIndex)</td></tr>
 <tr class="memdesc:a237ccf3b7bb00136a73efef1d5bf1e67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validate the overall binary, this goes through flash and checks it completely.  <a href="classMicroappStorage.html#a237ccf3b7bb00136a73efef1d5bf1e67">More...</a><br /></td></tr>
 <tr class="separator:a237ccf3b7bb00136a73efef1d5bf1e67"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51cb664bd286ee89803fce67e59634a7"><td class="memItemLeft" align="right" valign="top"><a id="a51cb664bd286ee89803fce67e59634a7" name="a51cb664bd286ee89803fce67e59634a7"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>printHeader</b> (uint8_t logLevel, <a class="el" href="structmicroapp__binary__header__t.html">microapp_binary_header_t</a> &amp;header)</td></tr>
+<tr class="memitem:a51cb664bd286ee89803fce67e59634a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a51cb664bd286ee89803fce67e59634a7">printHeader</a> (uint8_t logLevel, <a class="el" href="structmicroapp__binary__header__t.html">microapp_binary_header_t</a> &amp;header)</td></tr>
 <tr class="separator:a51cb664bd286ee89803fce67e59634a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3714e98182c3d7c34f2f9e171c18205a"><td class="memItemLeft" align="right" valign="top"><a id="a3714e98182c3d7c34f2f9e171c18205a" name="a3714e98182c3d7c34f2f9e171c18205a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>handleFileStorageEvent</b> (nrf_fstorage_evt_t *evt)</td></tr>
-<tr class="memdesc:a3714e98182c3d7c34f2f9e171c18205a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage: when fstorage is done, this function will be called (indirectly through app_scheduler). <br /></td></tr>
+<tr class="memitem:a3714e98182c3d7c34f2f9e171c18205a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a3714e98182c3d7c34f2f9e171c18205a">handleFileStorageEvent</a> (nrf_fstorage_evt_t *evt)</td></tr>
+<tr class="memdesc:a3714e98182c3d7c34f2f9e171c18205a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage: when fstorage is done, this function will be called (indirectly through app_scheduler).  <a href="classMicroappStorage.html#a3714e98182c3d7c34f2f9e171c18205a">More...</a><br /></td></tr>
 <tr class="separator:a3714e98182c3d7c34f2f9e171c18205a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aa5d79f4bdac9251ee93bc7886518bec7"><td class="memItemLeft" align="right" valign="top"><a id="aa5d79f4bdac9251ee93bc7886518bec7" name="aa5d79f4bdac9251ee93bc7886518bec7"></a>
-static <a class="el" href="classMicroappStorage.html">MicroappStorage</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
+<tr class="memitem:aa5d79f4bdac9251ee93bc7886518bec7"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classMicroappStorage.html">MicroappStorage</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#aa5d79f4bdac9251ee93bc7886518bec7">getInstance</a> ()</td></tr>
 <tr class="separator:aa5d79f4bdac9251ee93bc7886518bec7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:aa146955da9072b02fef7e32af41c52a5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#aa146955da9072b02fef7e32af41c52a5">MicroappStorage</a> ()</td></tr>
+<tr class="memdesc:aa146955da9072b02fef7e32af41c52a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Singleton, constructor, also copy constructor, is private.  <a href="classMicroappStorage.html#aa146955da9072b02fef7e32af41c52a5">More...</a><br /></td></tr>
+<tr class="separator:aa146955da9072b02fef7e32af41c52a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d41212c8f4c0c8020325fa7333daee5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a6d41212c8f4c0c8020325fa7333daee5">MicroappStorage</a> (<a class="el" href="classMicroappStorage.html">MicroappStorage</a> const &amp;)=delete</td></tr>
+<tr class="separator:a6d41212c8f4c0c8020325fa7333daee5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af8fd2de866df1cde0c370ef5f545659e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#af8fd2de866df1cde0c370ef5f545659e">operator=</a> (<a class="el" href="classMicroappStorage.html">MicroappStorage</a> const &amp;)=delete</td></tr>
+<tr class="separator:af8fd2de866df1cde0c370ef5f545659e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7f48df8a6e575f95b4cea7df8bc9b1c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#af7f48df8a6e575f95b4cea7df8bc9b1c">writeNextChunkPart</a> ()</td></tr>
+<tr class="memdesc:af7f48df8a6e575f95b4cea7df8bc9b1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the next part of a chunk.  <a href="classMicroappStorage.html#af7f48df8a6e575f95b4cea7df8bc9b1c">More...</a><br /></td></tr>
+<tr class="separator:af7f48df8a6e575f95b4cea7df8bc9b1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0536f8288dabc444d5269dcabed41488"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a0536f8288dabc444d5269dcabed41488">write</a> (uint32_t flashAddress, const uint8_t *data, uint16_t size)</td></tr>
+<tr class="memdesc:a0536f8288dabc444d5269dcabed41488"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write to flash.  <a href="classMicroappStorage.html#a0536f8288dabc444d5269dcabed41488">More...</a><br /></td></tr>
+<tr class="separator:a0536f8288dabc444d5269dcabed41488"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79698dc8ead712d81348a553e84455e7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a79698dc8ead712d81348a553e84455e7">onFlashWritten</a> (<a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> retCode)</td></tr>
+<tr class="memdesc:a79698dc8ead712d81348a553e84455e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when data has been written to flash.  <a href="classMicroappStorage.html#a79698dc8ead712d81348a553e84455e7">More...</a><br /></td></tr>
+<tr class="separator:a79698dc8ead712d81348a553e84455e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad89cd833ba153b916fac9b849ed0807b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#ad89cd833ba153b916fac9b849ed0807b">resetChunkVars</a> ()</td></tr>
+<tr class="memdesc:ad89cd833ba153b916fac9b849ed0807b"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called when a chunk has been written (or when it failed to write).  <a href="classMicroappStorage.html#ad89cd833ba153b916fac9b849ed0807b">More...</a><br /></td></tr>
+<tr class="separator:ad89cd833ba153b916fac9b849ed0807b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27b44300efd0b80b00ce730e0a2fdb3b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a27b44300efd0b80b00ce730e0a2fdb3b">isErased</a> (uint32_t flashAddress, uint16_t size)</td></tr>
+<tr class="memdesc:a27b44300efd0b80b00ce730e0a2fdb3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads flash, and checks if it's erased.  <a href="classMicroappStorage.html#a27b44300efd0b80b00ce730e0a2fdb3b">More...</a><br /></td></tr>
+<tr class="separator:a27b44300efd0b80b00ce730e0a2fdb3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a2cf79a9fe57eb6a91808408e73dabb3e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a2cf79a9fe57eb6a91808408e73dabb3e">_writing</a> = false</td></tr>
+<tr class="memdesc:a2cf79a9fe57eb6a91808408e73dabb3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up whether or not we are currently writing to (or erasing) flash.  <a href="classMicroappStorage.html#a2cf79a9fe57eb6a91808408e73dabb3e">More...</a><br /></td></tr>
+<tr class="separator:a2cf79a9fe57eb6a91808408e73dabb3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d8667ef701dc4188c45327735a8b3ee"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a5d8667ef701dc4188c45327735a8b3ee">_writeBuffer</a> [<a class="el" href="cs__MicroappStorage_8h.html#a9f0cf9514efab4323548f962db931ae3">MICROAPP_STORAGE_BUF_SIZE</a>]</td></tr>
+<tr class="memdesc:a5d8667ef701dc4188c45327735a8b3ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">The buffer is required to perform writes to flash, as the data has to be aligned, and stay in memory until the write is done.  <a href="classMicroappStorage.html#a5d8667ef701dc4188c45327735a8b3ee">More...</a><br /></td></tr>
+<tr class="separator:a5d8667ef701dc4188c45327735a8b3ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a3d964d7c5ed8fc925ee033815c6b81"><td class="memItemLeft" align="right" valign="top">const uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a7a3d964d7c5ed8fc925ee033815c6b81">_chunkData</a> = nullptr</td></tr>
+<tr class="memdesc:a7a3d964d7c5ed8fc925ee033815c6b81"><td class="mdescLeft">&#160;</td><td class="mdescRight">When writing a chunk of data, it will be done in parts.  <a href="classMicroappStorage.html#a7a3d964d7c5ed8fc925ee033815c6b81">More...</a><br /></td></tr>
+<tr class="separator:a7a3d964d7c5ed8fc925ee033815c6b81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69b348eaa0911d1d2e179fd4180216ee"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a69b348eaa0911d1d2e179fd4180216ee">_chunkSize</a> = 0</td></tr>
+<tr class="separator:a69b348eaa0911d1d2e179fd4180216ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9607cb30ef8f50ad4c0c0dedd87fcf07"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#a9607cb30ef8f50ad4c0c0dedd87fcf07">_chunkWritten</a> = 0</td></tr>
+<tr class="separator:a9607cb30ef8f50ad4c0c0dedd87fcf07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9682478ac99f666c1347ade0b3cba3a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappStorage.html#ab9682478ac99f666c1347ade0b3cba3a">_chunkFlashAddress</a> = 0</td></tr>
+<tr class="separator:ab9682478ac99f666c1347ade0b3cba3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class to store microapps on flash. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="aa146955da9072b02fef7e32af41c52a5" name="aa146955da9072b02fef7e32af41c52a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa146955da9072b02fef7e32af41c52a5">&#9670;&#160;</a></span>MicroappStorage() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMicroappStorage.html">MicroappStorage::MicroappStorage</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Singleton, constructor, also copy constructor, is private. </p>
+
+</div>
+</div>
+<a id="a6d41212c8f4c0c8020325fa7333daee5" name="a6d41212c8f4c0c8020325fa7333daee5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d41212c8f4c0c8020325fa7333daee5">&#9670;&#160;</a></span>MicroappStorage() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMicroappStorage.html">MicroappStorage::MicroappStorage</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMicroappStorage.html">MicroappStorage</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a id="a263b4447f1262cf942d2abab900c20ec" name="a263b4447f1262cf942d2abab900c20ec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a263b4447f1262cf942d2abab900c20ec">&#9670;&#160;</a></span>erase()</h2>
 
@@ -158,7 +253,7 @@ static <a class="el" href="classMicroappStorage.html">MicroappStorage</a> &amp;&
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t MicroappStorage::erase </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MicroappStorage::erase </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>appIndex</em></td><td>)</td>
@@ -220,6 +315,31 @@ ERR_BUSY Retry again later. </dd></dl>
 
 </div>
 </div>
+<a id="aa5d79f4bdac9251ee93bc7886518bec7" name="aa5d79f4bdac9251ee93bc7886518bec7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5d79f4bdac9251ee93bc7886518bec7">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classMicroappStorage.html">MicroappStorage</a> &amp; MicroappStorage::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="afea0ec40dc1d6402ec0337c3816f4634" name="afea0ec40dc1d6402ec0337c3816f4634"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afea0ec40dc1d6402ec0337c3816f4634">&#9670;&#160;</a></span>getStartInstructionAddress()</h2>
 
@@ -246,8 +366,85 @@ ERR_BUSY Retry again later. </dd></dl>
 
 </div>
 </div>
+<a id="a3714e98182c3d7c34f2f9e171c18205a" name="a3714e98182c3d7c34f2f9e171c18205a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3714e98182c3d7c34f2f9e171c18205a">&#9670;&#160;</a></span>handleFileStorageEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappStorage::handleFileStorageEvent </td>
+          <td>(</td>
+          <td class="paramtype">nrf_fstorage_evt_t *&#160;</td>
+          <td class="paramname"><em>evt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Internal usage: when fstorage is done, this function will be called (indirectly through app_scheduler). </p>
+
+</div>
+</div>
+<a id="a26379a15471e09d7428269dbad523338" name="a26379a15471e09d7428269dbad523338"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26379a15471e09d7428269dbad523338">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MicroappStorage::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize fstorage, allocate buffer. </p>
+
+</div>
+</div>
+<a id="a27b44300efd0b80b00ce730e0a2fdb3b" name="a27b44300efd0b80b00ce730e0a2fdb3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27b44300efd0b80b00ce730e0a2fdb3b">&#9670;&#160;</a></span>isErased() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MicroappStorage::isErased </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>flashAddress</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reads flash, and checks if it's erased. </p>
+
+</div>
+</div>
 <a id="af6adb58e5214d21ad2c214bda11dfb06" name="af6adb58e5214d21ad2c214bda11dfb06"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af6adb58e5214d21ad2c214bda11dfb06">&#9670;&#160;</a></span>isErased()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#af6adb58e5214d21ad2c214bda11dfb06">&#9670;&#160;</a></span>isErased() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -273,6 +470,116 @@ ERR_BUSY Retry again later. </dd></dl>
 
 </div>
 </div>
+<a id="a79698dc8ead712d81348a553e84455e7" name="a79698dc8ead712d81348a553e84455e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79698dc8ead712d81348a553e84455e7">&#9670;&#160;</a></span>onFlashWritten()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappStorage::onFlashWritten </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td>
+          <td class="paramname"><em>retCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Called when data has been written to flash. </p>
+
+</div>
+</div>
+<a id="af8fd2de866df1cde0c370ef5f545659e" name="af8fd2de866df1cde0c370ef5f545659e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8fd2de866df1cde0c370ef5f545659e">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappStorage::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMicroappStorage.html">MicroappStorage</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a51cb664bd286ee89803fce67e59634a7" name="a51cb664bd286ee89803fce67e59634a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51cb664bd286ee89803fce67e59634a7">&#9670;&#160;</a></span>printHeader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappStorage::printHeader </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>logLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmicroapp__binary__header__t.html">microapp_binary_header_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>header</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad89cd833ba153b916fac9b849ed0807b" name="ad89cd833ba153b916fac9b849ed0807b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad89cd833ba153b916fac9b849ed0807b">&#9670;&#160;</a></span>resetChunkVars()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappStorage::resetChunkVars </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>To be called when a chunk has been written (or when it failed to write). </p>
+<p >Resets all variables. </p>
+
+</div>
+</div>
 <a id="a237ccf3b7bb00136a73efef1d5bf1e67" name="a237ccf3b7bb00136a73efef1d5bf1e67"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a237ccf3b7bb00136a73efef1d5bf1e67">&#9670;&#160;</a></span>validateApp()</h2>
 
@@ -280,7 +587,7 @@ ERR_BUSY Retry again later. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t MicroappStorage::validateApp </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MicroappStorage::validateApp </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>appIndex</em></td><td>)</td>
@@ -301,6 +608,51 @@ ERR_BUSY Retry again later. </dd></dl>
 
 </div>
 </div>
+<a id="a0536f8288dabc444d5269dcabed41488" name="a0536f8288dabc444d5269dcabed41488"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0536f8288dabc444d5269dcabed41488">&#9670;&#160;</a></span>write()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MicroappStorage::write </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>flashAddress</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write to flash. </p>
+<dl class="section return"><dt>Returns</dt><dd>ERR_SUCCESS The data will be written to flash. </dd></dl>
+
+</div>
+</div>
 <a id="adbcb5700cf0f7b1425ec2f032a89321a" name="adbcb5700cf0f7b1425ec2f032a89321a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adbcb5700cf0f7b1425ec2f032a89321a">&#9670;&#160;</a></span>writeChunk()</h2>
 
@@ -308,7 +660,7 @@ ERR_BUSY Retry again later. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t MicroappStorage::writeChunk </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MicroappStorage::writeChunk </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>appIndex</em>, </td>
@@ -360,6 +712,178 @@ ERR_WRONG_PAYLOAD_LENGTH Data size is not a multiple of 4. </dd>
 ERR_WRITE_DISABLED App storage space is not erased. </dd>
 <dd>
 ERR_BUSY Another chunk is being written already. </dd></dl>
+
+</div>
+</div>
+<a id="af7f48df8a6e575f95b4cea7df8bc9b1c" name="af7f48df8a6e575f95b4cea7df8bc9b1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7f48df8a6e575f95b4cea7df8bc9b1c">&#9670;&#160;</a></span>writeNextChunkPart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MicroappStorage::writeNextChunkPart </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write the next part of a chunk. </p>
+<p >Called first time from command, and every time when a flash write is done.</p>
+<dl class="section return"><dt>Returns</dt><dd>ERR_SUCCESS Complete chunk has been written to flash. </dd>
+<dd>
+ERR_WAIT_FOR_SUCCESS The data will be written to flash. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a7a3d964d7c5ed8fc925ee033815c6b81" name="a7a3d964d7c5ed8fc925ee033815c6b81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a3d964d7c5ed8fc925ee033815c6b81">&#9670;&#160;</a></span>_chunkData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t* MicroappStorage::_chunkData = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>When writing a chunk of data, it will be done in parts. </p>
+<p >These variable are needed to know what to write where to. </p>
+
+</div>
+</div>
+<a id="ab9682478ac99f666c1347ade0b3cba3a" name="ab9682478ac99f666c1347ade0b3cba3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9682478ac99f666c1347ade0b3cba3a">&#9670;&#160;</a></span>_chunkFlashAddress</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t MicroappStorage::_chunkFlashAddress = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a69b348eaa0911d1d2e179fd4180216ee" name="a69b348eaa0911d1d2e179fd4180216ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69b348eaa0911d1d2e179fd4180216ee">&#9670;&#160;</a></span>_chunkSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t MicroappStorage::_chunkSize = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9607cb30ef8f50ad4c0c0dedd87fcf07" name="a9607cb30ef8f50ad4c0c0dedd87fcf07"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9607cb30ef8f50ad4c0c0dedd87fcf07">&#9670;&#160;</a></span>_chunkWritten</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t MicroappStorage::_chunkWritten = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5d8667ef701dc4188c45327735a8b3ee" name="a5d8667ef701dc4188c45327735a8b3ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d8667ef701dc4188c45327735a8b3ee">&#9670;&#160;</a></span>_writeBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t MicroappStorage::_writeBuffer[<a class="el" href="cs__MicroappStorage_8h.html#a9f0cf9514efab4323548f962db931ae3">MICROAPP_STORAGE_BUF_SIZE</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The buffer is required to perform writes to flash, as the data has to be aligned, and stay in memory until the write is done. </p>
+
+</div>
+</div>
+<a id="a2cf79a9fe57eb6a91808408e73dabb3e" name="a2cf79a9fe57eb6a91808408e73dabb3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cf79a9fe57eb6a91808408e73dabb3e">&#9670;&#160;</a></span>_writing</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MicroappStorage::_writing = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up whether or not we are currently writing to (or erasing) flash. </p>
+<p >We tried using nrf_fstorage_is_busy() instead, but that seems to return busy when <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> is writing (because <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> uses FDS, which uses fstorage). </p>
 
 </div>
 </div>

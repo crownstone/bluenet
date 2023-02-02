@@ -99,6 +99,8 @@ $(document).ready(function(){initNavTree('classCircularDifferentialBuffer.html',
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classCircularDifferentialBuffer-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">CircularDifferentialBuffer&lt; T &gt; Class Template Reference</div></div>
 </div><!--header-->
@@ -159,6 +161,42 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:adbf237e9d3e04f50973bbf6bcd01e52c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#adbf237e9d3e04f50973bbf6bcd01e52c">push</a> (T value)</td></tr>
 <tr class="memdesc:adbf237e9d3e04f50973bbf6bcd01e52c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add an element to the end of the buffer @value the element to be added.  <a href="classCircularDifferentialBuffer.html#adbf237e9d3e04f50973bbf6bcd01e52c">More...</a><br /></td></tr>
 <tr class="separator:adbf237e9d3e04f50973bbf6bcd01e52c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a71a61484b4d13029eb59afd4c38d0518"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#a71a61484b4d13029eb59afd4c38d0518">incTail</a> ()</td></tr>
+<tr class="memdesc:a71a61484b4d13029eb59afd4c38d0518"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increases the tail.  <a href="classCircularDifferentialBuffer.html#a71a61484b4d13029eb59afd4c38d0518">More...</a><br /></td></tr>
+<tr class="separator:a71a61484b4d13029eb59afd4c38d0518"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a931933ddb9c94d29151d3e9792585752"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#a931933ddb9c94d29151d3e9792585752">incHead</a> ()</td></tr>
+<tr class="memdesc:a931933ddb9c94d29151d3e9792585752"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increases the head.  <a href="classCircularDifferentialBuffer.html#a931933ddb9c94d29151d3e9792585752">More...</a><br /></td></tr>
+<tr class="separator:a931933ddb9c94d29151d3e9792585752"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:acf7abb9b2b259c90c8c1b3af469258f5"><td class="memItemLeft" align="right" valign="top">int8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#acf7abb9b2b259c90c8c1b3af469258f5">_array</a></td></tr>
+<tr class="memdesc:acf7abb9b2b259c90c8c1b3af469258f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the array storing the difference of elements compared to the previous element.  <a href="classCircularDifferentialBuffer.html#acf7abb9b2b259c90c8c1b3af469258f5">More...</a><br /></td></tr>
+<tr class="separator:acf7abb9b2b259c90c8c1b3af469258f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23ea93598d46290b6e2ca3c9e74f219b"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#a23ea93598d46290b6e2ca3c9e74f219b">_capacity</a></td></tr>
+<tr class="memdesc:a23ea93598d46290b6e2ca3c9e74f219b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The capacity of the buffer (maximum number of elements)  <a href="classCircularDifferentialBuffer.html#a23ea93598d46290b6e2ca3c9e74f219b">More...</a><br /></td></tr>
+<tr class="separator:a23ea93598d46290b6e2ca3c9e74f219b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5188f178df05fe669b5e297880a53720"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#a5188f178df05fe669b5e297880a53720">_head</a></td></tr>
+<tr class="memdesc:a5188f178df05fe669b5e297880a53720"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the head (next element to be removed)  <a href="classCircularDifferentialBuffer.html#a5188f178df05fe669b5e297880a53720">More...</a><br /></td></tr>
+<tr class="separator:a5188f178df05fe669b5e297880a53720"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1721b22f3091a76a46ea34cd213509c6"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#a1721b22f3091a76a46ea34cd213509c6">_tail</a></td></tr>
+<tr class="memdesc:a1721b22f3091a76a46ea34cd213509c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the tail (where the next element will be inserted)  <a href="classCircularDifferentialBuffer.html#a1721b22f3091a76a46ea34cd213509c6">More...</a><br /></td></tr>
+<tr class="separator:a1721b22f3091a76a46ea34cd213509c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e7544565a7fa2a6ca7b53ca3cc96e81"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#a0e7544565a7fa2a6ca7b53ca3cc96e81">_contentSize</a></td></tr>
+<tr class="memdesc:a0e7544565a7fa2a6ca7b53ca3cc96e81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of elements stored in the buffer.  <a href="classCircularDifferentialBuffer.html#a0e7544565a7fa2a6ca7b53ca3cc96e81">More...</a><br /></td></tr>
+<tr class="separator:a0e7544565a7fa2a6ca7b53ca3cc96e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5af95178031d493b9f60f3cee44d04ab"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#a5af95178031d493b9f60f3cee44d04ab">_firstVal</a></td></tr>
+<tr class="memdesc:a5af95178031d493b9f60f3cee44d04ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value of the oldest element in the buffer.  <a href="classCircularDifferentialBuffer.html#a5af95178031d493b9f60f3cee44d04ab">More...</a><br /></td></tr>
+<tr class="separator:a5af95178031d493b9f60f3cee44d04ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4246b77b8232dbd7a6d966f92bad9e70"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#a4246b77b8232dbd7a6d966f92bad9e70">_lastVal</a></td></tr>
+<tr class="memdesc:a4246b77b8232dbd7a6d966f92bad9e70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value of the newest element in the buffer.  <a href="classCircularDifferentialBuffer.html#a4246b77b8232dbd7a6d966f92bad9e70">More...</a><br /></td></tr>
+<tr class="separator:a4246b77b8232dbd7a6d966f92bad9e70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b433275823a645e24dc5c26257c267f"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCircularDifferentialBuffer.html#a3b433275823a645e24dc5c26257c267f">_readIdx</a></td></tr>
+<tr class="memdesc:a3b433275823a645e24dc5c26257c267f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the last read value, used in <a class="el" href="classCircularDifferentialBuffer.html#ad181564803be6e586b45f01e7987a250" title="Get the next value of the buffer, after calling &lt;CircularDifferentialBuffer&gt;&gt;getFirstElement()&gt;">getNextElement()</a>  <a href="classCircularDifferentialBuffer.html#a3b433275823a645e24dc5c26257c267f">More...</a><br /></td></tr>
+<tr class="separator:a3b433275823a645e24dc5c26257c267f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
@@ -489,6 +527,66 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a id="a931933ddb9c94d29151d3e9792585752" name="a931933ddb9c94d29151d3e9792585752"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a931933ddb9c94d29151d3e9792585752">&#9670;&#160;</a></span>incHead()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::incHead </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Increases the head. </p>
+<p >Decreases the contentsSize and increases the index of the head. It also wraps around the head if the end of the array is reached. </p>
+
+</div>
+</div>
+<a id="a71a61484b4d13029eb59afd4c38d0518" name="a71a61484b4d13029eb59afd4c38d0518"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71a61484b4d13029eb59afd4c38d0518">&#9670;&#160;</a></span>incTail()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::incTail </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Increases the tail. </p>
+<p >Increases the contentsSize and the index of the tail. It also wraps the tail around if the end of the array is reached. </p>
+
+</div>
+</div>
 <a id="a7a4a1ad36fc3ecc9951137d4fca47807" name="a7a4a1ad36fc3ecc9951137d4fca47807"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7a4a1ad36fc3ecc9951137d4fca47807">&#9670;&#160;</a></span>init()</h2>
 
@@ -664,6 +762,215 @@ template&lt;typename T &gt; </div>
 
 <p>Returns the number of elements stored. </p>
 <dl class="section return"><dt>Returns</dt><dd>the number of elements stored in the buffer </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="acf7abb9b2b259c90c8c1b3af469258f5" name="acf7abb9b2b259c90c8c1b3af469258f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf7abb9b2b259c90c8c1b3af469258f5">&#9670;&#160;</a></span>_array</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t* <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::_array</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Pointer to the array storing the difference of elements compared to the previous element. </p>
+
+</div>
+</div>
+<a id="a23ea93598d46290b6e2ca3c9e74f219b" name="a23ea93598d46290b6e2ca3c9e74f219b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23ea93598d46290b6e2ca3c9e74f219b">&#9670;&#160;</a></span>_capacity</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::_capacity</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The capacity of the buffer (maximum number of elements) </p>
+
+</div>
+</div>
+<a id="a0e7544565a7fa2a6ca7b53ca3cc96e81" name="a0e7544565a7fa2a6ca7b53ca3cc96e81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e7544565a7fa2a6ca7b53ca3cc96e81">&#9670;&#160;</a></span>_contentSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::_contentSize</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of elements stored in the buffer. </p>
+
+</div>
+</div>
+<a id="a5af95178031d493b9f60f3cee44d04ab" name="a5af95178031d493b9f60f3cee44d04ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5af95178031d493b9f60f3cee44d04ab">&#9670;&#160;</a></span>_firstVal</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::_firstVal</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Value of the oldest element in the buffer. </p>
+
+</div>
+</div>
+<a id="a5188f178df05fe669b5e297880a53720" name="a5188f178df05fe669b5e297880a53720"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5188f178df05fe669b5e297880a53720">&#9670;&#160;</a></span>_head</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::_head</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Index of the head (next element to be removed) </p>
+
+</div>
+</div>
+<a id="a4246b77b8232dbd7a6d966f92bad9e70" name="a4246b77b8232dbd7a6d966f92bad9e70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4246b77b8232dbd7a6d966f92bad9e70">&#9670;&#160;</a></span>_lastVal</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::_lastVal</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Value of the newest element in the buffer. </p>
+
+</div>
+</div>
+<a id="a3b433275823a645e24dc5c26257c267f" name="a3b433275823a645e24dc5c26257c267f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b433275823a645e24dc5c26257c267f">&#9670;&#160;</a></span>_readIdx</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::_readIdx</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Index of the last read value, used in <a class="el" href="classCircularDifferentialBuffer.html#ad181564803be6e586b45f01e7987a250" title="Get the next value of the buffer, after calling &lt;CircularDifferentialBuffer&gt;&gt;getFirstElement()&gt;">getNextElement()</a> </p>
+
+</div>
+</div>
+<a id="a1721b22f3091a76a46ea34cd213509c6" name="a1721b22f3091a76a46ea34cd213509c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1721b22f3091a76a46ea34cd213509c6">&#9670;&#160;</a></span>_tail</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classCircularDifferentialBuffer.html">CircularDifferentialBuffer</a>&lt; T &gt;::_tail</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Index of the tail (where the next element will be inserted) </p>
 
 </div>
 </div>

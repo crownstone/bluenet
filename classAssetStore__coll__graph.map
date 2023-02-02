@@ -1,5 +1,10 @@
 <map id="AssetStore" name="AssetStore">
-<area shape="rect" id="node1" title=" " alt="" coords="79,79,171,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
-<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="245,313,337,339"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,189,116,214"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,189,237,214"/>
+<area shape="rect" id="node4" href="$classStore.html" title=" " alt="" coords="339,181,497,221"/>
+<area shape="rect" id="node5" href="$structasset__record__t.html" title=" " alt="" coords="359,93,477,119"/>
+<area shape="rect" id="node6" href="$structasset__id__t.html" title=" " alt="" coords="303,5,391,31"/>
+<area shape="rect" id="node7" href="$structrssi__and__channel__t.html" title=" " alt="" coords="415,5,562,31"/>
+<area shape="rect" id="node8" href="$classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick&#45;event or tick count and execute..." alt="" coords="521,189,606,214"/>
 </map>

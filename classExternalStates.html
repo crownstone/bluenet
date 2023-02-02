@@ -99,6 +99,8 @@ $(document).ready(function(){initNavTree('classExternalStates.html',''); initRes
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classExternalStates-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">ExternalStates Class Reference</div></div>
 </div><!--header-->
@@ -108,23 +110,61 @@ $(document).ready(function(){initNavTree('classExternalStates.html',''); initRes
  <a href="classExternalStates.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cs__ExternalStates_8h_source.html">cs_ExternalStates.h</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for ExternalStates:</div>
+<div class="dyncontent">
+<div class="center"><img src="classExternalStates__coll__graph.png" border="0" usemap="#aExternalStates_coll__map" alt="Collaboration graph"/></div>
+<map name="aExternalStates_coll__map" id="aExternalStates_coll__map">
+<area shape="rect" title="Class that keeps up states of other stones." alt="" coords="1417,209,1535,234"/>
+<area shape="rect" href="structcs__external__state__item__t.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: May 22,..." alt="" coords="1131,209,1317,234"/>
+<area shape="rect" href="structstate__external__stone__t.html" title="Struct to communicate received state of other stones." alt="" coords="875,209,1045,234"/>
+<area shape="rect" href="structservice__data__encrypted__t.html" title="This data is encrypted." alt="" coords="604,209,793,234"/>
+<area shape="rect" href="structservice__data__encrypted__state__t.html" title="State of this crownstone." alt="" coords="308,9,485,49"/>
+<area shape="rect" href="unionservice__data__state__flags__t.html" title=" " alt="" coords="21,141,166,181"/>
+<area shape="rect" href="structservice__data__encrypted__error__t.html" title="In case the crownstone has errors, this will be advertised next to the state." alt="" coords="308,73,485,113"/>
+<area shape="rect" href="structservice__data__encrypted__ext__state__t.html" title="State of another crownstone." alt="" coords="308,137,485,177"/>
+<area shape="rect" href="structservice__data__encrypted__ext__error__t.html" title="Errors of another crownstone." alt="" coords="308,201,485,241"/>
+<area shape="rect" href="structservice__data__encrypted__alternative__state__t.html" title="State of this crownstone." alt="" coords="308,265,485,305"/>
+<area shape="rect" href="unionservice__data__state__extra__flags__t.html" title=" " alt="" coords="21,5,166,45"/>
+<area shape="rect" href="structservice__data__hub__state__t.html" title=" " alt="" coords="303,330,491,355"/>
+<area shape="rect" href="unionservice__data__hub__state__flags__t.html" title=" " alt="" coords="5,321,181,361"/>
+<area shape="rect" href="structservice__data__encrypted__microapp__t.html" title="Microapp data that will be encrypted." alt="" coords="308,383,485,423"/>
+<area shape="rect" href="unionservice__data__microapp__flags__t.html" title=" " alt="" coords="7,385,180,425"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a98197c68856723ece5ba4af67c08cb4d"><td class="memItemLeft" align="right" valign="top"><a id="a98197c68856723ece5ba4af67c08cb4d" name="a98197c68856723ece5ba4af67c08cb4d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
+<tr class="memitem:a98197c68856723ece5ba4af67c08cb4d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#a98197c68856723ece5ba4af67c08cb4d">init</a> ()</td></tr>
 <tr class="separator:a98197c68856723ece5ba4af67c08cb4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaefeb7e1a4c03f4b349ba4c01e7a76ef"><td class="memItemLeft" align="right" valign="top"><a id="aaefeb7e1a4c03f4b349ba4c01e7a76ef" name="aaefeb7e1a4c03f4b349ba4c01e7a76ef"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>receivedState</b> (<a class="el" href="structstate__external__stone__t.html">state_external_stone_t</a> *extState)</td></tr>
-<tr class="memdesc:aaefeb7e1a4c03f4b349ba4c01e7a76ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called when the state of another stone has been received. <br /></td></tr>
+<tr class="memitem:aaefeb7e1a4c03f4b349ba4c01e7a76ef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#aaefeb7e1a4c03f4b349ba4c01e7a76ef">receivedState</a> (<a class="el" href="structstate__external__stone__t.html">state_external_stone_t</a> *extState)</td></tr>
+<tr class="memdesc:aaefeb7e1a4c03f4b349ba4c01e7a76ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called when the state of another stone has been received.  <a href="classExternalStates.html#aaefeb7e1a4c03f4b349ba4c01e7a76ef">More...</a><br /></td></tr>
 <tr class="separator:aaefeb7e1a4c03f4b349ba4c01e7a76ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a783edd337fb267d50cd1040b21a005ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structservice__data__encrypted__t.html">service_data_encrypted_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#a783edd337fb267d50cd1040b21a005ad">getNextState</a> ()</td></tr>
 <tr class="memdesc:a783edd337fb267d50cd1040b21a005ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a state to be broadcasted.  <a href="classExternalStates.html#a783edd337fb267d50cd1040b21a005ad">More...</a><br /></td></tr>
 <tr class="separator:a783edd337fb267d50cd1040b21a005ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28aa23c2f5a84c5d27adf76ac4a20f5b"><td class="memItemLeft" align="right" valign="top"><a id="a28aa23c2f5a84c5d27adf76ac4a20f5b" name="a28aa23c2f5a84c5d27adf76ac4a20f5b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>tick</b> (TYPIFY(EVT_TICK) tickCount)</td></tr>
-<tr class="memdesc:a28aa23c2f5a84c5d27adf76ac4a20f5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called every EVT_TICK. <br /></td></tr>
+<tr class="memitem:a28aa23c2f5a84c5d27adf76ac4a20f5b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#a28aa23c2f5a84c5d27adf76ac4a20f5b">tick</a> (<a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a515bd143f1e5ad4b32be7d2507f43d4b">EVT_TICK</a>) tickCount)</td></tr>
+<tr class="memdesc:a28aa23c2f5a84c5d27adf76ac4a20f5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called every EVT_TICK.  <a href="classExternalStates.html#a28aa23c2f5a84c5d27adf76ac4a20f5b">More...</a><br /></td></tr>
 <tr class="separator:a28aa23c2f5a84c5d27adf76ac4a20f5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:af2c525b3addf7e4f5f97def06d134ba0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#af2c525b3addf7e4f5f97def06d134ba0">removeFromList</a> (<a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> id)</td></tr>
+<tr class="separator:af2c525b3addf7e4f5f97def06d134ba0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae088bb12804dddae94edb7a2e41d9da4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#ae088bb12804dddae94edb7a2e41d9da4">addToList</a> (int index, <a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> id, <a class="el" href="structstate__external__stone__t.html">state_external_stone_t</a> *state)</td></tr>
+<tr class="separator:ae088bb12804dddae94edb7a2e41d9da4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e40b7d7a88a19144f6b9ef034762f66"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#a8e40b7d7a88a19144f6b9ef034762f66">fixState</a> (<a class="el" href="structstate__external__stone__t.html">state_external_stone_t</a> *state)</td></tr>
+<tr class="separator:a8e40b7d7a88a19144f6b9ef034762f66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1599478856580f694d638d084821e27f"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#a1599478856580f694d638d084821e27f">getRssi</a> (<a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> id)</td></tr>
+<tr class="separator:a1599478856580f694d638d084821e27f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:aeaa65b14d7d92828db1eed8ff8ccd8ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcs__external__state__item__t.html">cs_external_state_item_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#aeaa65b14d7d92828db1eed8ff8ccd8ed">_states</a></td></tr>
+<tr class="separator:aeaa65b14d7d92828db1eed8ff8ccd8ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac35d3af75661dd91f2dc728e16ec8d1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExternalStates.html#aac35d3af75661dd91f2dc728e16ec8d1">_broadcastIndex</a> = 0</td></tr>
+<tr class="memdesc:aac35d3af75661dd91f2dc728e16ec8d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of states to be broadcasted next.  <a href="classExternalStates.html#aac35d3af75661dd91f2dc728e16ec8d1">More...</a><br /></td></tr>
+<tr class="separator:aac35d3af75661dd91f2dc728e16ec8d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that keeps up states of other stones. </p>
@@ -134,6 +174,74 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>tick</b> (TYPIFY(EVT_
 <li>Choosing which state should be broadcasted next. </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ae088bb12804dddae94edb7a2e41d9da4" name="ae088bb12804dddae94edb7a2e41d9da4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae088bb12804dddae94edb7a2e41d9da4">&#9670;&#160;</a></span>addToList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExternalStates::addToList </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structstate__external__stone__t.html">state_external_stone_t</a> *&#160;</td>
+          <td class="paramname"><em>state</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8e40b7d7a88a19144f6b9ef034762f66" name="a8e40b7d7a88a19144f6b9ef034762f66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e40b7d7a88a19144f6b9ef034762f66">&#9670;&#160;</a></span>fixState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExternalStates::fixState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structstate__external__stone__t.html">state_external_stone_t</a> *&#160;</td>
+          <td class="paramname"><em>state</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a783edd337fb267d50cd1040b21a005ad" name="a783edd337fb267d50cd1040b21a005ad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a783edd337fb267d50cd1040b21a005ad">&#9670;&#160;</a></span>getNextState()</h2>
 
@@ -151,6 +259,162 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>tick</b> (TYPIFY(EVT_
 
 <p>Get a state to be broadcasted. </p>
 <p >Returns NULL if no state was found. </p>
+
+</div>
+</div>
+<a id="a1599478856580f694d638d084821e27f" name="a1599478856580f694d638d084821e27f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1599478856580f694d638d084821e27f">&#9670;&#160;</a></span>getRssi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t ExternalStates::getRssi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a98197c68856723ece5ba4af67c08cb4d" name="a98197c68856723ece5ba4af67c08cb4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98197c68856723ece5ba4af67c08cb4d">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExternalStates::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaefeb7e1a4c03f4b349ba4c01e7a76ef" name="aaefeb7e1a4c03f4b349ba4c01e7a76ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaefeb7e1a4c03f4b349ba4c01e7a76ef">&#9670;&#160;</a></span>receivedState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExternalStates::receivedState </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structstate__external__stone__t.html">state_external_stone_t</a> *&#160;</td>
+          <td class="paramname"><em>extState</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>To be called when the state of another stone has been received. </p>
+
+</div>
+</div>
+<a id="af2c525b3addf7e4f5f97def06d134ba0" name="af2c525b3addf7e4f5f97def06d134ba0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2c525b3addf7e4f5f97def06d134ba0">&#9670;&#160;</a></span>removeFromList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExternalStates::removeFromList </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a28aa23c2f5a84c5d27adf76ac4a20f5b" name="a28aa23c2f5a84c5d27adf76ac4a20f5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28aa23c2f5a84c5d27adf76ac4a20f5b">&#9670;&#160;</a></span>tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ExternalStates::tick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#a74620d9fe3e29d50b0f3bb37b3ff86e3">TYPIFY</a>(<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a515bd143f1e5ad4b32be7d2507f43d4b">EVT_TICK</a>)&#160;</td>
+          <td class="paramname"><em>tickCount</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>To be called every EVT_TICK. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="aac35d3af75661dd91f2dc728e16ec8d1" name="aac35d3af75661dd91f2dc728e16ec8d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac35d3af75661dd91f2dc728e16ec8d1">&#9670;&#160;</a></span>_broadcastIndex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ExternalStates::_broadcastIndex = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Index of states to be broadcasted next. </p>
+
+</div>
+</div>
+<a id="aeaa65b14d7d92828db1eed8ff8ccd8ed" name="aeaa65b14d7d92828db1eed8ff8ccd8ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeaa65b14d7d92828db1eed8ff8ccd8ed">&#9670;&#160;</a></span>_states</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcs__external__state__item__t.html">cs_external_state_item_t</a>* ExternalStates::_states</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

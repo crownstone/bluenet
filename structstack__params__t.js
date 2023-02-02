@@ -1,7 +1,7 @@
 var structstack__params__t =
 [
-    [ "arg", "structstack__params__t.html#a8b53671232e7738889e333e89f09b635", null ],
-    [ "coroutine", "structstack__params__t.html#a38578d1f25940bea9e1062ad5b53cd9a", null ],
-    [ "coroutineFunction", "structstack__params__t.html#a8c4200b724979d49763d0309c3dce1ff", null ],
+    [ "coroutine", "structstack__params__t.html#a1bf260bd36dd60c96b93fc9c268de874", null ],
+    [ "coroutineArgumentBuffer", "structstack__params__t.html#a6bb1f7b62b450073373e2cf7293c94f3", null ],
+    [ "coroutineFunction", "structstack__params__t.html#a3e2deff087172e24ec8ca597eff76a51", null ],
     [ "oldStackPointer", "structstack__params__t.html#a835b87a6ef34d97bf393b56e4a2f0ab5", null ]
 ];

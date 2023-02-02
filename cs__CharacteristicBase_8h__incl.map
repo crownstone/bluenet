@@ -1,10 +1,10 @@
 <map id="source/include/ble/cs_CharacteristicBase.h" name="source/include/ble/cs_CharacteristicBase.h">
 <area shape="rect" id="node1" title="Bluetooth Low Energy characteristics." alt="" coords="2682,5,2863,45"/>
-<area shape="rect" id="node2" href="$cs__Nordic_8h_source.html" title=" " alt="" coords="2119,335,2240,361"/>
+<area shape="rect" id="node2" href="$cs__Nordic_8h.html" title=" " alt="" coords="2119,335,2240,361"/>
 <area shape="rect" id="node39" href="$cs__Service_8h.html" title="BLE service." alt="" coords="2612,101,2739,126"/>
-<area shape="rect" id="node44" href="$cs__Types_8h_source.html" title=" " alt="" coords="3741,255,3895,280"/>
-<area shape="rect" id="node48" href="$function_8h_source.html" title=" " alt="" coords="3069,255,3215,280"/>
-<area shape="rect" id="node50" href="$cs__CharacteristicStructs_8h_source.html" title=" " alt="" coords="2959,93,3141,133"/>
+<area shape="rect" id="node44" href="$cs__Types_8h.html" title=" " alt="" coords="3741,255,3895,280"/>
+<area shape="rect" id="node48" href="$function_8h.html" title=" " alt="" coords="3069,255,3215,280"/>
+<area shape="rect" id="node50" href="$cs__CharacteristicStructs_8h.html" title=" " alt="" coords="2959,93,3141,133"/>
 <area shape="rect" id="node3" title=" " alt="" coords="3853,416,4002,441"/>
 <area shape="rect" id="node4" title=" " alt="" coords="4026,416,4154,441"/>
 <area shape="rect" id="node5" title=" " alt="" coords="4179,416,4265,441"/>
@@ -42,11 +42,11 @@
 <area shape="rect" id="node37" title=" " alt="" coords="3624,416,3719,441"/>
 <area shape="rect" id="node38" title=" " alt="" coords="3743,416,3829,441"/>
 <area shape="rect" id="node40" href="$cs__Stack_8h.html" title="Manufacturing data." alt="" coords="2618,181,2733,207"/>
-<area shape="rect" id="node41" href="$cs__Strings_8h_source.html" title=" " alt="" coords="2496,255,2620,280"/>
-<area shape="rect" id="node42" href="$cs__BaseClass_8h_source.html" title=" " alt="" coords="2696,255,2879,280"/>
-<area shape="rect" id="node43" href="$cs__Tuple_8h_source.html" title=" " alt="" coords="2321,255,2472,280"/>
-<area shape="rect" id="node47" href="$cs__Timer_8h_source.html" title=" " alt="" coords="2903,255,3045,280"/>
-<area shape="rect" id="node49" href="$cs__BleError_8h_source.html" title=" " alt="" coords="2165,255,2297,280"/>
-<area shape="rect" id="node45" href="$cs__ExtendedSwitchBehaviour_8h_source.html" title=" " alt="" coords="3821,328,4037,368"/>
-<area shape="rect" id="node46" href="$cs__SwitchBehaviour_8h_source.html" title=" " alt="" coords="4289,416,4523,441"/>
+<area shape="rect" id="node41" href="$cs__Strings_8h.html" title=" " alt="" coords="2496,255,2620,280"/>
+<area shape="rect" id="node42" href="$cs__BaseClass_8h.html" title=" " alt="" coords="2696,255,2879,280"/>
+<area shape="rect" id="node43" href="$cs__Tuple_8h.html" title=" " alt="" coords="2321,255,2472,280"/>
+<area shape="rect" id="node47" href="$cs__Timer_8h.html" title=" " alt="" coords="2903,255,3045,280"/>
+<area shape="rect" id="node49" href="$cs__BleError_8h.html" title=" " alt="" coords="2165,255,2297,280"/>
+<area shape="rect" id="node45" href="$cs__ExtendedSwitchBehaviour_8h.html" title=" " alt="" coords="3821,328,4037,368"/>
+<area shape="rect" id="node46" href="$cs__SwitchBehaviour_8h.html" title=" " alt="" coords="4289,416,4523,441"/>
 </map>

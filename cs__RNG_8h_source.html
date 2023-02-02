@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__RNG_8h_source.html',''); initResiz
   <div class="headertitle"><div class="title">cs_RNG.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__RNG_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: 5 Jan., 2015</span></div>
@@ -113,36 +113,45 @@ $(document).ready(function(){initNavTree('cs__RNG_8h_source.html',''); initResiz
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="classRNG.html">   14</a></span><span class="keyword">class </span><a class="code hl_class" href="classRNG.html">RNG</a> {</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">public</span>:</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="comment">// Use static variant of singleton, no dynamic memory allocation</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <span class="keyword">static</span> <a class="code hl_class" href="classRNG.html">RNG</a>&amp; getInstance() {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="classRNG.html#ac38526ca47d3dfd624c18dc71cb5a73c">   17</a></span>    <span class="keyword">static</span> <a class="code hl_class" href="classRNG.html">RNG</a>&amp; <a class="code hl_function" href="classRNG.html#ac38526ca47d3dfd624c18dc71cb5a73c">getInstance</a>() {</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        <span class="keyword">static</span> <a class="code hl_class" href="classRNG.html">RNG</a> instance;</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <span class="keywordflow">return</span> instance;</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    }</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> fillBuffer(uint8_t* buffer, uint8_t length);</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="classRNG.html#a0c1f92f1c98ca11975be5ed48ebbb783">   22</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classRNG.html#a0c1f92f1c98ca11975be5ed48ebbb783">fillBuffer</a>(uint8_t* buffer, uint8_t length);</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    uint32_t getRandom32();</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    uint16_t getRandom16();</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    uint8_t getRandom8();</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classRNG.html#a9f351341cbb84995b1de044a761a0021">   24</a></span>    uint32_t <a class="code hl_function" href="classRNG.html#a9f351341cbb84995b1de044a761a0021">getRandom32</a>();</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classRNG.html#aed34c5318ca9691102fc84bd8d423a56">   25</a></span>    uint16_t <a class="code hl_function" href="classRNG.html#aed34c5318ca9691102fc84bd8d423a56">getRandom16</a>();</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classRNG.html#a69dc0540c0e2e1ad6418ad9bcb4dcd55">   26</a></span>    uint8_t <a class="code hl_function" href="classRNG.html#a69dc0540c0e2e1ad6418ad9bcb4dcd55">getRandom8</a>();</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    uint8_t _randomBytes[4];</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classRNG.html#af64fc897d26c86cc33f8787aba090b34">   29</a></span>    uint8_t <a class="code hl_variable" href="classRNG.html#af64fc897d26c86cc33f8787aba090b34">_randomBytes</a>[4];</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="comment">// Constructor</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <a class="code hl_class" href="classRNG.html">RNG</a>();</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classRNG.html#a0028b717ff3d402a5829fc09ab1c5ed4">   32</a></span>    <a class="code hl_function" href="classRNG.html#a0028b717ff3d402a5829fc09ab1c5ed4">RNG</a>();</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="comment">// This class is singleton, deny implementation</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <a class="code hl_class" href="classRNG.html">RNG</a>(<a class="code hl_class" href="classRNG.html">RNG</a> <span class="keyword">const</span>&amp;);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classRNG.html#a6a5e89a73e0f6ce3b97b84258e1fc1f8">   35</a></span>    <a class="code hl_function" href="classRNG.html#a6a5e89a73e0f6ce3b97b84258e1fc1f8">RNG</a>(<a class="code hl_class" href="classRNG.html">RNG</a> <span class="keyword">const</span>&amp;);</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// This class is singleton, deny implementation</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordtype">void</span> operator=(<a class="code hl_class" href="classRNG.html">RNG</a> <span class="keyword">const</span>&amp;);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classRNG.html#a0755c08e380ebb49bb59a133ffb9c648">   38</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classRNG.html#a0755c08e380ebb49bb59a133ffb9c648">operator=</a>(<a class="code hl_class" href="classRNG.html">RNG</a> <span class="keyword">const</span>&amp;);</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>};</div>
 <div class="ttc" id="aclassRNG_html"><div class="ttname"><a href="classRNG.html">RNG</a></div><div class="ttdoc">Random number generator using softdevice called peripheral.</div><div class="ttdef"><b>Definition:</b> cs_RNG.h:14</div></div>
+<div class="ttc" id="aclassRNG_html_a0028b717ff3d402a5829fc09ab1c5ed4"><div class="ttname"><a href="classRNG.html#a0028b717ff3d402a5829fc09ab1c5ed4">RNG::RNG</a></div><div class="ttdeci">RNG()</div></div>
+<div class="ttc" id="aclassRNG_html_a0755c08e380ebb49bb59a133ffb9c648"><div class="ttname"><a href="classRNG.html#a0755c08e380ebb49bb59a133ffb9c648">RNG::operator=</a></div><div class="ttdeci">void operator=(RNG const &amp;)</div></div>
+<div class="ttc" id="aclassRNG_html_a0c1f92f1c98ca11975be5ed48ebbb783"><div class="ttname"><a href="classRNG.html#a0c1f92f1c98ca11975be5ed48ebbb783">RNG::fillBuffer</a></div><div class="ttdeci">static void fillBuffer(uint8_t *buffer, uint8_t length)</div></div>
+<div class="ttc" id="aclassRNG_html_a69dc0540c0e2e1ad6418ad9bcb4dcd55"><div class="ttname"><a href="classRNG.html#a69dc0540c0e2e1ad6418ad9bcb4dcd55">RNG::getRandom8</a></div><div class="ttdeci">uint8_t getRandom8()</div></div>
+<div class="ttc" id="aclassRNG_html_a6a5e89a73e0f6ce3b97b84258e1fc1f8"><div class="ttname"><a href="classRNG.html#a6a5e89a73e0f6ce3b97b84258e1fc1f8">RNG::RNG</a></div><div class="ttdeci">RNG(RNG const &amp;)</div></div>
+<div class="ttc" id="aclassRNG_html_a9f351341cbb84995b1de044a761a0021"><div class="ttname"><a href="classRNG.html#a9f351341cbb84995b1de044a761a0021">RNG::getRandom32</a></div><div class="ttdeci">uint32_t getRandom32()</div></div>
+<div class="ttc" id="aclassRNG_html_ac38526ca47d3dfd624c18dc71cb5a73c"><div class="ttname"><a href="classRNG.html#ac38526ca47d3dfd624c18dc71cb5a73c">RNG::getInstance</a></div><div class="ttdeci">static RNG &amp; getInstance()</div><div class="ttdef"><b>Definition:</b> cs_RNG.h:17</div></div>
+<div class="ttc" id="aclassRNG_html_aed34c5318ca9691102fc84bd8d423a56"><div class="ttname"><a href="classRNG.html#aed34c5318ca9691102fc84bd8d423a56">RNG::getRandom16</a></div><div class="ttdeci">uint16_t getRandom16()</div></div>
+<div class="ttc" id="aclassRNG_html_af64fc897d26c86cc33f8787aba090b34"><div class="ttname"><a href="classRNG.html#af64fc897d26c86cc33f8787aba090b34">RNG::_randomBytes</a></div><div class="ttdeci">uint8_t _randomBytes[4]</div><div class="ttdef"><b>Definition:</b> cs_RNG.h:29</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><b>cs_RNG.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><a class="el" href="cs__RNG_8h.html">cs_RNG.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

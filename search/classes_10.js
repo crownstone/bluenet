@@ -40,7 +40,7 @@ var searchData=
   ['storage_37',['Storage',['../classStorage.html',1,'']]],
   ['store_38',['Store',['../classStore.html',1,'']]],
   ['store_3c_20asset_5frecord_5ft_2c_20max_5frecords_20_3e_39',['Store&lt; asset_record_t, MAX_RECORDS &gt;',['../classStore.html',1,'']]],
-  ['store_3c_20presencerecord_2c_20max_5frecords_20_3e_40',['Store&lt; PresenceRecord, MAX_RECORDS &gt;',['../classStore.html',1,'']]],
+  ['store_3c_20presencehandler_3a_3apresencerecord_2c_20max_5frecords_20_3e_40',['Store&lt; PresenceHandler::PresenceRecord, MAX_RECORDS &gt;',['../classStore.html',1,'']]],
   ['store_3c_20trackeddevice_2c_20max_5ftracked_5fdevices_20_3e_41',['Store&lt; TrackedDevice, MAX_TRACKED_DEVICES &gt;',['../classStore.html',1,'']]],
   ['streambufferaccessor_42',['StreamBufferAccessor',['../classStreamBufferAccessor.html',1,'']]],
   ['sun_5ftime_5ft_43',['sun_time_t',['../structsun__time__t.html',1,'']]],

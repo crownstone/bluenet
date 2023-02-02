@@ -100,6 +100,9 @@ $(document).ready(function(){initNavTree('classSystemTime.html',''); initResizab
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="#friends">Friends</a> &#124;
 <a href="classSystemTime-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">SystemTime Class Reference</div></div>
@@ -124,31 +127,34 @@ Collaboration diagram for SystemTime:</div>
 <div class="dyncontent">
 <div class="center"><img src="classSystemTime__coll__graph.png" border="0" usemap="#aSystemTime_coll__map" alt="Collaboration graph"/></div>
 <map name="aSystemTime_coll__map" id="aSystemTime_coll__map">
-<area shape="rect" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="9,79,112,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="168,123,271,148"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,13,116,38"/>
+<area shape="rect" href="structhigh__resolution__time__stamp__t.html" title="Versioned timestamp with milliseconds precision." alt="" coords="140,5,299,45"/>
+<area shape="rect" href="classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick&#45;event or tick count and execute..." alt="" coords="323,13,409,38"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a0fbf2f237dcb4cac4f06efc90634cedd"><td class="memItemLeft" align="right" valign="top"><a id="a0fbf2f237dcb4cac4f06efc90634cedd" name="a0fbf2f237dcb4cac4f06efc90634cedd"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="memdesc:a0fbf2f237dcb4cac4f06efc90634cedd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and starts the first tick timer. <br /></td></tr>
+<tr class="memitem:a0fbf2f237dcb4cac4f06efc90634cedd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a0fbf2f237dcb4cac4f06efc90634cedd">init</a> ()</td></tr>
+<tr class="memdesc:a0fbf2f237dcb4cac4f06efc90634cedd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and starts the first tick timer.  <a href="classSystemTime.html#a0fbf2f237dcb4cac4f06efc90634cedd">More...</a><br /></td></tr>
 <tr class="separator:a0fbf2f237dcb4cac4f06efc90634cedd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6ef48520fb6df7c3348e1fee15124aef"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a6ef48520fb6df7c3348e1fee15124aef">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:a6ef48520fb6df7c3348e1fee15124aef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classSystemTime.html#a6ef48520fb6df7c3348e1fee15124aef">More...</a><br /></td></tr>
 <tr class="separator:a6ef48520fb6df7c3348e1fee15124aef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf7096fce6066fe9f97df0929036e037"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#acf7096fce6066fe9f97df0929036e037">~SystemTime</a> ()=default</td></tr>
+<tr class="separator:acf7096fce6066fe9f97df0929036e037"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
@@ -156,32 +162,138 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a25fa5433cd6d28ae959fc7567b716bf1"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a25fa5433cd6d28ae959fc7567b716bf1">posix</a> ()</td></tr>
 <tr class="memdesc:a25fa5433cd6d28ae959fc7567b716bf1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current time as posix timestamp in seconds.  <a href="classSystemTime.html#a25fa5433cd6d28ae959fc7567b716bf1">More...</a><br /></td></tr>
 <tr class="separator:a25fa5433cd6d28ae959fc7567b716bf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1c7c2a9f489533d4f506b37a6afc428"><td class="memItemLeft" align="right" valign="top"><a id="aa1c7c2a9f489533d4f506b37a6afc428" name="aa1c7c2a9f489533d4f506b37a6afc428"></a>
-static <a class="el" href="classTime.html">Time</a>&#160;</td><td class="memItemRight" valign="bottom"><b>now</b> ()</td></tr>
-<tr class="memdesc:aa1c7c2a9f489533d4f506b37a6afc428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current time as <a class="el" href="classTime.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,...">Time</a> object. <br /></td></tr>
+<tr class="memitem:aa1c7c2a9f489533d4f506b37a6afc428"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classTime.html">Time</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#aa1c7c2a9f489533d4f506b37a6afc428">now</a> ()</td></tr>
+<tr class="memdesc:aa1c7c2a9f489533d4f506b37a6afc428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current time as <a class="el" href="classTime.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,...">Time</a> object.  <a href="classSystemTime.html#aa1c7c2a9f489533d4f506b37a6afc428">More...</a><br /></td></tr>
 <tr class="separator:aa1c7c2a9f489533d4f506b37a6afc428"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f5228fe58794bbefab0c327530fa640"><td class="memItemLeft" align="right" valign="top"><a id="a5f5228fe58794bbefab0c327530fa640" name="a5f5228fe58794bbefab0c327530fa640"></a>
-static DayOfWeek&#160;</td><td class="memItemRight" valign="bottom"><b>day</b> ()</td></tr>
-<tr class="memdesc:a5f5228fe58794bbefab0c327530fa640"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current weekday. <br /></td></tr>
+<tr class="memitem:a5f5228fe58794bbefab0c327530fa640"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="cs__DayOfWeek_8h.html#a68cdad1f67284b098bb2d4b5a0e9e5b3">DayOfWeek</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a5f5228fe58794bbefab0c327530fa640">day</a> ()</td></tr>
+<tr class="memdesc:a5f5228fe58794bbefab0c327530fa640"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current weekday.  <a href="classSystemTime.html#a5f5228fe58794bbefab0c327530fa640">More...</a><br /></td></tr>
 <tr class="separator:a5f5228fe58794bbefab0c327530fa640"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ee900ede82f5e572f9d920d02a45e58"><td class="memItemLeft" align="right" valign="top"><a id="a1ee900ede82f5e572f9d920d02a45e58" name="a1ee900ede82f5e572f9d920d02a45e58"></a>
-static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>up</b> ()</td></tr>
-<tr class="memdesc:a1ee900ede82f5e572f9d920d02a45e58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uptime in seconds. <br /></td></tr>
+<tr class="memitem:a1ee900ede82f5e572f9d920d02a45e58"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a1ee900ede82f5e572f9d920d02a45e58">up</a> ()</td></tr>
+<tr class="memdesc:a1ee900ede82f5e572f9d920d02a45e58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uptime in seconds.  <a href="classSystemTime.html#a1ee900ede82f5e572f9d920d02a45e58">More...</a><br /></td></tr>
 <tr class="separator:a1ee900ede82f5e572f9d920d02a45e58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1947a41954f9ccb5e0ea353e5d8ae3b4"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structhigh__resolution__time__stamp__t.html">high_resolution_time_stamp_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a1947a41954f9ccb5e0ea353e5d8ae3b4">getSynchronizedStamp</a> ()</td></tr>
 <tr class="memdesc:a1947a41954f9ccb5e0ea353e5d8ae3b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the synchronized timestamp, updated to current time.  <a href="classSystemTime.html#a1947a41954f9ccb5e0ea353e5d8ae3b4">More...</a><br /></td></tr>
 <tr class="separator:a1947a41954f9ccb5e0ea353e5d8ae3b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad07812f53ac2dd8d1d0ae1b8edc72a61"><td class="memItemLeft" align="right" valign="top">static cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ad07812f53ac2dd8d1d0ae1b8edc72a61">setTime</a> (uint32_t time, bool throttled, bool sendToMesh)</td></tr>
+<tr class="memitem:ad07812f53ac2dd8d1d0ae1b8edc72a61"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ad07812f53ac2dd8d1d0ae1b8edc72a61">setTime</a> (uint32_t time, bool throttled, bool sendToMesh)</td></tr>
 <tr class="memdesc:ad07812f53ac2dd8d1d0ae1b8edc72a61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the system wide time to given posix timestamp.  <a href="classSystemTime.html#ad07812f53ac2dd8d1d0ae1b8edc72a61">More...</a><br /></td></tr>
 <tr class="separator:ad07812f53ac2dd8d1d0ae1b8edc72a61"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36b2f8ee490d7fde6000c3c7ac9ed99b"><td class="memItemLeft" align="right" valign="top">static cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a36b2f8ee490d7fde6000c3c7ac9ed99b">setSunTimes</a> (const <a class="el" href="structsun__time__t.html">sun_time_t</a> &amp;sunTimes, bool throttled=true)</td></tr>
+<tr class="memitem:a36b2f8ee490d7fde6000c3c7ac9ed99b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a36b2f8ee490d7fde6000c3c7ac9ed99b">setSunTimes</a> (const <a class="el" href="structsun__time__t.html">sun_time_t</a> &amp;sunTimes, bool throttled=true)</td></tr>
 <tr class="memdesc:a36b2f8ee490d7fde6000c3c7ac9ed99b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the sunrise and sunset times.  <a href="classSystemTime.html#a36b2f8ee490d7fde6000c3c7ac9ed99b">More...</a><br /></td></tr>
 <tr class="separator:a36b2f8ee490d7fde6000c3c7ac9ed99b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a257811e7894c05c329389f90e848bd19"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a257811e7894c05c329389f90e848bd19">isOnlyReceiveByThisDevice</a> (<a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> counted_source)</td></tr>
+<tr class="memdesc:a257811e7894c05c329389f90e848bd19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if the command source is uart or ble through connection.  <a href="classSystemTime.html#a257811e7894c05c329389f90e848bd19">More...</a><br /></td></tr>
+<tr class="separator:a257811e7894c05c329389f90e848bd19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
+Static Private Member Functions</h2></td></tr>
+<tr class="memitem:a551ce05834ca675ae2a3232f1910bac5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a551ce05834ca675ae2a3232f1910bac5">scheduleNextTick</a> ()</td></tr>
+<tr class="separator:a551ce05834ca675ae2a3232f1910bac5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dba2d78d5add070045733449b1236cb"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a8dba2d78d5add070045733449b1236cb">tick</a> (void *unused)</td></tr>
+<tr class="memdesc:a8dba2d78d5add070045733449b1236cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Must be called at least once per second to update upTimeSec.  <a href="classSystemTime.html#a8dba2d78d5add070045733449b1236cb">More...</a><br /></td></tr>
+<tr class="separator:a8dba2d78d5add070045733449b1236cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf5d90cc1fda77e66b4e8ea442619c3d"><td class="memItemLeft" align="right" valign="top">static constexpr uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#aaf5d90cc1fda77e66b4e8ea442619c3d">reboot_sync_timeout_ms</a> ()</td></tr>
+<tr class="memdesc:aaf5d90cc1fda77e66b4e8ea442619c3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timeout period before considering this stone to be root clock.  <a href="classSystemTime.html#aaf5d90cc1fda77e66b4e8ea442619c3d">More...</a><br /></td></tr>
+<tr class="separator:aaf5d90cc1fda77e66b4e8ea442619c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f8d1812cef8fc82dc3ed40199eaf606"><td class="memItemLeft" align="right" valign="top">static constexpr uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a4f8d1812cef8fc82dc3ed40199eaf606">root_clock_update_period_ms</a> ()</td></tr>
+<tr class="memdesc:a4f8d1812cef8fc82dc3ed40199eaf606"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classTime.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,...">Time</a> between sync messages from the root clock.  <a href="classSystemTime.html#a4f8d1812cef8fc82dc3ed40199eaf606">More...</a><br /></td></tr>
+<tr class="separator:a4f8d1812cef8fc82dc3ed40199eaf606"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0c516f1f49cae9235eafa00981945cf"><td class="memItemLeft" align="right" valign="top">static constexpr uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ae0c516f1f49cae9235eafa00981945cf">root_clock_reelection_timeout_ms</a> ()</td></tr>
+<tr class="memdesc:ae0c516f1f49cae9235eafa00981945cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">If no sync message has been received from the root clock for this time, a new root clock will be selected.  <a href="classSystemTime.html#ae0c516f1f49cae9235eafa00981945cf">More...</a><br /></td></tr>
+<tr class="separator:ae0c516f1f49cae9235eafa00981945cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3774207fc805dccc9d89d18a3fb6799"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ac3774207fc805dccc9d89d18a3fb6799">stone_id_init</a> ()</td></tr>
+<tr class="memdesc:ac3774207fc805dccc9d89d18a3fb6799"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stone id to use for initialization.  <a href="classSystemTime.html#ac3774207fc805dccc9d89d18a3fb6799">More...</a><br /></td></tr>
+<tr class="separator:ac3774207fc805dccc9d89d18a3fb6799"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22ec6abc17ec51ee861af416e0c10353"><td class="memItemLeft" align="right" valign="top">static constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a22ec6abc17ec51ee861af416e0c10353">timestamp_version_lollipop_max</a> ()</td></tr>
+<tr class="memdesc:a22ec6abc17ec51ee861af416e0c10353"><td class="mdescLeft">&#160;</td><td class="mdescRight">The time version is lollipop versioned.  <a href="classSystemTime.html#a22ec6abc17ec51ee861af416e0c10353">More...</a><br /></td></tr>
+<tr class="separator:a22ec6abc17ec51ee861af416e0c10353"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c6c937422fb8a4f956e435896771c3d"><td class="memItemLeft" align="right" valign="top">static constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a4c6c937422fb8a4f956e435896771c3d">timestamp_version_min_valid</a> ()</td></tr>
+<tr class="memdesc:a4c6c937422fb8a4f956e435896771c3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lowest time version at which a valid posix time is set.  <a href="classSystemTime.html#a4c6c937422fb8a4f956e435896771c3d">More...</a><br /></td></tr>
+<tr class="separator:a4c6c937422fb8a4f956e435896771c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3597d730e9a30b86b83bd51487a2be25"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a3597d730e9a30b86b83bd51487a2be25">syncTimeCoroutineAction</a> ()</td></tr>
+<tr class="separator:a3597d730e9a30b86b83bd51487a2be25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb27ccf0e567d313eeb09b9680d8d43f"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#abb27ccf0e567d313eeb09b9680d8d43f">timeStampVersion</a> ()</td></tr>
+<tr class="separator:abb27ccf0e567d313eeb09b9680d8d43f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a465bb462fa421a0b7c3ac29f4daa3c4c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a465bb462fa421a0b7c3ac29f4daa3c4c">onTimeSyncMessageReceive</a> (<a class="el" href="structtime__sync__message__t.html">time_sync_message_t</a> syncmessage)</td></tr>
+<tr class="separator:a465bb462fa421a0b7c3ac29f4daa3c4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfbe66c95eb71456fc78f2ef9e496317"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#adfbe66c95eb71456fc78f2ef9e496317">setRootTimeStamp</a> (<a class="el" href="structhigh__resolution__time__stamp__t.html">high_resolution_time_stamp_t</a> stamp, <a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> id, uint32_t rtcCount)</td></tr>
+<tr class="separator:adfbe66c95eb71456fc78f2ef9e496317"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec16ce711e4b6f2b57423ffeee0ce0d5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#aec16ce711e4b6f2b57423ffeee0ce0d5">updateRootTimeStamp</a> (uint32_t rtcCount)</td></tr>
+<tr class="memdesc:aec16ce711e4b6f2b57423ffeee0ce0d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up the root clock time.  <a href="classSystemTime.html#aec16ce711e4b6f2b57423ffeee0ce0d5">More...</a><br /></td></tr>
+<tr class="separator:aec16ce711e4b6f2b57423ffeee0ce0d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b583a118689353c0986dc7ad2536b9d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a4b583a118689353c0986dc7ad2536b9d">sendTimeSyncMessage</a> (<a class="el" href="structhigh__resolution__time__stamp__t.html">high_resolution_time_stamp_t</a> stamp, <a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> id, bool reliable=false)</td></tr>
+<tr class="memdesc:a4b583a118689353c0986dc7ad2536b9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a sync message for given stamp/id combo to the mesh.  <a href="classSystemTime.html#a4b583a118689353c0986dc7ad2536b9d">More...</a><br /></td></tr>
+<tr class="separator:a4b583a118689353c0986dc7ad2536b9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a76fe9ddb677664847f07b3a9064e96"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a0a76fe9ddb677664847f07b3a9064e96">meIsRootClock</a> ()</td></tr>
+<tr class="memdesc:a0a76fe9ddb677664847f07b3a9064e96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if the id of this stone can considered to be root clock.  <a href="classSystemTime.html#a0a76fe9ddb677664847f07b3a9064e96">More...</a><br /></td></tr>
+<tr class="separator:a0a76fe9ddb677664847f07b3a9064e96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9cf6927c3dfd68094e173f7516fb150"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ac9cf6927c3dfd68094e173f7516fb150">isRootClock</a> (<a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> candidate)</td></tr>
+<tr class="memdesc:ac9cf6927c3dfd68094e173f7516fb150"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if the candidate can considered to be root clock.  <a href="classSystemTime.html#ac9cf6927c3dfd68094e173f7516fb150">More...</a><br /></td></tr>
+<tr class="separator:ac9cf6927c3dfd68094e173f7516fb150"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38e541b89f3e0890aa7c293b438cfe30"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a38e541b89f3e0890aa7c293b438cfe30">reelectionPeriodTimedOut</a> ()</td></tr>
+<tr class="memdesc:a38e541b89f3e0890aa7c293b438cfe30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if onTimeSyncMessageReceive hasn't received any sync messages from a clock authority in the last root_clock_reelection_timeout_ms milliseconds.  <a href="classSystemTime.html#a38e541b89f3e0890aa7c293b438cfe30">More...</a><br /></td></tr>
+<tr class="separator:a38e541b89f3e0890aa7c293b438cfe30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a193c70844a9cd3d7884bb78a29d3a08e"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a193c70844a9cd3d7884bb78a29d3a08e">rebootTimedOut</a> ()</td></tr>
+<tr class="memdesc:a193c70844a9cd3d7884bb78a29d3a08e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true when reboot period is passed.  <a href="classSystemTime.html#a193c70844a9cd3d7884bb78a29d3a08e">More...</a><br /></td></tr>
+<tr class="separator:a193c70844a9cd3d7884bb78a29d3a08e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac15258d8bca7be1f1e84b2612c945d26"><td class="memItemLeft" align="right" valign="top">static constexpr uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ac15258d8bca7be1f1e84b2612c945d26">debugSyncTimeMessagePeriodMs</a> ()</td></tr>
+<tr class="separator:ac15258d8bca7be1f1e84b2612c945d26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0e9f7a0b923e8238f2cf7399ae46ea0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#aa0e9f7a0b923e8238f2cf7399ae46ea0">initDebug</a> ()</td></tr>
+<tr class="memdesc:aa0e9f7a0b923e8238f2cf7399ae46ea0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the debug symc time coroutine when DEBUG_SYSTEM_TIME is defined in order to broadcast sync messages to the mesh regardless of being root clock or not.  <a href="classSystemTime.html#aa0e9f7a0b923e8238f2cf7399ae46ea0">More...</a><br /></td></tr>
+<tr class="separator:aa0e9f7a0b923e8238f2cf7399ae46ea0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a695659cf498cb849ba4ef0906078680d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a695659cf498cb849ba4ef0906078680d">publishSyncMessageForTesting</a> ()</td></tr>
+<tr class="separator:a695659cf498cb849ba4ef0906078680d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4db2b54b8a0933e6a301ae23823efa67"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a4db2b54b8a0933e6a301ae23823efa67">pushSyncMessageToTestSuite</a> (<a class="el" href="structtime__sync__message__t.html">time_sync_message_t</a> &amp;syncmessage)</td></tr>
+<tr class="separator:a4db2b54b8a0933e6a301ae23823efa67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a9d2b2ccacfe162b94db622b2196b8573"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a9d2b2ccacfe162b94db622b2196b8573">upTimeSec</a></td></tr>
+<tr class="separator:a9d2b2ccacfe162b94db622b2196b8573"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e8e049dafcf7031b03bc3649188d588"><td class="memItemLeft" align="right" valign="top">static uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a0e8e049dafcf7031b03bc3649188d588">throttleSetTimeCountdownTicks</a></td></tr>
+<tr class="separator:a0e8e049dafcf7031b03bc3649188d588"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ff4b356a9bfa5736c3f38050e090558"><td class="memItemLeft" align="right" valign="top">static uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a1ff4b356a9bfa5736c3f38050e090558">throttleSetSunTimesCountdownTicks</a></td></tr>
+<tr class="separator:a1ff4b356a9bfa5736c3f38050e090558"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3835a129794c9ad93cdc30ad675dc80"><td class="memItemLeft" align="right" valign="top">static constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ae3835a129794c9ad93cdc30ad675dc80">TICK_TIME_MS</a> = 500</td></tr>
+<tr class="separator:ae3835a129794c9ad93cdc30ad675dc80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a267e2d8dcfc49c640613c252572de315"><td class="memItemLeft" align="right" valign="top">static constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a267e2d8dcfc49c640613c252572de315">TIME_UPDATE_PERIOD_MS</a> = (60 * 1000)</td></tr>
+<tr class="separator:a267e2d8dcfc49c640613c252572de315"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87c01685b2e73a1167aa6e1cb6f5cab2"><td class="memItemLeft" align="right" valign="top">static constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a87c01685b2e73a1167aa6e1cb6f5cab2">THROTTLE_SET_TIME_TICKS</a> = (60 * 1000 / <a class="el" href="classSystemTime.html#ae3835a129794c9ad93cdc30ad675dc80">TICK_TIME_MS</a>)</td></tr>
+<tr class="separator:a87c01685b2e73a1167aa6e1cb6f5cab2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a9fb22bf2b2337f9e1f25a5736b195c"><td class="memItemLeft" align="right" valign="top">static constexpr uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a5a9fb22bf2b2337f9e1f25a5736b195c">THROTTLE_SET_SUN_TIMES_TICKS</a> = (30 * 60 * 1000 / <a class="el" href="classSystemTime.html#ae3835a129794c9ad93cdc30ad675dc80">TICK_TIME_MS</a>)</td></tr>
+<tr class="separator:a5a9fb22bf2b2337f9e1f25a5736b195c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b5746c950ab5c160d4deb9247dcd60e"><td class="memItemLeft" align="right" valign="top">static app_timer_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a4b5746c950ab5c160d4deb9247dcd60e">appTimerData</a></td></tr>
+<tr class="separator:a4b5746c950ab5c160d4deb9247dcd60e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad14b23413076503f9a87bfdc8dec1179"><td class="memItemLeft" align="right" valign="top">static app_timer_id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ad14b23413076503f9a87bfdc8dec1179">appTimerId</a></td></tr>
+<tr class="separator:ad14b23413076503f9a87bfdc8dec1179"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f673b1b37c72f774cf12889301fc778"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a2f673b1b37c72f774cf12889301fc778">rtcCountOfLastSecondIncrement</a></td></tr>
+<tr class="memdesc:a2f673b1b37c72f774cf12889301fc778"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRTC.html" title="Wrapper class for RTC functions.">RTC</a> count of last time a second had passed.  <a href="classSystemTime.html#a2f673b1b37c72f774cf12889301fc778">More...</a><br /></td></tr>
+<tr class="separator:a2f673b1b37c72f774cf12889301fc778"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace1f6a88a798ea9e80ea6bf8fa1d2cdd"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ace1f6a88a798ea9e80ea6bf8fa1d2cdd">myId</a></td></tr>
+<tr class="memdesc:ace1f6a88a798ea9e80ea6bf8fa1d2cdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cached ID of this stone.  <a href="classSystemTime.html#ace1f6a88a798ea9e80ea6bf8fa1d2cdd">More...</a><br /></td></tr>
+<tr class="separator:ace1f6a88a798ea9e80ea6bf8fa1d2cdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa285bf0a36c4655cf417e5fcd1e79724"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structhigh__resolution__time__stamp__t.html">high_resolution_time_stamp_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#aa285bf0a36c4655cf417e5fcd1e79724">rootTime</a></td></tr>
+<tr class="memdesc:aa285bf0a36c4655cf417e5fcd1e79724"><td class="mdescLeft">&#160;</td><td class="mdescRight">Root clock.  <a href="classSystemTime.html#aa285bf0a36c4655cf417e5fcd1e79724">More...</a><br /></td></tr>
+<tr class="separator:aa285bf0a36c4655cf417e5fcd1e79724"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8e6eb1d3ed0c0cd40ac5386ab4a0ae0"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#aa8e6eb1d3ed0c0cd40ac5386ab4a0ae0">rtcCountOfLastRootTimeUpdate</a></td></tr>
+<tr class="memdesc:aa8e6eb1d3ed0c0cd40ac5386ab4a0ae0"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRTC.html" title="Wrapper class for RTC functions.">RTC</a> count of last time the root clock was set.  <a href="classSystemTime.html#aa8e6eb1d3ed0c0cd40ac5386ab4a0ae0">More...</a><br /></td></tr>
+<tr class="separator:aa8e6eb1d3ed0c0cd40ac5386ab4a0ae0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad48682639fb90e35ffd7ee6d9c8ec6b9"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#ad48682639fb90e35ffd7ee6d9c8ec6b9">uptimeOfLastTimeSyncMessage</a></td></tr>
+<tr class="memdesc:ad48682639fb90e35ffd7ee6d9c8ec6b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uptime of last time a sync message was received.  <a href="classSystemTime.html#ad48682639fb90e35ffd7ee6d9c8ec6b9">More...</a><br /></td></tr>
+<tr class="separator:ad48682639fb90e35ffd7ee6d9c8ec6b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8409be957d40e02ea6d81a9479d54fe"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#aa8409be957d40e02ea6d81a9479d54fe">rootClockId</a></td></tr>
+<tr class="memdesc:aa8409be957d40e02ea6d81a9479d54fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stone ID of the root clock.  <a href="classSystemTime.html#aa8409be957d40e02ea6d81a9479d54fe">More...</a><br /></td></tr>
+<tr class="separator:aa8409be957d40e02ea6d81a9479d54fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c1ecd6bd8c993886b96600e28b9969d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classCoroutine.html">Coroutine</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a5c1ecd6bd8c993886b96600e28b9969d">syncTimeCoroutine</a></td></tr>
+<tr class="separator:a5c1ecd6bd8c993886b96600e28b9969d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8692e32369701b6321cd5580155e34d8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classCoroutine.html">Coroutine</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a8692e32369701b6321cd5580155e34d8">debugSyncTimeCoroutine</a></td></tr>
+<tr class="separator:a8692e32369701b6321cd5580155e34d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
-<tr class="memitem:a1cb4ba732efcd8fdd1460975b16c7407"><td class="memItemLeft" align="right" valign="top"><a id="a1cb4ba732efcd8fdd1460975b16c7407" name="a1cb4ba732efcd8fdd1460975b16c7407"></a>
-class&#160;</td><td class="memItemRight" valign="bottom"><b>TestAccess&lt; SystemTime &gt;</b></td></tr>
+<tr class="memitem:a1cb4ba732efcd8fdd1460975b16c7407"><td class="memItemLeft" align="right" valign="top">class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classSystemTime.html#a1cb4ba732efcd8fdd1460975b16c7407">TestAccess&lt; SystemTime &gt;</a></td></tr>
 <tr class="separator:a1cb4ba732efcd8fdd1460975b16c7407"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -204,7 +316,85 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TestAccess&lt; Syste
 <li>Add a lollipop version to the clock: a newer version will always be accepted, even if it's not the root ID.</li>
 </ol>
 <p >For robustness, not only the root clock node, but all nodes will regularly send a time sync message. It's up to the receiving node to device which clock is the root clock. Not sure if this is necessary. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="acf7096fce6066fe9f97df0929036e037" name="acf7096fce6066fe9f97df0929036e037"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf7096fce6066fe9f97df0929036e037">&#9670;&#160;</a></span>~SystemTime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual SystemTime::~SystemTime </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a5f5228fe58794bbefab0c327530fa640" name="a5f5228fe58794bbefab0c327530fa640"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f5228fe58794bbefab0c327530fa640">&#9670;&#160;</a></span>day()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="cs__DayOfWeek_8h.html#a68cdad1f67284b098bb2d4b5a0e9e5b3">DayOfWeek</a> SystemTime::day </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the current weekday. </p>
+
+</div>
+</div>
+<a id="ac15258d8bca7be1f1e84b2612c945d26" name="ac15258d8bca7be1f1e84b2612c945d26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac15258d8bca7be1f1e84b2612c945d26">&#9670;&#160;</a></span>debugSyncTimeMessagePeriodMs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr uint32_t SystemTime::debugSyncTimeMessagePeriodMs </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a1947a41954f9ccb5e0ea353e5d8ae3b4" name="a1947a41954f9ccb5e0ea353e5d8ae3b4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1947a41954f9ccb5e0ea353e5d8ae3b4">&#9670;&#160;</a></span>getSynchronizedStamp()</h2>
 
@@ -264,6 +454,188 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TestAccess&lt; Syste
 
 </div>
 </div>
+<a id="a0fbf2f237dcb4cac4f06efc90634cedd" name="a0fbf2f237dcb4cac4f06efc90634cedd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fbf2f237dcb4cac4f06efc90634cedd">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SystemTime::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates and starts the first tick timer. </p>
+
+</div>
+</div>
+<a id="aa0e9f7a0b923e8238f2cf7399ae46ea0" name="aa0e9f7a0b923e8238f2cf7399ae46ea0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0e9f7a0b923e8238f2cf7399ae46ea0">&#9670;&#160;</a></span>initDebug()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void SystemTime::initDebug </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sets up the debug symc time coroutine when DEBUG_SYSTEM_TIME is defined in order to broadcast sync messages to the mesh regardless of being root clock or not. </p>
+
+</div>
+</div>
+<a id="a257811e7894c05c329389f90e848bd19" name="a257811e7894c05c329389f90e848bd19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a257811e7894c05c329389f90e848bd19">&#9670;&#160;</a></span>isOnlyReceiveByThisDevice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool SystemTime::isOnlyReceiveByThisDevice </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;</td>
+          <td class="paramname"><em>counted_source</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true if the command source is uart or ble through connection. </p>
+
+</div>
+</div>
+<a id="ac9cf6927c3dfd68094e173f7516fb150" name="ac9cf6927c3dfd68094e173f7516fb150"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9cf6927c3dfd68094e173f7516fb150">&#9670;&#160;</a></span>isRootClock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool SystemTime::isRootClock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>candidate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true if the candidate can considered to be root clock. </p>
+
+</div>
+</div>
+<a id="a0a76fe9ddb677664847f07b3a9064e96" name="a0a76fe9ddb677664847f07b3a9064e96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a76fe9ddb677664847f07b3a9064e96">&#9670;&#160;</a></span>meIsRootClock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool SystemTime::meIsRootClock </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true if the id of this stone can considered to be root clock. </p>
+
+</div>
+</div>
+<a id="aa1c7c2a9f489533d4f506b37a6afc428" name="aa1c7c2a9f489533d4f506b37a6afc428"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1c7c2a9f489533d4f506b37a6afc428">&#9670;&#160;</a></span>now()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTime.html">Time</a> SystemTime::now </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the current time as <a class="el" href="classTime.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,...">Time</a> object. </p>
+
+</div>
+</div>
+<a id="a465bb462fa421a0b7c3ac29f4daa3c4c" name="a465bb462fa421a0b7c3ac29f4daa3c4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a465bb462fa421a0b7c3ac29f4daa3c4c">&#9670;&#160;</a></span>onTimeSyncMessageReceive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void SystemTime::onTimeSyncMessageReceive </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structtime__sync__message__t.html">time_sync_message_t</a>&#160;</td>
+          <td class="paramname"><em>syncmessage</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a25fa5433cd6d28ae959fc7567b716bf1" name="a25fa5433cd6d28ae959fc7567b716bf1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a25fa5433cd6d28ae959fc7567b716bf1">&#9670;&#160;</a></span>posix()</h2>
 
@@ -292,6 +664,303 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TestAccess&lt; Syste
 
 </div>
 </div>
+<a id="a695659cf498cb849ba4ef0906078680d" name="a695659cf498cb849ba4ef0906078680d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a695659cf498cb849ba4ef0906078680d">&#9670;&#160;</a></span>publishSyncMessageForTesting()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void SystemTime::publishSyncMessageForTesting </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4db2b54b8a0933e6a301ae23823efa67" name="a4db2b54b8a0933e6a301ae23823efa67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4db2b54b8a0933e6a301ae23823efa67">&#9670;&#160;</a></span>pushSyncMessageToTestSuite()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void SystemTime::pushSyncMessageToTestSuite </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structtime__sync__message__t.html">time_sync_message_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>syncmessage</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaf5d90cc1fda77e66b4e8ea442619c3d" name="aaf5d90cc1fda77e66b4e8ea442619c3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf5d90cc1fda77e66b4e8ea442619c3d">&#9670;&#160;</a></span>reboot_sync_timeout_ms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr uint32_t SystemTime::reboot_sync_timeout_ms </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Timeout period before considering this stone to be root clock. </p>
+
+</div>
+</div>
+<a id="a193c70844a9cd3d7884bb78a29d3a08e" name="a193c70844a9cd3d7884bb78a29d3a08e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a193c70844a9cd3d7884bb78a29d3a08e">&#9670;&#160;</a></span>rebootTimedOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool SystemTime::rebootTimedOut </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true when reboot period is passed. </p>
+
+</div>
+</div>
+<a id="a38e541b89f3e0890aa7c293b438cfe30" name="a38e541b89f3e0890aa7c293b438cfe30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38e541b89f3e0890aa7c293b438cfe30">&#9670;&#160;</a></span>reelectionPeriodTimedOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool SystemTime::reelectionPeriodTimedOut </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true if onTimeSyncMessageReceive hasn't received any sync messages from a clock authority in the last root_clock_reelection_timeout_ms milliseconds. </p>
+
+</div>
+</div>
+<a id="ae0c516f1f49cae9235eafa00981945cf" name="ae0c516f1f49cae9235eafa00981945cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0c516f1f49cae9235eafa00981945cf">&#9670;&#160;</a></span>root_clock_reelection_timeout_ms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr uint32_t SystemTime::root_clock_reelection_timeout_ms </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>If no sync message has been received from the root clock for this time, a new root clock will be selected. </p>
+
+</div>
+</div>
+<a id="a4f8d1812cef8fc82dc3ed40199eaf606" name="a4f8d1812cef8fc82dc3ed40199eaf606"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f8d1812cef8fc82dc3ed40199eaf606">&#9670;&#160;</a></span>root_clock_update_period_ms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr uint32_t SystemTime::root_clock_update_period_ms </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classTime.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,...">Time</a> between sync messages from the root clock. </p>
+
+</div>
+</div>
+<a id="a551ce05834ca675ae2a3232f1910bac5" name="a551ce05834ca675ae2a3232f1910bac5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a551ce05834ca675ae2a3232f1910bac5">&#9670;&#160;</a></span>scheduleNextTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void SystemTime::scheduleNextTick </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4b583a118689353c0986dc7ad2536b9d" name="a4b583a118689353c0986dc7ad2536b9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b583a118689353c0986dc7ad2536b9d">&#9670;&#160;</a></span>sendTimeSyncMessage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void SystemTime::sendTimeSyncMessage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structhigh__resolution__time__stamp__t.html">high_resolution_time_stamp_t</a>&#160;</td>
+          <td class="paramname"><em>stamp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>reliable</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send a sync message for given stamp/id combo to the mesh. </p>
+
+</div>
+</div>
+<a id="adfbe66c95eb71456fc78f2ef9e496317" name="adfbe66c95eb71456fc78f2ef9e496317"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfbe66c95eb71456fc78f2ef9e496317">&#9670;&#160;</a></span>setRootTimeStamp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void SystemTime::setRootTimeStamp </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structhigh__resolution__time__stamp__t.html">high_resolution_time_stamp_t</a>&#160;</td>
+          <td class="paramname"><em>stamp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>rtcCount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a36b2f8ee490d7fde6000c3c7ac9ed99b" name="a36b2f8ee490d7fde6000c3c7ac9ed99b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a36b2f8ee490d7fde6000c3c7ac9ed99b">&#9670;&#160;</a></span>setSunTimes()</h2>
 
@@ -302,7 +971,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TestAccess&lt; Syste
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static cs_ret_code_t SystemTime::setSunTimes </td>
+          <td class="memname">static <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> SystemTime::setSunTimes </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structsun__time__t.html">sun_time_t</a> &amp;&#160;</td>
           <td class="paramname"><em>sunTimes</em>, </td>
@@ -348,7 +1017,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TestAccess&lt; Syste
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static cs_ret_code_t SystemTime::setTime </td>
+          <td class="memname">static <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> SystemTime::setTime </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
           <td class="paramname"><em>time</em>, </td>
@@ -393,6 +1062,633 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>TestAccess&lt; Syste
 ERR_BUSY When set time is throttled, try again later. </dd>
 <dd>
 ERR_WRONG_PARAMETER When trying to set time to 0. </dd></dl>
+
+</div>
+</div>
+<a id="ac3774207fc805dccc9d89d18a3fb6799" name="ac3774207fc805dccc9d89d18a3fb6799"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3774207fc805dccc9d89d18a3fb6799">&#9670;&#160;</a></span>stone_id_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr <a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> SystemTime::stone_id_init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stone id to use for initialization. </p>
+
+</div>
+</div>
+<a id="a3597d730e9a30b86b83bd51487a2be25" name="a3597d730e9a30b86b83bd51487a2be25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3597d730e9a30b86b83bd51487a2be25">&#9670;&#160;</a></span>syncTimeCoroutineAction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint32_t SystemTime::syncTimeCoroutineAction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8dba2d78d5add070045733449b1236cb" name="a8dba2d78d5add070045733449b1236cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dba2d78d5add070045733449b1236cb">&#9670;&#160;</a></span>tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void SystemTime::tick </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>unused</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Must be called at least once per second to update upTimeSec. </p>
+
+</div>
+</div>
+<a id="a22ec6abc17ec51ee861af416e0c10353" name="a22ec6abc17ec51ee861af416e0c10353"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22ec6abc17ec51ee861af416e0c10353">&#9670;&#160;</a></span>timestamp_version_lollipop_max()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr uint8_t SystemTime::timestamp_version_lollipop_max </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The time version is lollipop versioned. </p>
+<p >This constant defines its roll over point. </p>
+
+</div>
+</div>
+<a id="a4c6c937422fb8a4f956e435896771c3d" name="a4c6c937422fb8a4f956e435896771c3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c6c937422fb8a4f956e435896771c3d">&#9670;&#160;</a></span>timestamp_version_min_valid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr uint8_t SystemTime::timestamp_version_min_valid </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Lowest time version at which a valid posix time is set. </p>
+
+</div>
+</div>
+<a id="abb27ccf0e567d313eeb09b9680d8d43f" name="abb27ccf0e567d313eeb09b9680d8d43f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb27ccf0e567d313eeb09b9680d8d43f">&#9670;&#160;</a></span>timeStampVersion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint8_t SystemTime::timeStampVersion </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1ee900ede82f5e572f9d920d02a45e58" name="a1ee900ede82f5e572f9d920d02a45e58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ee900ede82f5e572f9d920d02a45e58">&#9670;&#160;</a></span>up()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint32_t SystemTime::up </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Uptime in seconds. </p>
+
+</div>
+</div>
+<a id="aec16ce711e4b6f2b57423ffeee0ce0d5" name="aec16ce711e4b6f2b57423ffeee0ce0d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec16ce711e4b6f2b57423ffeee0ce0d5">&#9670;&#160;</a></span>updateRootTimeStamp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void SystemTime::updateRootTimeStamp </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>rtcCount</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up the root clock time. </p>
+<p >Should be called at least every second. But it currently looses some precision, so don't call it too often. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Friends And Related Function Documentation</h2>
+<a id="a1cb4ba732efcd8fdd1460975b16c7407" name="a1cb4ba732efcd8fdd1460975b16c7407"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1cb4ba732efcd8fdd1460975b16c7407">&#9670;&#160;</a></span>TestAccess&lt; SystemTime &gt;</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">friend class <a class="el" href="classTestAccess.html">TestAccess</a>&lt; <a class="el" href="classSystemTime.html">SystemTime</a> &gt;</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a4b5746c950ab5c160d4deb9247dcd60e" name="a4b5746c950ab5c160d4deb9247dcd60e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b5746c950ab5c160d4deb9247dcd60e">&#9670;&#160;</a></span>appTimerData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_t SystemTime::appTimerData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad14b23413076503f9a87bfdc8dec1179" name="ad14b23413076503f9a87bfdc8dec1179"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad14b23413076503f9a87bfdc8dec1179">&#9670;&#160;</a></span>appTimerId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_id_t SystemTime::appTimerId</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8692e32369701b6321cd5580155e34d8" name="a8692e32369701b6321cd5580155e34d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8692e32369701b6321cd5580155e34d8">&#9670;&#160;</a></span>debugSyncTimeCoroutine</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCoroutine.html">Coroutine</a> SystemTime::debugSyncTimeCoroutine</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ace1f6a88a798ea9e80ea6bf8fa1d2cdd" name="ace1f6a88a798ea9e80ea6bf8fa1d2cdd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace1f6a88a798ea9e80ea6bf8fa1d2cdd">&#9670;&#160;</a></span>myId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> SystemTime::myId</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cached ID of this stone. </p>
+
+</div>
+</div>
+<a id="aa8409be957d40e02ea6d81a9479d54fe" name="aa8409be957d40e02ea6d81a9479d54fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8409be957d40e02ea6d81a9479d54fe">&#9670;&#160;</a></span>rootClockId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> SystemTime::rootClockId</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stone ID of the root clock. </p>
+
+</div>
+</div>
+<a id="aa285bf0a36c4655cf417e5fcd1e79724" name="aa285bf0a36c4655cf417e5fcd1e79724"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa285bf0a36c4655cf417e5fcd1e79724">&#9670;&#160;</a></span>rootTime</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structhigh__resolution__time__stamp__t.html">high_resolution_time_stamp_t</a> SystemTime::rootTime</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Root clock. </p>
+<p >Updated at a low rate, use a function to get an up to date timestamp. </p>
+
+</div>
+</div>
+<a id="aa8e6eb1d3ed0c0cd40ac5386ab4a0ae0" name="aa8e6eb1d3ed0c0cd40ac5386ab4a0ae0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8e6eb1d3ed0c0cd40ac5386ab4a0ae0">&#9670;&#160;</a></span>rtcCountOfLastRootTimeUpdate</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t SystemTime::rtcCountOfLastRootTimeUpdate</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classRTC.html" title="Wrapper class for RTC functions.">RTC</a> count of last time the root clock was set. </p>
+
+</div>
+</div>
+<a id="a2f673b1b37c72f774cf12889301fc778" name="a2f673b1b37c72f774cf12889301fc778"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f673b1b37c72f774cf12889301fc778">&#9670;&#160;</a></span>rtcCountOfLastSecondIncrement</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t SystemTime::rtcCountOfLastSecondIncrement</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classRTC.html" title="Wrapper class for RTC functions.">RTC</a> count of last time a second had passed. </p>
+
+</div>
+</div>
+<a id="a5c1ecd6bd8c993886b96600e28b9969d" name="a5c1ecd6bd8c993886b96600e28b9969d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c1ecd6bd8c993886b96600e28b9969d">&#9670;&#160;</a></span>syncTimeCoroutine</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCoroutine.html">Coroutine</a> SystemTime::syncTimeCoroutine</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5a9fb22bf2b2337f9e1f25a5736b195c" name="a5a9fb22bf2b2337f9e1f25a5736b195c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a9fb22bf2b2337f9e1f25a5736b195c">&#9670;&#160;</a></span>THROTTLE_SET_SUN_TIMES_TICKS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint16_t SystemTime::THROTTLE_SET_SUN_TIMES_TICKS = (30 * 60 * 1000 / <a class="el" href="classSystemTime.html#ae3835a129794c9ad93cdc30ad675dc80">TICK_TIME_MS</a>)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a87c01685b2e73a1167aa6e1cb6f5cab2" name="a87c01685b2e73a1167aa6e1cb6f5cab2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87c01685b2e73a1167aa6e1cb6f5cab2">&#9670;&#160;</a></span>THROTTLE_SET_TIME_TICKS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint16_t SystemTime::THROTTLE_SET_TIME_TICKS = (60 * 1000 / <a class="el" href="classSystemTime.html#ae3835a129794c9ad93cdc30ad675dc80">TICK_TIME_MS</a>)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1ff4b356a9bfa5736c3f38050e090558" name="a1ff4b356a9bfa5736c3f38050e090558"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ff4b356a9bfa5736c3f38050e090558">&#9670;&#160;</a></span>throttleSetSunTimesCountdownTicks</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t SystemTime::throttleSetSunTimesCountdownTicks</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0e8e049dafcf7031b03bc3649188d588" name="a0e8e049dafcf7031b03bc3649188d588"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e8e049dafcf7031b03bc3649188d588">&#9670;&#160;</a></span>throttleSetTimeCountdownTicks</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t SystemTime::throttleSetTimeCountdownTicks</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae3835a129794c9ad93cdc30ad675dc80" name="ae3835a129794c9ad93cdc30ad675dc80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3835a129794c9ad93cdc30ad675dc80">&#9670;&#160;</a></span>TICK_TIME_MS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr auto SystemTime::TICK_TIME_MS = 500</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a267e2d8dcfc49c640613c252572de315" name="a267e2d8dcfc49c640613c252572de315"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a267e2d8dcfc49c640613c252572de315">&#9670;&#160;</a></span>TIME_UPDATE_PERIOD_MS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint16_t SystemTime::TIME_UPDATE_PERIOD_MS = (60 * 1000)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad48682639fb90e35ffd7ee6d9c8ec6b9" name="ad48682639fb90e35ffd7ee6d9c8ec6b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad48682639fb90e35ffd7ee6d9c8ec6b9">&#9670;&#160;</a></span>uptimeOfLastTimeSyncMessage</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t SystemTime::uptimeOfLastTimeSyncMessage</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Uptime of last time a sync message was received. </p>
+
+</div>
+</div>
+<a id="a9d2b2ccacfe162b94db622b2196b8573" name="a9d2b2ccacfe162b94db622b2196b8573"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d2b2ccacfe162b94db622b2196b8573">&#9670;&#160;</a></span>upTimeSec</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t SystemTime::upTimeSec</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

@@ -1,4 +1,14 @@
 <map id="source/include/time" name="source/include/time">
-<area shape="rect" id="node1" href="dir_67693156f0a338f09248586a5f67a444.html" title="time" alt="" coords="27,52,79,77"/>
-<area shape="rect" id="clust1" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html" title="include" alt="" coords="16,16,91,88"/>
+<area shape="rect" id="node1" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html" title="drivers" alt="" coords="27,125,93,151"/>
+<area shape="rect" id="node2" href="dir_933ecdb02ee7831305b91036a26acf32.html" title="test" alt="" coords="118,125,165,151"/>
+<area shape="rect" id="node3" href="dir_9e2d265e15a9f1363267da088ab8d529.html" title="events" alt="" coords="189,125,256,151"/>
+<area shape="rect" id="node4" href="dir_b336e50c30dde46b9972cb7df7cdb246.html" title="protocol" alt="" coords="280,125,355,151"/>
+<area shape="rect" id="node5" href="dir_e8d03031b1e92aeb84120cb3e87677a9.html" title="util" alt="" coords="379,125,421,151"/>
+<area shape="rect" id="node6" href="dir_67693156f0a338f09248586a5f67a444.html" title="time" alt="" coords="197,52,249,77"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000032_000007.html" title="1" alt="" coords="102,118,111,133"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000032_000030.html" title="1" alt="" coords="169,112,179,127"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000032_000009.html" title="1" alt="" coords="226,100,236,114"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000032_000020.html" title="2" alt="" coords="288,100,297,115"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000032_000035.html" title="3" alt="" coords="360,106,369,121"/>
+<area shape="rect" id="clust1" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html" title="include" alt="" coords="16,16,432,161"/>
 </map>

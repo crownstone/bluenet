@@ -100,30 +100,34 @@ $(document).ready(function(){initNavTree('cs__Temperature_8h_source.html',''); i
   <div class="headertitle"><div class="title">cs_Temperature.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<a href="cs__Temperature_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//#include &quot;nrf_soc.h&quot;</span></div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;ble/cs_Nordic.h&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Nordic_8h.html">ble/cs_Nordic.h</a>&gt;</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;util/cs_BleError.h&quot;</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;<a class="code" href="cs__BleError_8h.html">util/cs_BleError.h</a>&quot;</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">inline</span> int32_t getTemperature() {</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="cs__Temperature_8h.html#a6a5c6b3ffd587e3fef04fe2183c8d22b">   21</a></span><span class="keyword">inline</span> int32_t <a class="code hl_function" href="cs__Temperature_8h.html#a6a5c6b3ffd587e3fef04fe2183c8d22b">getTemperature</a>() {</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    int32_t temperature;</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    uint32_t nrfCode = sd_temp_get(&amp;temperature);</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="comment">// This function only has success as return code.</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    APP_ERROR_CHECK(nrfCode);</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <a class="code hl_define" href="cs__BleError_8h.html#a75a877a2eb7603238a1ade3a2a97c4a1">APP_ERROR_CHECK</a>(nrfCode);</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    temperature = (temperature / 4);</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">return</span> temperature;</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>}</div>
+<div class="ttc" id="acs__BleError_8h_html"><div class="ttname"><a href="cs__BleError_8h.html">cs_BleError.h</a></div></div>
+<div class="ttc" id="acs__BleError_8h_html_a75a877a2eb7603238a1ade3a2a97c4a1"><div class="ttname"><a href="cs__BleError_8h.html#a75a877a2eb7603238a1ade3a2a97c4a1">APP_ERROR_CHECK</a></div><div class="ttdeci">#define APP_ERROR_CHECK(cs_ret_code_t)</div><div class="ttdoc">Macro for calling error handler function if supplied error code any other than NRF_SUCCESS.</div><div class="ttdef"><b>Definition:</b> cs_BleError.h:61</div></div>
+<div class="ttc" id="acs__Nordic_8h_html"><div class="ttname"><a href="cs__Nordic_8h.html">cs_Nordic.h</a></div></div>
+<div class="ttc" id="acs__Temperature_8h_html_a6a5c6b3ffd587e3fef04fe2183c8d22b"><div class="ttname"><a href="cs__Temperature_8h.html#a6a5c6b3ffd587e3fef04fe2183c8d22b">getTemperature</a></div><div class="ttdeci">int32_t getTemperature()</div><div class="ttdoc">Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 23,...</div><div class="ttdef"><b>Definition:</b> cs_Temperature.h:21</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><b>cs_Temperature.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><a class="el" href="cs__Temperature_8h.html">cs_Temperature.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

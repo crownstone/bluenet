@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__RandomGenerator_8h_source.html',''
   <div class="headertitle"><div class="title">cs_RandomGenerator.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__RandomGenerator_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: 23 Feb, 2021</span></div>
@@ -108,31 +108,38 @@ $(document).ready(function(){initNavTree('cs__RandomGenerator_8h_source.html',''
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;third/random/random.h&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;third/random/seed.h&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;third/random/state.h&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;<a class="code" href="random_8h.html">third/random/random.h</a>&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="seed_8h.html">third/random/seed.h</a>&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;<a class="code" href="state_8h.html">third/random/state.h</a>&gt;</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="classRandomGenerator.html">   17</a></span><span class="keyword">class </span><a class="code hl_class" href="classRandomGenerator.html">RandomGenerator</a> {</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <a class="code hl_class" href="classMsws_1_1State.html">Msws::State</a> _state;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classRandomGenerator.html#ac2087ef5cc66cd05ffe675a12acdceaa">   19</a></span>    <a class="code hl_class" href="classMsws_1_1State.html">Msws::State</a> <a class="code hl_variable" href="classRandomGenerator.html#ac2087ef5cc66cd05ffe675a12acdceaa">_state</a>;</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classRandomGenerator.html#abb58788be396867f73d4c0121ef20de8">   27</a></span>    <a class="code hl_function" href="classRandomGenerator.html#abb58788be396867f73d4c0121ef20de8">RandomGenerator</a>(uint32_t seed) : _state(Msws::seed(seed)) {}</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classRandomGenerator.html#abb58788be396867f73d4c0121ef20de8">   27</a></span>    <a class="code hl_function" href="classRandomGenerator.html#abb58788be396867f73d4c0121ef20de8">RandomGenerator</a>(uint32_t seed) : <a class="code hl_variable" href="classRandomGenerator.html#ac2087ef5cc66cd05ffe675a12acdceaa">_state</a>(<a class="code hl_namespace" href="namespaceMsws.html">Msws</a>::seed(seed)) {}</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classRandomGenerator.html#a8f0102c7c17f2928672fafca6e48947a">   32</a></span>    uint32_t <a class="code hl_function" href="classRandomGenerator.html#a8f0102c7c17f2928672fafca6e48947a">rand</a>() { <span class="keywordflow">return</span> Msws::msws(_state); }</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classRandomGenerator.html#a8f0102c7c17f2928672fafca6e48947a">   32</a></span>    uint32_t <a class="code hl_function" href="classRandomGenerator.html#a8f0102c7c17f2928672fafca6e48947a">rand</a>() { <span class="keywordflow">return</span> <a class="code hl_function" href="namespaceMsws.html#a1a3e76e6e6bda0aac8bc0be740f2eaf6">Msws::msws</a>(<a class="code hl_variable" href="classRandomGenerator.html#ac2087ef5cc66cd05ffe675a12acdceaa">_state</a>); }</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    uint32_t operator()() { <span class="keywordflow">return</span> <a class="code hl_function" href="classRandomGenerator.html#a8f0102c7c17f2928672fafca6e48947a">rand</a>(); }</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classRandomGenerator.html#aa0dd15d323d4380bd014c5b1ea8c2187">   34</a></span>    uint32_t <a class="code hl_function" href="classRandomGenerator.html#aa0dd15d323d4380bd014c5b1ea8c2187">operator()</a>() { <span class="keywordflow">return</span> <a class="code hl_function" href="classRandomGenerator.html#a8f0102c7c17f2928672fafca6e48947a">rand</a>(); }</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>};</div>
 <div class="ttc" id="aclassMsws_1_1State_html"><div class="ttname"><a href="classMsws_1_1State.html">Msws::State</a></div><div class="ttdoc">Wrapper class for internal state of the Msws generator.</div><div class="ttdef"><b>Definition:</b> state.h:17</div></div>
 <div class="ttc" id="aclassRandomGenerator_html"><div class="ttname"><a href="classRandomGenerator.html">RandomGenerator</a></div><div class="ttdoc">Crownstones pseudo random number generator wrapper.</div><div class="ttdef"><b>Definition:</b> cs_RandomGenerator.h:17</div></div>
 <div class="ttc" id="aclassRandomGenerator_html_a8f0102c7c17f2928672fafca6e48947a"><div class="ttname"><a href="classRandomGenerator.html#a8f0102c7c17f2928672fafca6e48947a">RandomGenerator::rand</a></div><div class="ttdeci">uint32_t rand()</div><div class="ttdoc">Generates a new random number and updates the internal state.</div><div class="ttdef"><b>Definition:</b> cs_RandomGenerator.h:32</div></div>
+<div class="ttc" id="aclassRandomGenerator_html_aa0dd15d323d4380bd014c5b1ea8c2187"><div class="ttname"><a href="classRandomGenerator.html#aa0dd15d323d4380bd014c5b1ea8c2187">RandomGenerator::operator()</a></div><div class="ttdeci">uint32_t operator()()</div><div class="ttdef"><b>Definition:</b> cs_RandomGenerator.h:34</div></div>
 <div class="ttc" id="aclassRandomGenerator_html_abb58788be396867f73d4c0121ef20de8"><div class="ttname"><a href="classRandomGenerator.html#abb58788be396867f73d4c0121ef20de8">RandomGenerator::RandomGenerator</a></div><div class="ttdeci">RandomGenerator(uint32_t seed)</div><div class="ttdoc">The given seed need not be very high quality.</div><div class="ttdef"><b>Definition:</b> cs_RandomGenerator.h:27</div></div>
+<div class="ttc" id="aclassRandomGenerator_html_ac2087ef5cc66cd05ffe675a12acdceaa"><div class="ttname"><a href="classRandomGenerator.html#ac2087ef5cc66cd05ffe675a12acdceaa">RandomGenerator::_state</a></div><div class="ttdeci">Msws::State _state</div><div class="ttdef"><b>Definition:</b> cs_RandomGenerator.h:19</div></div>
+<div class="ttc" id="anamespaceMsws_html"><div class="ttname"><a href="namespaceMsws.html">Msws</a></div><div class="ttdef"><b>Definition:</b> random.h:43</div></div>
+<div class="ttc" id="anamespaceMsws_html_a1a3e76e6e6bda0aac8bc0be740f2eaf6"><div class="ttname"><a href="namespaceMsws.html#a1a3e76e6e6bda0aac8bc0be740f2eaf6">Msws::msws</a></div><div class="ttdeci">static uint32_t msws()</div><div class="ttdoc">Generate new pseudo random number from global state variables and update them.</div><div class="ttdef"><b>Definition:</b> random.h:59</div></div>
+<div class="ttc" id="arandom_8h_html"><div class="ttname"><a href="random_8h.html">random.h</a></div></div>
+<div class="ttc" id="aseed_8h_html"><div class="ttname"><a href="seed_8h.html">seed.h</a></div></div>
+<div class="ttc" id="astate_8h_html"><div class="ttname"><a href="state_8h.html">state.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_e8d03031b1e92aeb84120cb3e87677a9.html">util</a></li><li class="navelem"><b>cs_RandomGenerator.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_e8d03031b1e92aeb84120cb3e87677a9.html">util</a></li><li class="navelem"><a class="el" href="cs__RandomGenerator_8h.html">cs_RandomGenerator.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

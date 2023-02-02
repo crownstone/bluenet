@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classMesh.html',''); initResizable(); 
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classMesh-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Mesh Class Reference</div></div>
 </div><!--header-->
@@ -123,14 +125,36 @@ Collaboration diagram for Mesh:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMesh__coll__graph.png" border="0" usemap="#aMesh_coll__map" alt="Collaboration graph"/></div>
 <map name="aMesh_coll__map" id="aMesh_coll__map">
-<area shape="rect" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 12 Apr...." alt="" coords="32,79,89,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 12 Apr...." alt="" coords="1916,456,1973,481"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="1252,285,1363,311"/>
+<area shape="rect" href="classMeshCore.html" title="Class that:" alt="" coords="1667,141,1753,167"/>
+<area shape="rect" href="classMeshMsgSender.html" title="Class that:" alt="" coords="1645,353,1775,379"/>
+<area shape="rect" href="classMeshAdvertiser.html" title=" " alt="" coords="1648,252,1772,277"/>
+<area shape="rect" title=" " alt="" coords="1218,5,1397,60"/>
+<area shape="rect" title=" " alt="" coords="1238,84,1377,109"/>
+<area shape="rect" title=" " alt="" coords="1208,134,1407,174"/>
+<area shape="rect" href="classMeshModelMulticast.html" title="Class that:" alt="" coords="778,401,935,427"/>
+<area shape="rect" href="classMeshModelSelector.html" title="Class that selects which model to use to send a message." alt="" coords="1232,452,1383,477"/>
+<area shape="rect" title=" " alt="" coords="319,474,541,514"/>
+<area shape="rect" href="classMeshModelMulticastNeighbours.html" title="Class that:" alt="" coords="741,455,972,480"/>
+<area shape="rect" href="classMeshModelMulticastAcked.html" title="Class that:" alt="" coords="759,644,955,669"/>
+<area shape="rect" href="classMeshModelUnicast.html" title="Class that:" alt="" coords="783,551,930,576"/>
+<area shape="rect" href="structMeshModelMulticast_1_1cs__multicast__queue__item__t.html" title=" " alt="" coords="351,323,509,377"/>
+<area shape="rect" href="structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html" title="Data needed in each model queue." alt="" coords="5,499,197,539"/>
+<area shape="rect" href="structMeshModelMulticastNeighbours_1_1cs__multicast__queue__item__t.html" title=" " alt="" coords="315,405,545,445"/>
+<area shape="rect" href="structMeshModelMulticastAcked_1_1cs__multicast__acked__queue__item__t.html" title=" " alt="" coords="328,684,532,739"/>
+<area shape="rect" href="structMeshModelUnicast_1_1cs__unicast__queue__item__t.html" title=" " alt="" coords="344,549,516,589"/>
+<area shape="rect" href="classBitmaskVarSize.html" title="Class that holds a bitmask of variable size." alt="" coords="367,635,493,660"/>
+<area shape="rect" href="classMeshMsgHandler.html" title="Class that:" alt="" coords="1643,703,1777,728"/>
+<area shape="rect" href="structMeshMsgHandler_1_1cs__mesh__model__ext__state__t.html" title=" " alt="" coords="1211,702,1404,742"/>
+<area shape="rect" href="structibeacon__config__id__packet__t.html" title="Packet to change ibeacon config ID." alt="" coords="1207,199,1408,224"/>
+<area shape="rect" href="classMeshScanner.html" title="Class that handles scans from the mesh." alt="" coords="1655,752,1765,777"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a84f5504a1899a3c5e26601b34ebe949c"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a84f5504a1899a3c5e26601b34ebe949c">init</a> (const <a class="el" href="structboards__config__t.html">boards_config_t</a> &amp;board)</td></tr>
+<tr class="memitem:a84f5504a1899a3c5e26601b34ebe949c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a84f5504a1899a3c5e26601b34ebe949c">init</a> (const <a class="el" href="structboards__config__t.html">boards_config_t</a> &amp;board)</td></tr>
 <tr class="memdesc:a84f5504a1899a3c5e26601b34ebe949c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the mesh.  <a href="classMesh.html#a84f5504a1899a3c5e26601b34ebe949c">More...</a><br /></td></tr>
 <tr class="separator:a84f5504a1899a3c5e26601b34ebe949c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99f6ec4a09fda31ad28277b52ef2a0dd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a99f6ec4a09fda31ad28277b52ef2a0dd">checkFlashValid</a> ()</td></tr>
@@ -139,47 +163,94 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a40a0b7e4f0bcda5119f8ca073bbe1895"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a40a0b7e4f0bcda5119f8ca073bbe1895">start</a> ()</td></tr>
 <tr class="memdesc:a40a0b7e4f0bcda5119f8ca073bbe1895"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the mesh.  <a href="classMesh.html#a40a0b7e4f0bcda5119f8ca073bbe1895">More...</a><br /></td></tr>
 <tr class="separator:a40a0b7e4f0bcda5119f8ca073bbe1895"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1dcd4ba4e3462b2a857ca59ecb580d97"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a1dcd4ba4e3462b2a857ca59ecb580d97">stop</a> ()</td></tr>
+<tr class="memitem:a1dcd4ba4e3462b2a857ca59ecb580d97"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a1dcd4ba4e3462b2a857ca59ecb580d97">stop</a> ()</td></tr>
 <tr class="memdesc:a1dcd4ba4e3462b2a857ca59ecb580d97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop the mesh.  <a href="classMesh.html#a1dcd4ba4e3462b2a857ca59ecb580d97">More...</a><br /></td></tr>
 <tr class="separator:a1dcd4ba4e3462b2a857ca59ecb580d97"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff72e4c52c1a01603b48123ee233fbc2"><td class="memItemLeft" align="right" valign="top"><a id="aff72e4c52c1a01603b48123ee233fbc2" name="aff72e4c52c1a01603b48123ee233fbc2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>initAdvertiser</b> ()</td></tr>
-<tr class="memdesc:aff72e4c52c1a01603b48123ee233fbc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the advertiser. <br /></td></tr>
+<tr class="memitem:aff72e4c52c1a01603b48123ee233fbc2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#aff72e4c52c1a01603b48123ee233fbc2">initAdvertiser</a> ()</td></tr>
+<tr class="memdesc:aff72e4c52c1a01603b48123ee233fbc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the advertiser.  <a href="classMesh.html#aff72e4c52c1a01603b48123ee233fbc2">More...</a><br /></td></tr>
 <tr class="separator:aff72e4c52c1a01603b48123ee233fbc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5469d05c87e44616fe6910e71c68fbe"><td class="memItemLeft" align="right" valign="top"><a id="aa5469d05c87e44616fe6910e71c68fbe" name="aa5469d05c87e44616fe6910e71c68fbe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>advertiseIbeacon</b> ()</td></tr>
-<tr class="memdesc:aa5469d05c87e44616fe6910e71c68fbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start advertising as iBeacon. <br /></td></tr>
+<tr class="memitem:aa5469d05c87e44616fe6910e71c68fbe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#aa5469d05c87e44616fe6910e71c68fbe">advertiseIbeacon</a> ()</td></tr>
+<tr class="memdesc:aa5469d05c87e44616fe6910e71c68fbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start advertising as iBeacon.  <a href="classMesh.html#aa5469d05c87e44616fe6910e71c68fbe">More...</a><br /></td></tr>
 <tr class="separator:aa5469d05c87e44616fe6910e71c68fbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ffe08ae6a459741b7f4eee7fee2e58b"><td class="memItemLeft" align="right" valign="top"><a id="a3ffe08ae6a459741b7f4eee7fee2e58b" name="a3ffe08ae6a459741b7f4eee7fee2e58b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>stopAdvertising</b> ()</td></tr>
-<tr class="memdesc:a3ffe08ae6a459741b7f4eee7fee2e58b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop advertising. <br /></td></tr>
+<tr class="memitem:a3ffe08ae6a459741b7f4eee7fee2e58b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a3ffe08ae6a459741b7f4eee7fee2e58b">stopAdvertising</a> ()</td></tr>
+<tr class="memdesc:a3ffe08ae6a459741b7f4eee7fee2e58b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop advertising.  <a href="classMesh.html#a3ffe08ae6a459741b7f4eee7fee2e58b">More...</a><br /></td></tr>
 <tr class="separator:a3ffe08ae6a459741b7f4eee7fee2e58b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9c5db6f1de6d647f52d579867a56b44"><td class="memItemLeft" align="right" valign="top"><a id="ac9c5db6f1de6d647f52d579867a56b44" name="ac9c5db6f1de6d647f52d579867a56b44"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>startSync</b> ()</td></tr>
-<tr class="memdesc:ac9c5db6f1de6d647f52d579867a56b44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start synchronization of data with other nodes in mesh. <br /></td></tr>
+<tr class="memitem:ac9c5db6f1de6d647f52d579867a56b44"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#ac9c5db6f1de6d647f52d579867a56b44">startSync</a> ()</td></tr>
+<tr class="memdesc:ac9c5db6f1de6d647f52d579867a56b44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start synchronization of data with other nodes in mesh.  <a href="classMesh.html#ac9c5db6f1de6d647f52d579867a56b44">More...</a><br /></td></tr>
 <tr class="separator:ac9c5db6f1de6d647f52d579867a56b44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a686ba011102396fe1760e7c431f10dce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a686ba011102396fe1760e7c431f10dce">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:a686ba011102396fe1760e7c431f10dce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classMesh.html#a686ba011102396fe1760e7c431f10dce">More...</a><br /></td></tr>
 <tr class="separator:a686ba011102396fe1760e7c431f10dce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a20d0a7ed83312be449efc8c6abe94a1e"><td class="memItemLeft" align="right" valign="top"><a id="a20d0a7ed83312be449efc8c6abe94a1e" name="a20d0a7ed83312be449efc8c6abe94a1e"></a>
-static <a class="el" href="classMesh.html">Mesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:a20d0a7ed83312be449efc8c6abe94a1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the <a class="el" href="classMesh.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 12 Apr....">Mesh</a> object. <br /></td></tr>
+<tr class="memitem:a20d0a7ed83312be449efc8c6abe94a1e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classMesh.html">Mesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a20d0a7ed83312be449efc8c6abe94a1e">getInstance</a> ()</td></tr>
+<tr class="memdesc:a20d0a7ed83312be449efc8c6abe94a1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the <a class="el" href="classMesh.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 12 Apr....">Mesh</a> object.  <a href="classMesh.html#a20d0a7ed83312be449efc8c6abe94a1e">More...</a><br /></td></tr>
 <tr class="separator:a20d0a7ed83312be449efc8c6abe94a1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a2af137f1571af89172b9c102302c416b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a2af137f1571af89172b9c102302c416b">Mesh</a> ()</td></tr>
+<tr class="memdesc:a2af137f1571af89172b9c102302c416b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor, singleton, thus made private.  <a href="classMesh.html#a2af137f1571af89172b9c102302c416b">More...</a><br /></td></tr>
+<tr class="separator:a2af137f1571af89172b9c102302c416b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59c0e6d651a2db3de068b36ad4a3627a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a59c0e6d651a2db3de068b36ad4a3627a">Mesh</a> (<a class="el" href="classMesh.html">Mesh</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:a59c0e6d651a2db3de068b36ad4a3627a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor, singleton, thus made private.  <a href="classMesh.html#a59c0e6d651a2db3de068b36ad4a3627a">More...</a><br /></td></tr>
+<tr class="separator:a59c0e6d651a2db3de068b36ad4a3627a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe6876901c78b79ab80b96d1846f6967"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMesh.html">Mesh</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#abe6876901c78b79ab80b96d1846f6967">operator=</a> (<a class="el" href="classMesh.html">Mesh</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:abe6876901c78b79ab80b96d1846f6967"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator, singleton, thus made private.  <a href="classMesh.html#abe6876901c78b79ab80b96d1846f6967">More...</a><br /></td></tr>
+<tr class="separator:abe6876901c78b79ab80b96d1846f6967"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7be9a39f87d9b0a0de450819dda3da3d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a7be9a39f87d9b0a0de450819dda3da3d">requestSync</a> (bool propagateSyncMessageOverMesh=true)</td></tr>
+<tr class="memdesc:a7be9a39f87d9b0a0de450819dda3da3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatches an internal event to request what data this crownstone needs to receive from the mesh.  <a href="classMesh.html#a7be9a39f87d9b0a0de450819dda3da3d">More...</a><br /></td></tr>
+<tr class="separator:a7be9a39f87d9b0a0de450819dda3da3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6101e7d16277ceceb9c8e8e7b2c8d215"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a6101e7d16277ceceb9c8e8e7b2c8d215">initModels</a> ()</td></tr>
+<tr class="separator:a6101e7d16277ceceb9c8e8e7b2c8d215"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5242711fc81584513b0a42a99858263a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a5242711fc81584513b0a42a99858263a">configureModels</a> (dsm_handle_t appkeyHandle)</td></tr>
+<tr class="separator:a5242711fc81584513b0a42a99858263a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a19e5f8da34c4e9ed80794de6133e54"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a1a19e5f8da34c4e9ed80794de6133e54">onTick</a> (uint32_t tickCount)</td></tr>
+<tr class="separator:a1a19e5f8da34c4e9ed80794de6133e54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ae63c91adc3955c7171cf7c30a4127b51"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshCore.html">MeshCore</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#ae63c91adc3955c7171cf7c30a4127b51">_core</a></td></tr>
+<tr class="separator:ae63c91adc3955c7171cf7c30a4127b51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac436a90ce17331d63db6668283fb3cd2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelMulticast.html">MeshModelMulticast</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#ac436a90ce17331d63db6668283fb3cd2">_modelMulticast</a></td></tr>
+<tr class="separator:ac436a90ce17331d63db6668283fb3cd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf9fb2ba0a27a0432f36b9d5500b66a6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelMulticastNeighbours.html">MeshModelMulticastNeighbours</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#aaf9fb2ba0a27a0432f36b9d5500b66a6">_modelMulticastNeighbours</a></td></tr>
+<tr class="separator:aaf9fb2ba0a27a0432f36b9d5500b66a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee53d5c789c7b50faebba7ba9c81b328"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelMulticastAcked.html">MeshModelMulticastAcked</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#aee53d5c789c7b50faebba7ba9c81b328">_modelMulticastAcked</a></td></tr>
+<tr class="separator:aee53d5c789c7b50faebba7ba9c81b328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43c3d01ffeb8983ad5d02975cdde0a22"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelUnicast.html">MeshModelUnicast</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a43c3d01ffeb8983ad5d02975cdde0a22">_modelUnicast</a></td></tr>
+<tr class="separator:a43c3d01ffeb8983ad5d02975cdde0a22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeabe295d46840799a8c4c121fad9d65a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelSelector.html">MeshModelSelector</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#aeabe295d46840799a8c4c121fad9d65a">_modelSelector</a></td></tr>
+<tr class="separator:aeabe295d46840799a8c4c121fad9d65a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a072e726e0fc296562b49537ede366aae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshMsgHandler.html">MeshMsgHandler</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a072e726e0fc296562b49537ede366aae">_msgHandler</a></td></tr>
+<tr class="separator:a072e726e0fc296562b49537ede366aae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64c1a48935aead6f413b90b09376fc73"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshMsgSender.html">MeshMsgSender</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a64c1a48935aead6f413b90b09376fc73">_msgSender</a></td></tr>
+<tr class="separator:a64c1a48935aead6f413b90b09376fc73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef16b3b18b8f24d2262b72ae8ac0d09e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshAdvertiser.html">MeshAdvertiser</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#aef16b3b18b8f24d2262b72ae8ac0d09e">_advertiser</a></td></tr>
+<tr class="separator:aef16b3b18b8f24d2262b72ae8ac0d09e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74217ca58d9fe68c8c0265db49504110"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshScanner.html">MeshScanner</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a74217ca58d9fe68c8c0265db49504110">_scanner</a></td></tr>
+<tr class="separator:a74217ca58d9fe68c8c0265db49504110"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad74cf10fb2479018ef9df4a4da07e980"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ad2f8ed01c1733d4eab0932d970abaa4c">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#ad74cf10fb2479018ef9df4a4da07e980">_enabled</a> = true</td></tr>
+<tr class="separator:ad74cf10fb2479018ef9df4a4da07e980"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d255b371de1e99ce9a4487874e77278"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#a8d255b371de1e99ce9a4487874e77278">_synced</a> = false</td></tr>
+<tr class="separator:a8d255b371de1e99ce9a4487874e77278"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaab63ceff3679723f6795272880e0e2e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#aaab63ceff3679723f6795272880e0e2e">_syncCountdown</a> = -1</td></tr>
+<tr class="separator:aaab63ceff3679723f6795272880e0e2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba0ed93f7d1d43d24e377dfdcd9ce8ac"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMesh.html#aba0ed93f7d1d43d24e377dfdcd9ce8ac">_syncFailedCountdown</a> = 0</td></tr>
+<tr class="separator:aba0ed93f7d1d43d24e377dfdcd9ce8ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Author: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> Team Copyright: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> (<a href="https://crownstone.rocks">https://crownstone.rocks</a>) Date: 12 Apr., 2019 License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed) </p>
@@ -193,7 +264,82 @@ static <a class="el" href="classMesh.html">Mesh</a> &amp;&#160;</td><td class="m
 <li>Starts and retries sync requests.</li>
 <li>Sends crownstone state at a regular interval. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a2af137f1571af89172b9c102302c416b" name="a2af137f1571af89172b9c102302c416b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2af137f1571af89172b9c102302c416b">&#9670;&#160;</a></span>Mesh() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMesh.html">Mesh::Mesh</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor, singleton, thus made private. </p>
+
+</div>
+</div>
+<a id="a59c0e6d651a2db3de068b36ad4a3627a" name="a59c0e6d651a2db3de068b36ad4a3627a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59c0e6d651a2db3de068b36ad4a3627a">&#9670;&#160;</a></span>Mesh() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMesh.html">Mesh::Mesh</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMesh.html">Mesh</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy constructor, singleton, thus made private. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa5469d05c87e44616fe6910e71c68fbe" name="aa5469d05c87e44616fe6910e71c68fbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5469d05c87e44616fe6910e71c68fbe">&#9670;&#160;</a></span>advertiseIbeacon()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Mesh::advertiseIbeacon </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Start advertising as iBeacon. </p>
+
+</div>
+</div>
 <a id="a99f6ec4a09fda31ad28277b52ef2a0dd" name="a99f6ec4a09fda31ad28277b52ef2a0dd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a99f6ec4a09fda31ad28277b52ef2a0dd">&#9670;&#160;</a></span>checkFlashValid()</h2>
 
@@ -212,6 +358,59 @@ static <a class="el" href="classMesh.html">Mesh</a> &amp;&#160;</td><td class="m
 <p>Checks if flash pages have valid data. </p>
 <p >If not, the pages will be erased, wait for event EVT_MESH_PAGES_ERASED. Has to be done before storage is initialized.</p>
 <dl class="section return"><dt>Returns</dt><dd>true when valid. </dd></dl>
+
+</div>
+</div>
+<a id="a5242711fc81584513b0a42a99858263a" name="a5242711fc81584513b0a42a99858263a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5242711fc81584513b0a42a99858263a">&#9670;&#160;</a></span>configureModels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Mesh::configureModels </td>
+          <td>(</td>
+          <td class="paramtype">dsm_handle_t&#160;</td>
+          <td class="paramname"><em>appkeyHandle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a20d0a7ed83312be449efc8c6abe94a1e" name="a20d0a7ed83312be449efc8c6abe94a1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20d0a7ed83312be449efc8c6abe94a1e">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classMesh.html">Mesh</a> &amp; Mesh::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a reference to the <a class="el" href="classMesh.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 12 Apr....">Mesh</a> object. </p>
 
 </div>
 </div>
@@ -252,7 +451,7 @@ static <a class="el" href="classMesh.html">Mesh</a> &amp;&#160;</td><td class="m
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t Mesh::init </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Mesh::init </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structboards__config__t.html">boards_config_t</a> &amp;&#160;</td>
           <td class="paramname"><em>board</em></td><td>)</td>
@@ -265,6 +464,143 @@ static <a class="el" href="classMesh.html">Mesh</a> &amp;&#160;</td><td class="m
 <dl class="section return"><dt>Returns</dt><dd>ERR_SUCCESS Initialized successfully. </dd>
 <dd>
 ERR_WRONG_STATE Flash pages should be erased. </dd></dl>
+
+</div>
+</div>
+<a id="aff72e4c52c1a01603b48123ee233fbc2" name="aff72e4c52c1a01603b48123ee233fbc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff72e4c52c1a01603b48123ee233fbc2">&#9670;&#160;</a></span>initAdvertiser()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Mesh::initAdvertiser </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Init the advertiser. </p>
+
+</div>
+</div>
+<a id="a6101e7d16277ceceb9c8e8e7b2c8d215" name="a6101e7d16277ceceb9c8e8e7b2c8d215"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6101e7d16277ceceb9c8e8e7b2c8d215">&#9670;&#160;</a></span>initModels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Mesh::initModels </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1a19e5f8da34c4e9ed80794de6133e54" name="a1a19e5f8da34c4e9ed80794de6133e54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a19e5f8da34c4e9ed80794de6133e54">&#9670;&#160;</a></span>onTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Mesh::onTick </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tickCount</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abe6876901c78b79ab80b96d1846f6967" name="abe6876901c78b79ab80b96d1846f6967"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe6876901c78b79ab80b96d1846f6967">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMesh.html">Mesh</a> &amp; Mesh::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMesh.html">Mesh</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assignment operator, singleton, thus made private. </p>
+
+</div>
+</div>
+<a id="a7be9a39f87d9b0a0de450819dda3da3d" name="a7be9a39f87d9b0a0de450819dda3da3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7be9a39f87d9b0a0de450819dda3da3d">&#9670;&#160;</a></span>requestSync()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Mesh::requestSync </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>propagateSyncMessageOverMesh</em> = <code>true</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dispatches an internal event to request what data this crownstone needs to receive from the mesh. </p>
+<p >Afterwards, broadcasts a BT message in order to obtain the desired information.</p>
+<p >Assumes all event handlers that are interested in obtaining data are registered with the event dispatcher.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">[propagateSyncMessageOverMesh]</td><td>if set to false no mesh messages will be sent. (Use this internally to check if device is synced.)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true When request was necessary. If propagateSyncMessageOverMesh is true, a mesh message will be sent to resolve the sync. </dd>
+<dd>
+false When nothing had to be requested, so everything is synced. </dd></dl>
 
 </div>
 </div>
@@ -288,6 +624,25 @@ ERR_WRONG_STATE Flash pages should be erased. </dd></dl>
 
 </div>
 </div>
+<a id="ac9c5db6f1de6d647f52d579867a56b44" name="ac9c5db6f1de6d647f52d579867a56b44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9c5db6f1de6d647f52d579867a56b44">&#9670;&#160;</a></span>startSync()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Mesh::startSync </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Start synchronization of data with other nodes in mesh. </p>
+
+</div>
+</div>
 <a id="a1dcd4ba4e3462b2a857ca59ecb580d97" name="a1dcd4ba4e3462b2a857ca59ecb580d97"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1dcd4ba4e3462b2a857ca59ecb580d97">&#9670;&#160;</a></span>stop()</h2>
 
@@ -295,7 +650,7 @@ ERR_WRONG_STATE Flash pages should be erased. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t Mesh::stop </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Mesh::stop </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -308,6 +663,334 @@ ERR_WRONG_STATE Flash pages should be erased. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>ERR_SUCCESS When the mesh stopped. </dd>
 <dd>
 ERR_WAIT_FOR_SUCCESS When the mesh will stop, wait for NRF_MESH_EVT_DISABLED. </dd></dl>
+
+</div>
+</div>
+<a id="a3ffe08ae6a459741b7f4eee7fee2e58b" name="a3ffe08ae6a459741b7f4eee7fee2e58b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ffe08ae6a459741b7f4eee7fee2e58b">&#9670;&#160;</a></span>stopAdvertising()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Mesh::stopAdvertising </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Stop advertising. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="aef16b3b18b8f24d2262b72ae8ac0d09e" name="aef16b3b18b8f24d2262b72ae8ac0d09e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef16b3b18b8f24d2262b72ae8ac0d09e">&#9670;&#160;</a></span>_advertiser</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshAdvertiser.html">MeshAdvertiser</a> Mesh::_advertiser</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae63c91adc3955c7171cf7c30a4127b51" name="ae63c91adc3955c7171cf7c30a4127b51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae63c91adc3955c7171cf7c30a4127b51">&#9670;&#160;</a></span>_core</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshCore.html">MeshCore</a>* Mesh::_core</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad74cf10fb2479018ef9df4a4da07e980" name="ad74cf10fb2479018ef9df4a4da07e980"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad74cf10fb2479018ef9df4a4da07e980">&#9670;&#160;</a></span>_enabled</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ad2f8ed01c1733d4eab0932d970abaa4c">BOOL</a> Mesh::_enabled = true</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac436a90ce17331d63db6668283fb3cd2" name="ac436a90ce17331d63db6668283fb3cd2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac436a90ce17331d63db6668283fb3cd2">&#9670;&#160;</a></span>_modelMulticast</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelMulticast.html">MeshModelMulticast</a> Mesh::_modelMulticast</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aee53d5c789c7b50faebba7ba9c81b328" name="aee53d5c789c7b50faebba7ba9c81b328"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee53d5c789c7b50faebba7ba9c81b328">&#9670;&#160;</a></span>_modelMulticastAcked</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelMulticastAcked.html">MeshModelMulticastAcked</a> Mesh::_modelMulticastAcked</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaf9fb2ba0a27a0432f36b9d5500b66a6" name="aaf9fb2ba0a27a0432f36b9d5500b66a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf9fb2ba0a27a0432f36b9d5500b66a6">&#9670;&#160;</a></span>_modelMulticastNeighbours</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelMulticastNeighbours.html">MeshModelMulticastNeighbours</a> Mesh::_modelMulticastNeighbours</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aeabe295d46840799a8c4c121fad9d65a" name="aeabe295d46840799a8c4c121fad9d65a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeabe295d46840799a8c4c121fad9d65a">&#9670;&#160;</a></span>_modelSelector</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelSelector.html">MeshModelSelector</a> Mesh::_modelSelector</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a43c3d01ffeb8983ad5d02975cdde0a22" name="a43c3d01ffeb8983ad5d02975cdde0a22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43c3d01ffeb8983ad5d02975cdde0a22">&#9670;&#160;</a></span>_modelUnicast</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelUnicast.html">MeshModelUnicast</a> Mesh::_modelUnicast</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a072e726e0fc296562b49537ede366aae" name="a072e726e0fc296562b49537ede366aae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a072e726e0fc296562b49537ede366aae">&#9670;&#160;</a></span>_msgHandler</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshMsgHandler.html">MeshMsgHandler</a> Mesh::_msgHandler</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a64c1a48935aead6f413b90b09376fc73" name="a64c1a48935aead6f413b90b09376fc73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64c1a48935aead6f413b90b09376fc73">&#9670;&#160;</a></span>_msgSender</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshMsgSender.html">MeshMsgSender</a> Mesh::_msgSender</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a74217ca58d9fe68c8c0265db49504110" name="a74217ca58d9fe68c8c0265db49504110"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74217ca58d9fe68c8c0265db49504110">&#9670;&#160;</a></span>_scanner</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshScanner.html">MeshScanner</a> Mesh::_scanner</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaab63ceff3679723f6795272880e0e2e" name="aaab63ceff3679723f6795272880e0e2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaab63ceff3679723f6795272880e0e2e">&#9670;&#160;</a></span>_syncCountdown</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t Mesh::_syncCountdown = -1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8d255b371de1e99ce9a4487874e77278" name="a8d255b371de1e99ce9a4487874e77278"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d255b371de1e99ce9a4487874e77278">&#9670;&#160;</a></span>_synced</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Mesh::_synced = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aba0ed93f7d1d43d24e377dfdcd9ce8ac" name="aba0ed93f7d1d43d24e377dfdcd9ce8ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba0ed93f7d1d43d24e377dfdcd9ce8ac">&#9670;&#160;</a></span>_syncFailedCountdown</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t Mesh::_syncFailedCountdown = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

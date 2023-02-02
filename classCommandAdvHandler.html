@@ -100,10 +100,14 @@ $(document).ready(function(){initNavTree('classCommandAdvHandler.html',''); init
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classCommandAdvHandler-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">CommandAdvHandler Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__CommandAdvHandler_8h_source.html">cs_CommandAdvHandler.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for CommandAdvHandler:</div>
 <div class="dyncontent">
@@ -118,39 +122,393 @@ Collaboration diagram for CommandAdvHandler:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCommandAdvHandler__coll__graph.png" border="0" usemap="#aCommandAdvHandler_coll__map" alt="Collaboration graph"/></div>
 <map name="aCommandAdvHandler_coll__map" id="aCommandAdvHandler_coll__map">
-<area shape="rect" title=" " alt="" coords="5,79,171,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="33,5,143,31"/>
+<area shape="rect" title=" " alt="" coords="61,93,226,119"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" href="structcommand__adv__claim__t.html" title="Struct used to prevent double handling of similar command advertisements." alt="" coords="141,5,314,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a95b7f5bdeb28df04460bd147e75251d7"><td class="memItemLeft" align="right" valign="top"><a id="a95b7f5bdeb28df04460bd147e75251d7" name="a95b7f5bdeb28df04460bd147e75251d7"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
+<tr class="memitem:a95b7f5bdeb28df04460bd147e75251d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a95b7f5bdeb28df04460bd147e75251d7">init</a> ()</td></tr>
 <tr class="separator:a95b7f5bdeb28df04460bd147e75251d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad11ea4de7be76cb4574830ddb2f65c16"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#ad11ea4de7be76cb4574830ddb2f65c16">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:ad11ea4de7be76cb4574830ddb2f65c16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classCommandAdvHandler.html#ad11ea4de7be76cb4574830ddb2f65c16">More...</a><br /></td></tr>
 <tr class="separator:ad11ea4de7be76cb4574830ddb2f65c16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aaac4b1c46ced4065eeb46ffd1955e5d4"><td class="memItemLeft" align="right" valign="top"><a id="aaac4b1c46ced4065eeb46ffd1955e5d4" name="aaac4b1c46ced4065eeb46ffd1955e5d4"></a>
-static <a class="el" href="classCommandAdvHandler.html">CommandAdvHandler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
+<tr class="memitem:aaac4b1c46ced4065eeb46ffd1955e5d4"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classCommandAdvHandler.html">CommandAdvHandler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#aaac4b1c46ced4065eeb46ffd1955e5d4">getInstance</a> ()</td></tr>
 <tr class="separator:aaac4b1c46ced4065eeb46ffd1955e5d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a58db025fa99e751dab732722b0053a6a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a58db025fa99e751dab732722b0053a6a">CommandAdvHandler</a> ()</td></tr>
+<tr class="separator:a58db025fa99e751dab732722b0053a6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4d99bb04cb128eaf18a9b93644c1b1b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#ac4d99bb04cb128eaf18a9b93644c1b1b">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a75a2fda03533fb38b78f00cbb7abc63c">CONFIG_SPHERE_ID</a>) _sphereId=0</td></tr>
+<tr class="separator:ac4d99bb04cb128eaf18a9b93644c1b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a608fffa41b5837689e89f257157a4ecd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a608fffa41b5837689e89f257157a4ecd">parseAdvertisement</a> (<a class="el" href="structscanned__device__t.html">scanned_device_t</a> *scannedDevice)</td></tr>
+<tr class="separator:a608fffa41b5837689e89f257157a4ecd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d7464a91f7d638fa42dddf27da1ba1b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a0d7464a91f7d638fa42dddf27da1ba1b">handleEncryptedCommandPayload</a> (<a class="el" href="structscanned__device__t.html">scanned_device_t</a> *scannedDevice, const <a class="el" href="structcommand__adv__header__t.html">command_adv_header_t</a> &amp;header, const <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;nonce, <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;encryptedPayload, uint16_t encryptedPayloadRC5[2], uint16_t decryptedPayloadRC5[2])</td></tr>
+<tr class="separator:a0d7464a91f7d638fa42dddf27da1ba1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a177d25f7739fb0ea69bb087dfb9e9be6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a177d25f7739fb0ea69bb087dfb9e9be6">decryptRC5Payload</a> (uint16_t encryptedPayload[2], uint16_t decryptedPayload[2])</td></tr>
+<tr class="separator:a177d25f7739fb0ea69bb087dfb9e9be6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98887738c7af6d058c0d1babd5efb65a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a98887738c7af6d058c0d1babd5efb65a">handleDecryptedRC5Payload</a> (<a class="el" href="structscanned__device__t.html">scanned_device_t</a> *scannedDevice, const <a class="el" href="structcommand__adv__header__t.html">command_adv_header_t</a> &amp;header, uint16_t decryptedPayload[2])</td></tr>
+<tr class="separator:a98887738c7af6d058c0d1babd5efb65a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26ac7ae8f166b65a8f19264b9c8fc987"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a26ac7ae8f166b65a8f19264b9c8fc987">getRequiredAccessLevel</a> (const <a class="el" href="cs__CommandTypes_8h.html#a45450056913147dbaa1c5a07ced68dfa">AdvCommandTypes</a> type)</td></tr>
+<tr class="separator:a26ac7ae8f166b65a8f19264b9c8fc987"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8464a8cceea2305916e87ab7a046fa9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#aa8464a8cceea2305916e87ab7a046fa9">checkSimilarCommand</a> (uint8_t deviceToken, <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;encryptedData, uint16_t encryptedRC5, uint16_t &amp;decryptedRC5)</td></tr>
+<tr class="memdesc:aa8464a8cceea2305916e87ab7a046fa9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return index of claim with this device token.  <a href="classCommandAdvHandler.html#aa8464a8cceea2305916e87ab7a046fa9">More...</a><br /></td></tr>
+<tr class="separator:aa8464a8cceea2305916e87ab7a046fa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b67fd4b895710130b75b20506345465"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a9b67fd4b895710130b75b20506345465">claim</a> (uint8_t deviceToken, <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;encryptedData, uint16_t encryptedRC5, uint16_t decryptedRC5, int indexOfDevice)</td></tr>
+<tr class="separator:a9b67fd4b895710130b75b20506345465"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ec72311614a84bc8a1ec5047ff6f5e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a1ec72311614a84bc8a1ec5047ff6f5e6">tickClaims</a> ()</td></tr>
+<tr class="separator:a1ec72311614a84bc8a1ec5047ff6f5e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a862b4f5deb8a4b42977c97c12da9ecb1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcommand__adv__claim__t.html">command_adv_claim_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandAdvHandler.html#a862b4f5deb8a4b42977c97c12da9ecb1">_claims</a> [<a class="el" href="cs__CommandAdvHandler_8h.html#aa2bcfb74c105cbedd80924b3f8d3cc29">CMD_ADV_MAX_CLAIM_COUNT</a>]</td></tr>
+<tr class="separator:a862b4f5deb8a4b42977c97c12da9ecb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a58db025fa99e751dab732722b0053a6a" name="a58db025fa99e751dab732722b0053a6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58db025fa99e751dab732722b0053a6a">&#9670;&#160;</a></span>CommandAdvHandler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCommandAdvHandler.html">CommandAdvHandler::CommandAdvHandler</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa8464a8cceea2305916e87ab7a046fa9" name="aa8464a8cceea2305916e87ab7a046fa9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8464a8cceea2305916e87ab7a046fa9">&#9670;&#160;</a></span>checkSimilarCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int CommandAdvHandler::checkSimilarCommand </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>deviceToken</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>encryptedData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>encryptedRC5</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t &amp;&#160;</td>
+          <td class="paramname"><em>decryptedRC5</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return index of claim with this device token. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">decryptedRC5</td><td>When previous encrypted data is similar: set to previous decrypted <a class="el" href="classRC5.html" title="Class that implements RC5 encryption.">RC5</a> data.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Returns -1 when the device token was not found. Returns -2 when the device token was found, but the previous encryptedData is similar. </p>
+
+</div>
+</div>
+<a id="a9b67fd4b895710130b75b20506345465" name="a9b67fd4b895710130b75b20506345465"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b67fd4b895710130b75b20506345465">&#9670;&#160;</a></span>claim()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CommandAdvHandler::claim </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>deviceToken</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>encryptedData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>encryptedRC5</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>decryptedRC5</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>indexOfDevice</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a177d25f7739fb0ea69bb087dfb9e9be6" name="a177d25f7739fb0ea69bb087dfb9e9be6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a177d25f7739fb0ea69bb087dfb9e9be6">&#9670;&#160;</a></span>decryptRC5Payload()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CommandAdvHandler::decryptRC5Payload </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>encryptedPayload</em>[2], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>decryptedPayload</em>[2]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaac4b1c46ced4065eeb46ffd1955e5d4" name="aaac4b1c46ced4065eeb46ffd1955e5d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaac4b1c46ced4065eeb46ffd1955e5d4">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classCommandAdvHandler.html">CommandAdvHandler</a> &amp; CommandAdvHandler::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a26ac7ae8f166b65a8f19264b9c8fc987" name="a26ac7ae8f166b65a8f19264b9c8fc987"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26ac7ae8f166b65a8f19264b9c8fc987">&#9670;&#160;</a></span>getRequiredAccessLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> CommandAdvHandler::getRequiredAccessLevel </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="cs__CommandTypes_8h.html#a45450056913147dbaa1c5a07ced68dfa">AdvCommandTypes</a>&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a98887738c7af6d058c0d1babd5efb65a" name="a98887738c7af6d058c0d1babd5efb65a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98887738c7af6d058c0d1babd5efb65a">&#9670;&#160;</a></span>handleDecryptedRC5Payload()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandAdvHandler::handleDecryptedRC5Payload </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structscanned__device__t.html">scanned_device_t</a> *&#160;</td>
+          <td class="paramname"><em>scannedDevice</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcommand__adv__header__t.html">command_adv_header_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>header</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>decryptedPayload</em>[2]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0d7464a91f7d638fa42dddf27da1ba1b" name="a0d7464a91f7d638fa42dddf27da1ba1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d7464a91f7d638fa42dddf27da1ba1b">&#9670;&#160;</a></span>handleEncryptedCommandPayload()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CommandAdvHandler::handleEncryptedCommandPayload </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structscanned__device__t.html">scanned_device_t</a> *&#160;</td>
+          <td class="paramname"><em>scannedDevice</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcommand__adv__header__t.html">command_adv_header_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>header</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>nonce</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>encryptedPayload</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>encryptedPayloadRC5</em>[2], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>decryptedPayloadRC5</em>[2]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ad11ea4de7be76cb4574830ddb2f65c16" name="ad11ea4de7be76cb4574830ddb2f65c16"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad11ea4de7be76cb4574830ddb2f65c16">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -179,6 +537,123 @@ static <a class="el" href="classCommandAdvHandler.html">CommandAdvHandler</a> &a
 <p >This method is overloaded by all classes that derive from <a class="el" href="classEventListener.html" title="Event listener.">EventListener</a>. They can receive an <a class="el" href="classevent__t.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 9,...">event_t</a> struct and act upon it. These events are dispatched by the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. </p>
 
 <p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="a95b7f5bdeb28df04460bd147e75251d7" name="a95b7f5bdeb28df04460bd147e75251d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95b7f5bdeb28df04460bd147e75251d7">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandAdvHandler::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a608fffa41b5837689e89f257157a4ecd" name="a608fffa41b5837689e89f257157a4ecd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a608fffa41b5837689e89f257157a4ecd">&#9670;&#160;</a></span>parseAdvertisement()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandAdvHandler::parseAdvertisement </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structscanned__device__t.html">scanned_device_t</a> *&#160;</td>
+          <td class="paramname"><em>scannedDevice</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1ec72311614a84bc8a1ec5047ff6f5e6" name="a1ec72311614a84bc8a1ec5047ff6f5e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ec72311614a84bc8a1ec5047ff6f5e6">&#9670;&#160;</a></span>tickClaims()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandAdvHandler::tickClaims </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac4d99bb04cb128eaf18a9b93644c1b1b" name="ac4d99bb04cb128eaf18a9b93644c1b1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4d99bb04cb128eaf18a9b93644c1b1b">&#9670;&#160;</a></span>TYPIFY()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">CommandAdvHandler::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a75a2fda03533fb38b78f00cbb7abc63c">CONFIG_SPHERE_ID</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a862b4f5deb8a4b42977c97c12da9ecb1" name="a862b4f5deb8a4b42977c97c12da9ecb1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a862b4f5deb8a4b42977c97c12da9ecb1">&#9670;&#160;</a></span>_claims</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcommand__adv__claim__t.html">command_adv_claim_t</a> CommandAdvHandler::_claims[<a class="el" href="cs__CommandAdvHandler_8h.html#aa2bcfb74c105cbedd80924b3f8d3cc29">CMD_ADV_MAX_CLAIM_COUNT</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

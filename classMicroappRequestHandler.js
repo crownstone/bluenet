@@ -1,5 +1,26 @@
 var classMicroappRequestHandler =
 [
+    [ "MicroappRequestHandler", "classMicroappRequestHandler.html#a5a5a274f0219ea60129c2da86529e44e", null ],
+    [ "MicroappRequestHandler", "classMicroappRequestHandler.html#ad29efbfeb27645e6e14fd5c4be5704a1", null ],
+    [ "getCharacteristic", "classMicroappRequestHandler.html#add1a959b774c807aec3e4e0f09774724", null ],
+    [ "getInstance", "classMicroappRequestHandler.html#a6a857d1343e5c27c5cfeea412cb6d242", null ],
     [ "handleMicroappRequest", "classMicroappRequestHandler.html#a6437f0d2251f553eac7a79ecb883cbee", null ],
-    [ "handleRequestLog", "classMicroappRequestHandler.html#a848f723006ec5a127c58b59ee20037ae", null ]
+    [ "handleRequestAsset", "classMicroappRequestHandler.html#a00745e82cb778341f7392e268d807907", null ],
+    [ "handleRequestBle", "classMicroappRequestHandler.html#a023ad8c223870733ccd4cd35bf54ee20", null ],
+    [ "handleRequestBleCentral", "classMicroappRequestHandler.html#aefa83c39be6c380207d0a44b21bec65d", null ],
+    [ "handleRequestBlePeripheral", "classMicroappRequestHandler.html#a7b344e4f07f72e8d683d0497d10e6b78", null ],
+    [ "handleRequestBleScan", "classMicroappRequestHandler.html#a39fa56c1d21e2554959c38cf8812e89e", null ],
+    [ "handleRequestBluenetEvent", "classMicroappRequestHandler.html#a300ce2f849e3ed309d008dcc964183a4", null ],
+    [ "handleRequestControlCommand", "classMicroappRequestHandler.html#a185e450fd437e04ed003c4ad7bc9f93f", null ],
+    [ "handleRequestLog", "classMicroappRequestHandler.html#a848f723006ec5a127c58b59ee20037ae", null ],
+    [ "handleRequestMesh", "classMicroappRequestHandler.html#a1c751c6bc98910c4de645d0c37b8ac68", null ],
+    [ "handleRequestMessage", "classMicroappRequestHandler.html#a395ad8e8ad64aeabe4e1c3832d6a8228", null ],
+    [ "handleRequestPin", "classMicroappRequestHandler.html#aa0c742094831e62348b1cc22b6f063c4", null ],
+    [ "handleRequestPowerUsage", "classMicroappRequestHandler.html#aa4d24107062204cd751b4388a480b56e", null ],
+    [ "handleRequestPresence", "classMicroappRequestHandler.html#a2fead234d0b8232201a6076e14bdc8fa", null ],
+    [ "handleRequestServiceData", "classMicroappRequestHandler.html#a7afd53ddc4c042638d02e0bc06e3c813", null ],
+    [ "handleRequestSwitch", "classMicroappRequestHandler.html#a45ef1d5ce1c2b4a8a2258602dba2dc4e", null ],
+    [ "handleRequestTwi", "classMicroappRequestHandler.html#a67e8599f570ffc1693a5dad824df3c35", null ],
+    [ "handleRequestYield", "classMicroappRequestHandler.html#a733c439f67d5cc69d89208a2b3e25c3f", null ],
+    [ "operator=", "classMicroappRequestHandler.html#a00eea1625384be8be7509b19df66df4f", null ]
 ];

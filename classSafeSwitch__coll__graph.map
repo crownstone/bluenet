@@ -1,4 +1,8 @@
 <map id="SafeSwitch" name="SafeSwitch">
-<area shape="rect" id="node1" title="Class that takes care of safety of switch." alt="" coords="13,79,108,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node1" title="Class that takes care of safety of switch." alt="" coords="221,108,316,133"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,13,116,38"/>
+<area shape="rect" id="node3" href="$classDimmer.html" title="Class that provides a dimmer." alt="" coords="141,13,215,38"/>
+<area shape="rect" id="node4" href="$classRelay.html" title="Class that provides a bi&#45;stable relay." alt="" coords="239,13,298,38"/>
+<area shape="rect" id="node5" href="$unionswitch__state__t.html" title="Switch state: combination of relay and dimmer state." alt="" coords="323,13,439,38"/>
+<area shape="rect" id="node6" title=" " alt="" coords="463,5,629,45"/>
 </map>

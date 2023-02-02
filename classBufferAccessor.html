@@ -121,21 +121,19 @@ Inheritance diagram for BufferAccessor:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a012a181514aae89ffaf810ed394523b3"><td class="memItemLeft" align="right" valign="top"><a id="a012a181514aae89ffaf810ed394523b3" name="a012a181514aae89ffaf810ed394523b3"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~BufferAccessor</b> ()</td></tr>
-<tr class="memdesc:a012a181514aae89ffaf810ed394523b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor. <br /></td></tr>
+<tr class="memitem:a012a181514aae89ffaf810ed394523b3"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBufferAccessor.html#a012a181514aae89ffaf810ed394523b3">~BufferAccessor</a> ()</td></tr>
+<tr class="memdesc:a012a181514aae89ffaf810ed394523b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="classBufferAccessor.html#a012a181514aae89ffaf810ed394523b3">More...</a><br /></td></tr>
 <tr class="separator:a012a181514aae89ffaf810ed394523b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9bdbb577271ed81be0cbf496b88072e"><td class="memItemLeft" align="right" valign="top">virtual cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBufferAccessor.html#ae9bdbb577271ed81be0cbf496b88072e">assign</a> (buffer_ptr_t buffer, cs_buffer_size_t size)=0</td></tr>
+<tr class="memitem:ae9bdbb577271ed81be0cbf496b88072e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBufferAccessor.html#ae9bdbb577271ed81be0cbf496b88072e">assign</a> (<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> buffer, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> size)=0</td></tr>
 <tr class="memdesc:ae9bdbb577271ed81be0cbf496b88072e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assign the buffer used to hold the data.  <a href="classBufferAccessor.html#ae9bdbb577271ed81be0cbf496b88072e">More...</a><br /></td></tr>
 <tr class="separator:ae9bdbb577271ed81be0cbf496b88072e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29f39ae6f6fdf160758c677855ef85b8"><td class="memItemLeft" align="right" valign="top">virtual cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBufferAccessor.html#a29f39ae6f6fdf160758c677855ef85b8">getBufferSize</a> () const =0</td></tr>
+<tr class="memitem:a29f39ae6f6fdf160758c677855ef85b8"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBufferAccessor.html#a29f39ae6f6fdf160758c677855ef85b8">getBufferSize</a> () const =0</td></tr>
 <tr class="memdesc:a29f39ae6f6fdf160758c677855ef85b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the capacity of the buffer.  <a href="classBufferAccessor.html#a29f39ae6f6fdf160758c677855ef85b8">More...</a><br /></td></tr>
 <tr class="separator:a29f39ae6f6fdf160758c677855ef85b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d7ffac3c486b26a154b07ed8cf84f57"><td class="memItemLeft" align="right" valign="top">virtual cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBufferAccessor.html#a6d7ffac3c486b26a154b07ed8cf84f57">getSerializedSize</a> () const =0</td></tr>
+<tr class="memitem:a6d7ffac3c486b26a154b07ed8cf84f57"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBufferAccessor.html#a6d7ffac3c486b26a154b07ed8cf84f57">getSerializedSize</a> () const =0</td></tr>
 <tr class="memdesc:a6d7ffac3c486b26a154b07ed8cf84f57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the size of the serialized data in the buffer.  <a href="classBufferAccessor.html#a6d7ffac3c486b26a154b07ed8cf84f57">More...</a><br /></td></tr>
 <tr class="separator:a6d7ffac3c486b26a154b07ed8cf84f57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af963f944d97e172e9f1cfef5a85ce48f"><td class="memItemLeft" align="right" valign="top"><a id="af963f944d97e172e9f1cfef5a85ce48f" name="af963f944d97e172e9f1cfef5a85ce48f"></a>
-virtual cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><b>getRemainingCapacity</b> () const</td></tr>
+<tr class="memitem:af963f944d97e172e9f1cfef5a85ce48f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBufferAccessor.html#af963f944d97e172e9f1cfef5a85ce48f">getRemainingCapacity</a> () const</td></tr>
 <tr class="separator:af963f944d97e172e9f1cfef5a85ce48f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a051f267e94dc3cbb8b68c392fcdba7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBufferAccessor.html#a0a051f267e94dc3cbb8b68c392fcdba7">getSerializedBuffer</a> ()=0</td></tr>
 <tr class="memdesc:a0a051f267e94dc3cbb8b68c392fcdba7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the pointer to the buffer.  <a href="classBufferAccessor.html#a0a051f267e94dc3cbb8b68c392fcdba7">More...</a><br /></td></tr>
@@ -144,7 +142,35 @@ virtual cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><b>g
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Base class for a buffer accessor object. </p>
 <p >Any object that works on a buffer can use this as a base class. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a012a181514aae89ffaf810ed394523b3" name="a012a181514aae89ffaf810ed394523b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a012a181514aae89ffaf810ed394523b3">&#9670;&#160;</a></span>~BufferAccessor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual BufferAccessor::~BufferAccessor </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Default destructor. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a id="ae9bdbb577271ed81be0cbf496b88072e" name="ae9bdbb577271ed81be0cbf496b88072e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae9bdbb577271ed81be0cbf496b88072e">&#9670;&#160;</a></span>assign()</h2>
 
@@ -155,15 +181,15 @@ virtual cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><b>g
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual cs_ret_code_t BufferAccessor::assign </td>
+          <td class="memname">virtual <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> BufferAccessor::assign </td>
           <td>(</td>
-          <td class="paramtype">buffer_ptr_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&#160;</td>
           <td class="paramname"><em>buffer</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_buffer_size_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td>
           <td class="paramname"><em>size</em>&#160;</td>
         </tr>
         <tr>
@@ -203,7 +229,7 @@ virtual cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><b>g
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual cs_buffer_size_t BufferAccessor::getBufferSize </td>
+          <td class="memname">virtual <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> BufferAccessor::getBufferSize </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -220,6 +246,31 @@ virtual cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><b>g
 <dl class="section return"><dt>Returns</dt><dd>Maximum size of the buffer in bytes. </dd></dl>
 
 <p>Implemented in <a class="el" href="classControlPacketAccessor.html#aa08d3c5819ac6e6b4ea0bef300c42430">ControlPacketAccessor&lt; PAYLOAD_SIZE &gt;</a>, and <a class="el" href="classResultPacketAccessor.html#a2161b42a695fdf9206adbaf27f436319">ResultPacketAccessor&lt; PAYLOAD_SIZE &gt;</a>.</p>
+
+</div>
+</div>
+<a id="af963f944d97e172e9f1cfef5a85ce48f" name="af963f944d97e172e9f1cfef5a85ce48f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af963f944d97e172e9f1cfef5a85ce48f">&#9670;&#160;</a></span>getRemainingCapacity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> BufferAccessor::getRemainingCapacity </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -263,7 +314,7 @@ virtual cs_buffer_size_t&#160;</td><td class="memItemRight" valign="bottom"><b>g
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual cs_buffer_size_t BufferAccessor::getSerializedSize </td>
+          <td class="memname">virtual <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> BufferAccessor::getSerializedSize </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>

@@ -111,30 +111,109 @@ $(document).ready(function(){initNavTree('unionmesh__control__command__packet__f
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ade06368de39152dd14ccc276f7c4cd20"><td class="memItemLeft" ><a id="ade06368de39152dd14ccc276f7c4cd20" name="ade06368de39152dd14ccc276f7c4cd20"></a>
-struct {</td></tr>
-<tr class="memitem:aa5d740fd0f8fa85f7a510bc627d98219"><td class="memItemLeft" >
-&#160;&#160;&#160;bool&#160;&#160;&#160;<b>broadcast</b>: 1</td></tr>
+<tr class="memitem:ade06368de39152dd14ccc276f7c4cd20"><td class="memItemLeft" >struct {</td></tr>
+<tr class="memitem:aa5d740fd0f8fa85f7a510bc627d98219"><td class="memItemLeft" >&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="unionmesh__control__command__packet__flags__t.html#ac92992262e7b631252c2bdae9d0246d3">broadcast</a>: 1</td></tr>
 <tr class="separator:aa5d740fd0f8fa85f7a510bc627d98219"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86779505b8e46bf38f98675468927dae"><td class="memItemLeft" >
-&#160;&#160;&#160;bool&#160;&#160;&#160;<b>acked</b>: 1</td></tr>
+<tr class="memitem:a86779505b8e46bf38f98675468927dae"><td class="memItemLeft" >&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="unionmesh__control__command__packet__flags__t.html#a2a13adbe86e871b2a9fc607e69ff8a8c">acked</a>: 1</td></tr>
 <tr class="separator:a86779505b8e46bf38f98675468927dae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1890479019f2885420475689458fa01f"><td class="memItemLeft" >
-&#160;&#160;&#160;bool&#160;&#160;&#160;<b>useKnownIds</b>: 1</td></tr>
+<tr class="memitem:a1890479019f2885420475689458fa01f"><td class="memItemLeft" >&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="unionmesh__control__command__packet__flags__t.html#a95d8fa6663596774a154e2ca35c30fe0">useKnownIds</a>: 1</td></tr>
 <tr class="separator:a1890479019f2885420475689458fa01f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace47aa3c414245e8d92a665bb6a7ac69"><td class="memItemLeft" >
-&#160;&#160;&#160;bool&#160;&#160;&#160;<b>doNotRelay</b>: 1</td></tr>
+<tr class="memitem:ace47aa3c414245e8d92a665bb6a7ac69"><td class="memItemLeft" >&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="unionmesh__control__command__packet__flags__t.html#a51a618e251c0bbd32788d5c5fe9a40b0">doNotRelay</a>: 1</td></tr>
 <tr class="separator:ace47aa3c414245e8d92a665bb6a7ac69"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade06368de39152dd14ccc276f7c4cd20"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><b>flags</b></td></tr>
+<tr class="memitem:ade06368de39152dd14ccc276f7c4cd20"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionmesh__control__command__packet__flags__t.html#ade06368de39152dd14ccc276f7c4cd20">flags</a></td></tr>
 <tr class="separator:ade06368de39152dd14ccc276f7c4cd20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afcbc4ad56ccffded84575ac2d8fd349a"><td class="memItemLeft" align="right" valign="top"><a id="afcbc4ad56ccffded84575ac2d8fd349a" name="afcbc4ad56ccffded84575ac2d8fd349a"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>asInt</b> = 1</td></tr>
+<tr class="memitem:afcbc4ad56ccffded84575ac2d8fd349a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionmesh__control__command__packet__flags__t.html#afcbc4ad56ccffded84575ac2d8fd349a">asInt</a> = 1</td></tr>
 <tr class="separator:afcbc4ad56ccffded84575ac2d8fd349a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Flags to determine how to send the mesh message. </p>
 <p >All possibilities: 1,0,0 Broadcast 1,1,0 Broadcast, ack all provided IDs 1,1,1 Broadcast, ack all known IDs 0,0,0 Send command only to provided IDs 0,1,0 Send command only to provided IDs, with ack 0,0,1 Send command only to known IDs 0,1,1 Send command only to known IDs, with ack </p>
-</div><hr/>The documentation for this union was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a2a13adbe86e871b2a9fc607e69ff8a8c" name="a2a13adbe86e871b2a9fc607e69ff8a8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a13adbe86e871b2a9fc607e69ff8a8c">&#9670;&#160;</a></span>acked</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mesh_control_command_packet_flags_t::acked</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afcbc4ad56ccffded84575ac2d8fd349a" name="afcbc4ad56ccffded84575ac2d8fd349a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcbc4ad56ccffded84575ac2d8fd349a">&#9670;&#160;</a></span>asInt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t mesh_control_command_packet_flags_t::asInt = 1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac92992262e7b631252c2bdae9d0246d3" name="ac92992262e7b631252c2bdae9d0246d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac92992262e7b631252c2bdae9d0246d3">&#9670;&#160;</a></span>broadcast</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mesh_control_command_packet_flags_t::broadcast</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a51a618e251c0bbd32788d5c5fe9a40b0" name="a51a618e251c0bbd32788d5c5fe9a40b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51a618e251c0bbd32788d5c5fe9a40b0">&#9670;&#160;</a></span>doNotRelay</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mesh_control_command_packet_flags_t::doNotRelay</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ade06368de39152dd14ccc276f7c4cd20" name="ade06368de39152dd14ccc276f7c4cd20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade06368de39152dd14ccc276f7c4cd20">&#9670;&#160;</a></span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct  { ... }  mesh_control_command_packet_flags_t::flags</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a95d8fa6663596774a154e2ca35c30fe0" name="a95d8fa6663596774a154e2ca35c30fe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95d8fa6663596774a154e2ca35c30fe0">&#9670;&#160;</a></span>useKnownIds</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool mesh_control_command_packet_flags_t::useKnownIds</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this union was generated from the following file:<ul>
 <li>source/include/protocol/<a class="el" href="cs__Packets_8h_source.html">cs_Packets.h</a></li>
 </ul>
 </div><!-- contents -->

@@ -10,10 +10,20 @@ var classCircularDifferentialBuffer =
     [ "getLastElement", "classCircularDifferentialBuffer.html#adfb88040c357eed3d6224e52b3b41c73", null ],
     [ "getNextElement", "classCircularDifferentialBuffer.html#ad181564803be6e586b45f01e7987a250", null ],
     [ "getSerializedLength", "classCircularDifferentialBuffer.html#af474944feca139e57197fedc1a65e364", null ],
+    [ "incHead", "classCircularDifferentialBuffer.html#a931933ddb9c94d29151d3e9792585752", null ],
+    [ "incTail", "classCircularDifferentialBuffer.html#a71a61484b4d13029eb59afd4c38d0518", null ],
     [ "init", "classCircularDifferentialBuffer.html#a7a4a1ad36fc3ecc9951137d4fca47807", null ],
     [ "peek", "classCircularDifferentialBuffer.html#aad824c50897a8a2bbd85e89529dd73c6", null ],
     [ "pop", "classCircularDifferentialBuffer.html#a2520e5586b9b897aae88e12e610f0238", null ],
     [ "push", "classCircularDifferentialBuffer.html#adbf237e9d3e04f50973bbf6bcd01e52c", null ],
     [ "serialize", "classCircularDifferentialBuffer.html#a8582de8f9eb043f14342b222044d1212", null ],
-    [ "size", "classCircularDifferentialBuffer.html#a5c05ccbdd8951e3624839163962df385", null ]
+    [ "size", "classCircularDifferentialBuffer.html#a5c05ccbdd8951e3624839163962df385", null ],
+    [ "_array", "classCircularDifferentialBuffer.html#acf7abb9b2b259c90c8c1b3af469258f5", null ],
+    [ "_capacity", "classCircularDifferentialBuffer.html#a23ea93598d46290b6e2ca3c9e74f219b", null ],
+    [ "_contentSize", "classCircularDifferentialBuffer.html#a0e7544565a7fa2a6ca7b53ca3cc96e81", null ],
+    [ "_firstVal", "classCircularDifferentialBuffer.html#a5af95178031d493b9f60f3cee44d04ab", null ],
+    [ "_head", "classCircularDifferentialBuffer.html#a5188f178df05fe669b5e297880a53720", null ],
+    [ "_lastVal", "classCircularDifferentialBuffer.html#a4246b77b8232dbd7a6d966f92bad9e70", null ],
+    [ "_readIdx", "classCircularDifferentialBuffer.html#a3b433275823a645e24dc5c26257c267f", null ],
+    [ "_tail", "classCircularDifferentialBuffer.html#a1721b22f3091a76a46ea34cd213509c6", null ]
 ];

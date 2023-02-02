@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classUartConnection.html',''); initRes
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classUartConnection-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">UartConnection Class Reference</div></div>
 </div><!--header-->
@@ -123,8 +125,12 @@ Collaboration diagram for UartConnection:</div>
 <div class="dyncontent">
 <div class="center"><img src="classUartConnection__coll__graph.png" border="0" usemap="#aUartConnection_coll__map" alt="Collaboration graph"/></div>
 <map name="aUartConnection_coll__map" id="aUartConnection_coll__map">
-<area shape="rect" title="Class that:" alt="" coords="5,79,128,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="11,5,122,31"/>
+<area shape="rect" title="Class that:" alt="" coords="170,196,293,221"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,108,116,133"/>
+<area shape="rect" href="structuart__msg__status__reply__t.html" title=" " alt="" coords="140,108,323,133"/>
+<area shape="rect" href="unionuart__msg__status__reply__flags__t.html" title=" " alt="" coords="146,5,317,45"/>
+<area shape="rect" href="structuart__msg__status__user__t.html" title=" " alt="" coords="347,108,524,133"/>
+<area shape="rect" href="unionuart__msg__status__user__flags__t.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Jan 17,..." alt="" coords="353,5,518,45"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -133,21 +139,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a24d9bcd353c96ae6b5f4e3a826c492b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a24d9bcd353c96ae6b5f4e3a826c492b5">init</a> ()</td></tr>
 <tr class="memdesc:a24d9bcd353c96ae6b5f4e3a826c492b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the class.  <a href="classUartConnection.html#a24d9bcd353c96ae6b5f4e3a826c492b5">More...</a><br /></td></tr>
 <tr class="separator:a24d9bcd353c96ae6b5f4e3a826c492b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5141fe8f8f88b129a07e0de60083f9e1"><td class="memItemLeft" align="right" valign="top"><a id="a5141fe8f8f88b129a07e0de60083f9e1" name="a5141fe8f8f88b129a07e0de60083f9e1"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isAlive</b> ()</td></tr>
-<tr class="memdesc:a5141fe8f8f88b129a07e0de60083f9e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns whether the connection is considered to be alive (receiving heartbeats). <br /></td></tr>
+<tr class="memitem:a5141fe8f8f88b129a07e0de60083f9e1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a5141fe8f8f88b129a07e0de60083f9e1">isAlive</a> ()</td></tr>
+<tr class="memdesc:a5141fe8f8f88b129a07e0de60083f9e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns whether the connection is considered to be alive (receiving heartbeats).  <a href="classUartConnection.html#a5141fe8f8f88b129a07e0de60083f9e1">More...</a><br /></td></tr>
 <tr class="separator:a5141fe8f8f88b129a07e0de60083f9e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a205f7033e6424e875d1ca877f70bb820"><td class="memItemLeft" align="right" valign="top"><a id="a205f7033e6424e875d1ca877f70bb820" name="a205f7033e6424e875d1ca877f70bb820"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isEncryptedAlive</b> ()</td></tr>
-<tr class="memdesc:a205f7033e6424e875d1ca877f70bb820"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns whether the connection is considered to be alive and encrypted (receiving encrypted heartbeats). <br /></td></tr>
+<tr class="memitem:a205f7033e6424e875d1ca877f70bb820"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a205f7033e6424e875d1ca877f70bb820">isEncryptedAlive</a> ()</td></tr>
+<tr class="memdesc:a205f7033e6424e875d1ca877f70bb820"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns whether the connection is considered to be alive and encrypted (receiving encrypted heartbeats).  <a href="classUartConnection.html#a205f7033e6424e875d1ca877f70bb820">More...</a><br /></td></tr>
 <tr class="separator:a205f7033e6424e875d1ca877f70bb820"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7cac21fa958111a954fb472bfdabf492"><td class="memItemLeft" align="right" valign="top"><a id="a7cac21fa958111a954fb472bfdabf492" name="a7cac21fa958111a954fb472bfdabf492"></a>
-const <a class="el" href="structuart__msg__status__reply__t.html">uart_msg_status_reply_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getSelfStatus</b> ()</td></tr>
-<tr class="memdesc:a7cac21fa958111a954fb472bfdabf492"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the UART status reply. <br /></td></tr>
+<tr class="memitem:a7cac21fa958111a954fb472bfdabf492"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structuart__msg__status__reply__t.html">uart_msg_status_reply_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a7cac21fa958111a954fb472bfdabf492">getSelfStatus</a> ()</td></tr>
+<tr class="memdesc:a7cac21fa958111a954fb472bfdabf492"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the UART status reply.  <a href="classUartConnection.html#a7cac21fa958111a954fb472bfdabf492">More...</a><br /></td></tr>
 <tr class="separator:a7cac21fa958111a954fb472bfdabf492"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1fed3baf2a9f08ccf67f14e7bc84f68"><td class="memItemLeft" align="right" valign="top"><a id="ab1fed3baf2a9f08ccf67f14e7bc84f68" name="ab1fed3baf2a9f08ccf67f14e7bc84f68"></a>
-const <a class="el" href="structuart__msg__status__user__t.html">uart_msg_status_user_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getUserStatus</b> ()</td></tr>
-<tr class="memdesc:ab1fed3baf2a9f08ccf67f14e7bc84f68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the status of the UART user. <br /></td></tr>
+<tr class="memitem:ab1fed3baf2a9f08ccf67f14e7bc84f68"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structuart__msg__status__user__t.html">uart_msg_status_user_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#ab1fed3baf2a9f08ccf67f14e7bc84f68">getUserStatus</a> ()</td></tr>
+<tr class="memdesc:ab1fed3baf2a9f08ccf67f14e7bc84f68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the status of the UART user.  <a href="classUartConnection.html#ab1fed3baf2a9f08ccf67f14e7bc84f68">More...</a><br /></td></tr>
 <tr class="separator:ab1fed3baf2a9f08ccf67f14e7bc84f68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af182e59fe1255530d47e9fe30312fa2b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#af182e59fe1255530d47e9fe30312fa2b">onHello</a> (const <a class="el" href="unionuart__msg__status__user__flags__t.html">uart_msg_status_user_flags_t</a> &amp;flags)</td></tr>
 <tr class="memdesc:af182e59fe1255530d47e9fe30312fa2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called on UART hello command.  <a href="classUartConnection.html#af182e59fe1255530d47e9fe30312fa2b">More...</a><br /></td></tr>
@@ -161,19 +163,77 @@ const <a class="el" href="structuart__msg__status__user__t.html">uart_msg_status
 <tr class="memitem:aedc05e71f9fbd6aa89a23bf47ce9df5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#aedc05e71f9fbd6aa89a23bf47ce9df5d">onSessionNonce</a> (const <a class="el" href="structuart__msg__session__nonce__t.html">uart_msg_session_nonce_t</a> &amp;sessionNonce)</td></tr>
 <tr class="memdesc:aedc05e71f9fbd6aa89a23bf47ce9df5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called on UART session nonce command.  <a href="classUartConnection.html#aedc05e71f9fbd6aa89a23bf47ce9df5d">More...</a><br /></td></tr>
 <tr class="separator:aedc05e71f9fbd6aa89a23bf47ce9df5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a97d7677da4b69d879bd923d4501e17ef"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a97d7677da4b69d879bd923d4501e17ef">getSessionNonceTx</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> data)</td></tr>
+<tr class="memitem:a97d7677da4b69d879bd923d4501e17ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a97d7677da4b69d879bd923d4501e17ef">getSessionNonceTx</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> data)</td></tr>
 <tr class="memdesc:a97d7677da4b69d879bd923d4501e17ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the session nonce for TX.  <a href="classUartConnection.html#a97d7677da4b69d879bd923d4501e17ef">More...</a><br /></td></tr>
 <tr class="separator:a97d7677da4b69d879bd923d4501e17ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acfd3d474f6a4c73cb1449c1f8310d4a7"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#acfd3d474f6a4c73cb1449c1f8310d4a7">getSessionNonceRx</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> data)</td></tr>
+<tr class="memitem:acfd3d474f6a4c73cb1449c1f8310d4a7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#acfd3d474f6a4c73cb1449c1f8310d4a7">getSessionNonceRx</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> data)</td></tr>
 <tr class="memdesc:acfd3d474f6a4c73cb1449c1f8310d4a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the session nonce for RX.  <a href="classUartConnection.html#acfd3d474f6a4c73cb1449c1f8310d4a7">More...</a><br /></td></tr>
 <tr class="separator:acfd3d474f6a4c73cb1449c1f8310d4a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ac214c3618a4ce188ab5d2693be3eab41"><td class="memItemLeft" align="right" valign="top"><a id="ac214c3618a4ce188ab5d2693be3eab41" name="ac214c3618a4ce188ab5d2693be3eab41"></a>
-static <a class="el" href="classUartConnection.html">UartConnection</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:ac214c3618a4ce188ab5d2693be3eab41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) of this class. <br /></td></tr>
+<tr class="memitem:ac214c3618a4ce188ab5d2693be3eab41"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classUartConnection.html">UartConnection</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#ac214c3618a4ce188ab5d2693be3eab41">getInstance</a> ()</td></tr>
+<tr class="memdesc:ac214c3618a4ce188ab5d2693be3eab41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) of this class.  <a href="classUartConnection.html#ac214c3618a4ce188ab5d2693be3eab41">More...</a><br /></td></tr>
 <tr class="separator:ac214c3618a4ce188ab5d2693be3eab41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ac146aa7c1ef4bbdad4b9c0667250671c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#ac146aa7c1ef4bbdad4b9c0667250671c">UartConnection</a> ()</td></tr>
+<tr class="memdesc:ac146aa7c1ef4bbdad4b9c0667250671c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classUartConnection.html#ac146aa7c1ef4bbdad4b9c0667250671c">More...</a><br /></td></tr>
+<tr class="separator:ac146aa7c1ef4bbdad4b9c0667250671c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ad1ab7a372f68f4325c8d7235f15ff7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a7ad1ab7a372f68f4325c8d7235f15ff7">UartConnection</a> (<a class="el" href="classUartConnection.html">UartConnection</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:a7ad1ab7a372f68f4325c8d7235f15ff7"><td class="mdescLeft">&#160;</td><td class="mdescRight">This class is singleton, deny implementation.  <a href="classUartConnection.html#a7ad1ab7a372f68f4325c8d7235f15ff7">More...</a><br /></td></tr>
+<tr class="separator:a7ad1ab7a372f68f4325c8d7235f15ff7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae1ef682ba42ca490b801c3aeb41bc06"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#aae1ef682ba42ca490b801c3aeb41bc06">operator=</a> (<a class="el" href="classUartConnection.html">UartConnection</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:aae1ef682ba42ca490b801c3aeb41bc06"><td class="mdescLeft">&#160;</td><td class="mdescRight">This class is singleton, deny implementation.  <a href="classUartConnection.html#aae1ef682ba42ca490b801c3aeb41bc06">More...</a><br /></td></tr>
+<tr class="separator:aae1ef682ba42ca490b801c3aeb41bc06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a530f55559db7efdb527818039d858237"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a530f55559db7efdb527818039d858237">onTick</a> ()</td></tr>
+<tr class="separator:a530f55559db7efdb527818039d858237"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a488d43fe9df6e9d58519fa5ce89e9ad4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a488d43fe9df6e9d58519fa5ce89e9ad4">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
+<tr class="memdesc:a488d43fe9df6e9d58519fa5ce89e9ad4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classUartConnection.html#a488d43fe9df6e9d58519fa5ce89e9ad4">More...</a><br /></td></tr>
+<tr class="separator:a488d43fe9df6e9d58519fa5ce89e9ad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a31debb57c2f1a777b7f1f3a44f84d3ee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structuart__msg__status__reply__t.html">uart_msg_status_reply_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a31debb57c2f1a777b7f1f3a44f84d3ee">_status</a></td></tr>
+<tr class="memdesc:a31debb57c2f1a777b7f1f3a44f84d3ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up the UART status reply.  <a href="classUartConnection.html#a31debb57c2f1a777b7f1f3a44f84d3ee">More...</a><br /></td></tr>
+<tr class="separator:a31debb57c2f1a777b7f1f3a44f84d3ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c9edb58d2336771f749d1ccb32f5036"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structuart__msg__status__user__t.html">uart_msg_status_user_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a8c9edb58d2336771f749d1ccb32f5036">_userStatus</a></td></tr>
+<tr class="memdesc:a8c9edb58d2336771f749d1ccb32f5036"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up the UART user status.  <a href="classUartConnection.html#a8c9edb58d2336771f749d1ccb32f5036">More...</a><br /></td></tr>
+<tr class="separator:a8c9edb58d2336771f749d1ccb32f5036"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d777b20a0257fdc944257713d2e73bf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a8d777b20a0257fdc944257713d2e73bf">_isConnectionAlive</a> = false</td></tr>
+<tr class="memdesc:a8d777b20a0257fdc944257713d2e73bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up whether the connection is considered to be alive.  <a href="classUartConnection.html#a8d777b20a0257fdc944257713d2e73bf">More...</a><br /></td></tr>
+<tr class="separator:a8d777b20a0257fdc944257713d2e73bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b6ea8b84181f6b2aa6d4bf366a99ab7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a4b6ea8b84181f6b2aa6d4bf366a99ab7">_isConnectionEncrypted</a> = false</td></tr>
+<tr class="memdesc:a4b6ea8b84181f6b2aa6d4bf366a99ab7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the connection heartbeats are encrypted.  <a href="classUartConnection.html#a4b6ea8b84181f6b2aa6d4bf366a99ab7">More...</a><br /></td></tr>
+<tr class="separator:a4b6ea8b84181f6b2aa6d4bf366a99ab7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ea73d78a232e2b83ef3dfeedac48f3e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a5ea73d78a232e2b83ef3dfeedac48f3e">_connectionTimeoutCountdown</a> = 0</td></tr>
+<tr class="memdesc:a5ea73d78a232e2b83ef3dfeedac48f3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timeout (in tick events) set by heartbeat.  <a href="classUartConnection.html#a5ea73d78a232e2b83ef3dfeedac48f3e">More...</a><br /></td></tr>
+<tr class="separator:a5ea73d78a232e2b83ef3dfeedac48f3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e22b834ab47febe810e6132ca428749"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a9e22b834ab47febe810e6132ca428749">_sessionNonceRx</a> [<a class="el" href="cs__Packets_8h.html#af0508ca38f066fe0d871563d6b7a78fa">SESSION_NONCE_LENGTH</a>]</td></tr>
+<tr class="memdesc:a9e22b834ab47febe810e6132ca428749"><td class="mdescLeft">&#160;</td><td class="mdescRight">Session nonce used to decrypt incoming uart msgs.  <a href="classUartConnection.html#a9e22b834ab47febe810e6132ca428749">More...</a><br /></td></tr>
+<tr class="separator:a9e22b834ab47febe810e6132ca428749"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59d1ee9211b8f40d13bcbcc7cab6d09b"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a59d1ee9211b8f40d13bcbcc7cab6d09b">_sessionNonceTx</a> [<a class="el" href="cs__Packets_8h.html#af0508ca38f066fe0d871563d6b7a78fa">SESSION_NONCE_LENGTH</a>]</td></tr>
+<tr class="memdesc:a59d1ee9211b8f40d13bcbcc7cab6d09b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Session nonce used to encrypt outgoing uart msgs.  <a href="classUartConnection.html#a59d1ee9211b8f40d13bcbcc7cab6d09b">More...</a><br /></td></tr>
+<tr class="separator:a59d1ee9211b8f40d13bcbcc7cab6d09b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57ae0b06de7c4ddab9ef95d5584ce44a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a57ae0b06de7c4ddab9ef95d5584ce44a">_sessionNonceValid</a> = false</td></tr>
+<tr class="memdesc:a57ae0b06de7c4ddab9ef95d5584ce44a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the RX and TX session nonce are valid.  <a href="classUartConnection.html#a57ae0b06de7c4ddab9ef95d5584ce44a">More...</a><br /></td></tr>
+<tr class="separator:a57ae0b06de7c4ddab9ef95d5584ce44a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6aa7ff1a2102a3b5f7c1e1a13bf614ac"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartConnection.html#a6aa7ff1a2102a3b5f7c1e1a13bf614ac">_sessionNonceTimeoutCountdown</a> = 0</td></tr>
+<tr class="memdesc:a6aa7ff1a2102a3b5f7c1e1a13bf614ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timeout (in tick events) set by the received session nonce.  <a href="classUartConnection.html#a6aa7ff1a2102a3b5f7c1e1a13bf614ac">More...</a><br /></td></tr>
+<tr class="separator:a6aa7ff1a2102a3b5f7c1e1a13bf614ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that: </p>
@@ -182,7 +242,109 @@ static <a class="el" href="classUartConnection.html">UartConnection</a> &amp;&#1
 <li>Checks heartbeat to see if connection is alive.</li>
 <li>Keeps up the session nonce (also checks if it's timed out). </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ac146aa7c1ef4bbdad4b9c0667250671c" name="ac146aa7c1ef4bbdad4b9c0667250671c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac146aa7c1ef4bbdad4b9c0667250671c">&#9670;&#160;</a></span>UartConnection() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUartConnection.html">UartConnection::UartConnection</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor. </p>
+
+</div>
+</div>
+<a id="a7ad1ab7a372f68f4325c8d7235f15ff7" name="a7ad1ab7a372f68f4325c8d7235f15ff7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ad1ab7a372f68f4325c8d7235f15ff7">&#9670;&#160;</a></span>UartConnection() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUartConnection.html">UartConnection::UartConnection</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classUartConnection.html">UartConnection</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>This class is singleton, deny implementation. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac214c3618a4ce188ab5d2693be3eab41" name="ac214c3618a4ce188ab5d2693be3eab41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac214c3618a4ce188ab5d2693be3eab41">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classUartConnection.html">UartConnection</a> &amp; UartConnection::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets a static singleton (no dynamic memory allocation) of this class. </p>
+
+</div>
+</div>
+<a id="a7cac21fa958111a954fb472bfdabf492" name="a7cac21fa958111a954fb472bfdabf492"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7cac21fa958111a954fb472bfdabf492">&#9670;&#160;</a></span>getSelfStatus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="structuart__msg__status__reply__t.html">uart_msg_status_reply_t</a> &amp; UartConnection::getSelfStatus </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the UART status reply. </p>
+
+</div>
+</div>
 <a id="acfd3d474f6a4c73cb1449c1f8310d4a7" name="acfd3d474f6a4c73cb1449c1f8310d4a7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acfd3d474f6a4c73cb1449c1f8310d4a7">&#9670;&#160;</a></span>getSessionNonceRx()</h2>
 
@@ -190,7 +352,7 @@ static <a class="el" href="classUartConnection.html">UartConnection</a> &amp;&#1
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t UartConnection::getSessionNonceRx </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UartConnection::getSessionNonceRx </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
           <td class="paramname"><em>data</em></td><td>)</td>
@@ -217,7 +379,7 @@ static <a class="el" href="classUartConnection.html">UartConnection</a> &amp;&#1
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t UartConnection::getSessionNonceTx </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UartConnection::getSessionNonceTx </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
           <td class="paramname"><em>data</em></td><td>)</td>
@@ -234,6 +396,56 @@ static <a class="el" href="classUartConnection.html">UartConnection</a> &amp;&#1
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Result code. </dd></dl>
+
+</div>
+</div>
+<a id="ab1fed3baf2a9f08ccf67f14e7bc84f68" name="ab1fed3baf2a9f08ccf67f14e7bc84f68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1fed3baf2a9f08ccf67f14e7bc84f68">&#9670;&#160;</a></span>getUserStatus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="structuart__msg__status__user__t.html">uart_msg_status_user_t</a> &amp; UartConnection::getUserStatus </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the status of the UART user. </p>
+
+</div>
+</div>
+<a id="a488d43fe9df6e9d58519fa5ce89e9ad4" name="a488d43fe9df6e9d58519fa5ce89e9ad4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a488d43fe9df6e9d58519fa5ce89e9ad4">&#9670;&#160;</a></span>handleEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartConnection::handleEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classevent__t.html">event_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle events. </p>
+<p >This method is overloaded by all classes that derive from <a class="el" href="classEventListener.html" title="Event listener.">EventListener</a>. They can receive an <a class="el" href="classevent__t.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 9,...">event_t</a> struct and act upon it. These events are dispatched by the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. </p>
+
+<p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
 
 </div>
 </div>
@@ -257,6 +469,44 @@ static <a class="el" href="classUartConnection.html">UartConnection</a> &amp;&#1
 <li>Reads settings from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>.</li>
 <li>Starts listening for events. </li>
 </ul>
+
+</div>
+</div>
+<a id="a5141fe8f8f88b129a07e0de60083f9e1" name="a5141fe8f8f88b129a07e0de60083f9e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5141fe8f8f88b129a07e0de60083f9e1">&#9670;&#160;</a></span>isAlive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartConnection::isAlive </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns whether the connection is considered to be alive (receiving heartbeats). </p>
+
+</div>
+</div>
+<a id="a205f7033e6424e875d1ca877f70bb820" name="a205f7033e6424e875d1ca877f70bb820"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a205f7033e6424e875d1ca877f70bb820">&#9670;&#160;</a></span>isEncryptedAlive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartConnection::isEncryptedAlive </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns whether the connection is considered to be alive and encrypted (receiving encrypted heartbeats). </p>
 
 </div>
 </div>
@@ -333,6 +583,31 @@ static <a class="el" href="classUartConnection.html">UartConnection</a> &amp;&#1
 
 </div>
 </div>
+<a id="a530f55559db7efdb527818039d858237" name="a530f55559db7efdb527818039d858237"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a530f55559db7efdb527818039d858237">&#9670;&#160;</a></span>onTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartConnection::onTick </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a1bc731bdddcdc2f7664037563325f290" name="a1bc731bdddcdc2f7664037563325f290"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1bc731bdddcdc2f7664037563325f290">&#9670;&#160;</a></span>onUserStatus()</h2>
 
@@ -351,6 +626,253 @@ static <a class="el" href="classUartConnection.html">UartConnection</a> &amp;&#1
 
 <p>To be called on UART status command. </p>
 <p >Sends reply. </p>
+
+</div>
+</div>
+<a id="aae1ef682ba42ca490b801c3aeb41bc06" name="aae1ef682ba42ca490b801c3aeb41bc06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae1ef682ba42ca490b801c3aeb41bc06">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartConnection::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classUartConnection.html">UartConnection</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>This class is singleton, deny implementation. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a5ea73d78a232e2b83ef3dfeedac48f3e" name="a5ea73d78a232e2b83ef3dfeedac48f3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ea73d78a232e2b83ef3dfeedac48f3e">&#9670;&#160;</a></span>_connectionTimeoutCountdown</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t UartConnection::_connectionTimeoutCountdown = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Timeout (in tick events) set by heartbeat. </p>
+<p >When this reaches 0, consider the connection te be dead. </p>
+
+</div>
+</div>
+<a id="a8d777b20a0257fdc944257713d2e73bf" name="a8d777b20a0257fdc944257713d2e73bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d777b20a0257fdc944257713d2e73bf">&#9670;&#160;</a></span>_isConnectionAlive</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartConnection::_isConnectionAlive = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up whether the connection is considered to be alive. </p>
+
+</div>
+</div>
+<a id="a4b6ea8b84181f6b2aa6d4bf366a99ab7" name="a4b6ea8b84181f6b2aa6d4bf366a99ab7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b6ea8b84181f6b2aa6d4bf366a99ab7">&#9670;&#160;</a></span>_isConnectionEncrypted</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartConnection::_isConnectionEncrypted = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the connection heartbeats are encrypted. </p>
+
+</div>
+</div>
+<a id="a9e22b834ab47febe810e6132ca428749" name="a9e22b834ab47febe810e6132ca428749"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e22b834ab47febe810e6132ca428749">&#9670;&#160;</a></span>_sessionNonceRx</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t UartConnection::_sessionNonceRx[<a class="el" href="cs__Packets_8h.html#af0508ca38f066fe0d871563d6b7a78fa">SESSION_NONCE_LENGTH</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Session nonce used to decrypt incoming uart msgs. </p>
+
+</div>
+</div>
+<a id="a6aa7ff1a2102a3b5f7c1e1a13bf614ac" name="a6aa7ff1a2102a3b5f7c1e1a13bf614ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6aa7ff1a2102a3b5f7c1e1a13bf614ac">&#9670;&#160;</a></span>_sessionNonceTimeoutCountdown</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t UartConnection::_sessionNonceTimeoutCountdown = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Timeout (in tick events) set by the received session nonce. </p>
+<p >When this reaches 0, consider the RX and TX session nonce to be invalid. </p>
+
+</div>
+</div>
+<a id="a59d1ee9211b8f40d13bcbcc7cab6d09b" name="a59d1ee9211b8f40d13bcbcc7cab6d09b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59d1ee9211b8f40d13bcbcc7cab6d09b">&#9670;&#160;</a></span>_sessionNonceTx</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t UartConnection::_sessionNonceTx[<a class="el" href="cs__Packets_8h.html#af0508ca38f066fe0d871563d6b7a78fa">SESSION_NONCE_LENGTH</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Session nonce used to encrypt outgoing uart msgs. </p>
+
+</div>
+</div>
+<a id="a57ae0b06de7c4ddab9ef95d5584ce44a" name="a57ae0b06de7c4ddab9ef95d5584ce44a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57ae0b06de7c4ddab9ef95d5584ce44a">&#9670;&#160;</a></span>_sessionNonceValid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartConnection::_sessionNonceValid = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the RX and TX session nonce are valid. </p>
+
+</div>
+</div>
+<a id="a31debb57c2f1a777b7f1f3a44f84d3ee" name="a31debb57c2f1a777b7f1f3a44f84d3ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31debb57c2f1a777b7f1f3a44f84d3ee">&#9670;&#160;</a></span>_status</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structuart__msg__status__reply__t.html">uart_msg_status_reply_t</a> UartConnection::_status</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up the UART status reply. </p>
+
+</div>
+</div>
+<a id="a8c9edb58d2336771f749d1ccb32f5036" name="a8c9edb58d2336771f749d1ccb32f5036"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c9edb58d2336771f749d1ccb32f5036">&#9670;&#160;</a></span>_userStatus</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structuart__msg__status__user__t.html">uart_msg_status_user_t</a> UartConnection::_userStatus</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up the UART user status. </p>
 
 </div>
 </div>

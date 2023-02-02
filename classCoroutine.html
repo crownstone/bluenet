@@ -102,6 +102,7 @@ $(document).ready(function(){initNavTree('classCoroutine.html',''); initResizabl
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classCoroutine-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Coroutine Class Reference</div></div>
 </div><!--header-->
@@ -114,40 +115,40 @@ $(document).ready(function(){initNavTree('classCoroutine.html',''); initResizabl
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:af1d0ea00aedf7f7c35c1a2bcfa4390b3"><td class="memItemLeft" align="right" valign="top"><a id="af1d0ea00aedf7f7c35c1a2bcfa4390b3" name="af1d0ea00aedf7f7c35c1a2bcfa4390b3"></a>
-typedef std::function&lt; uint32_t(void)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Action</b></td></tr>
+<tr class="memitem:af1d0ea00aedf7f7c35c1a2bcfa4390b3"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; uint32_t(void)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#af1d0ea00aedf7f7c35c1a2bcfa4390b3">Action</a></td></tr>
 <tr class="separator:af1d0ea00aedf7f7c35c1a2bcfa4390b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae50bf19174f403dc484ba3a256918cca"><td class="memItemLeft" align="right" valign="top"><a id="ae50bf19174f403dc484ba3a256918cca" name="ae50bf19174f403dc484ba3a256918cca"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Coroutine</b> (Action a)</td></tr>
+<tr class="memitem:a828ea2a2e0463a2d5f617a91f0e47d22"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#a828ea2a2e0463a2d5f617a91f0e47d22">Coroutine</a> ()=default</td></tr>
+<tr class="separator:a828ea2a2e0463a2d5f617a91f0e47d22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae50bf19174f403dc484ba3a256918cca"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#ae50bf19174f403dc484ba3a256918cca">Coroutine</a> (<a class="el" href="classCoroutine.html#af1d0ea00aedf7f7c35c1a2bcfa4390b3">Action</a> a)</td></tr>
 <tr class="separator:ae50bf19174f403dc484ba3a256918cca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3fdcc5d2652054577529631df8924e3"><td class="memItemLeft" align="right" valign="top"><a id="af3fdcc5d2652054577529631df8924e3" name="af3fdcc5d2652054577529631df8924e3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onTick</b> (uint32_t currentTickCount)</td></tr>
-<tr class="memdesc:af3fdcc5d2652054577529631df8924e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called on tick event. <br /></td></tr>
+<tr class="memitem:af3fdcc5d2652054577529631df8924e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#af3fdcc5d2652054577529631df8924e3">onTick</a> (uint32_t currentTickCount)</td></tr>
+<tr class="memdesc:af3fdcc5d2652054577529631df8924e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called on tick event.  <a href="classCoroutine.html#af3fdcc5d2652054577529631df8924e3">More...</a><br /></td></tr>
 <tr class="separator:af3fdcc5d2652054577529631df8924e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b6f349efc34e5ec938551ed110ca6c2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#a1b6f349efc34e5ec938551ed110ca6c2">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;evt)</td></tr>
 <tr class="memdesc:a1b6f349efc34e5ec938551ed110ca6c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function replacing <a class="el" href="classCoroutine.html#af3fdcc5d2652054577529631df8924e3" title="To be called on tick event.">onTick()</a>.  <a href="classCoroutine.html#a1b6f349efc34e5ec938551ed110ca6c2">More...</a><br /></td></tr>
 <tr class="separator:a1b6f349efc34e5ec938551ed110ca6c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5dd49261ffb49c848e3ded6e544ca1fd"><td class="memItemLeft" align="right" valign="top"><a id="a5dd49261ffb49c848e3ded6e544ca1fd" name="a5dd49261ffb49c848e3ded6e544ca1fd"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>getNextCallTickCount</b> () const</td></tr>
+<tr class="memitem:a5dd49261ffb49c848e3ded6e544ca1fd"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#a5dd49261ffb49c848e3ded6e544ca1fd">getNextCallTickCount</a> () const</td></tr>
 <tr class="separator:a5dd49261ffb49c848e3ded6e544ca1fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a3bd4eb97a73b54da77a4cba414d13059"><td class="memItemLeft" align="right" valign="top"><a id="a3bd4eb97a73b54da77a4cba414d13059" name="a3bd4eb97a73b54da77a4cba414d13059"></a>
-static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>delayMs</b> (uint32_t ms)</td></tr>
+<tr class="memitem:a3bd4eb97a73b54da77a4cba414d13059"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#a3bd4eb97a73b54da77a4cba414d13059">delayMs</a> (uint32_t ms)</td></tr>
 <tr class="separator:a3bd4eb97a73b54da77a4cba414d13059"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a037ee783581b926d77312daf94d75adf"><td class="memItemLeft" align="right" valign="top"><a id="a037ee783581b926d77312daf94d75adf" name="a037ee783581b926d77312daf94d75adf"></a>
-static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>delayS</b> (uint32_t s)</td></tr>
+<tr class="memitem:a037ee783581b926d77312daf94d75adf"><td class="memItemLeft" align="right" valign="top">static uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#a037ee783581b926d77312daf94d75adf">delayS</a> (uint32_t s)</td></tr>
 <tr class="separator:a037ee783581b926d77312daf94d75adf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ad1c9a462a0b6f2afbc46c32651f8e7e7"><td class="memItemLeft" align="right" valign="top"><a id="ad1c9a462a0b6f2afbc46c32651f8e7e7" name="ad1c9a462a0b6f2afbc46c32651f8e7e7"></a>
-Action&#160;</td><td class="memItemRight" valign="bottom"><b>action</b></td></tr>
+<tr class="memitem:ad1c9a462a0b6f2afbc46c32651f8e7e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCoroutine.html#af1d0ea00aedf7f7c35c1a2bcfa4390b3">Action</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#ad1c9a462a0b6f2afbc46c32651f8e7e7">action</a></td></tr>
 <tr class="separator:ad1c9a462a0b6f2afbc46c32651f8e7e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:aa1f24e6b23a37e97639de4c68eea3778"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoroutine.html#aa1f24e6b23a37e97639de4c68eea3778">nextCallTickcount</a> = 0</td></tr>
+<tr class="separator:aa1f24e6b23a37e97639de4c68eea3778"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >A coroutine essentially is a throttling mechanism: it takes in a tick-event or tick count and executes its action when the time (number of ticks) passed between the last call and the current one is larger than the time the action reported the next call needed to wait. </p>
@@ -155,7 +156,151 @@ Action&#160;</td><td class="memItemRight" valign="bottom"><b>action</b></td></tr
 <p >for (int i = 0; ; i++){ hiSayer.onTick(i); }</p>
 <p >This will log "hi" only one in 42 calls.</p>
 <p >Note that the return value of sayHi determines the delay, so that a coroutine can dynamically determine if it needs to be called more often or not. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="af1d0ea00aedf7f7c35c1a2bcfa4390b3" name="af1d0ea00aedf7f7c35c1a2bcfa4390b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1d0ea00aedf7f7c35c1a2bcfa4390b3">&#9670;&#160;</a></span>Action</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::function&lt;uint32_t(void)&gt; <a class="el" href="classCoroutine.html#af1d0ea00aedf7f7c35c1a2bcfa4390b3">Coroutine::Action</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a828ea2a2e0463a2d5f617a91f0e47d22" name="a828ea2a2e0463a2d5f617a91f0e47d22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a828ea2a2e0463a2d5f617a91f0e47d22">&#9670;&#160;</a></span>Coroutine() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCoroutine.html">Coroutine::Coroutine</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae50bf19174f403dc484ba3a256918cca" name="ae50bf19174f403dc484ba3a256918cca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae50bf19174f403dc484ba3a256918cca">&#9670;&#160;</a></span>Coroutine() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCoroutine.html">Coroutine::Coroutine</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classCoroutine.html#af1d0ea00aedf7f7c35c1a2bcfa4390b3">Action</a>&#160;</td>
+          <td class="paramname"><em>a</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a3bd4eb97a73b54da77a4cba414d13059" name="a3bd4eb97a73b54da77a4cba414d13059"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bd4eb97a73b54da77a4cba414d13059">&#9670;&#160;</a></span>delayMs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint32_t Coroutine::delayMs </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>ms</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a037ee783581b926d77312daf94d75adf" name="a037ee783581b926d77312daf94d75adf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a037ee783581b926d77312daf94d75adf">&#9670;&#160;</a></span>delayS()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static uint32_t Coroutine::delayS </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5dd49261ffb49c848e3ded6e544ca1fd" name="a5dd49261ffb49c848e3ded6e544ca1fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5dd49261ffb49c848e3ded6e544ca1fd">&#9670;&#160;</a></span>getNextCallTickCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t Coroutine::getNextCallTickCount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a1b6f349efc34e5ec938551ed110ca6c2" name="a1b6f349efc34e5ec938551ed110ca6c2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1b6f349efc34e5ec938551ed110ca6c2">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -182,6 +327,71 @@ Action&#160;</td><td class="memItemRight" valign="bottom"><b>action</b></td></tr
 
 <p>Convenience function replacing <a class="el" href="classCoroutine.html#af3fdcc5d2652054577529631df8924e3" title="To be called on tick event.">onTick()</a>. </p>
 <p >To be called on event. </p>
+
+</div>
+</div>
+<a id="af3fdcc5d2652054577529631df8924e3" name="af3fdcc5d2652054577529631df8924e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3fdcc5d2652054577529631df8924e3">&#9670;&#160;</a></span>onTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Coroutine::onTick </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>currentTickCount</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>To be called on tick event. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad1c9a462a0b6f2afbc46c32651f8e7e7" name="ad1c9a462a0b6f2afbc46c32651f8e7e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1c9a462a0b6f2afbc46c32651f8e7e7">&#9670;&#160;</a></span>action</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCoroutine.html#af1d0ea00aedf7f7c35c1a2bcfa4390b3">Action</a> Coroutine::action</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa1f24e6b23a37e97639de4c68eea3778" name="aa1f24e6b23a37e97639de4c68eea3778"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1f24e6b23a37e97639de4c68eea3778">&#9670;&#160;</a></span>nextCallTickcount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t Coroutine::nextCallTickcount = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

@@ -100,6 +100,9 @@ $(document).ready(function(){initNavTree('classCommandHandler.html',''); initRes
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classCommandHandler-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">CommandHandler Class Reference</div></div>
 </div><!--header-->
@@ -123,20 +126,20 @@ Collaboration diagram for CommandHandler:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCommandHandler__coll__graph.png" border="0" usemap="#aCommandHandler_coll__map" alt="Collaboration graph"/></div>
 <map name="aCommandHandler_coll__map" id="aCommandHandler_coll__map">
-<area shape="rect" title="Every command from an external device such as a smartphone goes through the CommandHandler." alt="" coords="12,181,152,207"/>
+<area shape="rect" title="Every command from an external device such as a smartphone goes through the CommandHandler." alt="" coords="133,181,273,207"/>
 <area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,93,116,119"/>
-<area shape="rect" href="structcmd__source__with__counter__t.html" title="Struct that tells where a command originated from." alt="" coords="141,93,343,119"/>
-<area shape="rect" href="structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="186,5,298,31"/>
+<area shape="rect" href="structboards__config__t.html" title="Board configuration." alt="" coords="141,93,266,119"/>
+<area shape="rect" href="structcmd__source__with__counter__t.html" title="Struct that tells where a command originated from." alt="" coords="290,93,493,119"/>
+<area shape="rect" href="structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="335,5,447,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:abdd55eaf5a9bd5ee317b9f80904fa011"><td class="memItemLeft" align="right" valign="top"><a id="abdd55eaf5a9bd5ee317b9f80904fa011" name="abdd55eaf5a9bd5ee317b9f80904fa011"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (const <a class="el" href="structboards__config__t.html">boards_config_t</a> *board)</td></tr>
-<tr class="memdesc:abdd55eaf5a9bd5ee317b9f80904fa011"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize command handler given board configuration. <br /></td></tr>
+<tr class="memitem:abdd55eaf5a9bd5ee317b9f80904fa011"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#abdd55eaf5a9bd5ee317b9f80904fa011">init</a> (const <a class="el" href="structboards__config__t.html">boards_config_t</a> *board)</td></tr>
+<tr class="memdesc:abdd55eaf5a9bd5ee317b9f80904fa011"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize command handler given board configuration.  <a href="classCommandHandler.html#abdd55eaf5a9bd5ee317b9f80904fa011">More...</a><br /></td></tr>
 <tr class="separator:abdd55eaf5a9bd5ee317b9f80904fa011"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54a1160d504f8f2c10c4927ccd881981"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a54a1160d504f8f2c10c4927ccd881981">handleCommand</a> (uint8_t protocolVersion, const CommandHandlerTypes type, <a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> source, const EncryptionAccessLevel accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="memitem:a54a1160d504f8f2c10c4927ccd881981"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a54a1160d504f8f2c10c4927ccd881981">handleCommand</a> (uint8_t protocolVersion, const <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a> <a class="el" href="classCommandHandler.html#a8a9e761d1e8b079640221abf69ac825b">type</a>, <a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> <a class="el" href="classCommandHandler.html#a63de155b99907873f486a6ce9bc043ce">source</a>, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
 <tr class="memdesc:a54a1160d504f8f2c10c4927ccd881981"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a a command.  <a href="classCommandHandler.html#a54a1160d504f8f2c10c4927ccd881981">More...</a><br /></td></tr>
 <tr class="separator:a54a1160d504f8f2c10c4927ccd881981"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae67dfa61ee1fc3e0df6d51f946e9f61"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#aae67dfa61ee1fc3e0df6d51f946e9f61">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
@@ -145,17 +148,134 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (const <a cl
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a26de2fab511d4029d531b5589741c551"><td class="memItemLeft" align="right" valign="top"><a id="a26de2fab511d4029d531b5589741c551" name="a26de2fab511d4029d531b5589741c551"></a>
-static <a class="el" href="classCommandHandler.html">CommandHandler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:a26de2fab511d4029d531b5589741c551"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) <br /></td></tr>
+<tr class="memitem:a26de2fab511d4029d531b5589741c551"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classCommandHandler.html">CommandHandler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a26de2fab511d4029d531b5589741c551">getInstance</a> ()</td></tr>
+<tr class="memdesc:a26de2fab511d4029d531b5589741c551"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation)  <a href="classCommandHandler.html#a26de2fab511d4029d531b5589741c551">More...</a><br /></td></tr>
 <tr class="separator:a26de2fab511d4029d531b5589741c551"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a9a98482665c0a42277473c2b489ea4cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a9a98482665c0a42277473c2b489ea4cb">CommandHandler</a> ()</td></tr>
+<tr class="separator:a9a98482665c0a42277473c2b489ea4cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa622784eb292564a8dada65160fdc8b7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#aa622784eb292564a8dada65160fdc8b7">getRequiredAccessLevel</a> (const <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a> <a class="el" href="classCommandHandler.html#a8a9e761d1e8b079640221abf69ac825b">type</a>)</td></tr>
+<tr class="separator:aa622784eb292564a8dada65160fdc8b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2607cabd915f79c8322c02669525fe44"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a2607cabd915f79c8322c02669525fe44">allowedAsMeshCommand</a> (const <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a> <a class="el" href="classCommandHandler.html#a8a9e761d1e8b079640221abf69ac825b">type</a>)</td></tr>
+<tr class="separator:a2607cabd915f79c8322c02669525fe44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a812c847f98f7c4927d287ebf63e1f86b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a812c847f98f7c4927d287ebf63e1f86b">_handleCommand</a> (uint8_t protocolVersion, const <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a> <a class="el" href="classCommandHandler.html#a8a9e761d1e8b079640221abf69ac825b">type</a>, <a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> <a class="el" href="classCommandHandler.html#a63de155b99907873f486a6ce9bc043ce">source</a>, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a812c847f98f7c4927d287ebf63e1f86b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcac77b379859d381902194cf7b86fe7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#afcac77b379859d381902194cf7b86fe7">resolveAsyncCommand</a> (<a class="el" href="structcs__async__result__t.html">cs_async_result_t</a> *result)</td></tr>
+<tr class="separator:afcac77b379859d381902194cf7b86fe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a371e1c573c21736ba31a81ff7a3e52d4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a371e1c573c21736ba31a81ff7a3e52d4">handleCmdNop</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a371e1c573c21736ba31a81ff7a3e52d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b3dcb9131d97af3ce722dee014c3e66"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a2b3dcb9131d97af3ce722dee014c3e66">handleCmdGotoDfu</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a2b3dcb9131d97af3ce722dee014c3e66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3509a672b2be79cb43b1e129298c34c6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a3509a672b2be79cb43b1e129298c34c6">handleCmdGetBootloaderVersion</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a3509a672b2be79cb43b1e129298c34c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ad4678fc5e23aaa978841b67773c645"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a9ad4678fc5e23aaa978841b67773c645">handleCmdGetUicrData</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a9ad4678fc5e23aaa978841b67773c645"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a972280c776e07b065d9e99c85a299639"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a972280c776e07b065d9e99c85a299639">handleCmdReset</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a972280c776e07b065d9e99c85a299639"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cfe309d937b72f1a26a92d9f4ca2d90"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a6cfe309d937b72f1a26a92d9f4ca2d90">handleCmdFactoryReset</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a6cfe309d937b72f1a26a92d9f4ca2d90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5a13b8bc706f34d94290a48af100e53"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#ad5a13b8bc706f34d94290a48af100e53">handleCmdGetMacAddress</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:ad5a13b8bc706f34d94290a48af100e53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3dc05ff7c984647588556dbf615a19f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#ae3dc05ff7c984647588556dbf615a19f">handleCmdGetHardwareVersion</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:ae3dc05ff7c984647588556dbf615a19f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1f1cf96a4186c2a547133773f0f7550"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#aa1f1cf96a4186c2a547133773f0f7550">handleCmdGetFirmwareVersion</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:aa1f1cf96a4186c2a547133773f0f7550"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee06043c220c840ede45f226239975e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#aee06043c220c840ede45f226239975e8">handleCmdSetSunTime</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:aee06043c220c840ede45f226239975e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2910b4a04372f426e7ce9d618fec9346"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a2910b4a04372f426e7ce9d618fec9346">handleCmdGetTime</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a2910b4a04372f426e7ce9d618fec9346"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3687dd0a08f739f43fc9a5b80d25756c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a3687dd0a08f739f43fc9a5b80d25756c">handleCmdIncreaseTx</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a3687dd0a08f739f43fc9a5b80d25756c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab4addc26bf0c6d55e47d01ff6ceb1fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#aab4addc26bf0c6d55e47d01ff6ceb1fb">handleCmdValidateSetup</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:aab4addc26bf0c6d55e47d01ff6ceb1fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8976f231954ffbae8f8b476466140488"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a8976f231954ffbae8f8b476466140488">handleCmdDisconnect</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a8976f231954ffbae8f8b476466140488"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe8da344e0146a75302af20d495e7c7e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#afe8da344e0146a75302af20d495e7c7e">handleCmdResetErrors</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:afe8da344e0146a75302af20d495e7c7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc237744f04f1f169043f41b8d0fe232"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#abc237744f04f1f169043f41b8d0fe232">handleCmdPwm</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> <a class="el" href="classCommandHandler.html#a63de155b99907873f486a6ce9bc043ce">source</a>, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:abc237744f04f1f169043f41b8d0fe232"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e968605de722c631b2f95f686812ab9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a8e968605de722c631b2f95f686812ab9">handleCmdSwitch</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> <a class="el" href="classCommandHandler.html#a63de155b99907873f486a6ce9bc043ce">source</a>, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a8e968605de722c631b2f95f686812ab9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c11b6b430daf2bcaa48c4311a98517a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a9c11b6b430daf2bcaa48c4311a98517a">handleCmdRelay</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> <a class="el" href="classCommandHandler.html#a63de155b99907873f486a6ce9bc043ce">source</a>, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a9c11b6b430daf2bcaa48c4311a98517a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba28def508b4fcf815f14111a3606476"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#aba28def508b4fcf815f14111a3606476">handleCmdMultiSwitch</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> <a class="el" href="classCommandHandler.html#a63de155b99907873f486a6ce9bc043ce">source</a>, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:aba28def508b4fcf815f14111a3606476"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcebf95ba2108f1ac8b0b05b6b4194e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#adcebf95ba2108f1ac8b0b05b6b4194e3">handleCmdMeshCommand</a> (uint8_t protocol, <a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> <a class="el" href="classCommandHandler.html#a63de155b99907873f486a6ce9bc043ce">source</a>, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accesss_resulLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:adcebf95ba2108f1ac8b0b05b6b4194e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa92eded0a4aa6c1db5020d984abf31ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#aa92eded0a4aa6c1db5020d984abf31ee">handleCmdAllowDimming</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:aa92eded0a4aa6c1db5020d984abf31ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6047c780eec12fe21f42b1256c78b0b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#ad6047c780eec12fe21f42b1256c78b0b">handleCmdLockSwitch</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:ad6047c780eec12fe21f42b1256c78b0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1dc1e30daf90529a8d8e6a260e23e80"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#ae1dc1e30daf90529a8d8e6a260e23e80">handleCmdSetup</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:ae1dc1e30daf90529a8d8e6a260e23e80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ae0a72b6b241d59b124b2df1abd44dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a6ae0a72b6b241d59b124b2df1abd44dc">handleCmdUartMsg</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a6ae0a72b6b241d59b124b2df1abd44dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7238792fcf84fb55723fc2b4a1a36739"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a7238792fcf84fb55723fc2b4a1a36739">handleCmdHubData</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a7238792fcf84fb55723fc2b4a1a36739"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0ae383f5883761dfb094b59e19a9d0f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#ae0ae383f5883761dfb094b59e19a9d0f">handleCmdStateGet</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:ae0ae383f5883761dfb094b59e19a9d0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cef29618e14ac5fb82f9091cdaf1748"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a0cef29618e14ac5fb82f9091cdaf1748">handleCmdStateSet</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a0cef29618e14ac5fb82f9091cdaf1748"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7289d4bc2c92b91c8a7e3ffee50cbf5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a7289d4bc2c92b91c8a7e3ffee50cbf5a">handleCmdRegisterTrackedDevice</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a7289d4bc2c92b91c8a7e3ffee50cbf5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd82f254aada2a913f0f7fa90cea6085"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#abd82f254aada2a913f0f7fa90cea6085">handleCmdTrackedDeviceHeartbeat</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:abd82f254aada2a913f0f7fa90cea6085"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1356d8aab538ddac4f69b1d70071c781"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a1356d8aab538ddac4f69b1d70071c781">handleCmdGetUptime</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a1356d8aab538ddac4f69b1d70071c781"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24cac4da2b65847bc829f3bc5f53cb70"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a24cac4da2b65847bc829f3bc5f53cb70">handleCmdMicroappUpload</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:a24cac4da2b65847bc829f3bc5f53cb70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af14cfa709c8d4c712399e67686717245"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#af14cfa709c8d4c712399e67686717245">handleCmdMicroappMessage</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:af14cfa709c8d4c712399e67686717245"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dfe66e7b4869909ac4978a762db0c15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a8dfe66e7b4869909ac4978a762db0c15">dispatchEventForCommand</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> <a class="el" href="classCommandHandler.html#a8a9e761d1e8b079640221abf69ac825b">type</a>, <a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> &amp;<a class="el" href="classCommandHandler.html#a63de155b99907873f486a6ce9bc043ce">source</a>, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="memdesc:a8dfe66e7b4869909ac4978a762db0c15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delegate a command via an event.  <a href="classCommandHandler.html#a8dfe66e7b4869909ac4978a762db0c15">More...</a><br /></td></tr>
+<tr class="separator:a8dfe66e7b4869909ac4978a762db0c15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10f2cd3f46aae8bb557543c100379a6d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a10f2cd3f46aae8bb557543c100379a6d">resetDelayed</a> (uint8_t opCode, uint16_t delayMs=2000)</td></tr>
+<tr class="memdesc:a10f2cd3f46aae8bb557543c100379a6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset, after a delay.  <a href="classCommandHandler.html#a10f2cd3f46aae8bb557543c100379a6d">More...</a><br /></td></tr>
+<tr class="separator:a10f2cd3f46aae8bb557543c100379a6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a006d5d48fa6fc7e660f6d0c0c65c9ee3"><td class="memItemLeft" align="right" valign="top">app_timer_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a006d5d48fa6fc7e660f6d0c0c65c9ee3">_resetTimerData</a></td></tr>
+<tr class="separator:a006d5d48fa6fc7e660f6d0c0c65c9ee3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc54cf2ff2b74c396c52dd5668928dc2"><td class="memItemLeft" align="right" valign="top">app_timer_id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#adc54cf2ff2b74c396c52dd5668928dc2">_resetTimerId</a></td></tr>
+<tr class="separator:adc54cf2ff2b74c396c52dd5668928dc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10f5a3fb639cc4d39d85b298b54f7a6a"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structboards__config__t.html">boards_config_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a10f5a3fb639cc4d39d85b298b54f7a6a">_boardConfig</a></td></tr>
+<tr class="separator:a10f5a3fb639cc4d39d85b298b54f7a6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac03ac839c44cb370fe07d6dfd1fd803c"><td class="memItemLeft" >struct {</td></tr>
+<tr class="memitem:ab4286019b8a49fbf6382c27d0e7c141b"><td class="memItemLeft" >&#160;&#160;&#160;<a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a>&#160;&#160;&#160;<a class="el" href="classCommandHandler.html#a8a9e761d1e8b079640221abf69ac825b">type</a> = <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659a633dd9e01d1e2fea0796571f2cd26253">CTRL_CMD_NONE</a></td></tr>
+<tr class="separator:ab4286019b8a49fbf6382c27d0e7c141b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66a95e5e2a51dd46a0a1e1bf4b4ad087"><td class="memItemLeft" >&#160;&#160;&#160;<a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;&#160;&#160;<a class="el" href="classCommandHandler.html#a63de155b99907873f486a6ce9bc043ce">source</a></td></tr>
+<tr class="separator:a66a95e5e2a51dd46a0a1e1bf4b4ad087"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76acd62551e804d3de9d52c6ea7bba37"><td class="memItemLeft" >&#160;&#160;&#160;uint16_t&#160;&#160;&#160;<a class="el" href="classCommandHandler.html#a425585f1e30cf6c7b02a1b6328662f0f">timeoutCountdown</a></td></tr>
+<tr class="separator:a76acd62551e804d3de9d52c6ea7bba37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac03ac839c44cb370fe07d6dfd1fd803c"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#ac03ac839c44cb370fe07d6dfd1fd803c">_awaitingCommandResult</a></td></tr>
+<tr class="separator:ac03ac839c44cb370fe07d6dfd1fd803c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a354875872739d7fe3e08bf199b790367"><td class="memItemLeft" align="right" valign="top">static const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCommandHandler.html#a354875872739d7fe3e08bf199b790367">ASYNC_COMMAND_TIMEOUT_MS</a> = 10000</td></tr>
+<tr class="separator:a354875872739d7fe3e08bf199b790367"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Every command from an external device such as a smartphone goes through the <a class="el" href="classCommandHandler.html" title="Every command from an external device such as a smartphone goes through the CommandHandler.">CommandHandler</a>. </p>
 <h1><a class="anchor" id="autotoc_md1"></a>
 Handlers</h1>
 <p >To implement a new command:</p><ul>
-<li>Add a new type to &lt;<a class="el" href="cs__Types_8h_source.html">cs_Types.h</a>&gt;</li>
+<li>Add a new type to &lt;<a class="el" href="cs__Types_8h.html">cs_Types.h</a>&gt;</li>
 <li>Define a custom handler for this type in this class.</li>
 <li>Implement a function to handle this type.<ul>
 <li>The commandData contains a pointer to a data buffer.</li>
@@ -168,15 +288,44 @@ Handlers</h1>
 <h1><a class="anchor" id="autotoc_md2"></a>
 Access Level</h1>
 <p >TODO: In handleCommand is every function by default executed at ADMIN level. This should be at the lowest privilege level. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a54a1160d504f8f2c10c4927ccd881981" name="a54a1160d504f8f2c10c4927ccd881981"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a54a1160d504f8f2c10c4927ccd881981">&#9670;&#160;</a></span>handleCommand()</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a9a98482665c0a42277473c2b489ea4cb" name="a9a98482665c0a42277473c2b489ea4cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a98482665c0a42277473c2b489ea4cb">&#9670;&#160;</a></span>CommandHandler()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void CommandHandler::handleCommand </td>
+          <td class="memname"><a class="el" href="classCommandHandler.html">CommandHandler::CommandHandler</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a812c847f98f7c4927d287ebf63e1f86b" name="a812c847f98f7c4927d287ebf63e1f86b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a812c847f98f7c4927d287ebf63e1f86b">&#9670;&#160;</a></span>_handleCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::_handleCommand </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>protocolVersion</em>, </td>
@@ -184,7 +333,7 @@ Access Level</h1>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const CommandHandlerTypes&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a>&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
@@ -202,7 +351,1573 @@ Access Level</h1>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const EncryptionAccessLevel&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2607cabd915f79c8322c02669525fe44" name="a2607cabd915f79c8322c02669525fe44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2607cabd915f79c8322c02669525fe44">&#9670;&#160;</a></span>allowedAsMeshCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CommandHandler::allowedAsMeshCommand </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a>&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8dfe66e7b4869909ac4978a762db0c15" name="a8dfe66e7b4869909ac4978a762db0c15"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dfe66e7b4869909ac4978a762db0c15">&#9670;&#160;</a></span>dispatchEventForCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::dispatchEventForCommand </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Delegate a command via an event. </p>
+
+</div>
+</div>
+<a id="a26de2fab511d4029d531b5589741c551" name="a26de2fab511d4029d531b5589741c551"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26de2fab511d4029d531b5589741c551">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classCommandHandler.html">CommandHandler</a> &amp; CommandHandler::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets a static singleton (no dynamic memory allocation) </p>
+
+</div>
+</div>
+<a id="aa622784eb292564a8dada65160fdc8b7" name="aa622784eb292564a8dada65160fdc8b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa622784eb292564a8dada65160fdc8b7">&#9670;&#160;</a></span>getRequiredAccessLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> CommandHandler::getRequiredAccessLevel </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a>&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa92eded0a4aa6c1db5020d984abf31ee" name="aa92eded0a4aa6c1db5020d984abf31ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa92eded0a4aa6c1db5020d984abf31ee">&#9670;&#160;</a></span>handleCmdAllowDimming()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdAllowDimming </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8976f231954ffbae8f8b476466140488" name="a8976f231954ffbae8f8b476466140488"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8976f231954ffbae8f8b476466140488">&#9670;&#160;</a></span>handleCmdDisconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdDisconnect </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6cfe309d937b72f1a26a92d9f4ca2d90" name="a6cfe309d937b72f1a26a92d9f4ca2d90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6cfe309d937b72f1a26a92d9f4ca2d90">&#9670;&#160;</a></span>handleCmdFactoryReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdFactoryReset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3509a672b2be79cb43b1e129298c34c6" name="a3509a672b2be79cb43b1e129298c34c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3509a672b2be79cb43b1e129298c34c6">&#9670;&#160;</a></span>handleCmdGetBootloaderVersion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdGetBootloaderVersion </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa1f1cf96a4186c2a547133773f0f7550" name="aa1f1cf96a4186c2a547133773f0f7550"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1f1cf96a4186c2a547133773f0f7550">&#9670;&#160;</a></span>handleCmdGetFirmwareVersion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdGetFirmwareVersion </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae3dc05ff7c984647588556dbf615a19f" name="ae3dc05ff7c984647588556dbf615a19f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3dc05ff7c984647588556dbf615a19f">&#9670;&#160;</a></span>handleCmdGetHardwareVersion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdGetHardwareVersion </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad5a13b8bc706f34d94290a48af100e53" name="ad5a13b8bc706f34d94290a48af100e53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5a13b8bc706f34d94290a48af100e53">&#9670;&#160;</a></span>handleCmdGetMacAddress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdGetMacAddress </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2910b4a04372f426e7ce9d618fec9346" name="a2910b4a04372f426e7ce9d618fec9346"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2910b4a04372f426e7ce9d618fec9346">&#9670;&#160;</a></span>handleCmdGetTime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdGetTime </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9ad4678fc5e23aaa978841b67773c645" name="a9ad4678fc5e23aaa978841b67773c645"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ad4678fc5e23aaa978841b67773c645">&#9670;&#160;</a></span>handleCmdGetUicrData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdGetUicrData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1356d8aab538ddac4f69b1d70071c781" name="a1356d8aab538ddac4f69b1d70071c781"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1356d8aab538ddac4f69b1d70071c781">&#9670;&#160;</a></span>handleCmdGetUptime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdGetUptime </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2b3dcb9131d97af3ce722dee014c3e66" name="a2b3dcb9131d97af3ce722dee014c3e66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b3dcb9131d97af3ce722dee014c3e66">&#9670;&#160;</a></span>handleCmdGotoDfu()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdGotoDfu </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7238792fcf84fb55723fc2b4a1a36739" name="a7238792fcf84fb55723fc2b4a1a36739"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7238792fcf84fb55723fc2b4a1a36739">&#9670;&#160;</a></span>handleCmdHubData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdHubData </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3687dd0a08f739f43fc9a5b80d25756c" name="a3687dd0a08f739f43fc9a5b80d25756c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3687dd0a08f739f43fc9a5b80d25756c">&#9670;&#160;</a></span>handleCmdIncreaseTx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdIncreaseTx </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad6047c780eec12fe21f42b1256c78b0b" name="ad6047c780eec12fe21f42b1256c78b0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6047c780eec12fe21f42b1256c78b0b">&#9670;&#160;</a></span>handleCmdLockSwitch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdLockSwitch </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adcebf95ba2108f1ac8b0b05b6b4194e3" name="adcebf95ba2108f1ac8b0b05b6b4194e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adcebf95ba2108f1ac8b0b05b6b4194e3">&#9670;&#160;</a></span>handleCmdMeshCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdMeshCommand </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>protocol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accesss_resulLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af14cfa709c8d4c712399e67686717245" name="af14cfa709c8d4c712399e67686717245"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af14cfa709c8d4c712399e67686717245">&#9670;&#160;</a></span>handleCmdMicroappMessage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdMicroappMessage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a24cac4da2b65847bc829f3bc5f53cb70" name="a24cac4da2b65847bc829f3bc5f53cb70"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24cac4da2b65847bc829f3bc5f53cb70">&#9670;&#160;</a></span>handleCmdMicroappUpload()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdMicroappUpload </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aba28def508b4fcf815f14111a3606476" name="aba28def508b4fcf815f14111a3606476"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba28def508b4fcf815f14111a3606476">&#9670;&#160;</a></span>handleCmdMultiSwitch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdMultiSwitch </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a371e1c573c21736ba31a81ff7a3e52d4" name="a371e1c573c21736ba31a81ff7a3e52d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a371e1c573c21736ba31a81ff7a3e52d4">&#9670;&#160;</a></span>handleCmdNop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdNop </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abc237744f04f1f169043f41b8d0fe232" name="abc237744f04f1f169043f41b8d0fe232"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc237744f04f1f169043f41b8d0fe232">&#9670;&#160;</a></span>handleCmdPwm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdPwm </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7289d4bc2c92b91c8a7e3ffee50cbf5a" name="a7289d4bc2c92b91c8a7e3ffee50cbf5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7289d4bc2c92b91c8a7e3ffee50cbf5a">&#9670;&#160;</a></span>handleCmdRegisterTrackedDevice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdRegisterTrackedDevice </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9c11b6b430daf2bcaa48c4311a98517a" name="a9c11b6b430daf2bcaa48c4311a98517a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c11b6b430daf2bcaa48c4311a98517a">&#9670;&#160;</a></span>handleCmdRelay()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdRelay </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a972280c776e07b065d9e99c85a299639" name="a972280c776e07b065d9e99c85a299639"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a972280c776e07b065d9e99c85a299639">&#9670;&#160;</a></span>handleCmdReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdReset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afe8da344e0146a75302af20d495e7c7e" name="afe8da344e0146a75302af20d495e7c7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe8da344e0146a75302af20d495e7c7e">&#9670;&#160;</a></span>handleCmdResetErrors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdResetErrors </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aee06043c220c840ede45f226239975e8" name="aee06043c220c840ede45f226239975e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee06043c220c840ede45f226239975e8">&#9670;&#160;</a></span>handleCmdSetSunTime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdSetSunTime </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae1dc1e30daf90529a8d8e6a260e23e80" name="ae1dc1e30daf90529a8d8e6a260e23e80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1dc1e30daf90529a8d8e6a260e23e80">&#9670;&#160;</a></span>handleCmdSetup()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdSetup </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae0ae383f5883761dfb094b59e19a9d0f" name="ae0ae383f5883761dfb094b59e19a9d0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0ae383f5883761dfb094b59e19a9d0f">&#9670;&#160;</a></span>handleCmdStateGet()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdStateGet </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0cef29618e14ac5fb82f9091cdaf1748" name="a0cef29618e14ac5fb82f9091cdaf1748"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cef29618e14ac5fb82f9091cdaf1748">&#9670;&#160;</a></span>handleCmdStateSet()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdStateSet </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8e968605de722c631b2f95f686812ab9" name="a8e968605de722c631b2f95f686812ab9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e968605de722c631b2f95f686812ab9">&#9670;&#160;</a></span>handleCmdSwitch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdSwitch </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abd82f254aada2a913f0f7fa90cea6085" name="abd82f254aada2a913f0f7fa90cea6085"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd82f254aada2a913f0f7fa90cea6085">&#9670;&#160;</a></span>handleCmdTrackedDeviceHeartbeat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdTrackedDeviceHeartbeat </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6ae0a72b6b241d59b124b2df1abd44dc" name="a6ae0a72b6b241d59b124b2df1abd44dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ae0a72b6b241d59b124b2df1abd44dc">&#9670;&#160;</a></span>handleCmdUartMsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdUartMsg </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aab4addc26bf0c6d55e47d01ff6ceb1fb" name="aab4addc26bf0c6d55e47d01ff6ceb1fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab4addc26bf0c6d55e47d01ff6ceb1fb">&#9670;&#160;</a></span>handleCmdValidateSetup()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCmdValidateSetup </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a54a1160d504f8f2c10c4927ccd881981" name="a54a1160d504f8f2c10c4927ccd881981"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54a1160d504f8f2c10c4927ccd881981">&#9670;&#160;</a></span>handleCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::handleCommand </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>protocolVersion</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
           <td class="paramname"><em>accessLevel</em>, </td>
         </tr>
         <tr>
@@ -263,6 +1978,236 @@ Access Level</h1>
 <p >This method is overloaded by all classes that derive from <a class="el" href="classEventListener.html" title="Event listener.">EventListener</a>. They can receive an <a class="el" href="classevent__t.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 9,...">event_t</a> struct and act upon it. These events are dispatched by the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. </p>
 
 <p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="abdd55eaf5a9bd5ee317b9f80904fa011" name="abdd55eaf5a9bd5ee317b9f80904fa011"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdd55eaf5a9bd5ee317b9f80904fa011">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::init </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structboards__config__t.html">boards_config_t</a> *&#160;</td>
+          <td class="paramname"><em>board</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize command handler given board configuration. </p>
+
+</div>
+</div>
+<a id="a10f2cd3f46aae8bb557543c100379a6d" name="a10f2cd3f46aae8bb557543c100379a6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10f2cd3f46aae8bb557543c100379a6d">&#9670;&#160;</a></span>resetDelayed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::resetDelayed </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>opCode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>delayMs</em> = <code>2000</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reset, after a delay. </p>
+<p >TODO: This function doesn't belong in this class. </p>
+
+</div>
+</div>
+<a id="afcac77b379859d381902194cf7b86fe7" name="afcac77b379859d381902194cf7b86fe7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcac77b379859d381902194cf7b86fe7">&#9670;&#160;</a></span>resolveAsyncCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CommandHandler::resolveAsyncCommand </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__async__result__t.html">cs_async_result_t</a> *&#160;</td>
+          <td class="paramname"><em>result</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ac03ac839c44cb370fe07d6dfd1fd803c" name="ac03ac839c44cb370fe07d6dfd1fd803c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac03ac839c44cb370fe07d6dfd1fd803c">&#9670;&#160;</a></span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct  { ... }  CommandHandler::_awaitingCommandResult</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a10f5a3fb639cc4d39d85b298b54f7a6a" name="a10f5a3fb639cc4d39d85b298b54f7a6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10f5a3fb639cc4d39d85b298b54f7a6a">&#9670;&#160;</a></span>_boardConfig</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="structboards__config__t.html">boards_config_t</a>* CommandHandler::_boardConfig</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a006d5d48fa6fc7e660f6d0c0c65c9ee3" name="a006d5d48fa6fc7e660f6d0c0c65c9ee3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a006d5d48fa6fc7e660f6d0c0c65c9ee3">&#9670;&#160;</a></span>_resetTimerData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_t CommandHandler::_resetTimerData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adc54cf2ff2b74c396c52dd5668928dc2" name="adc54cf2ff2b74c396c52dd5668928dc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc54cf2ff2b74c396c52dd5668928dc2">&#9670;&#160;</a></span>_resetTimerId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_id_t CommandHandler::_resetTimerId</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a354875872739d7fe3e08bf199b790367" name="a354875872739d7fe3e08bf199b790367"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a354875872739d7fe3e08bf199b790367">&#9670;&#160;</a></span>ASYNC_COMMAND_TIMEOUT_MS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint32_t CommandHandler::ASYNC_COMMAND_TIMEOUT_MS = 10000</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a63de155b99907873f486a6ce9bc043ce" name="a63de155b99907873f486a6ce9bc043ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63de155b99907873f486a6ce9bc043ce">&#9670;&#160;</a></span>source</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> CommandHandler::source</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a425585f1e30cf6c7b02a1b6328662f0f" name="a425585f1e30cf6c7b02a1b6328662f0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a425585f1e30cf6c7b02a1b6328662f0f">&#9670;&#160;</a></span>timeoutCountdown</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t CommandHandler::timeoutCountdown</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8a9e761d1e8b079640221abf69ac825b" name="a8a9e761d1e8b079640221abf69ac825b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a9e761d1e8b079640221abf69ac825b">&#9670;&#160;</a></span>type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a> <a class="el" href="structMeshPacketTraits_3_01CS__MESH__MODEL__TYPE__TEST_01_4.html#a50d198cc165aa9b7a063874f6185add1">CommandHandler::type</a> = <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659a633dd9e01d1e2fea0796571f2cd26253">CTRL_CMD_NONE</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

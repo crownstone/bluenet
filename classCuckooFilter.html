@@ -100,6 +100,9 @@ $(document).ready(function(){initNavTree('classCuckooFilter.html',''); initResiz
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classCuckooFilter-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">CuckooFilter Class Reference</div></div>
 </div><!--header-->
@@ -123,8 +126,10 @@ Collaboration diagram for CuckooFilter:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCuckooFilter__coll__graph.png" border="0" usemap="#aCuckooFilter_coll__map" alt="Collaboration graph"/></div>
 <map name="aCuckooFilter_coll__map" id="aCuckooFilter_coll__map">
-<area shape="rect" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr...." alt="" coords="11,79,112,104"/>
-<area shape="rect" href="classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,5,117,31"/>
+<area shape="rect" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr...." alt="" coords="60,181,161,207"/>
+<area shape="rect" href="classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,93,117,119"/>
+<area shape="rect" href="structcuckoo__filter__data__t.html" title="Data content of the cuckoo filter." alt="" coords="141,93,294,119"/>
+<area shape="rect" href="structcuckoo__extended__fingerprint__t.html" title="Representation of an object (O) in this filter comprises of a fingerprint (F) and a the bucket index ..." alt="" coords="106,5,329,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -137,67 +142,101 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1267c21b23025c37b719d58d4b72fe04"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a1267c21b23025c37b719d58d4b72fe04">size</a> ()</td></tr>
 <tr class="memdesc:a1267c21b23025c37b719d58d4b72fe04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total number of bytes this instance occypies.  <a href="classCuckooFilter.html#a1267c21b23025c37b719d58d4b72fe04">More...</a><br /></td></tr>
 <tr class="separator:a1267c21b23025c37b719d58d4b72fe04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a212112f498b8fbf29a6e6468b99d0c"><td class="memItemLeft" align="right" valign="top"><a id="a5a212112f498b8fbf29a6e6468b99d0c" name="a5a212112f498b8fbf29a6e6468b99d0c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>add</b> (cuckoo_fingerprint_t finger, cuckoo_index_t bucketIndex)</td></tr>
+<tr class="memitem:a5a212112f498b8fbf29a6e6468b99d0c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a5a212112f498b8fbf29a6e6468b99d0c">add</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> finger, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> bucketIndex)</td></tr>
 <tr class="separator:a5a212112f498b8fbf29a6e6468b99d0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab6f45c41a708122f64411bc3511e563c"><td class="memItemLeft" align="right" valign="top"><a id="ab6f45c41a708122f64411bc3511e563c" name="ab6f45c41a708122f64411bc3511e563c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>remove</b> (cuckoo_fingerprint_t finger, cuckoo_index_t bucketIndex)</td></tr>
+<tr class="memitem:ab6f45c41a708122f64411bc3511e563c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#ab6f45c41a708122f64411bc3511e563c">remove</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> finger, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> bucketIndex)</td></tr>
 <tr class="separator:ab6f45c41a708122f64411bc3511e563c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77951ed5d19e592fd8b229af91c0d5ba"><td class="memItemLeft" align="right" valign="top"><a id="a77951ed5d19e592fd8b229af91c0d5ba" name="a77951ed5d19e592fd8b229af91c0d5ba"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>contains</b> (cuckoo_fingerprint_t finger, cuckoo_index_t bucketIndex)</td></tr>
+<tr class="memitem:a77951ed5d19e592fd8b229af91c0d5ba"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a77951ed5d19e592fd8b229af91c0d5ba">contains</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> finger, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> bucketIndex)</td></tr>
 <tr class="separator:a77951ed5d19e592fd8b229af91c0d5ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1948765cfb197eb48696c97b552785be"><td class="memItemLeft" align="right" valign="top"><a id="a1948765cfb197eb48696c97b552785be" name="a1948765cfb197eb48696c97b552785be"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>add</b> (cuckoo_key_t key, size_t keyLengthInBytes)</td></tr>
+<tr class="memitem:a1948765cfb197eb48696c97b552785be"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a1948765cfb197eb48696c97b552785be">add</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a> key, size_t keyLengthInBytes)</td></tr>
 <tr class="separator:a1948765cfb197eb48696c97b552785be"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42d0bd9ea0bdbbdbabfdd10f911ea303"><td class="memItemLeft" align="right" valign="top"><a id="a42d0bd9ea0bdbbdbabfdd10f911ea303" name="a42d0bd9ea0bdbbdbabfdd10f911ea303"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>remove</b> (cuckoo_key_t key, size_t keyLengthInBytes)</td></tr>
+<tr class="memitem:a42d0bd9ea0bdbbdbabfdd10f911ea303"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a42d0bd9ea0bdbbdbabfdd10f911ea303">remove</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a> key, size_t keyLengthInBytes)</td></tr>
 <tr class="separator:a42d0bd9ea0bdbbdbabfdd10f911ea303"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9507d6c551e7e5935e5330968702e59"><td class="memItemLeft" align="right" valign="top"><a id="ac9507d6c551e7e5935e5330968702e59" name="ac9507d6c551e7e5935e5330968702e59"></a>
-<a class="el" href="structcuckoo__compressed__fingerprint__t.html">cuckoo_compressed_fingerprint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getCompressedFingerprint</b> (cuckoo_key_t key, size_t keyLengthInBytes)</td></tr>
-<tr class="memdesc:ac9507d6c551e7e5935e5330968702e59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces a key (element) to a compressed fingerprint, consisting of the fingerprint of the key and its associated primary position in the fingerprint array. <br /></td></tr>
+<tr class="memitem:ac9507d6c551e7e5935e5330968702e59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcuckoo__compressed__fingerprint__t.html">cuckoo_compressed_fingerprint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#ac9507d6c551e7e5935e5330968702e59">getCompressedFingerprint</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a> key, size_t keyLengthInBytes)</td></tr>
+<tr class="memdesc:ac9507d6c551e7e5935e5330968702e59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces a key (element) to a compressed fingerprint, consisting of the fingerprint of the key and its associated primary position in the fingerprint array.  <a href="classCuckooFilter.html#ac9507d6c551e7e5935e5330968702e59">More...</a><br /></td></tr>
 <tr class="separator:ac9507d6c551e7e5935e5330968702e59"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04d9558358986bfdbc1b638e86319acc"><td class="memItemLeft" align="right" valign="top"><a id="a04d9558358986bfdbc1b638e86319acc" name="a04d9558358986bfdbc1b638e86319acc"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CuckooFilter</b> (<a class="el" href="structcuckoo__filter__data__t.html">cuckoo_filter_data_t</a> *data)</td></tr>
-<tr class="memdesc:a04d9558358986bfdbc1b638e86319acc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wraps a data struct into a <a class="el" href="classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr....">CuckooFilter</a> object. <br /></td></tr>
+<tr class="memitem:a04d9558358986bfdbc1b638e86319acc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a04d9558358986bfdbc1b638e86319acc">CuckooFilter</a> (<a class="el" href="structcuckoo__filter__data__t.html">cuckoo_filter_data_t</a> *data)</td></tr>
+<tr class="memdesc:a04d9558358986bfdbc1b638e86319acc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wraps a data struct into a <a class="el" href="classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr....">CuckooFilter</a> object.  <a href="classCuckooFilter.html#a04d9558358986bfdbc1b638e86319acc">More...</a><br /></td></tr>
 <tr class="separator:a04d9558358986bfdbc1b638e86319acc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad75a41ab7d2f8043c6293abde8043831"><td class="memItemLeft" align="right" valign="top"><a id="ad75a41ab7d2f8043c6293abde8043831" name="ad75a41ab7d2f8043c6293abde8043831"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CuckooFilter</b> ()</td></tr>
-<tr class="memdesc:ad75a41ab7d2f8043c6293abde8043831"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use this with loads of care, _data is never checked to be non-nullptr in this class. <br /></td></tr>
+<tr class="memitem:ad75a41ab7d2f8043c6293abde8043831"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#ad75a41ab7d2f8043c6293abde8043831">CuckooFilter</a> ()</td></tr>
+<tr class="memdesc:ad75a41ab7d2f8043c6293abde8043831"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use this with loads of care, _data is never checked to be non-nullptr in this class.  <a href="classCuckooFilter.html#ad75a41ab7d2f8043c6293abde8043831">More...</a><br /></td></tr>
 <tr class="separator:ad75a41ab7d2f8043c6293abde8043831"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a899378ee226e4c351df48b0eba101894"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a899378ee226e4c351df48b0eba101894">clear</a> ()</td></tr>
 <tr class="memdesc:a899378ee226e4c351df48b0eba101894"><td class="mdescLeft">&#160;</td><td class="mdescRight">Memsets the bucket_array to 0x00 and sets victim to 0.  <a href="classCuckooFilter.html#a899378ee226e4c351df48b0eba101894">More...</a><br /></td></tr>
 <tr class="separator:a899378ee226e4c351df48b0eba101894"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24103a7643cdebe8c0ff87b10668d671"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a24103a7643cdebe8c0ff87b10668d671">init</a> (cuckoo_index_t <a class="el" href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">bucketCount</a>, cuckoo_index_t nestsPerBucket)</td></tr>
+<tr class="memitem:a24103a7643cdebe8c0ff87b10668d671"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a24103a7643cdebe8c0ff87b10668d671">init</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> <a class="el" href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">bucketCount</a>, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> nestsPerBucket)</td></tr>
 <tr class="memdesc:a24103a7643cdebe8c0ff87b10668d671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the size parameters and then <a class="el" href="classCuckooFilter.html#a899378ee226e4c351df48b0eba101894" title="Memsets the bucket_array to 0x00 and sets victim to 0.">clear()</a>s this object so that the bucket_array is filled with precisely enough 0x00s to represent an empty filter.  <a href="classCuckooFilter.html#a24103a7643cdebe8c0ff87b10668d671">More...</a><br /></td></tr>
 <tr class="separator:a24103a7643cdebe8c0ff87b10668d671"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad25cbf9355a3f1936bb3f894841b2f6"><td class="memItemLeft" align="right" valign="top"><a id="aad25cbf9355a3f1936bb3f894841b2f6" name="aad25cbf9355a3f1936bb3f894841b2f6"></a>
-constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bucketCount</b> ()</td></tr>
-<tr class="memdesc:aad25cbf9355a3f1936bb3f894841b2f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Actual bucket count value may be bigger than a cuckoo_index_t can hold. <br /></td></tr>
+<tr class="memitem:aad25cbf9355a3f1936bb3f894841b2f6"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">bucketCount</a> ()</td></tr>
+<tr class="memdesc:aad25cbf9355a3f1936bb3f894841b2f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Actual bucket count value may be bigger than a cuckoo_index_t can hold.  <a href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">More...</a><br /></td></tr>
 <tr class="separator:aad25cbf9355a3f1936bb3f894841b2f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25246f9c0f087469e8daa4725d4ce7dd"><td class="memItemLeft" align="right" valign="top"><a id="a25246f9c0f087469e8daa4725d4ce7dd" name="a25246f9c0f087469e8daa4725d4ce7dd"></a>
-constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bufferSize</b> ()</td></tr>
+<tr class="memitem:a25246f9c0f087469e8daa4725d4ce7dd"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a25246f9c0f087469e8daa4725d4ce7dd">bufferSize</a> ()</td></tr>
 <tr class="separator:a25246f9c0f087469e8daa4725d4ce7dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb86eb52b13f665defb357a6fff79bbc"><td class="memItemLeft" align="right" valign="top"><a id="acb86eb52b13f665defb357a6fff79bbc" name="acb86eb52b13f665defb357a6fff79bbc"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>contains</b> (const void *key, size_t keyLengthInBytes)=0</td></tr>
-<tr class="separator:acb86eb52b13f665defb357a6fff79bbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1cc00bd1b1e7f1343c3b16bb9b50f0df"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">size</a> ()=0</td></tr>
-<tr class="separator:a1cc00bd1b1e7f1343c3b16bb9b50f0df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"><td class="memItemLeft" align="right" valign="top"><a id="ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf" name="ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValid</b> ()=0</td></tr>
-<tr class="separator:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classFilterInterface"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classFilterInterface')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classFilterInterface.html">FilterInterface</a></td></tr>
+<tr class="memitem:a001bb3f0f15cfa1d091c8f647249c79b inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a001bb3f0f15cfa1d091c8f647249c79b">~FilterInterface</a> ()=default</td></tr>
+<tr class="separator:a001bb3f0f15cfa1d091c8f647249c79b inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb86eb52b13f665defb357a6fff79bbc inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">contains</a> (const void *key, size_t keyLengthInBytes)=0</td></tr>
+<tr class="separator:acb86eb52b13f665defb357a6fff79bbc inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1cc00bd1b1e7f1343c3b16bb9b50f0df inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">size</a> ()=0</td></tr>
+<tr class="separator:a1cc00bd1b1e7f1343c3b16bb9b50f0df inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">isValid</a> ()=0</td></tr>
+<tr class="separator:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a9401ba8af84a56ad18d0d0df2444c052"><td class="memItemLeft" align="right" valign="top"><a id="a9401ba8af84a56ad18d0d0df2444c052" name="a9401ba8af84a56ad18d0d0df2444c052"></a>
-static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>fingerprintCount</b> (size_t <a class="el" href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">bucketCount</a>, cuckoo_index_t nestsPerBucket)</td></tr>
+<tr class="memitem:a9401ba8af84a56ad18d0d0df2444c052"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a9401ba8af84a56ad18d0d0df2444c052">fingerprintCount</a> (size_t <a class="el" href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">bucketCount</a>, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> nestsPerBucket)</td></tr>
 <tr class="separator:a9401ba8af84a56ad18d0d0df2444c052"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26358be265e07aa164e4909695df9fdb"><td class="memItemLeft" align="right" valign="top"><a id="a26358be265e07aa164e4909695df9fdb" name="a26358be265e07aa164e4909695df9fdb"></a>
-static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bufferSize</b> (size_t <a class="el" href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">bucketCount</a>, cuckoo_index_t nestsPerBucket)</td></tr>
-<tr class="memdesc:a26358be265e07aa164e4909695df9fdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of the byte buffer in bytes. <br /></td></tr>
+<tr class="memitem:a26358be265e07aa164e4909695df9fdb"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a26358be265e07aa164e4909695df9fdb">bufferSize</a> (size_t <a class="el" href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">bucketCount</a>, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> nestsPerBucket)</td></tr>
+<tr class="memdesc:a26358be265e07aa164e4909695df9fdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of the byte buffer in bytes.  <a href="classCuckooFilter.html#a26358be265e07aa164e4909695df9fdb">More...</a><br /></td></tr>
 <tr class="separator:a26358be265e07aa164e4909695df9fdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5942005f083c09816e8b0b882445208"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#aa5942005f083c09816e8b0b882445208">size</a> (cuckoo_index_t <a class="el" href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">bucketCount</a>, cuckoo_index_t nestsPerBucket)</td></tr>
+<tr class="memitem:aa5942005f083c09816e8b0b882445208"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#aa5942005f083c09816e8b0b882445208">size</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> <a class="el" href="classCuckooFilter.html#aad25cbf9355a3f1936bb3f894841b2f6">bucketCount</a>, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> nestsPerBucket)</td></tr>
 <tr class="memdesc:aa5942005f083c09816e8b0b882445208"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total number of bytes a <a class="el" href="classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr....">CuckooFilter</a> with the given parameters would occupy.  <a href="classCuckooFilter.html#aa5942005f083c09816e8b0b882445208">More...</a><br /></td></tr>
 <tr class="separator:aa5942005f083c09816e8b0b882445208"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a9e2f06b584a17126e98c70a75f938a7e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a9e2f06b584a17126e98c70a75f938a7e">getExtendedFingerprint</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a> key, size_t keyLengthInBytes)</td></tr>
+<tr class="memdesc:a9e2f06b584a17126e98c70a75f938a7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces a key (element) to an extended fingerprint, consisting of the fingerprint of the key and its associated positions in the fingerprint array.  <a href="classCuckooFilter.html#a9e2f06b584a17126e98c70a75f938a7e">More...</a><br /></td></tr>
+<tr class="separator:a9e2f06b584a17126e98c70a75f938a7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93a1782a50bd0fefb8c65a9180223bc7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a93a1782a50bd0fefb8c65a9180223bc7">getExtendedFingerprint</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> fingerprint, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> bucketIndex)</td></tr>
+<tr class="memdesc:a93a1782a50bd0fefb8c65a9180223bc7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Expands a fingerprint and the index where it is placed into an extended fingerprint, by computing the alternative index in the fingerprint array.  <a href="classCuckooFilter.html#a93a1782a50bd0fefb8c65a9180223bc7">More...</a><br /></td></tr>
+<tr class="separator:a93a1782a50bd0fefb8c65a9180223bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafa9ac0913d785b52cc6027a5962734d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#aafa9ac0913d785b52cc6027a5962734d">filterHash</a> ()</td></tr>
+<tr class="memdesc:aafa9ac0913d785b52cc6027a5962734d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A crc16 hash of this filters current contents (_data).  <a href="classCuckooFilter.html#aafa9ac0913d785b52cc6027a5962734d">More...</a><br /></td></tr>
+<tr class="separator:aafa9ac0913d785b52cc6027a5962734d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a7c61e94bbc6d04b65571cba96a229d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a9a7c61e94bbc6d04b65571cba96a229d">hashToFingerprint</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a> key, size_t keyLengthInBytes)</td></tr>
+<tr class="memdesc:a9a7c61e94bbc6d04b65571cba96a229d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hashes the given key into a fingerprint.  <a href="classCuckooFilter.html#a9a7c61e94bbc6d04b65571cba96a229d">More...</a><br /></td></tr>
+<tr class="separator:a9a7c61e94bbc6d04b65571cba96a229d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2bd219fc6573749ac3ac7f46219e8f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#af2bd219fc6573749ac3ac7f46219e8f8">hashToBucket</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a> key, size_t keyLengthInBytes)</td></tr>
+<tr class="memdesc:af2bd219fc6573749ac3ac7f46219e8f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hashes the given key to obtain an (untruncated) bucket index.  <a href="classCuckooFilter.html#af2bd219fc6573749ac3ac7f46219e8f8">More...</a><br /></td></tr>
+<tr class="separator:af2bd219fc6573749ac3ac7f46219e8f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b4ce4547d34f7b236d1bdc7ba674ffe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a6b4ce4547d34f7b236d1bdc7ba674ffe">lookupFingerprint</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> bucketIndex, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> fingerIndex)</td></tr>
+<tr class="memdesc:a6b4ce4547d34f7b236d1bdc7ba674ffe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a reference to the fingerprint at the given coordinates.  <a href="classCuckooFilter.html#a6b4ce4547d34f7b236d1bdc7ba674ffe">More...</a><br /></td></tr>
+<tr class="separator:a6b4ce4547d34f7b236d1bdc7ba674ffe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecb9ed8f825a9899342e5f3f61884a94"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#aecb9ed8f825a9899342e5f3f61884a94">addFingerprintToBucket</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> fingerprint, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> bucketIndex)</td></tr>
+<tr class="memdesc:aecb9ed8f825a9899342e5f3f61884a94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if there was an empty space in the bucket and placement was successful, returns false otherwise.  <a href="classCuckooFilter.html#aecb9ed8f825a9899342e5f3f61884a94">More...</a><br /></td></tr>
+<tr class="separator:aecb9ed8f825a9899342e5f3f61884a94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25db87088688ed0dad4f05098640932f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a25db87088688ed0dad4f05098640932f">removeFingerprintFromBucket</a> (<a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> fingerprint, <a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a> bucketIndex)</td></tr>
+<tr class="memdesc:a25db87088688ed0dad4f05098640932f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if found and removed, returns false if not found.  <a href="classCuckooFilter.html#a25db87088688ed0dad4f05098640932f">More...</a><br /></td></tr>
+<tr class="separator:a25db87088688ed0dad4f05098640932f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55af218e79b20dd106a3f90ca09bdb6b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a55af218e79b20dd106a3f90ca09bdb6b">move</a> (<a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a> entryToInsert)</td></tr>
+<tr class="separator:a55af218e79b20dd106a3f90ca09bdb6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f97a9e8881612834c170a3456e60bdc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a0f97a9e8881612834c170a3456e60bdc">add</a> (<a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a> efp)</td></tr>
+<tr class="separator:a0f97a9e8881612834c170a3456e60bdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f8f71f008f8e789d55c3655094d2f3f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a5f8f71f008f8e789d55c3655094d2f3f">remove</a> (<a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a> efp)</td></tr>
+<tr class="separator:a5f8f71f008f8e789d55c3655094d2f3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec924b2b8645d8736ba64c515c8e2258"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#aec924b2b8645d8736ba64c515c8e2258">contains</a> (<a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a> efp)</td></tr>
+<tr class="separator:aec924b2b8645d8736ba64c515c8e2258"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a237c1e546c82fb0dd7eca76898dd0b08"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcuckoo__filter__data__t.html">cuckoo_filter_data_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a237c1e546c82fb0dd7eca76898dd0b08">_data</a></td></tr>
+<tr class="separator:a237c1e546c82fb0dd7eca76898dd0b08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a723db5b40833e5dc06f39a8063191e91"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCuckooFilter.html#a723db5b40833e5dc06f39a8063191e91">MAX_KICK_ATTEMPTS</a> = 100</td></tr>
+<tr class="separator:a723db5b40833e5dc06f39a8063191e91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Author: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> Team Copyright: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> (<a href="https://crownstone.rocks">https://crownstone.rocks</a>) Date: 02 Apr., 2021 License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed) </p>
@@ -214,7 +253,290 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bu
 <p >The 'elements' that one can <code>add</code> to a <code><a class="el" href="classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr....">CuckooFilter</a></code> are of type <code>cuckoo_key_t</code> which are simply sequences of bytes. To check if an element is contained in a filter, refer to the <code>contains</code> methods.</p>
 <p ><a class="el" href="classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr....">CuckooFilter</a> data contents are stored in an array of fingerprints which is segmented into 'buckets'. These buckets are used for indexing, and although for an element, the bucket index and fingerprint are deterministic, the index inside the bucket is dependent on order of insertion.</p>
 <p >More details can be found in <code><a href="https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf">https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf</a></code>. "Cuckoo Filter: Better Than Bloom" by Bin Fan, Dave Andersen, and Michael Kaminsky </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a04d9558358986bfdbc1b638e86319acc" name="a04d9558358986bfdbc1b638e86319acc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04d9558358986bfdbc1b638e86319acc">&#9670;&#160;</a></span>CuckooFilter() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCuckooFilter.html">CuckooFilter::CuckooFilter</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcuckoo__filter__data__t.html">cuckoo_filter_data_t</a> *&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Wraps a data struct into a <a class="el" href="classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr....">CuckooFilter</a> object. </p>
+
+</div>
+</div>
+<a id="ad75a41ab7d2f8043c6293abde8043831" name="ad75a41ab7d2f8043c6293abde8043831"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad75a41ab7d2f8043c6293abde8043831">&#9670;&#160;</a></span>CuckooFilter() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCuckooFilter.html">CuckooFilter::CuckooFilter</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Use this with loads of care, _data is never checked to be non-nullptr in this class. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a0f97a9e8881612834c170a3456e60bdc" name="a0f97a9e8881612834c170a3456e60bdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f97a9e8881612834c170a3456e60bdc">&#9670;&#160;</a></span>add() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::add </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>efp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5a212112f498b8fbf29a6e6468b99d0c" name="a5a212112f498b8fbf29a6e6468b99d0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a212112f498b8fbf29a6e6468b99d0c">&#9670;&#160;</a></span>add() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::add </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>finger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>bucketIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1948765cfb197eb48696c97b552785be" name="a1948765cfb197eb48696c97b552785be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1948765cfb197eb48696c97b552785be">&#9670;&#160;</a></span>add() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::add </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a>&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>keyLengthInBytes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aecb9ed8f825a9899342e5f3f61884a94" name="aecb9ed8f825a9899342e5f3f61884a94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecb9ed8f825a9899342e5f3f61884a94">&#9670;&#160;</a></span>addFingerprintToBucket()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::addFingerprintToBucket </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>fingerprint</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>bucketIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true if there was an empty space in the bucket and placement was successful, returns false otherwise. </p>
+<p >Does <em>not</em> check for duplicates. </p>
+
+</div>
+</div>
+<a id="aad25cbf9355a3f1936bb3f894841b2f6" name="aad25cbf9355a3f1936bb3f894841b2f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad25cbf9355a3f1936bb3f894841b2f6">&#9670;&#160;</a></span>bucketCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr size_t CuckooFilter::bucketCount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Actual bucket count value may be bigger than a cuckoo_index_t can hold. </p>
+
+</div>
+</div>
+<a id="a25246f9c0f087469e8daa4725d4ce7dd" name="a25246f9c0f087469e8daa4725d4ce7dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25246f9c0f087469e8daa4725d4ce7dd">&#9670;&#160;</a></span>bufferSize() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr size_t CuckooFilter::bufferSize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a26358be265e07aa164e4909695df9fdb" name="a26358be265e07aa164e4909695df9fdb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26358be265e07aa164e4909695df9fdb">&#9670;&#160;</a></span>bufferSize() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr size_t CuckooFilter::bufferSize </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bucketCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>nestsPerBucket</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Size of the byte buffer in bytes. </p>
+
+</div>
+</div>
 <a id="a899378ee226e4c351df48b0eba101894" name="a899378ee226e4c351df48b0eba101894"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a899378ee226e4c351df48b0eba101894">&#9670;&#160;</a></span>clear()</h2>
 
@@ -236,7 +558,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bu
 </div>
 </div>
 <a id="a339c229191a662a34073b78f6f1b4dc7" name="a339c229191a662a34073b78f6f1b4dc7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a339c229191a662a34073b78f6f1b4dc7">&#9670;&#160;</a></span>contains()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a339c229191a662a34073b78f6f1b4dc7">&#9670;&#160;</a></span>contains() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -269,7 +591,316 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bu
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="classFilterInterface.html">FilterInterface</a>.</p>
+<p>Implements <a class="el" href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">FilterInterface</a>.</p>
+
+</div>
+</div>
+<a id="aec924b2b8645d8736ba64c515c8e2258" name="aec924b2b8645d8736ba64c515c8e2258"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec924b2b8645d8736ba64c515c8e2258">&#9670;&#160;</a></span>contains() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::contains </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>efp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a77951ed5d19e592fd8b229af91c0d5ba" name="a77951ed5d19e592fd8b229af91c0d5ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77951ed5d19e592fd8b229af91c0d5ba">&#9670;&#160;</a></span>contains() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::contains </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>finger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>bucketIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aafa9ac0913d785b52cc6027a5962734d" name="aafa9ac0913d785b52cc6027a5962734d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aafa9ac0913d785b52cc6027a5962734d">&#9670;&#160;</a></span>filterHash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> CuckooFilter::filterHash </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>A crc16 hash of this filters current contents (_data). </p>
+
+</div>
+</div>
+<a id="a9401ba8af84a56ad18d0d0df2444c052" name="a9401ba8af84a56ad18d0d0df2444c052"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9401ba8af84a56ad18d0d0df2444c052">&#9670;&#160;</a></span>fingerprintCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr size_t CuckooFilter::fingerprintCount </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bucketCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>nestsPerBucket</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac9507d6c551e7e5935e5330968702e59" name="ac9507d6c551e7e5935e5330968702e59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9507d6c551e7e5935e5330968702e59">&#9670;&#160;</a></span>getCompressedFingerprint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcuckoo__compressed__fingerprint__t.html">cuckoo_compressed_fingerprint_t</a> CuckooFilter::getCompressedFingerprint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a>&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>keyLengthInBytes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reduces a key (element) to a compressed fingerprint, consisting of the fingerprint of the key and its associated primary position in the fingerprint array. </p>
+
+</div>
+</div>
+<a id="a93a1782a50bd0fefb8c65a9180223bc7" name="a93a1782a50bd0fefb8c65a9180223bc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93a1782a50bd0fefb8c65a9180223bc7">&#9670;&#160;</a></span>getExtendedFingerprint() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a> CuckooFilter::getExtendedFingerprint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>fingerprint</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>bucketIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Expands a fingerprint and the index where it is placed into an extended fingerprint, by computing the alternative index in the fingerprint array. </p>
+<p >Note: bucketCount <em>must</em> be a power of two. (which is validated at construction/init) </p>
+
+</div>
+</div>
+<a id="a9e2f06b584a17126e98c70a75f938a7e" name="a9e2f06b584a17126e98c70a75f938a7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e2f06b584a17126e98c70a75f938a7e">&#9670;&#160;</a></span>getExtendedFingerprint() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a> CuckooFilter::getExtendedFingerprint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a>&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>keyLengthInBytes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reduces a key (element) to an extended fingerprint, consisting of the fingerprint of the key and its associated positions in the fingerprint array. </p>
+<p >Note: bucketCount <em>must</em> be a power of two. (which is validated at construction/init) </p>
+
+</div>
+</div>
+<a id="af2bd219fc6573749ac3ac7f46219e8f8" name="af2bd219fc6573749ac3ac7f46219e8f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2bd219fc6573749ac3ac7f46219e8f8">&#9670;&#160;</a></span>hashToBucket()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> CuckooFilter::hashToBucket </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a>&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>keyLengthInBytes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Hashes the given key to obtain an (untruncated) bucket index. </p>
+
+</div>
+</div>
+<a id="a9a7c61e94bbc6d04b65571cba96a229d" name="a9a7c61e94bbc6d04b65571cba96a229d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a7c61e94bbc6d04b65571cba96a229d">&#9670;&#160;</a></span>hashToFingerprint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> CuckooFilter::hashToFingerprint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a>&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>keyLengthInBytes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Hashes the given key into a fingerprint. </p>
 
 </div>
 </div>
@@ -282,13 +913,13 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bu
         <tr>
           <td class="memname">void CuckooFilter::init </td>
           <td>(</td>
-          <td class="paramtype">cuckoo_index_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
           <td class="paramname"><em>bucketCount</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cuckoo_index_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
           <td class="paramname"><em>nestsPerBucket</em>&#160;</td>
         </tr>
         <tr>
@@ -332,7 +963,207 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bu
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="classFilterInterface.html">FilterInterface</a>.</p>
+<p>Implements <a class="el" href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">FilterInterface</a>.</p>
+
+</div>
+</div>
+<a id="a6b4ce4547d34f7b236d1bdc7ba674ffe" name="a6b4ce4547d34f7b236d1bdc7ba674ffe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b4ce4547d34f7b236d1bdc7ba674ffe">&#9670;&#160;</a></span>lookupFingerprint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a> &amp; CuckooFilter::lookupFingerprint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>bucketIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>fingerIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a reference to the fingerprint at the given coordinates. </p>
+
+</div>
+</div>
+<a id="a55af218e79b20dd106a3f90ca09bdb6b" name="a55af218e79b20dd106a3f90ca09bdb6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55af218e79b20dd106a3f90ca09bdb6b">&#9670;&#160;</a></span>move()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::move </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>entryToInsert</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5f8f71f008f8e789d55c3655094d2f3f" name="a5f8f71f008f8e789d55c3655094d2f3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f8f71f008f8e789d55c3655094d2f3f">&#9670;&#160;</a></span>remove() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::remove </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcuckoo__extended__fingerprint__t.html">cuckoo_extended_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>efp</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab6f45c41a708122f64411bc3511e563c" name="ab6f45c41a708122f64411bc3511e563c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6f45c41a708122f64411bc3511e563c">&#9670;&#160;</a></span>remove() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::remove </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>finger</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>bucketIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a42d0bd9ea0bdbbdbabfdd10f911ea303" name="a42d0bd9ea0bdbbdbabfdd10f911ea303"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42d0bd9ea0bdbbdbabfdd10f911ea303">&#9670;&#160;</a></span>remove() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::remove </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a3e6de0692b0fac833a8da2c99e4b42f3">cuckoo_key_t</a>&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>keyLengthInBytes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a25db87088688ed0dad4f05098640932f" name="a25db87088688ed0dad4f05098640932f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25db87088688ed0dad4f05098640932f">&#9670;&#160;</a></span>removeFingerprintFromBucket()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool CuckooFilter::removeFingerprintFromBucket </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#a1cc748f233fe72f72e00a83ffb9d8769">cuckoo_fingerprint_t</a>&#160;</td>
+          <td class="paramname"><em>fingerprint</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
+          <td class="paramname"><em>bucketIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns true if found and removed, returns false if not found. </p>
 
 </div>
 </div>
@@ -362,7 +1193,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bu
 <p>Total number of bytes this instance occypies. </p>
 <p >Use this function instead of sizeof for this class to take the buffer into account. </p>
 
-<p>Implements <a class="el" href="classFilterInterface.html">FilterInterface</a>.</p>
+<p>Implements <a class="el" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">FilterInterface</a>.</p>
 
 </div>
 </div>
@@ -378,13 +1209,13 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bu
         <tr>
           <td class="memname">static constexpr size_t CuckooFilter::size </td>
           <td>(</td>
-          <td class="paramtype">cuckoo_index_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
           <td class="paramname"><em>bucketCount</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cuckoo_index_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__CuckooFilterStructs_8h.html#ab4f58b014da65197c7750f2548a3f108">cuckoo_index_t</a>&#160;</td>
           <td class="paramname"><em>nestsPerBucket</em>&#160;</td>
         </tr>
         <tr>
@@ -402,6 +1233,51 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bu
 
 <p>Total number of bytes a <a class="el" href="classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr....">CuckooFilter</a> with the given parameters would occupy. </p>
 <p >As per cppreference.com: "sizeof, and the assignment operator ignore the flexible array member." <a href="https://en.cppreference.com/w/c/language/struct">https://en.cppreference.com/w/c/language/struct</a> </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a237c1e546c82fb0dd7eca76898dd0b08" name="a237c1e546c82fb0dd7eca76898dd0b08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a237c1e546c82fb0dd7eca76898dd0b08">&#9670;&#160;</a></span>_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcuckoo__filter__data__t.html">cuckoo_filter_data_t</a>* CuckooFilter::_data</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a723db5b40833e5dc06f39a8063191e91" name="a723db5b40833e5dc06f39a8063191e91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a723db5b40833e5dc06f39a8063191e91">&#9670;&#160;</a></span>MAX_KICK_ATTEMPTS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr size_t CuckooFilter::MAX_KICK_ATTEMPTS = 100</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

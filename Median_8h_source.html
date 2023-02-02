@@ -100,22 +100,22 @@ $(document).ready(function(){initNavTree('Median_8h_source.html',''); initResiza
   <div class="headertitle"><div class="title">Median.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef MEDIAN_H</span></div>
+<a href="Median_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef MEDIAN_H</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define MEDIAN_H</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;third/Element.h&quot;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="Element_8h.html">third/Element.h</a>&quot;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//#include &lt;cassert&gt;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">//#include &lt;stdexcept&gt;</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="structMedianFilter.html">    8</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structMedianFilter.html">MedianFilter</a> {</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    <span class="keywordtype">unsigned</span> k;</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    <span class="keywordtype">unsigned</span> blocks;</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <span class="keywordtype">unsigned</span> n;</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <span class="keywordtype">unsigned</span> half;</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <span class="keywordtype">unsigned</span> result;</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="structMedianFilter.html#ab582a7ca09e90d35a39ea5e892942b99">    9</a></span>    <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="structMedianFilter.html#ab582a7ca09e90d35a39ea5e892942b99">k</a>;</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="structMedianFilter.html#adcd4ff5b3e8bb5213a71a4bc51c1a027">   10</a></span>    <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="structMedianFilter.html#adcd4ff5b3e8bb5213a71a4bc51c1a027">blocks</a>;</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="structMedianFilter.html#a959c63974affb2df13be5e5008b148dd">   11</a></span>    <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="structMedianFilter.html#a959c63974affb2df13be5e5008b148dd">n</a>;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="structMedianFilter.html#a6e33fde6009a1678dc9a04bb0f84e3a9">   12</a></span>    <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="structMedianFilter.html#a6e33fde6009a1678dc9a04bb0f84e3a9">half</a>;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="structMedianFilter.html#afc661ddbeada760b2adc03d9d69eea19">   13</a></span>    <span class="keywordtype">unsigned</span> <a class="code hl_variable" href="structMedianFilter.html#afc661ddbeada760b2adc03d9d69eea19">result</a>;</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    <a class="code hl_struct" href="structMedianFilter.html">MedianFilter</a>(<span class="keywordtype">unsigned</span> half_, <span class="keywordtype">unsigned</span> blocks_)</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>            : k{2 * half_ + 1}, blocks{blocks_}, n{k * blocks_}, half{half_}, result{k * (blocks_ - 1) + 1} {</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="structMedianFilter.html#a4857456858c40978e7e1d63f12fce977">   15</a></span>    <a class="code hl_function" href="structMedianFilter.html#a4857456858c40978e7e1d63f12fce977">MedianFilter</a>(<span class="keywordtype">unsigned</span> half_, <span class="keywordtype">unsigned</span> blocks_)</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>            : <a class="code hl_variable" href="structMedianFilter.html#ab582a7ca09e90d35a39ea5e892942b99">k</a>{2 * half_ + 1}, <a class="code hl_variable" href="structMedianFilter.html#adcd4ff5b3e8bb5213a71a4bc51c1a027">blocks</a>{blocks_}, <a class="code hl_variable" href="structMedianFilter.html#a959c63974affb2df13be5e5008b148dd">n</a>{<a class="code hl_variable" href="structMedianFilter.html#ab582a7ca09e90d35a39ea5e892942b99">k</a> * blocks_}, <a class="code hl_variable" href="structMedianFilter.html#a6e33fde6009a1678dc9a04bb0f84e3a9">half</a>{half_}, <a class="code hl_variable" href="structMedianFilter.html#afc661ddbeada760b2adc03d9d69eea19">result</a>{<a class="code hl_variable" href="structMedianFilter.html#ab582a7ca09e90d35a39ea5e892942b99">k</a> * (blocks_ - 1) + 1} {</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        <span class="comment">//        if (half_ == 0) {</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        <span class="comment">//            throw std::invalid_argument(&quot;half-window size must be at least 1&quot;);</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <span class="comment">//        }</span></div>
@@ -129,13 +129,20 @@ $(document).ready(function(){initNavTree('Median_8h_source.html',''); initResiza
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>};</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aElement_8h_html"><div class="ttname"><a href="Element_8h.html">Element.h</a></div></div>
 <div class="ttc" id="astructMedianFilter_html"><div class="ttname"><a href="structMedianFilter.html">MedianFilter</a></div><div class="ttdef"><b>Definition:</b> Median.h:8</div></div>
+<div class="ttc" id="astructMedianFilter_html_a4857456858c40978e7e1d63f12fce977"><div class="ttname"><a href="structMedianFilter.html#a4857456858c40978e7e1d63f12fce977">MedianFilter::MedianFilter</a></div><div class="ttdeci">MedianFilter(unsigned half_, unsigned blocks_)</div><div class="ttdef"><b>Definition:</b> Median.h:15</div></div>
+<div class="ttc" id="astructMedianFilter_html_a6e33fde6009a1678dc9a04bb0f84e3a9"><div class="ttname"><a href="structMedianFilter.html#a6e33fde6009a1678dc9a04bb0f84e3a9">MedianFilter::half</a></div><div class="ttdeci">unsigned half</div><div class="ttdef"><b>Definition:</b> Median.h:12</div></div>
+<div class="ttc" id="astructMedianFilter_html_a959c63974affb2df13be5e5008b148dd"><div class="ttname"><a href="structMedianFilter.html#a959c63974affb2df13be5e5008b148dd">MedianFilter::n</a></div><div class="ttdeci">unsigned n</div><div class="ttdef"><b>Definition:</b> Median.h:11</div></div>
+<div class="ttc" id="astructMedianFilter_html_ab582a7ca09e90d35a39ea5e892942b99"><div class="ttname"><a href="structMedianFilter.html#ab582a7ca09e90d35a39ea5e892942b99">MedianFilter::k</a></div><div class="ttdeci">unsigned k</div><div class="ttdef"><b>Definition:</b> Median.h:9</div></div>
+<div class="ttc" id="astructMedianFilter_html_adcd4ff5b3e8bb5213a71a4bc51c1a027"><div class="ttname"><a href="structMedianFilter.html#adcd4ff5b3e8bb5213a71a4bc51c1a027">MedianFilter::blocks</a></div><div class="ttdeci">unsigned blocks</div><div class="ttdef"><b>Definition:</b> Median.h:10</div></div>
+<div class="ttc" id="astructMedianFilter_html_afc661ddbeada760b2adc03d9d69eea19"><div class="ttname"><a href="structMedianFilter.html#afc661ddbeada760b2adc03d9d69eea19">MedianFilter::result</a></div><div class="ttdeci">unsigned result</div><div class="ttdef"><b>Definition:</b> Median.h:13</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_3f17983cf4973688a251fd1d24e6c0db.html">third</a></li><li class="navelem"><b>Median.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_3f17983cf4973688a251fd1d24e6c0db.html">third</a></li><li class="navelem"><a class="el" href="Median_8h.html">Median.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

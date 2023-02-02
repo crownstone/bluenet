@@ -111,22 +111,68 @@ $(document).ready(function(){initNavTree('structrssi__data__t.html',''); initRes
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:aab7ca6b925063be672a18153a1340513"><td class="memItemLeft" align="right" valign="top"><a id="aab7ca6b925063be672a18153a1340513" name="aab7ca6b925063be672a18153a1340513"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>variance</b>: 3</td></tr>
-<tr class="memdesc:aab7ca6b925063be672a18153a1340513"><td class="mdescLeft">&#160;</td><td class="mdescRight">variance of the given channel, rounded to intervals: 0: [ 0 - 2^2) 1: [ 2^2 - 4^2) 2: [ 4^2 - 6^2) 3: [ 6^2 - 8^2) 4: [ 8^2 - 10^2) 5: [10^2 - 15^2) 6: [15^2 - 20^2) 7: 20^2 and over <br /></td></tr>
+<tr class="memitem:aab7ca6b925063be672a18153a1340513"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structrssi__data__t.html#aab7ca6b925063be672a18153a1340513">variance</a>: 3</td></tr>
+<tr class="memdesc:aab7ca6b925063be672a18153a1340513"><td class="mdescLeft">&#160;</td><td class="mdescRight">variance of the given channel, rounded to intervals: 0: [ 0 - 2^2) 1: [ 2^2 - 4^2) 2: [ 4^2 - 6^2) 3: [ 6^2 - 8^2) 4: [ 8^2 - 10^2) 5: [10^2 - 15^2) 6: [15^2 - 20^2) 7: 20^2 and over  <a href="structrssi__data__t.html#aab7ca6b925063be672a18153a1340513">More...</a><br /></td></tr>
 <tr class="separator:aab7ca6b925063be672a18153a1340513"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad030d2ba4dd819425ee4b4bcee6e3835"><td class="memItemLeft" align="right" valign="top"><a id="ad030d2ba4dd819425ee4b4bcee6e3835" name="ad030d2ba4dd819425ee4b4bcee6e3835"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>rssi</b>: 7</td></tr>
-<tr class="memdesc:ad030d2ba4dd819425ee4b4bcee6e3835"><td class="mdescLeft">&#160;</td><td class="mdescRight">absolute value of the average rssi <br /></td></tr>
+<tr class="memitem:ad030d2ba4dd819425ee4b4bcee6e3835"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structrssi__data__t.html#ad030d2ba4dd819425ee4b4bcee6e3835">rssi</a>: 7</td></tr>
+<tr class="memdesc:ad030d2ba4dd819425ee4b4bcee6e3835"><td class="mdescLeft">&#160;</td><td class="mdescRight">absolute value of the average rssi  <a href="structrssi__data__t.html#ad030d2ba4dd819425ee4b4bcee6e3835">More...</a><br /></td></tr>
 <tr class="separator:ad030d2ba4dd819425ee4b4bcee6e3835"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ae1947624127b23c090decbbcb1d681"><td class="memItemLeft" align="right" valign="top"><a id="a3ae1947624127b23c090decbbcb1d681" name="a3ae1947624127b23c090decbbcb1d681"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>sampleCount</b>: 6</td></tr>
-<tr class="memdesc:a3ae1947624127b23c090decbbcb1d681"><td class="mdescLeft">&#160;</td><td class="mdescRight">a samplecount == 0x111111, indicates the channel had at least 2^6-1 == 63 samples. <br /></td></tr>
+<tr class="memitem:a3ae1947624127b23c090decbbcb1d681"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structrssi__data__t.html#a3ae1947624127b23c090decbbcb1d681">sampleCount</a>: 6</td></tr>
+<tr class="memdesc:a3ae1947624127b23c090decbbcb1d681"><td class="mdescLeft">&#160;</td><td class="mdescRight">a samplecount == 0x111111, indicates the channel had at least 2^6-1 == 63 samples.  <a href="structrssi__data__t.html#a3ae1947624127b23c090decbbcb1d681">More...</a><br /></td></tr>
 <tr class="separator:a3ae1947624127b23c090decbbcb1d681"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >The data in this packet contains information about a bluetooth channel between this crownstone and the one with id sender_id. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad030d2ba4dd819425ee4b4bcee6e3835" name="ad030d2ba4dd819425ee4b4bcee6e3835"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad030d2ba4dd819425ee4b4bcee6e3835">&#9670;&#160;</a></span>rssi</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t rssi_data_t::rssi</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>absolute value of the average rssi </p>
+
+</div>
+</div>
+<a id="a3ae1947624127b23c090decbbcb1d681" name="a3ae1947624127b23c090decbbcb1d681"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ae1947624127b23c090decbbcb1d681">&#9670;&#160;</a></span>sampleCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t rssi_data_t::sampleCount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>a samplecount == 0x111111, indicates the channel had at least 2^6-1 == 63 samples. </p>
+
+</div>
+</div>
+<a id="aab7ca6b925063be672a18153a1340513" name="aab7ca6b925063be672a18153a1340513"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab7ca6b925063be672a18153a1340513">&#9670;&#160;</a></span>variance</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t rssi_data_t::variance</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>variance of the given channel, rounded to intervals: 0: [ 0 - 2^2) 1: [ 2^2 - 4^2) 2: [ 4^2 - 6^2) 3: [ 6^2 - 8^2) 4: [ 8^2 - 10^2) 5: [10^2 - 15^2) 6: [15^2 - 20^2) 7: 20^2 and over </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>source/include/protocol/mesh/<a class="el" href="cs__MeshModelPackets_8h_source.html">cs_MeshModelPackets.h</a></li>
 </ul>
 </div><!-- contents -->

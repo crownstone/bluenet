@@ -1,4 +1,5 @@
 <map id="TapToToggle" name="TapToToggle">
-<area shape="rect" id="node1" title="Class that toggles the switch when a device, like a phone, is held close to the Crownstone." alt="" coords="11,79,111,104"/>
+<area shape="rect" id="node1" title="Class that toggles the switch when a device, like a phone, is held close to the Crownstone." alt="" coords="73,93,173,119"/>
 <area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node3" href="$structt2t__entry__t.html" title=" " alt="" coords="141,5,234,31"/>
 </map>

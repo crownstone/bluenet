@@ -1,4 +1,6 @@
 <map id="MeshTopologyResearch" name="MeshTopologyResearch">
-<area shape="rect" id="node1" title="This class/component keeps track of the rssi distance of a crownstone to its neighbors (i...." alt="" coords="5,79,180,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="37,5,148,31"/>
+<area shape="rect" id="node1" title="This class/component keeps track of the rssi distance of a crownstone to its neighbors (i...." alt="" coords="96,108,271,133"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,13,116,38"/>
+<area shape="rect" id="node3" href="$classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick&#45;event or tick count and execute..." alt="" coords="141,13,226,38"/>
+<area shape="rect" id="node4" href="$structMeshTopologyResearch_1_1TimingSettings.html" title=" " alt="" coords="251,5,425,45"/>
 </map>

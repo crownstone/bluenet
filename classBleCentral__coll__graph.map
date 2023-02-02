@@ -1,4 +1,6 @@
 <map id="BleCentral" name="BleCentral">
-<area shape="rect" id="node1" title="Class that enables you to connect to a device, and perform write or read operations." alt="" coords="15,79,106,104"/>
+<area shape="rect" id="node1" title="Class that enables you to connect to a device, and perform write or read operations." alt="" coords="162,93,253,119"/>
 <area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node3" href="$structdevice__address__t.html" title=" " alt="" coords="140,5,275,31"/>
+<area shape="rect" id="node4" href="$structcs__data__t.html" title="Packets (structs) that are used internally in the firmware, and can be changed freely." alt="" coords="299,5,383,31"/>
 </map>

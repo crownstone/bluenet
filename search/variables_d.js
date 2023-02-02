@@ -1,8 +1,21 @@
 var searchData=
 [
-  ['pin_0',['pin',['../structadc__channel__config__result__t.html#a8ac783b5ae83199bb9c2d7882fc7a7a4',1,'adc_channel_config_result_t']]],
-  ['poweroffsetmilliwatt_1',['powerOffsetMilliWatt',['../structboards__config__t.html#a08e172da8ab6ba3ff0104c19c17f4317',1,'boards_config_t']]],
-  ['priority_2',['priority',['../structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html#a9c7e75abf41809269e276b7a62e1f59a',1,'MeshUtil::cs_mesh_queue_item_meta_data_t']]],
-  ['pwmtempvoltagethreshold_3',['pwmTempVoltageThreshold',['../structboards__config__t.html#aca7741ed42538545936863444e57ca03',1,'boards_config_t']]],
-  ['pwmtempvoltagethresholddown_4',['pwmTempVoltageThresholdDown',['../structboards__config__t.html#a70bd38475536196ca64bb85f0535bb8b',1,'boards_config_t']]]
+  ['n_0',['n',['../structMedianFilter.html#a959c63974affb2df13be5e5008b148dd',1,'MedianFilter']]],
+  ['neighbourid_1',['neighbourId',['../structcs__mesh__model__msg__neighbour__rssi__t.html#aaeb545de922c1258d153b7b2f0234750',1,'cs_mesh_model_msg_neighbour_rssi_t']]],
+  ['nestsperbucket_2',['nestsPerBucket',['../structcuckoo__filter__data__t.html#ae10439075f348c2a691cac9fb9380b5b',1,'cuckoo_filter_data_t']]],
+  ['newline_3',['newLine',['../structuart__msg__log__common__header__t.html#a32c219afe9d9f0acbddb7b0ca97ecd85',1,'uart_msg_log_common_header_t']]],
+  ['next_5fblock_4',['next_block',['../structcs__mesh__seq__number__v5__t.html#a6184a82f1f7c842f4bd5c25623214e17',1,'cs_mesh_seq_number_v5_t']]],
+  ['nextcalltickcount_5',['nextCallTickcount',['../classCoroutine.html#aa1f24e6b23a37e97639de4c68eea3778',1,'Coroutine']]],
+  ['notificationchunker_6',['notificationChunker',['../structcharacteristic__config__t.html#a7a55f46b15ee6b7473b4fe6c6d69788a',1,'characteristic_config_t']]],
+  ['notify_7',['notify',['../structble__central__discovery__t.html#af7a6a742fad92fd8d93f251f0bfbf39c',1,'ble_central_discovery_t::notify()'],['../structcharacteristic__config__t.html#af51f62fb7ce528c81674ea2470cd3c4e',1,'characteristic_config_t::notify()']]],
+  ['num_5fibeacon_5fconfig_5fids_8',['num_ibeacon_config_ids',['../classMeshAdvertiser.html#a1ac16c0a9341fa530e1d0120ba0001de',1,'MeshAdvertiser']]],
+  ['num_5frecorded_5fvalues_9',['num_recorded_values',['../classVarianceAggregator.html#a1d57a0c24b6ef105515dfe2c01ed5329',1,'VarianceAggregator']]],
+  ['numargs_10',['numArgs',['../structuart__msg__log__header__t.html#a32a303a49c2503d72886dec2ba4fc36c',1,'uart_msg_log_header_t']]],
+  ['numchannels_11',['numChannels',['../structPowerSampling_1_1power__t.html#acd5632873e886bf144b9d1a8ab4a028e',1,'PowerSampling::power_t']]],
+  ['numfilteredbuffersforprocessing_12',['numFilteredBuffersForProcessing',['../classPowerSampling.html#a42b814ec5b6cd5dbcbfc5ddbe45d8fa6',1,'PowerSampling']]],
+  ['numperiodsbeforevalueupdate_13',['numPeriodsBeforeValueUpdate',['../classPWM.html#a9bc10689f9fa122a3e84486f8222f491',1,'PWM']]],
+  ['numsbrkfails_14',['numSbrkFails',['../structcs__ram__stats__t.html#a9e1363aebfd6ffb9c266255f4dd38cbe',1,'cs_ram_stats_t']]],
+  ['numstoneids_15',['numStoneIds',['../structMeshUtil_1_1cs__mesh__queue__item__t.html#ade1091d68dcbd29d7ded1bec4c875a92',1,'MeshUtil::cs_mesh_queue_item_t::numStoneIds()'],['../structMeshModelMulticastAcked_1_1cs__multicast__acked__queue__item__t.html#a0bfffb6d323d73bbe1371391f2bf7dbb',1,'MeshModelMulticastAcked::cs_multicast_acked_queue_item_t::numStoneIds()']]],
+  ['numswitchsamplesbuffers_16',['numSwitchSamplesBuffers',['../classPowerSampling.html#a86bbfc55b123a90542b6f1143975b02e',1,'PowerSampling']]],
+  ['numunfilteredbuffers_17',['numUnfilteredBuffers',['../classPowerSampling.html#a3935dff30b523f1a6acf6a0afdc29db7',1,'PowerSampling']]]
 ];

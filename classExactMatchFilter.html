@@ -100,10 +100,14 @@ $(document).ready(function(){initNavTree('classExactMatchFilter.html',''); initR
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classExactMatchFilter-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">ExactMatchFilter Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__ExactMatchFilter_8h_source.html">cs_ExactMatchFilter.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ExactMatchFilter:</div>
 <div class="dyncontent">
@@ -118,54 +122,169 @@ Collaboration diagram for ExactMatchFilter:</div>
 <div class="dyncontent">
 <div class="center"><img src="classExactMatchFilter__coll__graph.png" border="0" usemap="#aExactMatchFilter_coll__map" alt="Collaboration graph"/></div>
 <map name="aExactMatchFilter_coll__map" id="aExactMatchFilter_coll__map">
-<area shape="rect" title=" " alt="" coords="5,79,136,104"/>
-<area shape="rect" href="classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="15,5,127,31"/>
+<area shape="rect" title=" " alt="" coords="72,108,203,133"/>
+<area shape="rect" href="classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,13,117,38"/>
+<area shape="rect" href="structexact__match__filter__data__t.html" title="Data content of the exact match filter." alt="" coords="141,5,285,45"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6fa0bab0b1dc4b9e6cd9e1918714c9da"><td class="memItemLeft" align="right" valign="top"><a id="a6fa0bab0b1dc4b9e6cd9e1918714c9da" name="a6fa0bab0b1dc4b9e6cd9e1918714c9da"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ExactMatchFilter</b> (<a class="el" href="structexact__match__filter__data__t.html">exact_match_filter_data_t</a> *data)</td></tr>
+<tr class="memitem:a6fa0bab0b1dc4b9e6cd9e1918714c9da"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#a6fa0bab0b1dc4b9e6cd9e1918714c9da">ExactMatchFilter</a> (<a class="el" href="structexact__match__filter__data__t.html">exact_match_filter_data_t</a> *data)</td></tr>
 <tr class="separator:a6fa0bab0b1dc4b9e6cd9e1918714c9da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9069b562a21c6f590a7581dbd8d2f4e3"><td class="memItemLeft" align="right" valign="top"><a id="a9069b562a21c6f590a7581dbd8d2f4e3" name="a9069b562a21c6f590a7581dbd8d2f4e3"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ExactMatchFilter</b> ()</td></tr>
-<tr class="memdesc:a9069b562a21c6f590a7581dbd8d2f4e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use this default constructor with care, _data is never checked in this class. <br /></td></tr>
+<tr class="memitem:a9069b562a21c6f590a7581dbd8d2f4e3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#a9069b562a21c6f590a7581dbd8d2f4e3">ExactMatchFilter</a> ()</td></tr>
+<tr class="memdesc:a9069b562a21c6f590a7581dbd8d2f4e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use this default constructor with care, _data is never checked in this class.  <a href="classExactMatchFilter.html#a9069b562a21c6f590a7581dbd8d2f4e3">More...</a><br /></td></tr>
 <tr class="separator:a9069b562a21c6f590a7581dbd8d2f4e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a580ea6b70534e5df717bffa21a94b188"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#a580ea6b70534e5df717bffa21a94b188">contains</a> (const void *key, size_t keyLengthInBytes) override</td></tr>
 <tr class="separator:a580ea6b70534e5df717bffa21a94b188"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a495b06a6387a10f3ffbe5f7aa545cb44"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#a495b06a6387a10f3ffbe5f7aa545cb44">isValid</a> () override</td></tr>
 <tr class="separator:a495b06a6387a10f3ffbe5f7aa545cb44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e590b0dba79cf0a9eb0dee2041bf3de"><td class="memItemLeft" align="right" valign="top"><a id="a6e590b0dba79cf0a9eb0dee2041bf3de" name="a6e590b0dba79cf0a9eb0dee2041bf3de"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>find</b> (const void *item, size_t itemSize)</td></tr>
-<tr class="memdesc:a6e590b0dba79cf0a9eb0dee2041bf3de"><td class="mdescLeft">&#160;</td><td class="mdescRight">if contains(key,itemSize): returns the index of the item else: return -1 <br /></td></tr>
+<tr class="memitem:a6e590b0dba79cf0a9eb0dee2041bf3de"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#a6e590b0dba79cf0a9eb0dee2041bf3de">find</a> (const void *item, size_t itemSize)</td></tr>
+<tr class="memdesc:a6e590b0dba79cf0a9eb0dee2041bf3de"><td class="mdescLeft">&#160;</td><td class="mdescRight">if contains(key,itemSize): returns the index of the item else: return -1  <a href="classExactMatchFilter.html#a6e590b0dba79cf0a9eb0dee2041bf3de">More...</a><br /></td></tr>
 <tr class="separator:a6e590b0dba79cf0a9eb0dee2041bf3de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf6aa1efb6852e951f131aecda4681b5"><td class="memItemLeft" align="right" valign="top"><a id="adf6aa1efb6852e951f131aecda4681b5" name="adf6aa1efb6852e951f131aecda4681b5"></a>
-constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bufferSize</b> ()</td></tr>
+<tr class="memitem:adf6aa1efb6852e951f131aecda4681b5"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#adf6aa1efb6852e951f131aecda4681b5">bufferSize</a> ()</td></tr>
 <tr class="separator:adf6aa1efb6852e951f131aecda4681b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4495b4b39854b78bf79fcf1e10f774ed"><td class="memItemLeft" align="right" valign="top">constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#a4495b4b39854b78bf79fcf1e10f774ed">size</a> ()</td></tr>
 <tr class="separator:a4495b4b39854b78bf79fcf1e10f774ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb86eb52b13f665defb357a6fff79bbc"><td class="memItemLeft" align="right" valign="top"><a id="acb86eb52b13f665defb357a6fff79bbc" name="acb86eb52b13f665defb357a6fff79bbc"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>contains</b> (const void *key, size_t keyLengthInBytes)=0</td></tr>
-<tr class="separator:acb86eb52b13f665defb357a6fff79bbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1cc00bd1b1e7f1343c3b16bb9b50f0df"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">size</a> ()=0</td></tr>
-<tr class="separator:a1cc00bd1b1e7f1343c3b16bb9b50f0df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"><td class="memItemLeft" align="right" valign="top"><a id="ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf" name="ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValid</b> ()=0</td></tr>
-<tr class="separator:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classFilterInterface"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classFilterInterface')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classFilterInterface.html">FilterInterface</a></td></tr>
+<tr class="memitem:a001bb3f0f15cfa1d091c8f647249c79b inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a001bb3f0f15cfa1d091c8f647249c79b">~FilterInterface</a> ()=default</td></tr>
+<tr class="separator:a001bb3f0f15cfa1d091c8f647249c79b inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb86eb52b13f665defb357a6fff79bbc inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">contains</a> (const void *key, size_t keyLengthInBytes)=0</td></tr>
+<tr class="separator:acb86eb52b13f665defb357a6fff79bbc inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1cc00bd1b1e7f1343c3b16bb9b50f0df inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">size</a> ()=0</td></tr>
+<tr class="separator:a1cc00bd1b1e7f1343c3b16bb9b50f0df inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf inherit pub_methods_classFilterInterface"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">isValid</a> ()=0</td></tr>
+<tr class="separator:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf inherit pub_methods_classFilterInterface"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a4975dc650960d8edd97ca2f6c188af84"><td class="memItemLeft" align="right" valign="top"><a id="a4975dc650960d8edd97ca2f6c188af84" name="a4975dc650960d8edd97ca2f6c188af84"></a>
-static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>bufferSize</b> (uint8_t itemCount, uint8_t itemSize)</td></tr>
-<tr class="memdesc:a4975dc650960d8edd97ca2f6c188af84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of the itemArray in bytes. <br /></td></tr>
+<tr class="memitem:a4975dc650960d8edd97ca2f6c188af84"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#a4975dc650960d8edd97ca2f6c188af84">bufferSize</a> (uint8_t itemCount, uint8_t itemSize)</td></tr>
+<tr class="memdesc:a4975dc650960d8edd97ca2f6c188af84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of the itemArray in bytes.  <a href="classExactMatchFilter.html#a4975dc650960d8edd97ca2f6c188af84">More...</a><br /></td></tr>
 <tr class="separator:a4975dc650960d8edd97ca2f6c188af84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af9d7e398d9670917696b5caf7c2febab"><td class="memItemLeft" align="right" valign="top"><a id="af9d7e398d9670917696b5caf7c2febab" name="af9d7e398d9670917696b5caf7c2febab"></a>
-static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>size</b> (uint8_t itemCount, uint8_t itemSize)</td></tr>
-<tr class="memdesc:af9d7e398d9670917696b5caf7c2febab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total number of bytes that a filter with the given parameters would occupy. <br /></td></tr>
+<tr class="memitem:af9d7e398d9670917696b5caf7c2febab"><td class="memItemLeft" align="right" valign="top">static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#af9d7e398d9670917696b5caf7c2febab">size</a> (uint8_t itemCount, uint8_t itemSize)</td></tr>
+<tr class="memdesc:af9d7e398d9670917696b5caf7c2febab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total number of bytes that a filter with the given parameters would occupy.  <a href="classExactMatchFilter.html#af9d7e398d9670917696b5caf7c2febab">More...</a><br /></td></tr>
 <tr class="separator:af9d7e398d9670917696b5caf7c2febab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a5a0e242887bbc244451c5ccd6f90ffe3"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#a5a0e242887bbc244451c5ccd6f90ffe3">getItem</a> (size_t index)</td></tr>
+<tr class="separator:a5a0e242887bbc244451c5ccd6f90ffe3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a5df3074db703ae7a124cdc0e5b0bb213"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structexact__match__filter__data__t.html">exact_match_filter_data_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classExactMatchFilter.html#a5df3074db703ae7a124cdc0e5b0bb213">_data</a></td></tr>
+<tr class="separator:a5df3074db703ae7a124cdc0e5b0bb213"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a6fa0bab0b1dc4b9e6cd9e1918714c9da" name="a6fa0bab0b1dc4b9e6cd9e1918714c9da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fa0bab0b1dc4b9e6cd9e1918714c9da">&#9670;&#160;</a></span>ExactMatchFilter() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classExactMatchFilter.html">ExactMatchFilter::ExactMatchFilter</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structexact__match__filter__data__t.html">exact_match_filter_data_t</a> *&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9069b562a21c6f590a7581dbd8d2f4e3" name="a9069b562a21c6f590a7581dbd8d2f4e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9069b562a21c6f590a7581dbd8d2f4e3">&#9670;&#160;</a></span>ExactMatchFilter() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classExactMatchFilter.html">ExactMatchFilter::ExactMatchFilter</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Use this default constructor with care, _data is never checked in this class. </p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="adf6aa1efb6852e951f131aecda4681b5" name="adf6aa1efb6852e951f131aecda4681b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf6aa1efb6852e951f131aecda4681b5">&#9670;&#160;</a></span>bufferSize() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr size_t ExactMatchFilter::bufferSize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4975dc650960d8edd97ca2f6c188af84" name="a4975dc650960d8edd97ca2f6c188af84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4975dc650960d8edd97ca2f6c188af84">&#9670;&#160;</a></span>bufferSize() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr size_t ExactMatchFilter::bufferSize </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>itemCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>itemSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Size of the itemArray in bytes. </p>
+
+</div>
+</div>
 <a id="a580ea6b70534e5df717bffa21a94b188" name="a580ea6b70534e5df717bffa21a94b188"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a580ea6b70534e5df717bffa21a94b188">&#9670;&#160;</a></span>contains()</h2>
 
@@ -200,7 +319,63 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>si
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="classFilterInterface.html">FilterInterface</a>.</p>
+<p>Implements <a class="el" href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">FilterInterface</a>.</p>
+
+</div>
+</div>
+<a id="a6e590b0dba79cf0a9eb0dee2041bf3de" name="a6e590b0dba79cf0a9eb0dee2041bf3de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e590b0dba79cf0a9eb0dee2041bf3de">&#9670;&#160;</a></span>find()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ExactMatchFilter::find </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>item</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>itemSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>if contains(key,itemSize): returns the index of the item else: return -1 </p>
+
+</div>
+</div>
+<a id="a5a0e242887bbc244451c5ccd6f90ffe3" name="a5a0e242887bbc244451c5ccd6f90ffe3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a0e242887bbc244451c5ccd6f90ffe3">&#9670;&#160;</a></span>getItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t * ExactMatchFilter::getItem </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -227,12 +402,12 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>si
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="classFilterInterface.html">FilterInterface</a>.</p>
+<p>Implements <a class="el" href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">FilterInterface</a>.</p>
 
 </div>
 </div>
 <a id="a4495b4b39854b78bf79fcf1e10f774ed" name="a4495b4b39854b78bf79fcf1e10f774ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4495b4b39854b78bf79fcf1e10f774ed">&#9670;&#160;</a></span>size()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4495b4b39854b78bf79fcf1e10f774ed">&#9670;&#160;</a></span>size() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -254,7 +429,68 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>si
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="classFilterInterface.html">FilterInterface</a>.</p>
+<p>Implements <a class="el" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">FilterInterface</a>.</p>
+
+</div>
+</div>
+<a id="af9d7e398d9670917696b5caf7c2febab" name="af9d7e398d9670917696b5caf7c2febab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9d7e398d9670917696b5caf7c2febab">&#9670;&#160;</a></span>size() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr size_t ExactMatchFilter::size </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>itemCount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>itemSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Total number of bytes that a filter with the given parameters would occupy. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a5df3074db703ae7a124cdc0e5b0bb213" name="a5df3074db703ae7a124cdc0e5b0bb213"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5df3074db703ae7a124cdc0e5b0bb213">&#9670;&#160;</a></span>_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structexact__match__filter__data__t.html">exact_match_filter_data_t</a>* ExactMatchFilter::_data</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

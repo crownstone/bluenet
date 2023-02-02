@@ -1,4 +1,6 @@
 <map id="ConnectionEncryption" name="ConnectionEncryption">
-<area shape="rect" id="node1" title=" " alt="" coords="5,79,169,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="32,5,143,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="117,93,281,119"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node3" href="$structsession__data__t.html" title=" " alt="" coords="140,5,259,31"/>
+<area shape="rect" id="node4" href="$structencryption__nonce__t.html" title="Nonce used for encryption." alt="" coords="282,5,431,31"/>
 </map>

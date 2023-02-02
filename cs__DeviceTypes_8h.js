@@ -1,0 +1,25 @@
+var cs__DeviceTypes_8h =
+[
+    [ "DEVICE_CROWNSTONE_BUILTIN", "cs__DeviceTypes_8h.html#af4efa23b00fe5c1db3531807def75fb9", null ],
+    [ "DEVICE_CROWNSTONE_BUILTIN_ONE", "cs__DeviceTypes_8h.html#a57b618dbbc4abc4aead8358031f5f2c5", null ],
+    [ "DEVICE_CROWNSTONE_BUILTIN_TWO", "cs__DeviceTypes_8h.html#a4998a353e31cf678403e6c4e883b7538", null ],
+    [ "DEVICE_CROWNSTONE_HUB", "cs__DeviceTypes_8h.html#ae91e2a3aa740b645d4b80d1afbc2fca8", null ],
+    [ "DEVICE_CROWNSTONE_OUTLET", "cs__DeviceTypes_8h.html#ad950e280f0fe67f834b802c60c1dffd0", null ],
+    [ "DEVICE_CROWNSTONE_PLUG", "cs__DeviceTypes_8h.html#a2b8d30144de5ac90d0bc2870481dff48", null ],
+    [ "DEVICE_CROWNSTONE_PLUG_ONE", "cs__DeviceTypes_8h.html#a5f4ac86f7a028ab21144ba3ab2247011", null ],
+    [ "DEVICE_CROWNSTONE_USB", "cs__DeviceTypes_8h.html#a8bfab06b80bfb4b4a67ce79815572e6f", null ],
+    [ "DEVICE_GUIDESTONE", "cs__DeviceTypes_8h.html#a64e1a6db252f435b7ba563d5552cb0e1", null ],
+    [ "DEVICE_UNDEF", "cs__DeviceTypes_8h.html#af8a27b0b89aa4ef724939b30eadcb804", null ],
+    [ "IS_CROWNSTONE", "cs__DeviceTypes_8h.html#acd22e6099b2cb6110b1021bf45b18389", null ],
+    [ "PRODUCT_CROWNSTONE_BUILTIN_ONE", "cs__DeviceTypes_8h.html#a2395d5cceffe9eb967b417190f02966f", null ],
+    [ "PRODUCT_CROWNSTONE_BUILTIN_TWO", "cs__DeviceTypes_8h.html#abceb880879e2f26dfa626351a082353c", null ],
+    [ "PRODUCT_CROWNSTONE_BUILTIN_ZERO", "cs__DeviceTypes_8h.html#a1e8e781152dea899cc02ed1a337d881f", null ],
+    [ "PRODUCT_CROWNSTONE_HUB", "cs__DeviceTypes_8h.html#a87601a54b2b38e29afa74a24c3912bc1", null ],
+    [ "PRODUCT_CROWNSTONE_OUTLET", "cs__DeviceTypes_8h.html#a6d04c6399ca34a1be61cfab384d664f9", null ],
+    [ "PRODUCT_CROWNSTONE_PLUG_ONE", "cs__DeviceTypes_8h.html#a3e053debf1e4ac7310d88599b9dcb3cc", null ],
+    [ "PRODUCT_CROWNSTONE_PLUG_ZERO", "cs__DeviceTypes_8h.html#a637ad648f3f1b06a324949eb57cd16ef", null ],
+    [ "PRODUCT_CROWNSTONE_USB_DONGLE", "cs__DeviceTypes_8h.html#a844f763e13ee6d15a15e8741ea982238", null ],
+    [ "PRODUCT_DEV_BOARD", "cs__DeviceTypes_8h.html#a94f7187d2b865512d825e1fddc75b66c", null ],
+    [ "PRODUCT_GUIDESTONE", "cs__DeviceTypes_8h.html#ac126c1bb1e2a12fc5a1d6b7173510547", null ],
+    [ "PRODUCT_UNKNOWN", "cs__DeviceTypes_8h.html#a58a09871c01e6908f42ed668017238dc", null ]
+];

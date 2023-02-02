@@ -122,18 +122,109 @@ Inheritance diagram for FilterInterface:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:acb86eb52b13f665defb357a6fff79bbc"><td class="memItemLeft" align="right" valign="top"><a id="acb86eb52b13f665defb357a6fff79bbc" name="acb86eb52b13f665defb357a6fff79bbc"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>contains</b> (const void *key, size_t keyLengthInBytes)=0</td></tr>
+<tr class="memitem:a001bb3f0f15cfa1d091c8f647249c79b"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a001bb3f0f15cfa1d091c8f647249c79b">~FilterInterface</a> ()=default</td></tr>
+<tr class="separator:a001bb3f0f15cfa1d091c8f647249c79b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb86eb52b13f665defb357a6fff79bbc"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#acb86eb52b13f665defb357a6fff79bbc">contains</a> (const void *key, size_t keyLengthInBytes)=0</td></tr>
 <tr class="separator:acb86eb52b13f665defb357a6fff79bbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cc00bd1b1e7f1343c3b16bb9b50f0df"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#a1cc00bd1b1e7f1343c3b16bb9b50f0df">size</a> ()=0</td></tr>
 <tr class="separator:a1cc00bd1b1e7f1343c3b16bb9b50f0df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"><td class="memItemLeft" align="right" valign="top"><a id="ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf" name="ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValid</b> ()=0</td></tr>
+<tr class="memitem:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFilterInterface.html#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">isValid</a> ()=0</td></tr>
 <tr class="separator:ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Used in <a class="el" href="classAssetFiltering.html">AssetFiltering</a> as a generic way to query a filter for containment and assetId. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a001bb3f0f15cfa1d091c8f647249c79b" name="a001bb3f0f15cfa1d091c8f647249c79b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a001bb3f0f15cfa1d091c8f647249c79b">&#9670;&#160;</a></span>~FilterInterface()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual FilterInterface::~FilterInterface </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="acb86eb52b13f665defb357a6fff79bbc" name="acb86eb52b13f665defb357a6fff79bbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb86eb52b13f665defb357a6fff79bbc">&#9670;&#160;</a></span>contains()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool FilterInterface::contains </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>keyLengthInBytes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classAssetFilter.html#a0c0ad92783950a0b2b565ee0ebbf3c84">AssetFilter</a>, <a class="el" href="classCuckooFilter.html#a339c229191a662a34073b78f6f1b4dc7">CuckooFilter</a>, and <a class="el" href="classExactMatchFilter.html#a580ea6b70534e5df717bffa21a94b188">ExactMatchFilter</a>.</p>
+
+</div>
+</div>
+<a id="ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf" name="ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3b2ccbf5f3bc5c20dbed7bfd10c5fcf">&#9670;&#160;</a></span>isValid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool FilterInterface::isValid </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classAssetFilter.html#a18f21b8ed9cb50c10cba7691184b0be2">AssetFilter</a>, <a class="el" href="classCuckooFilter.html#aa1cd614904184eb167c8f44a822836a9">CuckooFilter</a>, and <a class="el" href="classExactMatchFilter.html#a495b06a6387a10f3ffbe5f7aa545cb44">ExactMatchFilter</a>.</p>
+
+</div>
+</div>
 <a id="a1cc00bd1b1e7f1343c3b16bb9b50f0df" name="a1cc00bd1b1e7f1343c3b16bb9b50f0df"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1cc00bd1b1e7f1343c3b16bb9b50f0df">&#9670;&#160;</a></span>size()</h2>
 
@@ -157,7 +248,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValid</b> (
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classCuckooFilter.html#a1267c21b23025c37b719d58d4b72fe04">CuckooFilter</a>, and <a class="el" href="classAssetFilter.html#ae9c3b272bffe3f5b52c469543222dc9a">AssetFilter</a>.</p>
+<p>Implemented in <a class="el" href="classCuckooFilter.html#a1267c21b23025c37b719d58d4b72fe04">CuckooFilter</a>, <a class="el" href="classExactMatchFilter.html#a4495b4b39854b78bf79fcf1e10f774ed">ExactMatchFilter</a>, and <a class="el" href="classAssetFilter.html#ae9c3b272bffe3f5b52c469543222dc9a">AssetFilter</a>.</p>
 
 </div>
 </div>

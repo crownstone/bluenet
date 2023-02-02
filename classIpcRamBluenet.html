@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classIpcRamBluenet.html',''); initResi
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classIpcRamBluenet-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">IpcRamBluenet Class Reference</div></div>
 </div><!--header-->
@@ -115,9 +117,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aac19deb56d179812058c7a27cb7b17fc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#aac19deb56d179812058c7a27cb7b17fc">init</a> ()</td></tr>
 <tr class="memdesc:aac19deb56d179812058c7a27cb7b17fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the IPC ram.  <a href="classIpcRamBluenet.html#aac19deb56d179812058c7a27cb7b17fc">More...</a><br /></td></tr>
 <tr class="separator:aac19deb56d179812058c7a27cb7b17fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a615a2d66e8c1110c1f1eb93e52c6e6fc"><td class="memItemLeft" align="right" valign="top"><a id="a615a2d66e8c1110c1f1eb93e52c6e6fc" name="a615a2d66e8c1110c1f1eb93e52c6e6fc"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValidOnBoot</b> ()</td></tr>
-<tr class="memdesc:a615a2d66e8c1110c1f1eb93e52c6e6fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the IPC ram data was valid before init. <br /></td></tr>
+<tr class="memitem:a615a2d66e8c1110c1f1eb93e52c6e6fc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#a615a2d66e8c1110c1f1eb93e52c6e6fc">isValidOnBoot</a> ()</td></tr>
+<tr class="memdesc:a615a2d66e8c1110c1f1eb93e52c6e6fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the IPC ram data was valid before init.  <a href="classIpcRamBluenet.html#a615a2d66e8c1110c1f1eb93e52c6e6fc">More...</a><br /></td></tr>
 <tr class="separator:a615a2d66e8c1110c1f1eb93e52c6e6fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7cabfdbf371a34cf9a3196fcbc39805d"><td class="memItemLeft" align="right" valign="top">const bluenet_ipc_bluenet_data_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#a7cabfdbf371a34cf9a3196fcbc39805d">getData</a> ()</td></tr>
 <tr class="memdesc:a7cabfdbf371a34cf9a3196fcbc39805d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current data.  <a href="classIpcRamBluenet.html#a7cabfdbf371a34cf9a3196fcbc39805d">More...</a><br /></td></tr>
@@ -131,15 +132,125 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>isValidOnBoot</b> ()<
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aca53cd3cc3a4409ee850a1abc6af2aae"><td class="memItemLeft" align="right" valign="top"><a id="aca53cd3cc3a4409ee850a1abc6af2aae" name="aca53cd3cc3a4409ee850a1abc6af2aae"></a>
-static <a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:aca53cd3cc3a4409ee850a1abc6af2aae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the singleton instance. <br /></td></tr>
+<tr class="memitem:aca53cd3cc3a4409ee850a1abc6af2aae"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#aca53cd3cc3a4409ee850a1abc6af2aae">getInstance</a> ()</td></tr>
+<tr class="memdesc:aca53cd3cc3a4409ee850a1abc6af2aae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the singleton instance.  <a href="classIpcRamBluenet.html#aca53cd3cc3a4409ee850a1abc6af2aae">More...</a><br /></td></tr>
 <tr class="separator:aca53cd3cc3a4409ee850a1abc6af2aae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a0ab03d5fb16077e6158ae5aaa7f33532"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#a0ab03d5fb16077e6158ae5aaa7f33532">IpcRamBluenet</a> ()</td></tr>
+<tr class="memdesc:a0ab03d5fb16077e6158ae5aaa7f33532"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor, singleton, thus made private.  <a href="classIpcRamBluenet.html#a0ab03d5fb16077e6158ae5aaa7f33532">More...</a><br /></td></tr>
+<tr class="separator:a0ab03d5fb16077e6158ae5aaa7f33532"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acea30a2801717476db99c6282d0b0954"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#acea30a2801717476db99c6282d0b0954">IpcRamBluenet</a> (<a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:acea30a2801717476db99c6282d0b0954"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor, singleton, thus made private.  <a href="classIpcRamBluenet.html#acea30a2801717476db99c6282d0b0954">More...</a><br /></td></tr>
+<tr class="separator:acea30a2801717476db99c6282d0b0954"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac84625819f5cd4dff50500efdafade1d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#ac84625819f5cd4dff50500efdafade1d">operator=</a> (<a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:ac84625819f5cd4dff50500efdafade1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator, singleton, thus made private.  <a href="classIpcRamBluenet.html#ac84625819f5cd4dff50500efdafade1d">More...</a><br /></td></tr>
+<tr class="separator:ac84625819f5cd4dff50500efdafade1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b1c7b2897318f6c66d830c53375ebed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#a5b1c7b2897318f6c66d830c53375ebed">clearData</a> ()</td></tr>
+<tr class="memdesc:a5b1c7b2897318f6c66d830c53375ebed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear the cached data.  <a href="classIpcRamBluenet.html#a5b1c7b2897318f6c66d830c53375ebed">More...</a><br /></td></tr>
+<tr class="separator:a5b1c7b2897318f6c66d830c53375ebed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc0c51f2c1ae29b08026fad6e83957f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#adc0c51f2c1ae29b08026fad6e83957f5">updateData</a> ()</td></tr>
+<tr class="memdesc:adc0c51f2c1ae29b08026fad6e83957f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy cache to IPC ram.  <a href="classIpcRamBluenet.html#adc0c51f2c1ae29b08026fad6e83957f5">More...</a><br /></td></tr>
+<tr class="separator:adc0c51f2c1ae29b08026fad6e83957f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10e9129c3278c56cb336645f0d294f14"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#a10e9129c3278c56cb336645f0d294f14">printData</a> ()</td></tr>
+<tr class="separator:a10e9129c3278c56cb336645f0d294f14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:aa1cd52cc429720a06df6bc514e2cbb47"><td class="memItemLeft" align="right" valign="top">bluenet_ipc_data_payload_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#aa1cd52cc429720a06df6bc514e2cbb47">_ipcData</a></td></tr>
+<tr class="memdesc:aa1cd52cc429720a06df6bc514e2cbb47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache the data in IPC.  <a href="classIpcRamBluenet.html#aa1cd52cc429720a06df6bc514e2cbb47">More...</a><br /></td></tr>
+<tr class="separator:aa1cd52cc429720a06df6bc514e2cbb47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0a2be843f271ea81ee706d27aecc296"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIpcRamBluenet.html#ad0a2be843f271ea81ee706d27aecc296">_isValidOnBoot</a> = false</td></tr>
+<tr class="separator:ad0a2be843f271ea81ee706d27aecc296"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class to operate on bluenet to bluenet IPC ram. </p>
 <p >An alternative to this class would be to add a method to the IpcRamData class to update a single field. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a0ab03d5fb16077e6158ae5aaa7f33532" name="a0ab03d5fb16077e6158ae5aaa7f33532"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ab03d5fb16077e6158ae5aaa7f33532">&#9670;&#160;</a></span>IpcRamBluenet() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIpcRamBluenet.html">IpcRamBluenet::IpcRamBluenet</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor, singleton, thus made private. </p>
+
+</div>
+</div>
+<a id="acea30a2801717476db99c6282d0b0954" name="acea30a2801717476db99c6282d0b0954"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acea30a2801717476db99c6282d0b0954">&#9670;&#160;</a></span>IpcRamBluenet() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIpcRamBluenet.html">IpcRamBluenet::IpcRamBluenet</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy constructor, singleton, thus made private. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a5b1c7b2897318f6c66d830c53375ebed" name="a5b1c7b2897318f6c66d830c53375ebed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b1c7b2897318f6c66d830c53375ebed">&#9670;&#160;</a></span>clearData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void IpcRamBluenet::clearData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Clear the cached data. </p>
+
+</div>
+</div>
 <a id="a7cabfdbf371a34cf9a3196fcbc39805d" name="a7cabfdbf371a34cf9a3196fcbc39805d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7cabfdbf371a34cf9a3196fcbc39805d">&#9670;&#160;</a></span>getData()</h2>
 
@@ -160,6 +271,33 @@ static <a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> &amp;&#160
 
 </div>
 </div>
+<a id="aca53cd3cc3a4409ee850a1abc6af2aae" name="aca53cd3cc3a4409ee850a1abc6af2aae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca53cd3cc3a4409ee850a1abc6af2aae">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> &amp; IpcRamBluenet::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the singleton instance. </p>
+
+</div>
+</div>
 <a id="aac19deb56d179812058c7a27cb7b17fc" name="aac19deb56d179812058c7a27cb7b17fc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aac19deb56d179812058c7a27cb7b17fc">&#9670;&#160;</a></span>init()</h2>
 
@@ -177,6 +315,105 @@ static <a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> &amp;&#160
 
 <p>Reads the IPC ram. </p>
 <p >If it's not valid, the data will be cleared. After init, the data is valid. </p>
+
+</div>
+</div>
+<a id="a615a2d66e8c1110c1f1eb93e52c6e6fc" name="a615a2d66e8c1110c1f1eb93e52c6e6fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a615a2d66e8c1110c1f1eb93e52c6e6fc">&#9670;&#160;</a></span>isValidOnBoot()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool IpcRamBluenet::isValidOnBoot </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Whether the IPC ram data was valid before init. </p>
+
+</div>
+</div>
+<a id="ac84625819f5cd4dff50500efdafade1d" name="ac84625819f5cd4dff50500efdafade1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac84625819f5cd4dff50500efdafade1d">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> &amp; IpcRamBluenet::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assignment operator, singleton, thus made private. </p>
+
+</div>
+</div>
+<a id="a10e9129c3278c56cb336645f0d294f14" name="a10e9129c3278c56cb336645f0d294f14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10e9129c3278c56cb336645f0d294f14">&#9670;&#160;</a></span>printData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void IpcRamBluenet::printData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adc0c51f2c1ae29b08026fad6e83957f5" name="adc0c51f2c1ae29b08026fad6e83957f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc0c51f2c1ae29b08026fad6e83957f5">&#9670;&#160;</a></span>updateData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void IpcRamBluenet::updateData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy cache to IPC ram. </p>
 
 </div>
 </div>
@@ -229,6 +466,53 @@ static <a class="el" href="classIpcRamBluenet.html">IpcRamBluenet</a> &amp;&#160
 
 <p>Update a microapp field. </p>
 <p >Will write the data to IPC ram. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="aa1cd52cc429720a06df6bc514e2cbb47" name="aa1cd52cc429720a06df6bc514e2cbb47"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1cd52cc429720a06df6bc514e2cbb47">&#9670;&#160;</a></span>_ipcData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bluenet_ipc_data_payload_t IpcRamBluenet::_ipcData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache the data in IPC. </p>
+
+</div>
+</div>
+<a id="ad0a2be843f271ea81ee706d27aecc296" name="ad0a2be843f271ea81ee706d27aecc296"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0a2be843f271ea81ee706d27aecc296">&#9670;&#160;</a></span>_isValidOnBoot</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool IpcRamBluenet::_isValidOnBoot = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

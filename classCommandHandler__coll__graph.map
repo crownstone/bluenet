@@ -1,6 +1,7 @@
 <map id="CommandHandler" name="CommandHandler">
-<area shape="rect" id="node1" title="Every command from an external device such as a smartphone goes through the CommandHandler." alt="" coords="12,181,152,207"/>
+<area shape="rect" id="node1" title="Every command from an external device such as a smartphone goes through the CommandHandler." alt="" coords="133,181,273,207"/>
 <area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,93,116,119"/>
-<area shape="rect" id="node3" href="$structcmd__source__with__counter__t.html" title="Struct that tells where a command originated from." alt="" coords="141,93,343,119"/>
-<area shape="rect" id="node4" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="186,5,298,31"/>
+<area shape="rect" id="node3" href="$structboards__config__t.html" title="Board configuration." alt="" coords="141,93,266,119"/>
+<area shape="rect" id="node4" href="$structcmd__source__with__counter__t.html" title="Struct that tells where a command originated from." alt="" coords="290,93,493,119"/>
+<area shape="rect" id="node5" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="335,5,447,31"/>
 </map>

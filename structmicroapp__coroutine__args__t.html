@@ -111,17 +111,44 @@ $(document).ready(function(){initNavTree('structmicroapp__coroutine__args__t.htm
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a557dc1010be0d8eac124c38e3bc34670"><td class="memItemLeft" align="right" valign="top"><a id="a557dc1010be0d8eac124c38e3bc34670" name="a557dc1010be0d8eac124c38e3bc34670"></a>
-uintptr_t&#160;</td><td class="memItemRight" valign="bottom"><b>entry</b></td></tr>
+<tr class="memitem:a557dc1010be0d8eac124c38e3bc34670"><td class="memItemLeft" align="right" valign="top">uintptr_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmicroapp__coroutine__args__t.html#a557dc1010be0d8eac124c38e3bc34670">entry</a></td></tr>
 <tr class="separator:a557dc1010be0d8eac124c38e3bc34670"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc8cb49fe3ea7452ffc657bb56f937cf"><td class="memItemLeft" align="right" valign="top"><a id="acc8cb49fe3ea7452ffc657bb56f937cf" name="acc8cb49fe3ea7452ffc657bb56f937cf"></a>
-bluenet_io_buffers_t *&#160;</td><td class="memItemRight" valign="bottom"><b>ioBuffers</b></td></tr>
+<tr class="memitem:acc8cb49fe3ea7452ffc657bb56f937cf"><td class="memItemLeft" align="right" valign="top">bluenet_io_buffers_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmicroapp__coroutine__args__t.html#acc8cb49fe3ea7452ffc657bb56f937cf">ioBuffers</a></td></tr>
 <tr class="separator:acc8cb49fe3ea7452ffc657bb56f937cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >The IPC buffers can be used to bootstrap communication between microapp and bluenet. </p>
 <p >However, when in the microapp coroutine context it is convenient if we can immediately yield towards the other context. For this we reserve a bit of space on the stack (apart from stack pointer etc.). </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a557dc1010be0d8eac124c38e3bc34670" name="a557dc1010be0d8eac124c38e3bc34670"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a557dc1010be0d8eac124c38e3bc34670">&#9670;&#160;</a></span>entry</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uintptr_t microapp_coroutine_args_t::entry</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acc8cb49fe3ea7452ffc657bb56f937cf" name="acc8cb49fe3ea7452ffc657bb56f937cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc8cb49fe3ea7452ffc657bb56f937cf">&#9670;&#160;</a></span>ioBuffers</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bluenet_io_buffers_t* microapp_coroutine_args_t::ioBuffers</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>source/include/microapp/<a class="el" href="cs__MicroappController_8h_source.html">cs_MicroappController.h</a></li>
 </ul>
 </div><!-- contents -->

@@ -120,20 +120,60 @@ Collaboration diagram for adc_config_t:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a0287db175bd9d1dd8b0c70b4137ec973"><td class="memItemLeft" align="right" valign="top"><a id="a0287db175bd9d1dd8b0c70b4137ec973" name="a0287db175bd9d1dd8b0c70b4137ec973"></a>
-adc_channel_id_t&#160;</td><td class="memItemRight" valign="bottom"><b>channelCount</b></td></tr>
+<tr class="memitem:a0287db175bd9d1dd8b0c70b4137ec973"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__config__t.html#a0287db175bd9d1dd8b0c70b4137ec973">channelCount</a></td></tr>
 <tr class="separator:a0287db175bd9d1dd8b0c70b4137ec973"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af895ef7c530d7f2c90654715c32bb877"><td class="memItemLeft" align="right" valign="top"><a id="af895ef7c530d7f2c90654715c32bb877" name="af895ef7c530d7f2c90654715c32bb877"></a>
-<a class="el" href="structadc__channel__config__t.html">adc_channel_config_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>channels</b> [CS_ADC_NUM_CHANNELS]</td></tr>
+<tr class="memitem:af895ef7c530d7f2c90654715c32bb877"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structadc__channel__config__t.html">adc_channel_config_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__config__t.html#af895ef7c530d7f2c90654715c32bb877">channels</a> [<a class="el" href="cs__Config_8h.html#a6b59a7de2956b2f655a029b61ee19194">CS_ADC_NUM_CHANNELS</a>]</td></tr>
 <tr class="separator:af895ef7c530d7f2c90654715c32bb877"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a032b1ab87a0e39b7024b7e243b06bd35"><td class="memItemLeft" align="right" valign="top"><a id="a032b1ab87a0e39b7024b7e243b06bd35" name="a032b1ab87a0e39b7024b7e243b06bd35"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>samplingIntervalUs</b></td></tr>
+<tr class="memitem:a032b1ab87a0e39b7024b7e243b06bd35"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__config__t.html#a032b1ab87a0e39b7024b7e243b06bd35">samplingIntervalUs</a></td></tr>
 <tr class="separator:a032b1ab87a0e39b7024b7e243b06bd35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Struct to configure the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a>. </p>
 <p >channelCount: The amount of channels to sample. channels: The channel configs. samplingIntervalUs: The sampling interval in μs (each interval, all channels are sampled once). </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a0287db175bd9d1dd8b0c70b4137ec973" name="a0287db175bd9d1dd8b0c70b4137ec973"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0287db175bd9d1dd8b0c70b4137ec973">&#9670;&#160;</a></span>channelCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> adc_config_t::channelCount</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af895ef7c530d7f2c90654715c32bb877" name="af895ef7c530d7f2c90654715c32bb877"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af895ef7c530d7f2c90654715c32bb877">&#9670;&#160;</a></span>channels</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structadc__channel__config__t.html">adc_channel_config_t</a> adc_config_t::channels[<a class="el" href="cs__Config_8h.html#a6b59a7de2956b2f655a029b61ee19194">CS_ADC_NUM_CHANNELS</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a032b1ab87a0e39b7024b7e243b06bd35" name="a032b1ab87a0e39b7024b7e243b06bd35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a032b1ab87a0e39b7024b7e243b06bd35">&#9670;&#160;</a></span>samplingIntervalUs</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t adc_config_t::samplingIntervalUs</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>source/include/structs/<a class="el" href="cs__PacketsInternal_8h_source.html">cs_PacketsInternal.h</a></li>
 </ul>
 </div><!-- contents -->

@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__Uicr_8h_source.html',''); initResi
   <div class="headertitle"><div class="title">cs_Uicr.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__Uicr_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Mar 17, 2022</span></div>
@@ -113,33 +113,42 @@ $(document).ready(function(){initNavTree('cs__Uicr_8h_source.html',''); initResi
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;protocol/cs_Typedefs.h&gt;</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;protocol/cs_UicrPacket.h&gt;</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Typedefs_8h.html">protocol/cs_Typedefs.h</a>&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;<a class="code" href="cs__UicrPacket_8h.html">protocol/cs_UicrPacket.h</a>&gt;</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;stdbool.h&gt;</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>uint32_t getHardwareBoard();</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="cs__Uicr_8h.html#ad7978986f1de31baa70f5d516a8b9b8b">   22</a></span>uint32_t <a class="code hl_function" href="cs__Uicr_8h.html#ad7978986f1de31baa70f5d516a8b9b8b">getHardwareBoard</a>();</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>cs_ret_code_t writeHardwareBoard();</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="cs__Uicr_8h.html#aef5cf850e9881dad8de5fdff94a305f0">   35</a></span><a class="code hl_typedef" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> <a class="code hl_function" href="cs__Uicr_8h.html#aef5cf850e9881dad8de5fdff94a305f0">writeHardwareBoard</a>();</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>cs_ret_code_t enableNfcPinsAsGpio();</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="cs__Uicr_8h.html#a6ae62a9d0af34f538994315e4844a59a">   46</a></span><a class="code hl_typedef" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> <a class="code hl_function" href="cs__Uicr_8h.html#a6ae62a9d0af34f538994315e4844a59a">enableNfcPinsAsGpio</a>();</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keywordtype">bool</span> canUseNfcPinsAsGpio();</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="cs__Uicr_8h.html#ae762bdd1ef4e3dfcf1ce0c8d971b8617">   51</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="cs__Uicr_8h.html#ae762bdd1ef4e3dfcf1ce0c8d971b8617">canUseNfcPinsAsGpio</a>();</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>cs_ret_code_t getUicr(<a class="code hl_struct" href="structcs__uicr__data__t.html">cs_uicr_data_t</a>* uicrData);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="cs__Uicr_8h.html#a9fb83d4e0430e818ca2595dda970d92b">   60</a></span><a class="code hl_typedef" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> <a class="code hl_function" href="cs__Uicr_8h.html#a9fb83d4e0430e818ca2595dda970d92b">getUicr</a>(<a class="code hl_struct" href="structcs__uicr__data__t.html">cs_uicr_data_t</a>* uicrData);</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>cs_ret_code_t setUicr(<span class="keyword">const</span> <a class="code hl_struct" href="structcs__uicr__data__t.html">cs_uicr_data_t</a>* uicrData, <span class="keywordtype">bool</span> overwrite);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="cs__Uicr_8h.html#a4abdc8348527ee1e5b54258145eee13d">   73</a></span><a class="code hl_typedef" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> <a class="code hl_function" href="cs__Uicr_8h.html#a4abdc8348527ee1e5b54258145eee13d">setUicr</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structcs__uicr__data__t.html">cs_uicr_data_t</a>* uicrData, <span class="keywordtype">bool</span> overwrite);</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#ifdef __cplusplus</span></div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>}</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="acs__Typedefs_8h_html"><div class="ttname"><a href="cs__Typedefs_8h.html">cs_Typedefs.h</a></div></div>
+<div class="ttc" id="acs__Typedefs_8h_html_ab09e5fe247ba3ab46e9e728c8499ecaf"><div class="ttname"><a href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a></div><div class="ttdeci">uint16_t cs_ret_code_t</div><div class="ttdef"><b>Definition:</b> cs_Typedefs.h:21</div></div>
+<div class="ttc" id="acs__UicrPacket_8h_html"><div class="ttname"><a href="cs__UicrPacket_8h.html">cs_UicrPacket.h</a></div></div>
+<div class="ttc" id="acs__Uicr_8h_html_a4abdc8348527ee1e5b54258145eee13d"><div class="ttname"><a href="cs__Uicr_8h.html#a4abdc8348527ee1e5b54258145eee13d">setUicr</a></div><div class="ttdeci">cs_ret_code_t setUicr(const cs_uicr_data_t *uicrData, bool overwrite)</div><div class="ttdoc">Write the UICR data to UICR.</div></div>
+<div class="ttc" id="acs__Uicr_8h_html_a6ae62a9d0af34f538994315e4844a59a"><div class="ttname"><a href="cs__Uicr_8h.html#a6ae62a9d0af34f538994315e4844a59a">enableNfcPinsAsGpio</a></div><div class="ttdeci">cs_ret_code_t enableNfcPinsAsGpio()</div><div class="ttdoc">Enable NFC pins to be used as GPIO.</div></div>
+<div class="ttc" id="acs__Uicr_8h_html_a9fb83d4e0430e818ca2595dda970d92b"><div class="ttname"><a href="cs__Uicr_8h.html#a9fb83d4e0430e818ca2595dda970d92b">getUicr</a></div><div class="ttdeci">cs_ret_code_t getUicr(cs_uicr_data_t *uicrData)</div><div class="ttdoc">Read the UICR data from UICR.</div></div>
+<div class="ttc" id="acs__Uicr_8h_html_ad7978986f1de31baa70f5d516a8b9b8b"><div class="ttname"><a href="cs__Uicr_8h.html#ad7978986f1de31baa70f5d516a8b9b8b">getHardwareBoard</a></div><div class="ttdeci">uint32_t getHardwareBoard()</div><div class="ttdoc">Get the hardware board from UICR, or the default board if none is set in UICR.</div></div>
+<div class="ttc" id="acs__Uicr_8h_html_ae762bdd1ef4e3dfcf1ce0c8d971b8617"><div class="ttname"><a href="cs__Uicr_8h.html#ae762bdd1ef4e3dfcf1ce0c8d971b8617">canUseNfcPinsAsGpio</a></div><div class="ttdeci">bool canUseNfcPinsAsGpio()</div><div class="ttdoc">Returns true when the NFC pins can be used as GPIO.</div></div>
+<div class="ttc" id="acs__Uicr_8h_html_aef5cf850e9881dad8de5fdff94a305f0"><div class="ttname"><a href="cs__Uicr_8h.html#aef5cf850e9881dad8de5fdff94a305f0">writeHardwareBoard</a></div><div class="ttdeci">cs_ret_code_t writeHardwareBoard()</div><div class="ttdoc">Write the default hardware board to UICR if none is written yet.</div></div>
 <div class="ttc" id="astructcs__uicr__data__t_html"><div class="ttname"><a href="structcs__uicr__data__t.html">cs_uicr_data_t</a></div><div class="ttdoc">Struct with all the Crownstone fields in UICR.</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:20</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><b>cs_Uicr.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><a class="el" href="cs__Uicr_8h.html">cs_Uicr.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

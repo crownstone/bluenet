@@ -8,7 +8,7 @@ var classStackBuffer =
     [ "deinit", "classStackBuffer.html#a3654a34e8cac39ad32f241197c5ed4ad", null ],
     [ "empty", "classStackBuffer.html#a627df5106cd678d0aa82d1b59e11d265", null ],
     [ "full", "classStackBuffer.html#a95817c5020fa8cfbf611bfa804a2488e", null ],
-    [ "getBuffer", "classStackBuffer.html#aa9e1f26f1852a67b82dc5f96cb042c72", null ],
+    [ "getBuffer", "classStackBuffer.html#acfc8f8f62100288c6a7484a99d118b83", null ],
     [ "getMaxByteSize", "classStackBuffer.html#a3c1f56d0a92bd7b0b80fed556c5fcbdc", null ],
     [ "getMaxByteSize", "classStackBuffer.html#ad43989fbd9756b5b90e3699ed5d9c020", null ],
     [ "getMaxSize", "classStackBuffer.html#ae05e212d952ab1748eef8bb90dc94408", null ],
@@ -17,5 +17,8 @@ var classStackBuffer =
     [ "pop", "classStackBuffer.html#aaa8e5237178b24063c4892077f1a178d", null ],
     [ "push", "classStackBuffer.html#ac5a56b2f7e1dc6c434cbce540dac3b05", null ],
     [ "release", "classStackBuffer.html#a9e6ca6d93f4fe679ae07c44f9f8dffc0", null ],
-    [ "size", "classStackBuffer.html#a4b187ecd200d5e2929f02048a49e5bb6", null ]
+    [ "size", "classStackBuffer.html#a4b187ecd200d5e2929f02048a49e5bb6", null ],
+    [ "_allocatedSelf", "classStackBuffer.html#af391275b52606119b7e334cd8fc15026", null ],
+    [ "_buffer", "classStackBuffer.html#a0065d27bd1be4d8f554645f17fc2a9be", null ],
+    [ "_capacity", "classStackBuffer.html#aa75b63f3b140a87e95543e060e9ec38a", null ]
 ];

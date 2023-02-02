@@ -101,6 +101,8 @@ $(document).ready(function(){initNavTree('classTimeOfDay.html',''); initResizabl
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classTimeOfDay-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">TimeOfDay Class Reference</div></div>
 </div><!--header-->
@@ -113,65 +115,484 @@ $(document).ready(function(){initNavTree('classTimeOfDay.html',''); initResizabl
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:ae91d8a559c7f809529d1329c44f99209"><td class="memItemLeft" align="right" valign="top"><a id="ae91d8a559c7f809529d1329c44f99209" name="ae91d8a559c7f809529d1329c44f99209"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>BaseTime</b> : uint8_t { <b>Midnight</b> = 0
-, <b>Sunrise</b> = 1
-, <b>Sunset</b> = 2
+<tr class="memitem:ae91d8a559c7f809529d1329c44f99209"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">BaseTime</a> : uint8_t { <a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209ac8c012313f10e2d0830f3fbc5afca619">Midnight</a> = 0
+, <a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209a4c88924788f419b562d50acfddc3a781">Sunrise</a> = 1
+, <a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209ad0e1dc9d061e72d496bd3757671edeea">Sunset</a> = 2
  }</td></tr>
 <tr class="separator:ae91d8a559c7f809529d1329c44f99209"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae1b4681bbac6bf33a6eb439818bed567"><td class="memItemLeft" align="right" valign="top"><a id="ae1b4681bbac6bf33a6eb439818bed567" name="ae1b4681bbac6bf33a6eb439818bed567"></a>
-typedef std::array&lt; uint8_t, 5 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>SerializedDataType</b></td></tr>
+<tr class="memitem:ae1b4681bbac6bf33a6eb439818bed567"><td class="memItemLeft" align="right" valign="top">typedef std::array&lt; uint8_t, 5 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#ae1b4681bbac6bf33a6eb439818bed567">SerializedDataType</a></td></tr>
 <tr class="separator:ae1b4681bbac6bf33a6eb439818bed567"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5c8eb3f729ca9e70f0394a641e7e1ea5"><td class="memItemLeft" align="right" valign="top"><a id="a5c8eb3f729ca9e70f0394a641e7e1ea5" name="a5c8eb3f729ca9e70f0394a641e7e1ea5"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>TimeOfDay</b> (BaseTime basetime, int32_t secondsSinceBase)</td></tr>
+<tr class="memitem:a5c8eb3f729ca9e70f0394a641e7e1ea5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a5c8eb3f729ca9e70f0394a641e7e1ea5">TimeOfDay</a> (<a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">BaseTime</a> basetime, int32_t secondsSinceBase)</td></tr>
 <tr class="separator:a5c8eb3f729ca9e70f0394a641e7e1ea5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7c4dc40bcc1a624704697f59f3cedab"><td class="memItemLeft" align="right" valign="top"><a id="aa7c4dc40bcc1a624704697f59f3cedab" name="aa7c4dc40bcc1a624704697f59f3cedab"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>TimeOfDay</b> (SerializedDataType rawData)</td></tr>
+<tr class="memitem:aa7c4dc40bcc1a624704697f59f3cedab"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#aa7c4dc40bcc1a624704697f59f3cedab">TimeOfDay</a> (<a class="el" href="classTimeOfDay.html#ae1b4681bbac6bf33a6eb439818bed567">SerializedDataType</a> rawData)</td></tr>
 <tr class="separator:aa7c4dc40bcc1a624704697f59f3cedab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abdba7d6b2a90e48137ff1afec14ca3f1"><td class="memItemLeft" align="right" valign="top"><a id="abdba7d6b2a90e48137ff1afec14ca3f1" name="abdba7d6b2a90e48137ff1afec14ca3f1"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>TimeOfDay</b> (uint32_t h, uint32_t m, uint32_t s)</td></tr>
+<tr class="memitem:abdba7d6b2a90e48137ff1afec14ca3f1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#abdba7d6b2a90e48137ff1afec14ca3f1">TimeOfDay</a> (uint32_t <a class="el" href="classTimeOfDay.html#a55c5c9299adf638a4a23a5363dc8981e">h</a>, uint32_t <a class="el" href="classTimeOfDay.html#a6a81f237ea3d0ad2581527dee2da7748">m</a>, uint32_t <a class="el" href="classTimeOfDay.html#aac0f999bb6a9152aa474296844c23fe7">s</a>)</td></tr>
 <tr class="separator:abdba7d6b2a90e48137ff1afec14ca3f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0cdd72bb67eb98e8cc1ea5242b6a4be6"><td class="memItemLeft" align="right" valign="top"><a id="a0cdd72bb67eb98e8cc1ea5242b6a4be6" name="a0cdd72bb67eb98e8cc1ea5242b6a4be6"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>TimeOfDay</b> (uint32_t secondsSinceMidnight)</td></tr>
+<tr class="memitem:a0cdd72bb67eb98e8cc1ea5242b6a4be6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a0cdd72bb67eb98e8cc1ea5242b6a4be6">TimeOfDay</a> (uint32_t secondsSinceMidnight)</td></tr>
 <tr class="separator:a0cdd72bb67eb98e8cc1ea5242b6a4be6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6144ee19863afb587ab32c1241efa806"><td class="memItemLeft" align="right" valign="top"><a id="a6144ee19863afb587ab32c1241efa806" name="a6144ee19863afb587ab32c1241efa806"></a>
-SerializedDataType&#160;</td><td class="memItemRight" valign="bottom"><b>serialize</b> () const</td></tr>
+<tr class="memitem:a6144ee19863afb587ab32c1241efa806"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTimeOfDay.html#ae1b4681bbac6bf33a6eb439818bed567">SerializedDataType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a6144ee19863afb587ab32c1241efa806">serialize</a> () const</td></tr>
 <tr class="separator:a6144ee19863afb587ab32c1241efa806"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad44734e3e59228ce3c69233968977b6"><td class="memItemLeft" align="right" valign="top"><a id="aad44734e3e59228ce3c69233968977b6" name="aad44734e3e59228ce3c69233968977b6"></a>
-<a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><b>convert</b> (BaseTime newBase)</td></tr>
+<tr class="memitem:aad44734e3e59228ce3c69233968977b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#aad44734e3e59228ce3c69233968977b6">convert</a> (<a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">BaseTime</a> newBase)</td></tr>
 <tr class="separator:aad44734e3e59228ce3c69233968977b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55c5c9299adf638a4a23a5363dc8981e"><td class="memItemLeft" align="right" valign="top"><a id="a55c5c9299adf638a4a23a5363dc8981e" name="a55c5c9299adf638a4a23a5363dc8981e"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>h</b> ()</td></tr>
+<tr class="memitem:a55c5c9299adf638a4a23a5363dc8981e"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a55c5c9299adf638a4a23a5363dc8981e">h</a> ()</td></tr>
 <tr class="separator:a55c5c9299adf638a4a23a5363dc8981e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a81f237ea3d0ad2581527dee2da7748"><td class="memItemLeft" align="right" valign="top"><a id="a6a81f237ea3d0ad2581527dee2da7748" name="a6a81f237ea3d0ad2581527dee2da7748"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>m</b> ()</td></tr>
+<tr class="memitem:a6a81f237ea3d0ad2581527dee2da7748"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a6a81f237ea3d0ad2581527dee2da7748">m</a> ()</td></tr>
 <tr class="separator:a6a81f237ea3d0ad2581527dee2da7748"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac0f999bb6a9152aa474296844c23fe7"><td class="memItemLeft" align="right" valign="top"><a id="aac0f999bb6a9152aa474296844c23fe7" name="aac0f999bb6a9152aa474296844c23fe7"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>s</b> ()</td></tr>
+<tr class="memitem:aac0f999bb6a9152aa474296844c23fe7"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#aac0f999bb6a9152aa474296844c23fe7">s</a> ()</td></tr>
 <tr class="separator:aac0f999bb6a9152aa474296844c23fe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78c8ea7a88de3f59b1d9d0067ac25552"><td class="memItemLeft" align="right" valign="top"><a id="a78c8ea7a88de3f59b1d9d0067ac25552" name="a78c8ea7a88de3f59b1d9d0067ac25552"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>operator uint32_t</b> ()</td></tr>
-<tr class="memdesc:a78c8ea7a88de3f59b1d9d0067ac25552"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit cast operators, returns seconds since midnight (enables built in relational operators). <br /></td></tr>
+<tr class="memitem:a78c8ea7a88de3f59b1d9d0067ac25552"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a78c8ea7a88de3f59b1d9d0067ac25552">operator uint32_t</a> ()</td></tr>
+<tr class="memdesc:a78c8ea7a88de3f59b1d9d0067ac25552"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit cast operators, returns seconds since midnight (enables built in relational operators).  <a href="classTimeOfDay.html#a78c8ea7a88de3f59b1d9d0067ac25552">More...</a><br /></td></tr>
 <tr class="separator:a78c8ea7a88de3f59b1d9d0067ac25552"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a65461015aef81a70657a2e21d433fa0b"><td class="memItemLeft" align="right" valign="top"><a id="a65461015aef81a70657a2e21d433fa0b" name="a65461015aef81a70657a2e21d433fa0b"></a>
-static <a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Midnight</b> ()</td></tr>
+<tr class="memitem:a65461015aef81a70657a2e21d433fa0b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a65461015aef81a70657a2e21d433fa0b">Midnight</a> ()</td></tr>
 <tr class="separator:a65461015aef81a70657a2e21d433fa0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa82e61f1425ff12044e43da3aa4a86a"><td class="memItemLeft" align="right" valign="top"><a id="aaa82e61f1425ff12044e43da3aa4a86a" name="aaa82e61f1425ff12044e43da3aa4a86a"></a>
-static <a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Sunrise</b> ()</td></tr>
+<tr class="memitem:aaa82e61f1425ff12044e43da3aa4a86a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#aaa82e61f1425ff12044e43da3aa4a86a">Sunrise</a> ()</td></tr>
 <tr class="separator:aaa82e61f1425ff12044e43da3aa4a86a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9191b7d55b5f64a9240b77b1aa7035ca"><td class="memItemLeft" align="right" valign="top"><a id="a9191b7d55b5f64a9240b77b1aa7035ca" name="a9191b7d55b5f64a9240b77b1aa7035ca"></a>
-static <a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Sunset</b> ()</td></tr>
+<tr class="memitem:a9191b7d55b5f64a9240b77b1aa7035ca"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a9191b7d55b5f64a9240b77b1aa7035ca">Sunset</a> ()</td></tr>
 <tr class="separator:a9191b7d55b5f64a9240b77b1aa7035ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a18ea90cc52c21225bb21dc9a8c2007cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a18ea90cc52c21225bb21dc9a8c2007cd">wrap</a> ()</td></tr>
+<tr class="separator:a18ea90cc52c21225bb21dc9a8c2007cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e6165b7fd4db2b324abe9d6565f3d6b"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a3e6165b7fd4db2b324abe9d6565f3d6b">baseTimeSinceMidnight</a> (<a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">BaseTime</a> b)</td></tr>
+<tr class="separator:a3e6165b7fd4db2b324abe9d6565f3d6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a04853ba16dd5505fd110e85a718c650e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">BaseTime</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#a04853ba16dd5505fd110e85a718c650e">base</a></td></tr>
+<tr class="separator:a04853ba16dd5505fd110e85a718c650e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe52e0167000e299902a1f66d05a9184"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeOfDay.html#afe52e0167000e299902a1f66d05a9184">secSinceBase</a></td></tr>
+<tr class="separator:afe52e0167000e299902a1f66d05a9184"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Author: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> Team Copyright: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> (<a href="https://crownstone.rocks">https://crownstone.rocks</a>) Date: Sep 24, 2019 License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed) </p>
 <p >Objects of this type represent a time of day. They are stored as time offset relative to one of several key events like midnight and sunrise. </p>
-</div><hr/>The documentation for this class was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="ae1b4681bbac6bf33a6eb439818bed567" name="ae1b4681bbac6bf33a6eb439818bed567"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1b4681bbac6bf33a6eb439818bed567">&#9670;&#160;</a></span>SerializedDataType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::array&lt;uint8_t, 5&gt; <a class="el" href="classTimeOfDay.html#ae1b4681bbac6bf33a6eb439818bed567">TimeOfDay::SerializedDataType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="ae91d8a559c7f809529d1329c44f99209" name="ae91d8a559c7f809529d1329c44f99209"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae91d8a559c7f809529d1329c44f99209">&#9670;&#160;</a></span>BaseTime</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">TimeOfDay::BaseTime</a> : uint8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ae91d8a559c7f809529d1329c44f99209ac8c012313f10e2d0830f3fbc5afca619" name="ae91d8a559c7f809529d1329c44f99209ac8c012313f10e2d0830f3fbc5afca619"></a>Midnight&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ae91d8a559c7f809529d1329c44f99209a4c88924788f419b562d50acfddc3a781" name="ae91d8a559c7f809529d1329c44f99209a4c88924788f419b562d50acfddc3a781"></a>Sunrise&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ae91d8a559c7f809529d1329c44f99209ad0e1dc9d061e72d496bd3757671edeea" name="ae91d8a559c7f809529d1329c44f99209ad0e1dc9d061e72d496bd3757671edeea"></a>Sunset&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a5c8eb3f729ca9e70f0394a641e7e1ea5" name="a5c8eb3f729ca9e70f0394a641e7e1ea5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c8eb3f729ca9e70f0394a641e7e1ea5">&#9670;&#160;</a></span>TimeOfDay() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html">TimeOfDay::TimeOfDay</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">BaseTime</a>&#160;</td>
+          <td class="paramname"><em>basetime</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>secondsSinceBase</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa7c4dc40bcc1a624704697f59f3cedab" name="aa7c4dc40bcc1a624704697f59f3cedab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7c4dc40bcc1a624704697f59f3cedab">&#9670;&#160;</a></span>TimeOfDay() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html">TimeOfDay::TimeOfDay</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTimeOfDay.html#ae1b4681bbac6bf33a6eb439818bed567">SerializedDataType</a>&#160;</td>
+          <td class="paramname"><em>rawData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abdba7d6b2a90e48137ff1afec14ca3f1" name="abdba7d6b2a90e48137ff1afec14ca3f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdba7d6b2a90e48137ff1afec14ca3f1">&#9670;&#160;</a></span>TimeOfDay() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html">TimeOfDay::TimeOfDay</a> </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>h</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>s</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0cdd72bb67eb98e8cc1ea5242b6a4be6" name="a0cdd72bb67eb98e8cc1ea5242b6a4be6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cdd72bb67eb98e8cc1ea5242b6a4be6">&#9670;&#160;</a></span>TimeOfDay() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html">TimeOfDay::TimeOfDay</a> </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>secondsSinceMidnight</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a3e6165b7fd4db2b324abe9d6565f3d6b" name="a3e6165b7fd4db2b324abe9d6565f3d6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e6165b7fd4db2b324abe9d6565f3d6b">&#9670;&#160;</a></span>baseTimeSinceMidnight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t TimeOfDay::baseTimeSinceMidnight </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">BaseTime</a>&#160;</td>
+          <td class="paramname"><em>b</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aad44734e3e59228ce3c69233968977b6" name="aad44734e3e59228ce3c69233968977b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad44734e3e59228ce3c69233968977b6">&#9670;&#160;</a></span>convert()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html">TimeOfDay</a> TimeOfDay::convert </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">BaseTime</a>&#160;</td>
+          <td class="paramname"><em>newBase</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a55c5c9299adf638a4a23a5363dc8981e" name="a55c5c9299adf638a4a23a5363dc8981e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55c5c9299adf638a4a23a5363dc8981e">&#9670;&#160;</a></span>h()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t TimeOfDay::h </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6a81f237ea3d0ad2581527dee2da7748" name="a6a81f237ea3d0ad2581527dee2da7748"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a81f237ea3d0ad2581527dee2da7748">&#9670;&#160;</a></span>m()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t TimeOfDay::m </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a65461015aef81a70657a2e21d433fa0b" name="a65461015aef81a70657a2e21d433fa0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65461015aef81a70657a2e21d433fa0b">&#9670;&#160;</a></span>Midnight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTimeOfDay.html">TimeOfDay</a> TimeOfDay::Midnight </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a78c8ea7a88de3f59b1d9d0067ac25552" name="a78c8ea7a88de3f59b1d9d0067ac25552"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78c8ea7a88de3f59b1d9d0067ac25552">&#9670;&#160;</a></span>operator uint32_t()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">TimeOfDay::operator uint32_t </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Implicit cast operators, returns seconds since midnight (enables built in relational operators). </p>
+
+</div>
+</div>
+<a id="aac0f999bb6a9152aa474296844c23fe7" name="aac0f999bb6a9152aa474296844c23fe7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac0f999bb6a9152aa474296844c23fe7">&#9670;&#160;</a></span>s()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t TimeOfDay::s </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6144ee19863afb587ab32c1241efa806" name="a6144ee19863afb587ab32c1241efa806"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6144ee19863afb587ab32c1241efa806">&#9670;&#160;</a></span>serialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html#ae1b4681bbac6bf33a6eb439818bed567">SerializedDataType</a> TimeOfDay::serialize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaa82e61f1425ff12044e43da3aa4a86a" name="aaa82e61f1425ff12044e43da3aa4a86a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa82e61f1425ff12044e43da3aa4a86a">&#9670;&#160;</a></span>Sunrise()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTimeOfDay.html">TimeOfDay</a> TimeOfDay::Sunrise </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9191b7d55b5f64a9240b77b1aa7035ca" name="a9191b7d55b5f64a9240b77b1aa7035ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9191b7d55b5f64a9240b77b1aa7035ca">&#9670;&#160;</a></span>Sunset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTimeOfDay.html">TimeOfDay</a> TimeOfDay::Sunset </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a18ea90cc52c21225bb21dc9a8c2007cd" name="a18ea90cc52c21225bb21dc9a8c2007cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18ea90cc52c21225bb21dc9a8c2007cd">&#9670;&#160;</a></span>wrap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TimeOfDay::wrap </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a04853ba16dd5505fd110e85a718c650e" name="a04853ba16dd5505fd110e85a718c650e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04853ba16dd5505fd110e85a718c650e">&#9670;&#160;</a></span>base</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html#ae91d8a559c7f809529d1329c44f99209">BaseTime</a> TimeOfDay::base</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afe52e0167000e299902a1f66d05a9184" name="afe52e0167000e299902a1f66d05a9184"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe52e0167000e299902a1f66d05a9184">&#9670;&#160;</a></span>secSinceBase</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t TimeOfDay::secSinceBase</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>source/include/time/<a class="el" href="cs__TimeOfDay_8h_source.html">cs_TimeOfDay.h</a></li>
 </ul>
 </div><!-- contents -->

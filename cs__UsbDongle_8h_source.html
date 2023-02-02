@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__UsbDongle_8h_source.html',''); ini
   <div class="headertitle"><div class="title">cs_UsbDongle.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__UsbDongle_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Jan 25, 2022</span></div>
@@ -109,29 +109,36 @@ $(document).ready(function(){initNavTree('cs__UsbDongle_8h_source.html',''); ini
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;cfg/cs_Boards.h&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;cfg/cs_DeviceTypes.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Boards_8h.html">cfg/cs_Boards.h</a>&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;<a class="code" href="cs__DeviceTypes_8h.html">cfg/cs_DeviceTypes.h</a>&gt;</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keywordtype">void</span> asUsbDongle(<a class="code hl_struct" href="structboards__config__t.html">boards_config_t</a>* config) {</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    config-&gt;pinRx            = 8;</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    config-&gt;pinTx            = 6;</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    config-&gt;<a class="code hl_variable" href="structboards__config__t.html#a17a55ef948d2854bd42db36454b7c477">flags</a>.enableUart = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    config-&gt;<a class="code hl_variable" href="structboards__config__t.html#ab610d00cffa3e905a1b614124b8ba373">deviceType</a>       = DEVICE_CROWNSTONE_USB;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="cs__UsbDongle_8h.html#ad514d415913bd37b23f2fbc263fc29eb">   13</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="cs__UsbDongle_8h.html#ad514d415913bd37b23f2fbc263fc29eb">asUsbDongle</a>(<a class="code hl_struct" href="structboards__config__t.html">boards_config_t</a>* config) {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    config-&gt;<a class="code hl_variable" href="structboards__config__t.html#afd5758fc52c380f931b68539766f5693">pinRx</a>            = 8;</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    config-&gt;<a class="code hl_variable" href="structboards__config__t.html#a9fa557e12063d472eed688e030fe998c">pinTx</a>            = 6;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    config-&gt;<a class="code hl_variable" href="structboards__config__t.html#a17a55ef948d2854bd42db36454b7c477">flags</a>.<a class="code hl_variable" href="structboards__config__t.html#a295a7008650936d046c7ba550cce6ba3">enableUart</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    config-&gt;<a class="code hl_variable" href="structboards__config__t.html#ab610d00cffa3e905a1b614124b8ba373">deviceType</a>       = <a class="code hl_define" href="cs__DeviceTypes_8h.html#a8bfab06b80bfb4b4a67ce79815572e6f">DEVICE_CROWNSTONE_USB</a>;</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    config-&gt;<a class="code hl_variable" href="structboards__config__t.html#a0bacc3ea9705ea972e7795f7296293ba">minTxPower</a>       = -40;</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    config-&gt;<a class="code hl_variable" href="structboards__config__t.html#a8e986dafff2ae3c150b17ebab4f522ea">scanWindowUs</a>     = config-&gt;<a class="code hl_variable" href="structboards__config__t.html#a44f8ea01d745ec24aca763adf8ad2e32">scanIntervalUs</a>;</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>}</div>
+<div class="ttc" id="acs__Boards_8h_html"><div class="ttname"><a href="cs__Boards_8h.html">cs_Boards.h</a></div></div>
+<div class="ttc" id="acs__DeviceTypes_8h_html"><div class="ttname"><a href="cs__DeviceTypes_8h.html">cs_DeviceTypes.h</a></div></div>
+<div class="ttc" id="acs__DeviceTypes_8h_html_a8bfab06b80bfb4b4a67ce79815572e6f"><div class="ttname"><a href="cs__DeviceTypes_8h.html#a8bfab06b80bfb4b4a67ce79815572e6f">DEVICE_CROWNSTONE_USB</a></div><div class="ttdeci">#define DEVICE_CROWNSTONE_USB</div><div class="ttdef"><b>Definition:</b> cs_DeviceTypes.h:27</div></div>
+<div class="ttc" id="acs__UsbDongle_8h_html_ad514d415913bd37b23f2fbc263fc29eb"><div class="ttname"><a href="cs__UsbDongle_8h.html#ad514d415913bd37b23f2fbc263fc29eb">asUsbDongle</a></div><div class="ttdeci">void asUsbDongle(boards_config_t *config)</div><div class="ttdef"><b>Definition:</b> cs_UsbDongle.h:13</div></div>
 <div class="ttc" id="astructboards__config__t_html"><div class="ttname"><a href="structboards__config__t.html">boards_config_t</a></div><div class="ttdoc">Board configuration.</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:169</div></div>
 <div class="ttc" id="astructboards__config__t_html_a0bacc3ea9705ea972e7795f7296293ba"><div class="ttname"><a href="structboards__config__t.html#a0bacc3ea9705ea972e7795f7296293ba">boards_config_t::minTxPower</a></div><div class="ttdeci">int8_t minTxPower</div><div class="ttdoc">The minimum radio transmission power to be used.</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:322</div></div>
 <div class="ttc" id="astructboards__config__t_html_a17a55ef948d2854bd42db36454b7c477"><div class="ttname"><a href="structboards__config__t.html#a17a55ef948d2854bd42db36454b7c477">boards_config_t::flags</a></div><div class="ttdeci">struct boards_config_t::@7 flags</div><div class="ttdoc">Flags about pin order, presence of components, etc.</div></div>
+<div class="ttc" id="astructboards__config__t_html_a295a7008650936d046c7ba550cce6ba3"><div class="ttname"><a href="structboards__config__t.html#a295a7008650936d046c7ba550cce6ba3">boards_config_t::enableUart</a></div><div class="ttdeci">bool enableUart</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:239</div></div>
 <div class="ttc" id="astructboards__config__t_html_a44f8ea01d745ec24aca763adf8ad2e32"><div class="ttname"><a href="structboards__config__t.html#a44f8ea01d745ec24aca763adf8ad2e32">boards_config_t::scanIntervalUs</a></div><div class="ttdeci">uint32_t scanIntervalUs</div><div class="ttdoc">Scan interval in μs.</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:341</div></div>
 <div class="ttc" id="astructboards__config__t_html_a8e986dafff2ae3c150b17ebab4f522ea"><div class="ttname"><a href="structboards__config__t.html#a8e986dafff2ae3c150b17ebab4f522ea">boards_config_t::scanWindowUs</a></div><div class="ttdeci">uint32_t scanWindowUs</div><div class="ttdoc">Scan window in μs.</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:349</div></div>
+<div class="ttc" id="astructboards__config__t_html_a9fa557e12063d472eed688e030fe998c"><div class="ttname"><a href="structboards__config__t.html#a9fa557e12063d472eed688e030fe998c">boards_config_t::pinTx</a></div><div class="ttdeci">uint8_t pinTx</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:216</div></div>
 <div class="ttc" id="astructboards__config__t_html_ab610d00cffa3e905a1b614124b8ba373"><div class="ttname"><a href="structboards__config__t.html#ab610d00cffa3e905a1b614124b8ba373">boards_config_t::deviceType</a></div><div class="ttdeci">uint8_t deviceType</div><div class="ttdoc">Device type, e.g.</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:272</div></div>
+<div class="ttc" id="astructboards__config__t_html_afd5758fc52c380f931b68539766f5693"><div class="ttname"><a href="structboards__config__t.html#afd5758fc52c380f931b68539766f5693">boards_config_t::pinRx</a></div><div class="ttdeci">uint8_t pinRx</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:213</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_337abcda26d724be7070df9dc61ba0e8.html">boards</a></li><li class="navelem"><b>cs_UsbDongle.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_337abcda26d724be7070df9dc61ba0e8.html">boards</a></li><li class="navelem"><a class="el" href="cs__UsbDongle_8h.html">cs_UsbDongle.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

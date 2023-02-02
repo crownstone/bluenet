@@ -99,18 +99,122 @@ $(document).ready(function(){initNavTree('classUartCommandHandler.html',''); ini
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="classUartCommandHandler-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">UartCommandHandler Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__UartCommandHandler_8h_source.html">cs_UartCommandHandler.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6e588b509d24e1cb699b790bc7e1e34f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a6e588b509d24e1cb699b790bc7e1e34f">handleCommand</a> (UartOpcodeRx opCode, <a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, EncryptionAccessLevel accessLevel, bool wasEncrypted, <a class="el" href="structcs__data__t.html">cs_data_t</a> resultBuffer)</td></tr>
+<tr class="memitem:a6e588b509d24e1cb699b790bc7e1e34f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a6e588b509d24e1cb699b790bc7e1e34f">handleCommand</a> (<a class="el" href="cs__UartOpcodes_8h.html#ace6e382b1155379f769fa4b482ccc8b3">UartOpcodeRx</a> opCode, <a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, bool wasEncrypted, <a class="el" href="structcs__data__t.html">cs_data_t</a> resultBuffer)</td></tr>
 <tr class="memdesc:a6e588b509d24e1cb699b790bc7e1e34f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle UART command.  <a href="classUartCommandHandler.html#a6e588b509d24e1cb699b790bc7e1e34f">More...</a><br /></td></tr>
 <tr class="separator:a6e588b509d24e1cb699b790bc7e1e34f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a96906730d7fd9548c807b84a62712619"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a96906730d7fd9548c807b84a62712619">getRequiredAccessLevel</a> (const <a class="el" href="cs__UartOpcodes_8h.html#ace6e382b1155379f769fa4b482ccc8b3">UartOpcodeRx</a> opCode)</td></tr>
+<tr class="separator:a96906730d7fd9548c807b84a62712619"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ce280c541e812da1c73cf9966b994be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a5ce280c541e812da1c73cf9966b994be">dispatchEventForCommand</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> type, <a class="el" href="structcs__data__t.html">cs_data_t</a> commandData)</td></tr>
+<tr class="memdesc:a5ce280c541e812da1c73cf9966b994be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatch event.  <a href="classUartCommandHandler.html#a5ce280c541e812da1c73cf9966b994be">More...</a><br /></td></tr>
+<tr class="separator:a5ce280c541e812da1c73cf9966b994be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b1dfcfb34baafd892d420de8074338f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a6b1dfcfb34baafd892d420de8074338f">handleCommandHello</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData)</td></tr>
+<tr class="separator:a6b1dfcfb34baafd892d420de8074338f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0da2eb7e7682933f1fb70b8e9f5db551"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a0da2eb7e7682933f1fb70b8e9f5db551">handleCommandSessionNonce</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData)</td></tr>
+<tr class="separator:a0da2eb7e7682933f1fb70b8e9f5db551"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94f9b98659063df3d7e13bf116fc6ee5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a94f9b98659063df3d7e13bf116fc6ee5">handleCommandHeartBeat</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, bool wasEncrypted)</td></tr>
+<tr class="separator:a94f9b98659063df3d7e13bf116fc6ee5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10e8be98e647b182066ba177f9b244dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a10e8be98e647b182066ba177f9b244dd">handleCommandStatus</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData)</td></tr>
+<tr class="separator:a10e8be98e647b182066ba177f9b244dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec3f93212644deca2a4c31106d334b40"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#aec3f93212644deca2a4c31106d334b40">handleCommandControl</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> source, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__data__t.html">cs_data_t</a> resultBuffer)</td></tr>
+<tr class="separator:aec3f93212644deca2a4c31106d334b40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4ed92b4c7fbfd3cd499698195780e19"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#ad4ed92b4c7fbfd3cd499698195780e19">handleCommandHubDataReply</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> source, const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="structcs__data__t.html">cs_data_t</a> resultBuffer)</td></tr>
+<tr class="separator:ad4ed92b4c7fbfd3cd499698195780e19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a998bb6916fb56a4da1995561ee3086ff"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a998bb6916fb56a4da1995561ee3086ff">handleCommandEnableAdvertising</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData)</td></tr>
+<tr class="separator:a998bb6916fb56a4da1995561ee3086ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c3e7177f5e0154e98a714123d93961e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a2c3e7177f5e0154e98a714123d93961e">handleCommandEnableMesh</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData)</td></tr>
+<tr class="separator:a2c3e7177f5e0154e98a714123d93961e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a050de09c178b2e34bd7aac4074ba53"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a6a050de09c178b2e34bd7aac4074ba53">handleCommandGetId</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData)</td></tr>
+<tr class="separator:a6a050de09c178b2e34bd7aac4074ba53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac52358c3dbd11c400afb468aa9958483"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#ac52358c3dbd11c400afb468aa9958483">handleCommandGetMacAddress</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData)</td></tr>
+<tr class="separator:ac52358c3dbd11c400afb468aa9958483"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83a5686cbb5e487c7dab9f5b8de6e71d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartCommandHandler.html#a83a5686cbb5e487c7dab9f5b8de6e71d">handleCommandInjectEvent</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> commandData)</td></tr>
+<tr class="separator:a83a5686cbb5e487c7dab9f5b8de6e71d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a5ce280c541e812da1c73cf9966b994be" name="a5ce280c541e812da1c73cf9966b994be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ce280c541e812da1c73cf9966b994be">&#9670;&#160;</a></span>dispatchEventForCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::dispatchEventForCommand </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dispatch event. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>Event type. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">commandData</td><td>Command data, which will be used as event data. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a96906730d7fd9548c807b84a62712619" name="a96906730d7fd9548c807b84a62712619"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96906730d7fd9548c807b84a62712619">&#9670;&#160;</a></span>getRequiredAccessLevel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> UartCommandHandler::getRequiredAccessLevel </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="cs__UartOpcodes_8h.html#ace6e382b1155379f769fa4b482ccc8b3">UartOpcodeRx</a>&#160;</td>
+          <td class="paramname"><em>opCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a6e588b509d24e1cb699b790bc7e1e34f" name="a6e588b509d24e1cb699b790bc7e1e34f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6e588b509d24e1cb699b790bc7e1e34f">&#9670;&#160;</a></span>handleCommand()</h2>
 
@@ -120,7 +224,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void UartCommandHandler::handleCommand </td>
           <td>(</td>
-          <td class="paramtype">UartOpcodeRx&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__UartOpcodes_8h.html#ace6e382b1155379f769fa4b482ccc8b3">UartOpcodeRx</a>&#160;</td>
           <td class="paramname"><em>opCode</em>, </td>
         </tr>
         <tr>
@@ -132,7 +236,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">EncryptionAccessLevel&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
           <td class="paramname"><em>accessLevel</em>, </td>
         </tr>
         <tr>
@@ -170,6 +274,346 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="aec3f93212644deca2a4c31106d334b40" name="aec3f93212644deca2a4c31106d334b40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec3f93212644deca2a4c31106d334b40">&#9670;&#160;</a></span>handleCommandControl()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandControl </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>resultBuffer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a998bb6916fb56a4da1995561ee3086ff" name="a998bb6916fb56a4da1995561ee3086ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a998bb6916fb56a4da1995561ee3086ff">&#9670;&#160;</a></span>handleCommandEnableAdvertising()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandEnableAdvertising </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2c3e7177f5e0154e98a714123d93961e" name="a2c3e7177f5e0154e98a714123d93961e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c3e7177f5e0154e98a714123d93961e">&#9670;&#160;</a></span>handleCommandEnableMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandEnableMesh </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6a050de09c178b2e34bd7aac4074ba53" name="a6a050de09c178b2e34bd7aac4074ba53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a050de09c178b2e34bd7aac4074ba53">&#9670;&#160;</a></span>handleCommandGetId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandGetId </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac52358c3dbd11c400afb468aa9958483" name="ac52358c3dbd11c400afb468aa9958483"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac52358c3dbd11c400afb468aa9958483">&#9670;&#160;</a></span>handleCommandGetMacAddress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandGetMacAddress </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a94f9b98659063df3d7e13bf116fc6ee5" name="a94f9b98659063df3d7e13bf116fc6ee5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94f9b98659063df3d7e13bf116fc6ee5">&#9670;&#160;</a></span>handleCommandHeartBeat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandHeartBeat </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>wasEncrypted</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6b1dfcfb34baafd892d420de8074338f" name="a6b1dfcfb34baafd892d420de8074338f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b1dfcfb34baafd892d420de8074338f">&#9670;&#160;</a></span>handleCommandHello()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandHello </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad4ed92b4c7fbfd3cd499698195780e19" name="ad4ed92b4c7fbfd3cd499698195780e19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4ed92b4c7fbfd3cd499698195780e19">&#9670;&#160;</a></span>handleCommandHubDataReply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandHubDataReply </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a>&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>resultBuffer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a83a5686cbb5e487c7dab9f5b8de6e71d" name="a83a5686cbb5e487c7dab9f5b8de6e71d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83a5686cbb5e487c7dab9f5b8de6e71d">&#9670;&#160;</a></span>handleCommandInjectEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandInjectEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0da2eb7e7682933f1fb70b8e9f5db551" name="a0da2eb7e7682933f1fb70b8e9f5db551"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0da2eb7e7682933f1fb70b8e9f5db551">&#9670;&#160;</a></span>handleCommandSessionNonce()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandSessionNonce </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a10e8be98e647b182066ba177f9b244dd" name="a10e8be98e647b182066ba177f9b244dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10e8be98e647b182066ba177f9b244dd">&#9670;&#160;</a></span>handleCommandStatus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartCommandHandler::handleCommandStatus </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>commandData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

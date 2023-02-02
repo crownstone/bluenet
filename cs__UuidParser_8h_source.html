@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__UuidParser_8h_source.html',''); in
   <div class="headertitle"><div class="title">cs_UuidParser.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__UuidParser_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: 18 Mar., 2019</span></div>
@@ -109,7 +109,7 @@ $(document).ready(function(){initNavTree('cs__UuidParser_8h_source.html',''); in
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#define CS_UUID_STR_LEN 36</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="cs__UuidParser_8h.html#a42871934f0bb2a1d9b47dc28d56f0fd5">   10</a></span><span class="preprocessor">#define CS_UUID_STR_LEN 36</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceCsUtils.html">CsUtils</a> {</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
@@ -131,7 +131,7 @@ $(document).ready(function(){initNavTree('cs__UuidParser_8h_source.html',''); in
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>}</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="namespaceCsUtils.html#a6408cbb99ed1530a9f0d56987cdc04a5">   40</a></span><span class="keyword">constexpr</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceCsUtils.html#a6408cbb99ed1530a9f0d56987cdc04a5">parseUuid</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* str, <span class="keywordtype">int</span> stringSize, uint8_t* array, <span class="keywordtype">int</span> arraySize) {</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordflow">if</span> (stringSize != CS_UUID_STR_LEN || arraySize &lt; 16) {</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordflow">if</span> (stringSize != <a class="code hl_define" href="cs__UuidParser_8h.html#a42871934f0bb2a1d9b47dc28d56f0fd5">CS_UUID_STR_LEN</a> || arraySize &lt; 16) {</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    }</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="comment">//   0        8+1  12+2 16+3 20+4</span></div>
@@ -157,6 +157,7 @@ $(document).ready(function(){initNavTree('cs__UuidParser_8h_source.html',''); in
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>}</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>}  <span class="comment">// namespace CsUtils</span></div>
+<div class="ttc" id="acs__UuidParser_8h_html_a42871934f0bb2a1d9b47dc28d56f0fd5"><div class="ttname"><a href="cs__UuidParser_8h.html#a42871934f0bb2a1d9b47dc28d56f0fd5">CS_UUID_STR_LEN</a></div><div class="ttdeci">#define CS_UUID_STR_LEN</div><div class="ttdef"><b>Definition:</b> cs_UuidParser.h:10</div></div>
 <div class="ttc" id="anamespaceCsUtils_html"><div class="ttname"><a href="namespaceCsUtils.html">CsUtils</a></div><div class="ttdoc">Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 29,...</div></div>
 <div class="ttc" id="anamespaceCsUtils_html_a5c20c5404fa39fe95022ca7843d951be"><div class="ttname"><a href="namespaceCsUtils.html#a5c20c5404fa39fe95022ca7843d951be">CsUtils::parseHexChar</a></div><div class="ttdeci">constexpr int parseHexChar(const char chr)</div><div class="ttdoc">Parses a hex char to an integer.</div><div class="ttdef"><b>Definition:</b> cs_UuidParser.h:17</div></div>
 <div class="ttc" id="anamespaceCsUtils_html_a6408cbb99ed1530a9f0d56987cdc04a5"><div class="ttname"><a href="namespaceCsUtils.html#a6408cbb99ed1530a9f0d56987cdc04a5">CsUtils::parseUuid</a></div><div class="ttdeci">constexpr bool parseUuid(const char *str, int stringSize, uint8_t *array, int arraySize)</div><div class="ttdoc">Parse UUID string (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX) to a byte array.</div><div class="ttdef"><b>Definition:</b> cs_UuidParser.h:40</div></div>
@@ -166,7 +167,7 @@ $(document).ready(function(){initNavTree('cs__UuidParser_8h_source.html',''); in
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_e8d03031b1e92aeb84120cb3e87677a9.html">util</a></li><li class="navelem"><b>cs_UuidParser.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_e8d03031b1e92aeb84120cb3e87677a9.html">util</a></li><li class="navelem"><a class="el" href="cs__UuidParser_8h.html">cs_UuidParser.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

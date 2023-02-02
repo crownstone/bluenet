@@ -1,5 +1,10 @@
 <map id="BehaviourHandler" name="BehaviourHandler">
-<area shape="rect" id="node1" title=" " alt="" coords="55,79,194,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
-<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="72,416,210,441"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="28,225,139,251"/>
+<area shape="rect" id="node4" href="$classPresenceHandler.html" title="Keeps up all the locations each profile is present in." alt="" coords="170,328,302,353"/>
+<area shape="rect" id="node8" href="$classBehaviourStore.html" title="Keeps track of the behaviours that are active on this crownstone." alt="" coords="22,328,145,353"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="175,225,272,251"/>
+<area shape="rect" id="node5" href="$classStore.html" title=" " alt="" coords="374,211,556,265"/>
+<area shape="rect" id="node6" href="$structPresenceHandler_1_1PresenceRecord.html" title=" " alt="" coords="366,108,564,148"/>
+<area shape="rect" id="node7" href="$structPresenceHandler_1_1ProfileLocation.html" title=" " alt="" coords="374,5,556,45"/>
 </map>

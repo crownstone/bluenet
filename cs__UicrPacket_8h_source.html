@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__UicrPacket_8h_source.html',''); in
   <div class="headertitle"><div class="title">cs_UicrPacket.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__UicrPacket_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Feb 21, 2022</span></div>
@@ -116,49 +116,61 @@ $(document).ready(function(){initNavTree('cs__UicrPacket_8h_source.html',''); in
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html">   20</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span>__attribute__((packed)) {</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    uint32_t board;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a3a906c5e14deb1e5f93ef15971f9ba0d">   21</a></span>    uint32_t <a class="code hl_variable" href="structcs__uicr__data__t.html#a3a906c5e14deb1e5f93ef15971f9ba0d">board</a>;</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">union </span>__attribute__((packed)) {</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        <span class="keyword">struct </span>__attribute__((packed)) {</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>            uint8_t productType;</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>            uint8_t region;</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>            uint8_t productFamily;</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>            uint8_t reserved;</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        } fields;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        uint32_t asInt;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    } productRegionFamily;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a7b8ea808bedecc0518ecb926ef57759c">   25</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#a7b8ea808bedecc0518ecb926ef57759c">productType</a>;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a6eca7ea3afcd2c191545308127c87c9b">   26</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#a6eca7ea3afcd2c191545308127c87c9b">region</a>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a0d28a8de65a0b16312c41e4de09a7ef8">   27</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#a0d28a8de65a0b16312c41e4de09a7ef8">productFamily</a>;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a2832f96cb4c2eb0acda599a6354b661f">   28</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#a2832f96cb4c2eb0acda599a6354b661f">reserved</a>;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a50bd64794c445b8ed67e4f69f9e7f1a3">   29</a></span>        } fields;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#acec0d443588d68ec3f60e76c5bf9ad3a">   30</a></span>        uint32_t <a class="code hl_variable" href="structcs__uicr__data__t.html#acec0d443588d68ec3f60e76c5bf9ad3a">asInt</a>;</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#aa2a7798e0a465319c5a7dd03276978db">   31</a></span>    } productRegionFamily;</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">union </span>__attribute__((packed)) {</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="keyword">struct </span>__attribute__((packed)) {</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>            uint8_t patch;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>            uint8_t minor;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>            uint8_t major;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a980bb8aa9bc4b3b75c46832420dfc0e9">   35</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#a980bb8aa9bc4b3b75c46832420dfc0e9">patch</a>;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#adfc8134fbd72f6d88652ada3121c1bab">   36</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#adfc8134fbd72f6d88652ada3121c1bab">minor</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a106aa9285b15e448bce0d8e58e2d9510">   37</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#a106aa9285b15e448bce0d8e58e2d9510">major</a>;</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>            uint8_t reserved;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        } fields;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a1593d6f8a502817f02467539c87ce5e4">   39</a></span>        } fields;</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        uint32_t asInt;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    } majorMinorPatch;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#aec98ed7c91c7d2fe80950e447b68d13a">   41</a></span>    } majorMinorPatch;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">union </span>__attribute__((packed)) {</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keyword">struct </span>__attribute__((packed)) {</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            uint8_t housing;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            uint8_t week;  <span class="comment">// week number</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            uint8_t year;  <span class="comment">// last 2 digits of the year</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a7d2e2b080a8d7a8657e837afd76ba03e">   45</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#a7d2e2b080a8d7a8657e837afd76ba03e">housing</a>;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#ad6a17020880ece29f34829abd233e6ed">   46</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#ad6a17020880ece29f34829abd233e6ed">week</a>;  <span class="comment">// week number</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#a98740e86e0233fa28925876415f5ef16">   47</a></span>            uint8_t <a class="code hl_variable" href="structcs__uicr__data__t.html#a98740e86e0233fa28925876415f5ef16">year</a>;  <span class="comment">// last 2 digits of the year</span></div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>            uint8_t reserved;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        } fields;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#abedcde2ef0aaef804324e77ea5d78bc5">   49</a></span>        } fields;</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        uint32_t asInt;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    } productionDateHousing;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="structcs__uicr__data__t.html#acd33a6d48eb074c4e76863a8c6ceb735">   51</a></span>    } productionDateHousing;</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>} <a class="code hl_struct" href="structcs__uicr__data__t.html">cs_uicr_data_t</a>;</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#ifdef __cplusplus</span></div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="astructcs__uicr__data__t_html"><div class="ttname"><a href="structcs__uicr__data__t.html">cs_uicr_data_t</a></div><div class="ttdoc">Struct with all the Crownstone fields in UICR.</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:20</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_a0d28a8de65a0b16312c41e4de09a7ef8"><div class="ttname"><a href="structcs__uicr__data__t.html#a0d28a8de65a0b16312c41e4de09a7ef8">cs_uicr_data_t::productFamily</a></div><div class="ttdeci">uint8_t productFamily</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:27</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_a106aa9285b15e448bce0d8e58e2d9510"><div class="ttname"><a href="structcs__uicr__data__t.html#a106aa9285b15e448bce0d8e58e2d9510">cs_uicr_data_t::major</a></div><div class="ttdeci">uint8_t major</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:37</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_a2832f96cb4c2eb0acda599a6354b661f"><div class="ttname"><a href="structcs__uicr__data__t.html#a2832f96cb4c2eb0acda599a6354b661f">cs_uicr_data_t::reserved</a></div><div class="ttdeci">uint8_t reserved</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:28</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_a3a906c5e14deb1e5f93ef15971f9ba0d"><div class="ttname"><a href="structcs__uicr__data__t.html#a3a906c5e14deb1e5f93ef15971f9ba0d">cs_uicr_data_t::board</a></div><div class="ttdeci">uint32_t board</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:21</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_a6eca7ea3afcd2c191545308127c87c9b"><div class="ttname"><a href="structcs__uicr__data__t.html#a6eca7ea3afcd2c191545308127c87c9b">cs_uicr_data_t::region</a></div><div class="ttdeci">uint8_t region</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:26</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_a7b8ea808bedecc0518ecb926ef57759c"><div class="ttname"><a href="structcs__uicr__data__t.html#a7b8ea808bedecc0518ecb926ef57759c">cs_uicr_data_t::productType</a></div><div class="ttdeci">uint8_t productType</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:25</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_a7d2e2b080a8d7a8657e837afd76ba03e"><div class="ttname"><a href="structcs__uicr__data__t.html#a7d2e2b080a8d7a8657e837afd76ba03e">cs_uicr_data_t::housing</a></div><div class="ttdeci">uint8_t housing</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:45</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_a980bb8aa9bc4b3b75c46832420dfc0e9"><div class="ttname"><a href="structcs__uicr__data__t.html#a980bb8aa9bc4b3b75c46832420dfc0e9">cs_uicr_data_t::patch</a></div><div class="ttdeci">uint8_t patch</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:35</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_a98740e86e0233fa28925876415f5ef16"><div class="ttname"><a href="structcs__uicr__data__t.html#a98740e86e0233fa28925876415f5ef16">cs_uicr_data_t::year</a></div><div class="ttdeci">uint8_t year</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:47</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_acec0d443588d68ec3f60e76c5bf9ad3a"><div class="ttname"><a href="structcs__uicr__data__t.html#acec0d443588d68ec3f60e76c5bf9ad3a">cs_uicr_data_t::asInt</a></div><div class="ttdeci">uint32_t asInt</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:30</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_ad6a17020880ece29f34829abd233e6ed"><div class="ttname"><a href="structcs__uicr__data__t.html#ad6a17020880ece29f34829abd233e6ed">cs_uicr_data_t::week</a></div><div class="ttdeci">uint8_t week</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:46</div></div>
+<div class="ttc" id="astructcs__uicr__data__t_html_adfc8134fbd72f6d88652ada3121c1bab"><div class="ttname"><a href="structcs__uicr__data__t.html#adfc8134fbd72f6d88652ada3121c1bab">cs_uicr_data_t::minor</a></div><div class="ttdeci">uint8_t minor</div><div class="ttdef"><b>Definition:</b> cs_UicrPacket.h:36</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b336e50c30dde46b9972cb7df7cdb246.html">protocol</a></li><li class="navelem"><b>cs_UicrPacket.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b336e50c30dde46b9972cb7df7cdb246.html">protocol</a></li><li class="navelem"><a class="el" href="cs__UicrPacket_8h.html">cs_UicrPacket.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

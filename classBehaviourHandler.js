@@ -1,10 +1,30 @@
 var classBehaviourHandler =
 [
+    [ "~BehaviourHandler", "classBehaviourHandler.html#a59535ee1ba6f6252cf0a58c37d933716", null ],
+    [ "computeIntendedState", "classBehaviourHandler.html#ac07603a4d8003988ae9eb7ffb31a1dc8", null ],
     [ "getValue", "classBehaviourHandler.html#a64be07171dc9255ebec2bf9db47e8211", null ],
     [ "handleEvent", "classBehaviourHandler.html#a6caf54df848964cd2cb32e3256c12023", null ],
+    [ "handleGetBehaviourDebug", "classBehaviourHandler.html#aa5721c37696f3bb08c951dce271824da", null ],
     [ "init", "classBehaviourHandler.html#aced1112dc2134fbfb675f3b1507ccb3a", null ],
+    [ "onBehaviourSettingsChange", "classBehaviourHandler.html#a2146a7c40b9efe81e5684df65b830002", null ],
+    [ "onBehaviourSettingsIncomingSyncRequest", "classBehaviourHandler.html#aa7df3b8e5ed5d4f506287960584e5830", null ],
+    [ "onBehaviourSettingsMeshMsg", "classBehaviourHandler.html#aba600b98670b3a1108f4b68d3c66e35d", null ],
+    [ "onBehaviourSettingsOutgoingSyncRequest", "classBehaviourHandler.html#a2c2b99a10d94cd769fa9d36e6a00e50a", null ],
+    [ "onMeshSyncFailed", "classBehaviourHandler.html#a70427374b9a6ae4d28a180bd3a8de2eb", null ],
     [ "requiresAbsence", "classBehaviourHandler.html#a463664a1cde0ef30ce07e84feb51128d", null ],
     [ "requiresPresence", "classBehaviourHandler.html#a71550d790066ec2c37e7c35a95bc99da", null ],
+    [ "resolveSwitchBehaviour", "classBehaviourHandler.html#af36868a7d33d85884246cf9c7b16e139", null ],
+    [ "tryFinalizeBehaviourSettingsSync", "classBehaviourHandler.html#a4cc3c73d3fb04ab6ea9dc2d89667282c", null ],
     [ "update", "classBehaviourHandler.html#aa254e9f699799ccc0bd08c2395bdcb30", null ],
-    [ "validateBehaviour", "classBehaviourHandler.html#a0c4dbabec8164c0c0e505c91b3400cd2", null ]
+    [ "validateBehaviour", "classBehaviourHandler.html#a0c4dbabec8164c0c0e505c91b3400cd2", null ],
+    [ "validateSwitchBehaviour", "classBehaviourHandler.html#aca0e8ea37c279f2be848db82f59b23dc", null ],
+    [ "validateTwilightBehaviour", "classBehaviourHandler.html#a021a37f71d30da6de717b06afbb6af8e", null ],
+    [ "TestAccess< BehaviourHandler >", "classBehaviourHandler.html#a42106421729665eea32ec739f0c2a336", null ],
+    [ "_behaviourSettingsSynced", "classBehaviourHandler.html#abdf137fb4efa1ff18ba0bd2250cee385", null ],
+    [ "_behaviourStore", "classBehaviourHandler.html#afa178155719f148ed97b4900fdb3b427", null ],
+    [ "_isActive", "classBehaviourHandler.html#afa0c0c1b3c0743206e30c336e695e199", null ],
+    [ "_presenceHandler", "classBehaviourHandler.html#aeeedccfe7f4012eef4a675d2285a3a52", null ],
+    [ "_receivedBehaviourSettings", "classBehaviourHandler.html#aef351b3c04574fd2cbc2bfeb3501fda1", null ],
+    [ "currentIntendedState", "classBehaviourHandler.html#a2486faeaeb5a1c22553795163ea76f5c", null ],
+    [ "previousIntendedState", "classBehaviourHandler.html#a689196b2a74873931948f6d8ec19ec7b", null ]
 ];

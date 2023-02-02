@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__EventDispatcher_8h_source.html',''
   <div class="headertitle"><div class="title">cs_EventDispatcher.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__EventDispatcher_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: May 6, 2015</span></div>
@@ -108,28 +108,28 @@ $(document).ready(function(){initNavTree('cs__EventDispatcher_8h_source.html',''
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;events/cs_Event.h&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;events/cs_EventListener.h&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Event_8h.html">events/cs_Event.h</a>&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__EventListener_8h.html">events/cs_EventListener.h</a>&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#define MAX_EVENT_LISTENERS 48</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="cs__EventDispatcher_8h.html#a71dfcf5f1bf27618d48e40888a633b1a">   12</a></span><span class="preprocessor">#define MAX_EVENT_LISTENERS 48</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="classEventDispatcher.html">   17</a></span><span class="keyword">class </span><a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a> {</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a>();</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classEventDispatcher.html#aec174a9e25796e5727e59f5452817cda">   20</a></span>    <a class="code hl_function" href="classEventDispatcher.html#aec174a9e25796e5727e59f5452817cda">EventDispatcher</a>();</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <a class="code hl_class" href="classEventListener.html">EventListener</a>* _listeners[MAX_EVENT_LISTENERS] = {};</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classEventDispatcher.html#a4c155de9622d59584fd30fb9eb99c6e5">   23</a></span>    <a class="code hl_class" href="classEventListener.html">EventListener</a>* <a class="code hl_variable" href="classEventDispatcher.html#a4c155de9622d59584fd30fb9eb99c6e5">_listeners</a>[<a class="code hl_define" href="cs__EventDispatcher_8h.html#a71dfcf5f1bf27618d48e40888a633b1a">MAX_EVENT_LISTENERS</a>] = {};</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    uint16_t _listenerCount;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classEventDispatcher.html#a3c5f2bc3bd3642986d735d3eef4231e2">   26</a></span>    uint16_t <a class="code hl_variable" href="classEventDispatcher.html#a3c5f2bc3bd3642986d735d3eef4231e2">_listenerCount</a>;</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keyword">static</span> <a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a>&amp; getInstance() {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="classEventDispatcher.html#ace9c6478fb5b5b0d86d215a37925cdba">   29</a></span>    <span class="keyword">static</span> <a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a>&amp; <a class="code hl_function" href="classEventDispatcher.html#ace9c6478fb5b5b0d86d215a37925cdba">getInstance</a>() {</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="keyword">static</span> <a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a> instance;</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="keywordflow">return</span> instance;</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    }</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a>(<a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a> <span class="keyword">const</span>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keywordtype">void</span> operator=(<a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a> <span class="keyword">const</span>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="classEventDispatcher.html#a1f168397d7e401a181bfc47f7be2801b">   34</a></span>    <a class="code hl_function" href="classEventDispatcher.html#a1f168397d7e401a181bfc47f7be2801b">EventDispatcher</a>(<a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a> <span class="keyword">const</span>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classEventDispatcher.html#ad7f7831c618297be60c0475cb6f68aad">   35</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classEventDispatcher.html#ad7f7831c618297be60c0475cb6f68aad">operator=</a>(<a class="code hl_class" href="classEventDispatcher.html">EventDispatcher</a> <span class="keyword">const</span>&amp;) = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classEventDispatcher.html#aa9b87270250c49f31d4c9d0b092780a5">   38</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classEventDispatcher.html#aa9b87270250c49f31d4c9d0b092780a5">addListener</a>(<a class="code hl_class" href="classEventListener.html">EventListener</a>* listener);</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
@@ -138,17 +138,26 @@ $(document).ready(function(){initNavTree('cs__EventDispatcher_8h_source.html',''
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classEventDispatcher.html#a74b53d85f9a845e717c45c721be48014">   44</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classEventDispatcher.html#a74b53d85f9a845e717c45c721be48014">dispatch</a>(<a class="code hl_class" href="classevent__t.html">event_t</a>&amp; event);</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>};</div>
 <div class="ttc" id="aclassEventDispatcher_html"><div class="ttname"><a href="classEventDispatcher.html">EventDispatcher</a></div><div class="ttdoc">Event dispatcher.</div><div class="ttdef"><b>Definition:</b> cs_EventDispatcher.h:17</div></div>
+<div class="ttc" id="aclassEventDispatcher_html_a1f168397d7e401a181bfc47f7be2801b"><div class="ttname"><a href="classEventDispatcher.html#a1f168397d7e401a181bfc47f7be2801b">EventDispatcher::EventDispatcher</a></div><div class="ttdeci">EventDispatcher(EventDispatcher const &amp;)=delete</div></div>
+<div class="ttc" id="aclassEventDispatcher_html_a3c5f2bc3bd3642986d735d3eef4231e2"><div class="ttname"><a href="classEventDispatcher.html#a3c5f2bc3bd3642986d735d3eef4231e2">EventDispatcher::_listenerCount</a></div><div class="ttdeci">uint16_t _listenerCount</div><div class="ttdoc">Count of added listeners.</div><div class="ttdef"><b>Definition:</b> cs_EventDispatcher.h:26</div></div>
+<div class="ttc" id="aclassEventDispatcher_html_a4c155de9622d59584fd30fb9eb99c6e5"><div class="ttname"><a href="classEventDispatcher.html#a4c155de9622d59584fd30fb9eb99c6e5">EventDispatcher::_listeners</a></div><div class="ttdeci">EventListener * _listeners[MAX_EVENT_LISTENERS]</div><div class="ttdoc">Array of listeners.</div><div class="ttdef"><b>Definition:</b> cs_EventDispatcher.h:23</div></div>
 <div class="ttc" id="aclassEventDispatcher_html_a5dd4c72202e2b3d9e43bf402528415a5"><div class="ttname"><a href="classEventDispatcher.html#a5dd4c72202e2b3d9e43bf402528415a5">EventDispatcher::removeListener</a></div><div class="ttdeci">void removeListener(EventListener *listener)</div><div class="ttdoc">Nulls all elements in _listeners equal to listener.</div></div>
 <div class="ttc" id="aclassEventDispatcher_html_a74b53d85f9a845e717c45c721be48014"><div class="ttname"><a href="classEventDispatcher.html#a74b53d85f9a845e717c45c721be48014">EventDispatcher::dispatch</a></div><div class="ttdeci">void dispatch(event_t &amp;event)</div><div class="ttdoc">Dispatch an event to all registered (non-null) listeners.</div></div>
 <div class="ttc" id="aclassEventDispatcher_html_aa9b87270250c49f31d4c9d0b092780a5"><div class="ttname"><a href="classEventDispatcher.html#aa9b87270250c49f31d4c9d0b092780a5">EventDispatcher::addListener</a></div><div class="ttdeci">bool addListener(EventListener *listener)</div><div class="ttdoc">Add a listener.</div></div>
+<div class="ttc" id="aclassEventDispatcher_html_ace9c6478fb5b5b0d86d215a37925cdba"><div class="ttname"><a href="classEventDispatcher.html#ace9c6478fb5b5b0d86d215a37925cdba">EventDispatcher::getInstance</a></div><div class="ttdeci">static EventDispatcher &amp; getInstance()</div><div class="ttdef"><b>Definition:</b> cs_EventDispatcher.h:29</div></div>
+<div class="ttc" id="aclassEventDispatcher_html_ad7f7831c618297be60c0475cb6f68aad"><div class="ttname"><a href="classEventDispatcher.html#ad7f7831c618297be60c0475cb6f68aad">EventDispatcher::operator=</a></div><div class="ttdeci">void operator=(EventDispatcher const &amp;)=delete</div></div>
+<div class="ttc" id="aclassEventDispatcher_html_aec174a9e25796e5727e59f5452817cda"><div class="ttname"><a href="classEventDispatcher.html#aec174a9e25796e5727e59f5452817cda">EventDispatcher::EventDispatcher</a></div><div class="ttdeci">EventDispatcher()</div></div>
 <div class="ttc" id="aclassEventListener_html"><div class="ttname"><a href="classEventListener.html">EventListener</a></div><div class="ttdoc">Event listener.</div><div class="ttdef"><b>Definition:</b> cs_EventListener.h:17</div></div>
 <div class="ttc" id="aclassevent__t_html"><div class="ttname"><a href="classevent__t.html">event_t</a></div><div class="ttdoc">Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 9,...</div><div class="ttdef"><b>Definition:</b> cs_Event.h:26</div></div>
+<div class="ttc" id="acs__EventDispatcher_8h_html_a71dfcf5f1bf27618d48e40888a633b1a"><div class="ttname"><a href="cs__EventDispatcher_8h.html#a71dfcf5f1bf27618d48e40888a633b1a">MAX_EVENT_LISTENERS</a></div><div class="ttdeci">#define MAX_EVENT_LISTENERS</div><div class="ttdef"><b>Definition:</b> cs_EventDispatcher.h:12</div></div>
+<div class="ttc" id="acs__EventListener_8h_html"><div class="ttname"><a href="cs__EventListener_8h.html">cs_EventListener.h</a></div></div>
+<div class="ttc" id="acs__Event_8h_html"><div class="ttname"><a href="cs__Event_8h.html">cs_Event.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_9e2d265e15a9f1363267da088ab8d529.html">events</a></li><li class="navelem"><b>cs_EventDispatcher.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_9e2d265e15a9f1363267da088ab8d529.html">events</a></li><li class="navelem"><a class="el" href="cs__EventDispatcher_8h.html">cs_EventDispatcher.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

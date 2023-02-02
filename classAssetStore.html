@@ -100,10 +100,15 @@ $(document).ready(function(){initNavTree('classAssetStore.html',''); initResizab
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classAssetStore-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">AssetStore Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__AssetStore_8h_source.html">cs_AssetStore.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for AssetStore:</div>
 <div class="dyncontent">
@@ -119,15 +124,22 @@ Collaboration diagram for AssetStore:</div>
 <div class="dyncontent">
 <div class="center"><img src="classAssetStore__coll__graph.png" border="0" usemap="#aAssetStore_coll__map" alt="Collaboration graph"/></div>
 <map name="aAssetStore_coll__map" id="aAssetStore_coll__map">
-<area shape="rect" title=" " alt="" coords="79,79,171,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
-<area shape="rect" href="classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
+<area shape="rect" title=" " alt="" coords="245,313,337,339"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,189,116,214"/>
+<area shape="rect" href="classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,189,237,214"/>
+<area shape="rect" href="classStore.html" title=" " alt="" coords="339,181,497,221"/>
+<area shape="rect" href="structasset__record__t.html" title=" " alt="" coords="359,93,477,119"/>
+<area shape="rect" href="structasset__id__t.html" title=" " alt="" coords="303,5,391,31"/>
+<area shape="rect" href="structrssi__and__channel__t.html" title=" " alt="" coords="415,5,562,31"/>
+<area shape="rect" href="classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick&#45;event or tick count and execute..." alt="" coords="521,189,606,214"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a716edc4d9f0ce82c5a84cb5135e1dbfb"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a716edc4d9f0ce82c5a84cb5135e1dbfb">init</a> () override</td></tr>
+<tr class="memitem:a8043644830f610ed507620c168e2b36c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a8043644830f610ed507620c168e2b36c">AssetStore</a> ()</td></tr>
+<tr class="separator:a8043644830f610ed507620c168e2b36c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a716edc4d9f0ce82c5a84cb5135e1dbfb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a716edc4d9f0ce82c5a84cb5135e1dbfb">init</a> () override</td></tr>
 <tr class="memdesc:a716edc4d9f0ce82c5a84cb5135e1dbfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Components can implement this if they need to get references to sibling or if they need to do specific initialization.  <a href="classAssetStore.html#a716edc4d9f0ce82c5a84cb5135e1dbfb">More...</a><br /></td></tr>
 <tr class="separator:a716edc4d9f0ce82c5a84cb5135e1dbfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af914b40644a695809b6b80c197b58f29"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#af914b40644a695809b6b80c197b58f29">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;evt) override</td></tr>
@@ -136,55 +148,78 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab95ead6a6bb66e6d81e80190d0bf78c9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structasset__record__t.html">asset_record_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#ab95ead6a6bb66e6d81e80190d0bf78c9">handleAcceptedAsset</a> (const <a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;asset, const <a class="el" href="structasset__id__t.html">asset_id_t</a> &amp;assetId)</td></tr>
 <tr class="memdesc:ab95ead6a6bb66e6d81e80190d0bf78c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get or create a record for the given assetId.  <a href="classAssetStore.html#ab95ead6a6bb66e6d81e80190d0bf78c9">More...</a><br /></td></tr>
 <tr class="separator:ab95ead6a6bb66e6d81e80190d0bf78c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac504a2cb752656be9857615a0eb1baee"><td class="memItemLeft" align="right" valign="top"><a id="ac504a2cb752656be9857615a0eb1baee" name="ac504a2cb752656be9857615a0eb1baee"></a>
-<a class="el" href="structasset__record__t.html">asset_record_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getRecord</b> (const <a class="el" href="structasset__id__t.html">asset_id_t</a> &amp;id)</td></tr>
-<tr class="memdesc:ac504a2cb752656be9857615a0eb1baee"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns a pointer of record if found, else returns nullptr. <br /></td></tr>
+<tr class="memitem:ac504a2cb752656be9857615a0eb1baee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structasset__record__t.html">asset_record_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#ac504a2cb752656be9857615a0eb1baee">getRecord</a> (const <a class="el" href="structasset__id__t.html">asset_id_t</a> &amp;id)</td></tr>
+<tr class="memdesc:ac504a2cb752656be9857615a0eb1baee"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns a pointer of record if found, else returns nullptr.  <a href="classAssetStore.html#ac504a2cb752656be9857615a0eb1baee">More...</a><br /></td></tr>
 <tr class="separator:ac504a2cb752656be9857615a0eb1baee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa65e3eab1b2dc23ca323101ac99fb554"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#aa65e3eab1b2dc23ca323101ac99fb554">addThrottlingBump</a> (<a class="el" href="structasset__record__t.html">asset_record_t</a> &amp;record, uint16_t timeToNextThrottleOpenMs)</td></tr>
 <tr class="memdesc:aa65e3eab1b2dc23ca323101ac99fb554"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a value to the records' throttlingCountdownTicks.  <a href="classAssetStore.html#aa65e3eab1b2dc23ca323101ac99fb554">More...</a><br /></td></tr>
 <tr class="separator:aa65e3eab1b2dc23ca323101ac99fb554"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5c7cf1eb7a88617f00e194c9a95d169a"><td class="memItemLeft" align="right" valign="top"><a id="a5c7cf1eb7a88617f00e194c9a95d169a" name="a5c7cf1eb7a88617f00e194c9a95d169a"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>throttlingBumpMsToTicks</b> (uint16_t timeToNextThrottleOpenMs)</td></tr>
-<tr class="memdesc:a5c7cf1eb7a88617f00e194c9a95d169a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert ms to ticks, rounding fractional parts upwards. <br /></td></tr>
+<tr class="memitem:a5c7cf1eb7a88617f00e194c9a95d169a"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a5c7cf1eb7a88617f00e194c9a95d169a">throttlingBumpMsToTicks</a> (uint16_t timeToNextThrottleOpenMs)</td></tr>
+<tr class="memdesc:a5c7cf1eb7a88617f00e194c9a95d169a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert ms to ticks, rounding fractional parts upwards.  <a href="classAssetStore.html#a5c7cf1eb7a88617f00e194c9a95d169a">More...</a><br /></td></tr>
 <tr class="separator:a5c7cf1eb7a88617f00e194c9a95d169a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classComponent"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classComponent')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classComponent.html">Component</a></td></tr>
 <tr class="memitem:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">getComponent</a> (<a class="el" href="classComponent.html">Component</a> *requester=nullptr)</td></tr>
 <tr class="memdesc:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a component of type T* from _parent-&gt;children(), If not found try again with ancestors: _parent-&gt; ... -&gt;_parent-&gt;children().  <a href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">More...</a><br /></td></tr>
 <tr class="separator:ab7c92af073ee6d4e4b7e8eeb71a8c4d8 inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a> ()</td></tr>
+<tr class="memitem:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a> ()</td></tr>
 <tr class="memdesc:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Components can implement this if they need to get references to sibling or if they need to do specific initialization.  <a href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">More...</a><br /></td></tr>
 <tr class="separator:aa51b4a1259d0c5f2c022d8afbb44f0bb inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top"><a id="a9cd21445768610fd3db1b15a9c851416" name="a9cd21445768610fd3db1b15a9c851416"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>parentAllChildren</b> ()</td></tr>
-<tr class="memdesc:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">utility that loops over all elements of <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321" title="Components with children can override this method to return them.">getChildren()</a> and setParent on the non-nullptr ones. <br /></td></tr>
+<tr class="memitem:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">parentAllChildren</a> ()</td></tr>
+<tr class="memdesc:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">utility that loops over all elements of <a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321" title="Components with children can override this method to return them.">getChildren()</a> and setParent on the non-nullptr ones.  <a href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">More...</a><br /></td></tr>
 <tr class="separator:a9cd21445768610fd3db1b15a9c851416 inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad82d7393e339c1b19cc17a0d55b5674d inherit pub_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#ad82d7393e339c1b19cc17a0d55b5674d">~Component</a> ()=default</td></tr>
+<tr class="separator:ad82d7393e339c1b19cc17a0d55b5674d inherit pub_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:ae36a7a52661c3007d844c33f4a4a503e"><td class="memItemLeft" align="right" valign="top">static constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#ae36a7a52661c3007d844c33f4a4a503e">LAST_RECEIVED_TIMEOUT_THRESHOLD_S</a> = 250</td></tr>
 <tr class="memdesc:ae36a7a52661c3007d844c33f4a4a503e"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classTime.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,...">Time</a> in seconds after which a record is timed out.  <a href="classAssetStore.html#ae36a7a52661c3007d844c33f4a4a503e">More...</a><br /></td></tr>
 <tr class="separator:ae36a7a52661c3007d844c33f4a4a503e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af888584c0035115932d6a002dfdab15e"><td class="memItemLeft" align="right" valign="top"><a id="af888584c0035115932d6a002dfdab15e" name="af888584c0035115932d6a002dfdab15e"></a>
-static constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><b>LAST_RECEIVED_COUNTER_PERIOD_MS</b> = 1000</td></tr>
-<tr class="memdesc:af888584c0035115932d6a002dfdab15e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interval at which the timeout counter is increased, should be 1 second. <br /></td></tr>
+<tr class="memitem:af888584c0035115932d6a002dfdab15e"><td class="memItemLeft" align="right" valign="top">static constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#af888584c0035115932d6a002dfdab15e">LAST_RECEIVED_COUNTER_PERIOD_MS</a> = 1000</td></tr>
+<tr class="memdesc:af888584c0035115932d6a002dfdab15e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interval at which the timeout counter is increased, should be 1 second.  <a href="classAssetStore.html#af888584c0035115932d6a002dfdab15e">More...</a><br /></td></tr>
 <tr class="separator:af888584c0035115932d6a002dfdab15e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f44dfa716cf7628854c8b7b5924a4c9"><td class="memItemLeft" align="right" valign="top"><a id="a4f44dfa716cf7628854c8b7b5924a4c9" name="a4f44dfa716cf7628854c8b7b5924a4c9"></a>
-static constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><b>THROTTLE_COUNTER_PERIOD_MS</b> = 100</td></tr>
-<tr class="memdesc:a4f44dfa716cf7628854c8b7b5924a4c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interval at which the throttle countdown is decreased. <br /></td></tr>
+<tr class="memitem:a4f44dfa716cf7628854c8b7b5924a4c9"><td class="memItemLeft" align="right" valign="top">static constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a4f44dfa716cf7628854c8b7b5924a4c9">THROTTLE_COUNTER_PERIOD_MS</a> = 100</td></tr>
+<tr class="memdesc:a4f44dfa716cf7628854c8b7b5924a4c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interval at which the throttle countdown is decreased.  <a href="classAssetStore.html#a4f44dfa716cf7628854c8b7b5924a4c9">More...</a><br /></td></tr>
 <tr class="separator:a4f44dfa716cf7628854c8b7b5924a4c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a8fd849db4654cef80a64dc8b446aaf76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structasset__record__t.html">asset_record_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a8fd849db4654cef80a64dc8b446aaf76">getOrCreateRecord</a> (const <a class="el" href="structasset__id__t.html">asset_id_t</a> &amp;id)</td></tr>
+<tr class="memdesc:a8fd849db4654cef80a64dc8b446aaf76"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns a pointer of record if found, else tries to create a new blank record and return a pointer to that, else returns nullptr.  <a href="classAssetStore.html#a8fd849db4654cef80a64dc8b446aaf76">More...</a><br /></td></tr>
+<tr class="separator:a8fd849db4654cef80a64dc8b446aaf76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d369aee79045f222d1d57c2e2e2dd0d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a6d369aee79045f222d1d57c2e2e2dd0d">incrementLastReceivedCounters</a> ()</td></tr>
+<tr class="memdesc:a6d369aee79045f222d1d57c2e2e2dd0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds 1 to the update/sent counters of all valid records, until 0xff is reached.  <a href="classAssetStore.html#a6d369aee79045f222d1d57c2e2e2dd0d">More...</a><br /></td></tr>
+<tr class="separator:a6d369aee79045f222d1d57c2e2e2dd0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab09e9d9b5c28a5baa2c3705d12752cec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#ab09e9d9b5c28a5baa2c3705d12752cec">decrementThrottlingCounters</a> ()</td></tr>
+<tr class="memdesc:ab09e9d9b5c28a5baa2c3705d12752cec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrements throttlingCountdownTicks by 1of all valid records, until zero is reached.  <a href="classAssetStore.html#ab09e9d9b5c28a5baa2c3705d12752cec">More...</a><br /></td></tr>
+<tr class="separator:ab09e9d9b5c28a5baa2c3705d12752cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a2996aa9167c4cbde68e20e53d5ce711c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classStore.html">Store</a>&lt; <a class="el" href="structasset__record__t.html">asset_record_t</a>, <a class="el" href="classAssetStore.html#a3f484eb3a116c3cfba4294ccd1a1eba7">MAX_RECORDS</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a2996aa9167c4cbde68e20e53d5ce711c">_store</a></td></tr>
+<tr class="separator:a2996aa9167c4cbde68e20e53d5ce711c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b46c64accce1336b9ea4bb8eb34a8ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCoroutine.html">Coroutine</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a3b46c64accce1336b9ea4bb8eb34a8ff">updateLastReceivedCounterRoutine</a></td></tr>
+<tr class="separator:a3b46c64accce1336b9ea4bb8eb34a8ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b313f815fb628cf4eea23bab43f8624"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCoroutine.html">Coroutine</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a3b313f815fb628cf4eea23bab43f8624">updateLastSentCounterRoutine</a></td></tr>
+<tr class="separator:a3b313f815fb628cf4eea23bab43f8624"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a3f484eb3a116c3cfba4294ccd1a1eba7"><td class="memItemLeft" align="right" valign="top">static constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssetStore.html#a3f484eb3a116c3cfba4294ccd1a1eba7">MAX_RECORDS</a> = 50u</td></tr>
+<tr class="separator:a3f484eb3a116c3cfba4294ccd1a1eba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -192,13 +227,30 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a3ec59ae860e2dd270a8c076430df1321 inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; <a class="el" href="classComponent.html">Component</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321">getChildren</a> ()</td></tr>
 <tr class="memdesc:a3ec59ae860e2dd270a8c076430df1321 inherit pro_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Components with children can override this method to return them.  <a href="classComponent.html#a3ec59ae860e2dd270a8c076430df1321">More...</a><br /></td></tr>
 <tr class="separator:a3ec59ae860e2dd270a8c076430df1321 inherit pro_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15dfa6d3ca6bfe46e46a53811235fdde inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a> ()</td></tr>
+<tr class="memitem:a15dfa6d3ca6bfe46e46a53811235fdde inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a> ()</td></tr>
 <tr class="separator:a15dfa6d3ca6bfe46e46a53811235fdde inherit pro_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top"><a id="a40f9568b0e447fb079e16dee8428e9f1" name="a40f9568b0e447fb079e16dee8428e9f1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a class="el" href="classComponent.html">Component</a> *p)</td></tr>
-<tr class="memdesc:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Children that are instantiated later can also be added individually. <br /></td></tr>
+<tr class="memitem:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">setParent</a> (<a class="el" href="classComponent.html">Component</a> *p)</td></tr>
+<tr class="memdesc:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="mdescLeft">&#160;</td><td class="mdescRight">Children that are instantiated later can also be added individually.  <a href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">More...</a><br /></td></tr>
 <tr class="separator:a40f9568b0e447fb079e16dee8428e9f1 inherit pro_methods_classComponent"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a8043644830f610ed507620c168e2b36c" name="a8043644830f610ed507620c168e2b36c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8043644830f610ed507620c168e2b36c">&#9670;&#160;</a></span>AssetStore()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssetStore.html">AssetStore::AssetStore</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="aa65e3eab1b2dc23ca323101ac99fb554" name="aa65e3eab1b2dc23ca323101ac99fb554"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa65e3eab1b2dc23ca323101ac99fb554">&#9670;&#160;</a></span>addThrottlingBump()</h2>
@@ -228,6 +280,81 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 
 <p>Adds a value to the records' throttlingCountdownTicks. </p>
 <p >This will ensure that the record.isThrottled() will be true for (at least) timeToNextThrottleOpenMs. </p>
+
+</div>
+</div>
+<a id="ab09e9d9b5c28a5baa2c3705d12752cec" name="ab09e9d9b5c28a5baa2c3705d12752cec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab09e9d9b5c28a5baa2c3705d12752cec">&#9670;&#160;</a></span>decrementThrottlingCounters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetStore::decrementThrottlingCounters </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Decrements throttlingCountdownTicks by 1of all valid records, until zero is reached. </p>
+
+</div>
+</div>
+<a id="a8fd849db4654cef80a64dc8b446aaf76" name="a8fd849db4654cef80a64dc8b446aaf76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fd849db4654cef80a64dc8b446aaf76">&#9670;&#160;</a></span>getOrCreateRecord()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structasset__record__t.html">asset_record_t</a> * AssetStore::getOrCreateRecord </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structasset__id__t.html">asset_id_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>returns a pointer of record if found, else tries to create a new blank record and return a pointer to that, else returns nullptr. </p>
+
+</div>
+</div>
+<a id="ac504a2cb752656be9857615a0eb1baee" name="ac504a2cb752656be9857615a0eb1baee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac504a2cb752656be9857615a0eb1baee">&#9670;&#160;</a></span>getRecord()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structasset__record__t.html">asset_record_t</a> * AssetStore::getRecord </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structasset__id__t.html">asset_id_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>returns a pointer of record if found, else returns nullptr. </p>
 
 </div>
 </div>
@@ -294,6 +421,33 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 
 </div>
 </div>
+<a id="a6d369aee79045f222d1d57c2e2e2dd0d" name="a6d369aee79045f222d1d57c2e2e2dd0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d369aee79045f222d1d57c2e2e2dd0d">&#9670;&#160;</a></span>incrementLastReceivedCounters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AssetStore::incrementLastReceivedCounters </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Adds 1 to the update/sent counters of all valid records, until 0xff is reached. </p>
+
+</div>
+</div>
 <a id="a716edc4d9f0ce82c5a84cb5135e1dbfb" name="a716edc4d9f0ce82c5a84cb5135e1dbfb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a716edc4d9f0ce82c5a84cb5135e1dbfb">&#9670;&#160;</a></span>init()</h2>
 
@@ -304,7 +458,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t AssetStore::init </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AssetStore::init </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -330,7 +484,73 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 
 </div>
 </div>
+<a id="a5c7cf1eb7a88617f00e194c9a95d169a" name="a5c7cf1eb7a88617f00e194c9a95d169a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c7cf1eb7a88617f00e194c9a95d169a">&#9670;&#160;</a></span>throttlingBumpMsToTicks()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t AssetStore::throttlingBumpMsToTicks </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>timeToNextThrottleOpenMs</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Convert ms to ticks, rounding fractional parts upwards. </p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a2996aa9167c4cbde68e20e53d5ce711c" name="a2996aa9167c4cbde68e20e53d5ce711c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2996aa9167c4cbde68e20e53d5ce711c">&#9670;&#160;</a></span>_store</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStore.html">Store</a>&lt;<a class="el" href="structasset__record__t.html">asset_record_t</a>, <a class="el" href="classAssetStore.html#a3f484eb3a116c3cfba4294ccd1a1eba7">MAX_RECORDS</a>&gt; AssetStore::_store</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af888584c0035115932d6a002dfdab15e" name="af888584c0035115932d6a002dfdab15e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af888584c0035115932d6a002dfdab15e">&#9670;&#160;</a></span>LAST_RECEIVED_COUNTER_PERIOD_MS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr auto AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS = 1000</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Interval at which the timeout counter is increased, should be 1 second. </p>
+
+</div>
+</div>
 <a id="ae36a7a52661c3007d844c33f4a4a503e" name="ae36a7a52661c3007d844c33f4a4a503e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae36a7a52661c3007d844c33f4a4a503e">&#9670;&#160;</a></span>LAST_RECEIVED_TIMEOUT_THRESHOLD_S</h2>
 
@@ -353,6 +573,96 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setParent</b> (<a cla
 
 <p><a class="el" href="classTime.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,...">Time</a> in seconds after which a record is timed out. </p>
 <p >Must be smaller than 0xFF. </p>
+
+</div>
+</div>
+<a id="a3f484eb3a116c3cfba4294ccd1a1eba7" name="a3f484eb3a116c3cfba4294ccd1a1eba7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f484eb3a116c3cfba4294ccd1a1eba7">&#9670;&#160;</a></span>MAX_RECORDS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr auto AssetStore::MAX_RECORDS = 50u</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4f44dfa716cf7628854c8b7b5924a4c9" name="a4f44dfa716cf7628854c8b7b5924a4c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f44dfa716cf7628854c8b7b5924a4c9">&#9670;&#160;</a></span>THROTTLE_COUNTER_PERIOD_MS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr auto AssetStore::THROTTLE_COUNTER_PERIOD_MS = 100</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Interval at which the throttle countdown is decreased. </p>
+
+</div>
+</div>
+<a id="a3b46c64accce1336b9ea4bb8eb34a8ff" name="a3b46c64accce1336b9ea4bb8eb34a8ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b46c64accce1336b9ea4bb8eb34a8ff">&#9670;&#160;</a></span>updateLastReceivedCounterRoutine</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCoroutine.html">Coroutine</a> AssetStore::updateLastReceivedCounterRoutine</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3b313f815fb628cf4eea23bab43f8624" name="a3b313f815fb628cf4eea23bab43f8624"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b313f815fb628cf4eea23bab43f8624">&#9670;&#160;</a></span>updateLastSentCounterRoutine</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCoroutine.html">Coroutine</a> AssetStore::updateLastSentCounterRoutine</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

@@ -99,6 +99,7 @@ $(document).ready(function(){initNavTree('classMeshModelSelector.html',''); init
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classMeshModelSelector-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">MeshModelSelector Class Reference</div></div>
 </div><!--header-->
@@ -108,24 +109,72 @@ $(document).ready(function(){initNavTree('classMeshModelSelector.html',''); init
  <a href="classMeshModelSelector.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cs__MeshModelSelector_8h_source.html">cs_MeshModelSelector.h</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for MeshModelSelector:</div>
+<div class="dyncontent">
+<div class="center"><img src="classMeshModelSelector__coll__graph.png" border="0" usemap="#aMeshModelSelector_coll__map" alt="Collaboration graph"/></div>
+<map name="aMeshModelSelector_coll__map" id="aMeshModelSelector_coll__map">
+<area shape="rect" title="Class that selects which model to use to send a message." alt="" coords="1207,171,1357,196"/>
+<area shape="rect" href="classMeshModelMulticast.html" title="Class that:" alt="" coords="778,96,935,121"/>
+<area shape="rect" title=" " alt="" coords="319,157,541,197"/>
+<area shape="rect" href="classMeshModelMulticastAcked.html" title="Class that:" alt="" coords="759,285,955,311"/>
+<area shape="rect" href="classMeshModelMulticastNeighbours.html" title="Class that:" alt="" coords="741,195,972,220"/>
+<area shape="rect" href="classMeshModelUnicast.html" title="Class that:" alt="" coords="783,145,930,171"/>
+<area shape="rect" href="structMeshModelMulticast_1_1cs__multicast__queue__item__t.html" title=" " alt="" coords="351,5,509,60"/>
+<area shape="rect" href="structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html" title="Data needed in each model queue." alt="" coords="5,182,197,222"/>
+<area shape="rect" href="structMeshModelMulticastAcked_1_1cs__multicast__acked__queue__item__t.html" title=" " alt="" coords="328,367,532,421"/>
+<area shape="rect" href="structMeshModelMulticastNeighbours_1_1cs__multicast__queue__item__t.html" title=" " alt="" coords="315,231,545,271"/>
+<area shape="rect" href="structMeshModelUnicast_1_1cs__unicast__queue__item__t.html" title=" " alt="" coords="344,87,516,127"/>
+<area shape="rect" href="classBitmaskVarSize.html" title="Class that holds a bitmask of variable size." alt="" coords="367,317,493,343"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a572b0f9546ae7feac32225923ede6b15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelSelector.html#a572b0f9546ae7feac32225923ede6b15">init</a> (<a class="el" href="classMeshModelMulticast.html">MeshModelMulticast</a> &amp;multicastModel, <a class="el" href="classMeshModelMulticastAcked.html">MeshModelMulticastAcked</a> &amp;multicastAckedModel, <a class="el" href="classMeshModelMulticastNeighbours.html">MeshModelMulticastNeighbours</a> &amp;multicastNeighboursModel, <a class="el" href="classMeshModelUnicast.html">MeshModelUnicast</a> &amp;unicastModel)</td></tr>
 <tr class="memdesc:a572b0f9546ae7feac32225923ede6b15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init with pointer to all models.  <a href="classMeshModelSelector.html#a572b0f9546ae7feac32225923ede6b15">More...</a><br /></td></tr>
 <tr class="separator:a572b0f9546ae7feac32225923ede6b15"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac3e03dacdda9b9abf6a2bdd9a15920d4"><td class="memItemLeft" align="right" valign="top"><a id="ac3e03dacdda9b9abf6a2bdd9a15920d4" name="ac3e03dacdda9b9abf6a2bdd9a15920d4"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>addToQueue</b> (<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;item)</td></tr>
-<tr class="memdesc:ac3e03dacdda9b9abf6a2bdd9a15920d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add item to the send queue of a suitable model. <br /></td></tr>
+<tr class="memitem:ac3e03dacdda9b9abf6a2bdd9a15920d4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelSelector.html#ac3e03dacdda9b9abf6a2bdd9a15920d4">addToQueue</a> (<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;item)</td></tr>
+<tr class="memdesc:ac3e03dacdda9b9abf6a2bdd9a15920d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add item to the send queue of a suitable model.  <a href="classMeshModelSelector.html#ac3e03dacdda9b9abf6a2bdd9a15920d4">More...</a><br /></td></tr>
 <tr class="separator:ac3e03dacdda9b9abf6a2bdd9a15920d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac67a88871267507ef9a3f85c78af9c3c"><td class="memItemLeft" align="right" valign="top"><a id="ac67a88871267507ef9a3f85c78af9c3c" name="ac67a88871267507ef9a3f85c78af9c3c"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>remFromQueue</b> (<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;item)</td></tr>
-<tr class="memdesc:ac67a88871267507ef9a3f85c78af9c3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove an item from the send queue. <br /></td></tr>
+<tr class="memitem:ac67a88871267507ef9a3f85c78af9c3c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelSelector.html#ac67a88871267507ef9a3f85c78af9c3c">remFromQueue</a> (<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;item)</td></tr>
+<tr class="memdesc:ac67a88871267507ef9a3f85c78af9c3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove an item from the send queue.  <a href="classMeshModelSelector.html#ac67a88871267507ef9a3f85c78af9c3c">More...</a><br /></td></tr>
 <tr class="separator:ac67a88871267507ef9a3f85c78af9c3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:aa695441c7220139c76ca157e6dc05d14"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelMulticast.html">MeshModelMulticast</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelSelector.html#aa695441c7220139c76ca157e6dc05d14">_multicastModel</a> = nullptr</td></tr>
+<tr class="separator:aa695441c7220139c76ca157e6dc05d14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bce51a5e58bc3f435791749a3a9dad6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelMulticastAcked.html">MeshModelMulticastAcked</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelSelector.html#a1bce51a5e58bc3f435791749a3a9dad6">_multicastAckedModel</a> = nullptr</td></tr>
+<tr class="separator:a1bce51a5e58bc3f435791749a3a9dad6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac29e3f150ca1c8639818a4f83661a54b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelMulticastNeighbours.html">MeshModelMulticastNeighbours</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelSelector.html#ac29e3f150ca1c8639818a4f83661a54b">_multicastNeighboursModel</a> = nullptr</td></tr>
+<tr class="separator:ac29e3f150ca1c8639818a4f83661a54b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99356cdda81a1a8aa09f79b0f9f39847"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelUnicast.html">MeshModelUnicast</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelSelector.html#a99356cdda81a1a8aa09f79b0f9f39847">_unicastModel</a> = nullptr</td></tr>
+<tr class="separator:a99356cdda81a1a8aa09f79b0f9f39847"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that selects which model to use to send a message. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac3e03dacdda9b9abf6a2bdd9a15920d4" name="ac3e03dacdda9b9abf6a2bdd9a15920d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3e03dacdda9b9abf6a2bdd9a15920d4">&#9670;&#160;</a></span>addToQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshModelSelector::addToQueue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>item</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add item to the send queue of a suitable model. </p>
+
+</div>
+</div>
 <a id="a572b0f9546ae7feac32225923ede6b15" name="a572b0f9546ae7feac32225923ede6b15"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a572b0f9546ae7feac32225923ede6b15">&#9670;&#160;</a></span>init()</h2>
 
@@ -166,6 +215,115 @@ cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>remFromQueue
 
 <p>Init with pointer to all models. </p>
 <p >Could maybe be implemented neater if we have a base class for models. </p>
+
+</div>
+</div>
+<a id="ac67a88871267507ef9a3f85c78af9c3c" name="ac67a88871267507ef9a3f85c78af9c3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac67a88871267507ef9a3f85c78af9c3c">&#9670;&#160;</a></span>remFromQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshModelSelector::remFromQueue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>item</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove an item from the send queue. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a1bce51a5e58bc3f435791749a3a9dad6" name="a1bce51a5e58bc3f435791749a3a9dad6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bce51a5e58bc3f435791749a3a9dad6">&#9670;&#160;</a></span>_multicastAckedModel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelMulticastAcked.html">MeshModelMulticastAcked</a>* MeshModelSelector::_multicastAckedModel = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa695441c7220139c76ca157e6dc05d14" name="aa695441c7220139c76ca157e6dc05d14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa695441c7220139c76ca157e6dc05d14">&#9670;&#160;</a></span>_multicastModel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelMulticast.html">MeshModelMulticast</a>* MeshModelSelector::_multicastModel = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac29e3f150ca1c8639818a4f83661a54b" name="ac29e3f150ca1c8639818a4f83661a54b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac29e3f150ca1c8639818a4f83661a54b">&#9670;&#160;</a></span>_multicastNeighboursModel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelMulticastNeighbours.html">MeshModelMulticastNeighbours</a>* MeshModelSelector::_multicastNeighboursModel = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a99356cdda81a1a8aa09f79b0f9f39847" name="a99356cdda81a1a8aa09f79b0f9f39847"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99356cdda81a1a8aa09f79b0f9f39847">&#9670;&#160;</a></span>_unicastModel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelUnicast.html">MeshModelUnicast</a>* MeshModelSelector::_unicastModel = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

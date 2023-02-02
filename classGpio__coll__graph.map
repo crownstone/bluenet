@@ -1,4 +1,6 @@
 <map id="Gpio" name="Gpio">
-<area shape="rect" id="node1" title=" " alt="" coords="35,79,87,104"/>
+<area shape="rect" id="node1" title=" " alt="" coords="157,93,209,119"/>
 <area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node3" href="$structpin__info__t.html" title=" " alt="" coords="140,5,227,31"/>
+<area shape="rect" id="node4" href="$structboards__config__t.html" title="Board configuration." alt="" coords="251,5,377,31"/>
 </map>

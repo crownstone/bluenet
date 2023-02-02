@@ -25,5 +25,5 @@ var dir_8ee1a5e78eaec319fe5d64075812fc61 =
     [ "tracking", "dir_2ab581ab161aaacbddfcb91ec0dfe906.html", "dir_2ab581ab161aaacbddfcb91ec0dfe906" ],
     [ "uart", "dir_9c81f6464ea5b4cf1e12b59fd7c3b1f4.html", "dir_9c81f6464ea5b4cf1e12b59fd7c3b1f4" ],
     [ "util", "dir_e8d03031b1e92aeb84120cb3e87677a9.html", "dir_e8d03031b1e92aeb84120cb3e87677a9" ],
-    [ "cs_Crownstone.h", "cs__Crownstone_8h_source.html", null ]
+    [ "cs_Crownstone.h", "cs__Crownstone_8h.html", "cs__Crownstone_8h" ]
 ];

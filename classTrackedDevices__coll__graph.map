@@ -1,4 +1,8 @@
 <map id="TrackedDevices" name="TrackedDevices">
-<area shape="rect" id="node1" title="Class that keeps up devices to be tracked." alt="" coords="5,79,129,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="12,5,123,31"/>
+<area shape="rect" id="node1" title="Class that keeps up devices to be tracked." alt="" coords="20,401,144,427"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,306,116,331"/>
+<area shape="rect" id="node3" href="$classStore.html" title=" " alt="" coords="141,299,343,339"/>
+<area shape="rect" id="node4" href="$structTrackedDevice.html" title=" " alt="" coords="183,211,301,236"/>
+<area shape="rect" id="node5" href="$structinternal__register__tracked__device__packet__t.html" title=" " alt="" coords="150,108,334,148"/>
+<area shape="rect" id="node6" href="$structregister__tracked__device__packet__t.html" title=" " alt="" coords="153,5,331,45"/>
 </map>

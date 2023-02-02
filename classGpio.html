@@ -100,10 +100,14 @@ $(document).ready(function(){initNavTree('classGpio.html',''); initResizable(); 
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classGpio-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Gpio Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__Gpio_8h_source.html">cs_Gpio.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for Gpio:</div>
 <div class="dyncontent">
@@ -118,45 +122,251 @@ Collaboration diagram for Gpio:</div>
 <div class="dyncontent">
 <div class="center"><img src="classGpio__coll__graph.png" border="0" usemap="#aGpio_coll__map" alt="Collaboration graph"/></div>
 <map name="aGpio_coll__map" id="aGpio_coll__map">
-<area shape="rect" title=" " alt="" coords="35,79,87,104"/>
+<area shape="rect" title=" " alt="" coords="157,93,209,119"/>
 <area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" href="structpin__info__t.html" title=" " alt="" coords="140,5,227,31"/>
+<area shape="rect" href="structboards__config__t.html" title="Board configuration." alt="" coords="251,5,377,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:afc80815bb49b63d8525c3377ffe31c5c"><td class="memItemLeft" align="right" valign="top"><a id="afc80815bb49b63d8525c3377ffe31c5c" name="afc80815bb49b63d8525c3377ffe31c5c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (const <a class="el" href="structboards__config__t.html">boards_config_t</a> &amp;board)</td></tr>
-<tr class="memdesc:afc80815bb49b63d8525c3377ffe31c5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize (from cs_Crownstone as driver) <br /></td></tr>
+<tr class="memitem:afc80815bb49b63d8525c3377ffe31c5c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#afc80815bb49b63d8525c3377ffe31c5c">init</a> (const <a class="el" href="structboards__config__t.html">boards_config_t</a> &amp;board)</td></tr>
+<tr class="memdesc:afc80815bb49b63d8525c3377ffe31c5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize (from cs_Crownstone as driver)  <a href="classGpio.html#afc80815bb49b63d8525c3377ffe31c5c">More...</a><br /></td></tr>
 <tr class="separator:afc80815bb49b63d8525c3377ffe31c5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee2c0a104f299aa8eedabdeb496212e1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#aee2c0a104f299aa8eedabdeb496212e1">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:aee2c0a104f299aa8eedabdeb496212e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle incoming events.  <a href="classGpio.html#aee2c0a104f299aa8eedabdeb496212e1">More...</a><br /></td></tr>
 <tr class="separator:aee2c0a104f299aa8eedabdeb496212e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a900e5ef60a978c6dbb6394d2b014e84b"><td class="memItemLeft" align="right" valign="top"><a id="a900e5ef60a978c6dbb6394d2b014e84b" name="a900e5ef60a978c6dbb6394d2b014e84b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>registerEvent</b> (pin_t pin)</td></tr>
-<tr class="memdesc:a900e5ef60a978c6dbb6394d2b014e84b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register event (from event handler) <br /></td></tr>
+<tr class="memitem:a900e5ef60a978c6dbb6394d2b014e84b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a900e5ef60a978c6dbb6394d2b014e84b">registerEvent</a> (<a class="el" href="cs__Gpio_8h.html#aede467d93ddeb5fdeff6023236aa4ad6">pin_t</a> pin)</td></tr>
+<tr class="memdesc:a900e5ef60a978c6dbb6394d2b014e84b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register event (from event handler)  <a href="classGpio.html#a900e5ef60a978c6dbb6394d2b014e84b">More...</a><br /></td></tr>
 <tr class="separator:a900e5ef60a978c6dbb6394d2b014e84b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a168870bc2db67c03592b5156cf3a6bcd"><td class="memItemLeft" align="right" valign="top"><a id="a168870bc2db67c03592b5156cf3a6bcd" name="a168870bc2db67c03592b5156cf3a6bcd"></a>
-static <a class="el" href="classGpio.html">Gpio</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:a168870bc2db67c03592b5156cf3a6bcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get singleton instance. <br /></td></tr>
+<tr class="memitem:a168870bc2db67c03592b5156cf3a6bcd"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classGpio.html">Gpio</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a168870bc2db67c03592b5156cf3a6bcd">getInstance</a> ()</td></tr>
+<tr class="memdesc:a168870bc2db67c03592b5156cf3a6bcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get singleton instance.  <a href="classGpio.html#a168870bc2db67c03592b5156cf3a6bcd">More...</a><br /></td></tr>
 <tr class="separator:a168870bc2db67c03592b5156cf3a6bcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a51a72b41aabb6df62d8cb35f1b35849a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a51a72b41aabb6df62d8cb35f1b35849a">Gpio</a> ()</td></tr>
+<tr class="memdesc:a51a72b41aabb6df62d8cb35f1b35849a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classGpio.html#a51a72b41aabb6df62d8cb35f1b35849a">More...</a><br /></td></tr>
+<tr class="separator:a51a72b41aabb6df62d8cb35f1b35849a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaee079f67f546a22ad7da32f836e187b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#aaee079f67f546a22ad7da32f836e187b">Gpio</a> (<a class="el" href="classGpio.html">Gpio</a> const &amp;)</td></tr>
+<tr class="memdesc:aaee079f67f546a22ad7da32f836e187b"><td class="mdescLeft">&#160;</td><td class="mdescRight">This class is a singleton, deny implementation.  <a href="classGpio.html#aaee079f67f546a22ad7da32f836e187b">More...</a><br /></td></tr>
+<tr class="separator:aaee079f67f546a22ad7da32f836e187b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac35a65a49da7453e9316d9b9a6ae71d6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#ac35a65a49da7453e9316d9b9a6ae71d6">operator=</a> (<a class="el" href="classGpio.html">Gpio</a> const &amp;)</td></tr>
+<tr class="memdesc:ac35a65a49da7453e9316d9b9a6ae71d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">This class is a singleton, deny implementation.  <a href="classGpio.html#ac35a65a49da7453e9316d9b9a6ae71d6">More...</a><br /></td></tr>
+<tr class="separator:ac35a65a49da7453e9316d9b9a6ae71d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22290412014371ce0a257171c65956c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a22290412014371ce0a257171c65956c7">tick</a> ()</td></tr>
+<tr class="memdesc:a22290412014371ce0a257171c65956c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get regular ticks to send events.  <a href="classGpio.html#a22290412014371ce0a257171c65956c7">More...</a><br /></td></tr>
+<tr class="separator:a22290412014371ce0a257171c65956c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a968887179ae76e6e065d963568bbafc4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a968887179ae76e6e065d963568bbafc4">pinExists</a> (uint8_t pin_index)</td></tr>
+<tr class="memdesc:a968887179ae76e6e065d963568bbafc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return whether pin exists on board.  <a href="classGpio.html#a968887179ae76e6e065d963568bbafc4">More...</a><br /></td></tr>
+<tr class="separator:a968887179ae76e6e065d963568bbafc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32f9c2d64d8e5fcae8139ef69dafdd50"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Gpio_8h.html#aede467d93ddeb5fdeff6023236aa4ad6">pin_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a32f9c2d64d8e5fcae8139ef69dafdd50">getPin</a> (uint8_t pin_index)</td></tr>
+<tr class="memdesc:a32f9c2d64d8e5fcae8139ef69dafdd50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return physical pin from virtual pin index.  <a href="classGpio.html#a32f9c2d64d8e5fcae8139ef69dafdd50">More...</a><br /></td></tr>
+<tr class="separator:a32f9c2d64d8e5fcae8139ef69dafdd50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbab3933b004823c23b551089ba661a4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#abbab3933b004823c23b551089ba661a4">isLedPin</a> (uint8_t pin_index)</td></tr>
+<tr class="memdesc:abbab3933b004823c23b551089ba661a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return whether pin is a LED.  <a href="classGpio.html#abbab3933b004823c23b551089ba661a4">More...</a><br /></td></tr>
+<tr class="separator:abbab3933b004823c23b551089ba661a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f5472ef82b7c2cf92651de10f16b5fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a5f5472ef82b7c2cf92651de10f16b5fe">configure</a> (uint8_t pin_index, <a class="el" href="cs__Gpio_8h.html#a7ad7c67b406e0ff7e1267f141c0c25db">GpioDirection</a> direction, <a class="el" href="cs__Gpio_8h.html#ab8026499dc1cb666984631ab87d4ba6b">GpioPullResistor</a> pull, <a class="el" href="cs__Gpio_8h.html#aa2ad49e8cc5b4fe6dd26d28ca169ef02">GpioPolarity</a> polarity)</td></tr>
+<tr class="memdesc:a5f5472ef82b7c2cf92651de10f16b5fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure pin.  <a href="classGpio.html#a5f5472ef82b7c2cf92651de10f16b5fe">More...</a><br /></td></tr>
+<tr class="separator:a5f5472ef82b7c2cf92651de10f16b5fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88d081f41e7d6d081f2d24a627b44c7e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a88d081f41e7d6d081f2d24a627b44c7e">write</a> (uint8_t pin_index, uint8_t *buf, uint8_t &amp;length)</td></tr>
+<tr class="memdesc:a88d081f41e7d6d081f2d24a627b44c7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write to pin.  <a href="classGpio.html#a88d081f41e7d6d081f2d24a627b44c7e">More...</a><br /></td></tr>
+<tr class="separator:a88d081f41e7d6d081f2d24a627b44c7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b3f37973ce6471bb4f418c75ffd9123"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a2b3f37973ce6471bb4f418c75ffd9123">read</a> (uint8_t pin_index, uint8_t *buf, uint8_t &amp;length)</td></tr>
+<tr class="memdesc:a2b3f37973ce6471bb4f418c75ffd9123"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read from pin.  <a href="classGpio.html#a2b3f37973ce6471bb4f418c75ffd9123">More...</a><br /></td></tr>
+<tr class="separator:a2b3f37973ce6471bb4f418c75ffd9123"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ac5a341c76d1040b7a126f2ffd52d4f9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structpin__info__t.html">pin_info_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#ac5a341c76d1040b7a126f2ffd52d4f9f">_pins</a> [<a class="el" href="cs__Gpio_8h.html#a3cd9d8166a9f14fd691a38eb8df0f4a4">TOTAL_PIN_COUNT</a>]</td></tr>
+<tr class="memdesc:ac5a341c76d1040b7a126f2ffd52d4f9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array of virtual pin info.  <a href="classGpio.html#ac5a341c76d1040b7a126f2ffd52d4f9f">More...</a><br /></td></tr>
+<tr class="separator:ac5a341c76d1040b7a126f2ffd52d4f9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8d7e1f4c3fb55220e0d742a65d3f6f5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#ac8d7e1f4c3fb55220e0d742a65d3f6f5">_initialized</a></td></tr>
+<tr class="memdesc:ac8d7e1f4c3fb55220e0d742a65d3f6f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialized flag.  <a href="classGpio.html#ac8d7e1f4c3fb55220e0d742a65d3f6f5">More...</a><br /></td></tr>
+<tr class="separator:ac8d7e1f4c3fb55220e0d742a65d3f6f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26d03b4b475c00a2faf58107cf2d46d3"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structboards__config__t.html">boards_config_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGpio.html#a26d03b4b475c00a2faf58107cf2d46d3">_boardConfig</a></td></tr>
+<tr class="memdesc:a26d03b4b475c00a2faf58107cf2d46d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Board configuration.  <a href="classGpio.html#a26d03b4b475c00a2faf58107cf2d46d3">More...</a><br /></td></tr>
+<tr class="separator:a26d03b4b475c00a2faf58107cf2d46d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a51a72b41aabb6df62d8cb35f1b35849a" name="a51a72b41aabb6df62d8cb35f1b35849a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51a72b41aabb6df62d8cb35f1b35849a">&#9670;&#160;</a></span>Gpio() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classGpio.html">Gpio::Gpio</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor. </p>
+
+</div>
+</div>
+<a id="aaee079f67f546a22ad7da32f836e187b" name="aaee079f67f546a22ad7da32f836e187b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaee079f67f546a22ad7da32f836e187b">&#9670;&#160;</a></span>Gpio() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classGpio.html">Gpio::Gpio</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classGpio.html">Gpio</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>This class is a singleton, deny implementation. </p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a5f5472ef82b7c2cf92651de10f16b5fe" name="a5f5472ef82b7c2cf92651de10f16b5fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f5472ef82b7c2cf92651de10f16b5fe">&#9670;&#160;</a></span>configure()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Gpio::configure </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>pin_index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Gpio_8h.html#a7ad7c67b406e0ff7e1267f141c0c25db">GpioDirection</a>&#160;</td>
+          <td class="paramname"><em>direction</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Gpio_8h.html#ab8026499dc1cb666984631ab87d4ba6b">GpioPullResistor</a>&#160;</td>
+          <td class="paramname"><em>pull</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Gpio_8h.html#aa2ad49e8cc5b4fe6dd26d28ca169ef02">GpioPolarity</a>&#160;</td>
+          <td class="paramname"><em>polarity</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Configure pin. </p>
+
+</div>
+</div>
+<a id="a168870bc2db67c03592b5156cf3a6bcd" name="a168870bc2db67c03592b5156cf3a6bcd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a168870bc2db67c03592b5156cf3a6bcd">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classGpio.html">Gpio</a> &amp; Gpio::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get singleton instance. </p>
+
+</div>
+</div>
+<a id="a32f9c2d64d8e5fcae8139ef69dafdd50" name="a32f9c2d64d8e5fcae8139ef69dafdd50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32f9c2d64d8e5fcae8139ef69dafdd50">&#9670;&#160;</a></span>getPin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Gpio_8h.html#aede467d93ddeb5fdeff6023236aa4ad6">pin_t</a> Gpio::getPin </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>pin_index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return physical pin from virtual pin index. </p>
+<p >Returns PIN_NONE when it does not exist (for the configured board). </p>
+
+</div>
+</div>
 <a id="aee2c0a104f299aa8eedabdeb496212e1" name="aee2c0a104f299aa8eedabdeb496212e1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aee2c0a104f299aa8eedabdeb496212e1">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -184,6 +394,319 @@ static <a class="el" href="classGpio.html">Gpio</a> &amp;&#160;</td><td class="m
 <p>Handle incoming events. </p>
 
 <p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="afc80815bb49b63d8525c3377ffe31c5c" name="afc80815bb49b63d8525c3377ffe31c5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc80815bb49b63d8525c3377ffe31c5c">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Gpio::init </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structboards__config__t.html">boards_config_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>board</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize (from cs_Crownstone as driver) </p>
+
+</div>
+</div>
+<a id="abbab3933b004823c23b551089ba661a4" name="abbab3933b004823c23b551089ba661a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbab3933b004823c23b551089ba661a4">&#9670;&#160;</a></span>isLedPin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Gpio::isLedPin </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>pin_index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return whether pin is a LED. </p>
+
+</div>
+</div>
+<a id="ac35a65a49da7453e9316d9b9a6ae71d6" name="ac35a65a49da7453e9316d9b9a6ae71d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac35a65a49da7453e9316d9b9a6ae71d6">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Gpio::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classGpio.html">Gpio</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>This class is a singleton, deny implementation. </p>
+
+</div>
+</div>
+<a id="a968887179ae76e6e065d963568bbafc4" name="a968887179ae76e6e065d963568bbafc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a968887179ae76e6e065d963568bbafc4">&#9670;&#160;</a></span>pinExists()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Gpio::pinExists </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>pin_index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return whether pin exists on board. </p>
+
+</div>
+</div>
+<a id="a2b3f37973ce6471bb4f418c75ffd9123" name="a2b3f37973ce6471bb4f418c75ffd9123"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b3f37973ce6471bb4f418c75ffd9123">&#9670;&#160;</a></span>read()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Gpio::read </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>pin_index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t &amp;&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read from pin. </p>
+
+</div>
+</div>
+<a id="a900e5ef60a978c6dbb6394d2b014e84b" name="a900e5ef60a978c6dbb6394d2b014e84b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a900e5ef60a978c6dbb6394d2b014e84b">&#9670;&#160;</a></span>registerEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Gpio::registerEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Gpio_8h.html#aede467d93ddeb5fdeff6023236aa4ad6">pin_t</a>&#160;</td>
+          <td class="paramname"><em>pin</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register event (from event handler) </p>
+
+</div>
+</div>
+<a id="a22290412014371ce0a257171c65956c7" name="a22290412014371ce0a257171c65956c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22290412014371ce0a257171c65956c7">&#9670;&#160;</a></span>tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Gpio::tick </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get regular ticks to send events. </p>
+
+</div>
+</div>
+<a id="a88d081f41e7d6d081f2d24a627b44c7e" name="a88d081f41e7d6d081f2d24a627b44c7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88d081f41e7d6d081f2d24a627b44c7e">&#9670;&#160;</a></span>write()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Gpio::write </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>pin_index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t &amp;&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write to pin. </p>
+<p >Write to pin. Assumes pin has been configured as output. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a26d03b4b475c00a2faf58107cf2d46d3" name="a26d03b4b475c00a2faf58107cf2d46d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26d03b4b475c00a2faf58107cf2d46d3">&#9670;&#160;</a></span>_boardConfig</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="structboards__config__t.html">boards_config_t</a>* Gpio::_boardConfig</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Board configuration. </p>
+
+</div>
+</div>
+<a id="ac8d7e1f4c3fb55220e0d742a65d3f6f5" name="ac8d7e1f4c3fb55220e0d742a65d3f6f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8d7e1f4c3fb55220e0d742a65d3f6f5">&#9670;&#160;</a></span>_initialized</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Gpio::_initialized</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Initialized flag. </p>
+
+</div>
+</div>
+<a id="ac5a341c76d1040b7a126f2ffd52d4f9f" name="ac5a341c76d1040b7a126f2ffd52d4f9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5a341c76d1040b7a126f2ffd52d4f9f">&#9670;&#160;</a></span>_pins</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structpin__info__t.html">pin_info_t</a> Gpio::_pins[<a class="el" href="cs__Gpio_8h.html#a3cd9d8166a9f14fd691a38eb8df0f4a4">TOTAL_PIN_COUNT</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Array of virtual pin info. </p>
 
 </div>
 </div>

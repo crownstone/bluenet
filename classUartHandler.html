@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classUartHandler.html',''); initResiza
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classUartHandler-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">UartHandler Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
@@ -123,30 +125,31 @@ Collaboration diagram for UartHandler:</div>
 <div class="dyncontent">
 <div class="center"><img src="classUartHandler__coll__graph.png" border="0" usemap="#aUartHandler_coll__map" alt="Collaboration graph"/></div>
 <map name="aUartHandler_coll__map" id="aUartHandler_coll__map">
-<area shape="rect" title="Class that implements the binary UART protocol." alt="" coords="10,79,111,104"/>
+<area shape="rect" title="Class that implements the binary UART protocol." alt="" coords="174,93,275,119"/>
 <area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" href="classUartCommandHandler.html" title=" " alt="" coords="141,5,309,31"/>
+<area shape="rect" href="structencryption__nonce__t.html" title="Nonce used for encryption." alt="" coords="333,5,482,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a20dd48e5e5ded3b30464d46e8adaebe9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a20dd48e5e5ded3b30464d46e8adaebe9">init</a> (serial_enable_t serialEnabled)</td></tr>
+<tr class="memitem:a20dd48e5e5ded3b30464d46e8adaebe9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a20dd48e5e5ded3b30464d46e8adaebe9">init</a> (<a class="el" href="cs__SerialTypes_8h.html#a346130c6654d55e5a721d226438f73d7">serial_enable_t</a> serialEnabled)</td></tr>
 <tr class="memdesc:a20dd48e5e5ded3b30464d46e8adaebe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the class.  <a href="classUartHandler.html#a20dd48e5e5ded3b30464d46e8adaebe9">More...</a><br /></td></tr>
 <tr class="separator:a20dd48e5e5ded3b30464d46e8adaebe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ab2ac1b3c1ddb8911409469c58de9df"><td class="memItemLeft" align="right" valign="top">ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a1ab2ac1b3c1ddb8911409469c58de9df">writeMsg</a> (UartOpcodeTx opCode, uint8_t *data, uint16_t size, UartProtocol::Encrypt encrypt=UartProtocol::ENCRYPT_ACCORDING_TO_TYPE)</td></tr>
+<tr class="memitem:a1ab2ac1b3c1ddb8911409469c58de9df"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a1ab2ac1b3c1ddb8911409469c58de9df">writeMsg</a> (<a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a> opCode, uint8_t *data, uint16_t size, <a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a> encrypt=<a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23ad48a7e1cffa49bab2d51c2e32b2ed824">UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</a>)</td></tr>
 <tr class="memdesc:a1ab2ac1b3c1ddb8911409469c58de9df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a msg over UART.  <a href="classUartHandler.html#a1ab2ac1b3c1ddb8911409469c58de9df">More...</a><br /></td></tr>
 <tr class="separator:a1ab2ac1b3c1ddb8911409469c58de9df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a284f1e4a897211f48338e0ba7c29eb19"><td class="memItemLeft" align="right" valign="top"><a id="a284f1e4a897211f48338e0ba7c29eb19" name="a284f1e4a897211f48338e0ba7c29eb19"></a>
-ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>writeMsg</b> (UartOpcodeTx opCode)</td></tr>
-<tr class="memdesc:a284f1e4a897211f48338e0ba7c29eb19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience method to write a msg over UART without payload data. <br /></td></tr>
+<tr class="memitem:a284f1e4a897211f48338e0ba7c29eb19"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a284f1e4a897211f48338e0ba7c29eb19">writeMsg</a> (<a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a> opCode)</td></tr>
+<tr class="memdesc:a284f1e4a897211f48338e0ba7c29eb19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience method to write a msg over UART without payload data.  <a href="classUartHandler.html#a284f1e4a897211f48338e0ba7c29eb19">More...</a><br /></td></tr>
 <tr class="separator:a284f1e4a897211f48338e0ba7c29eb19"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00868d13919627f73ba5d40618001366"><td class="memItemLeft" align="right" valign="top">ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a00868d13919627f73ba5d40618001366">writeMsgStart</a> (UartOpcodeTx opCode, uint16_t size, UartProtocol::Encrypt encrypt=UartProtocol::ENCRYPT_ACCORDING_TO_TYPE)</td></tr>
+<tr class="memitem:a00868d13919627f73ba5d40618001366"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a00868d13919627f73ba5d40618001366">writeMsgStart</a> (<a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a> opCode, uint16_t size, <a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a> encrypt=<a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23ad48a7e1cffa49bab2d51c2e32b2ed824">UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</a>)</td></tr>
 <tr class="memdesc:a00868d13919627f73ba5d40618001366"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a msg over UART in a streaming manner.  <a href="classUartHandler.html#a00868d13919627f73ba5d40618001366">More...</a><br /></td></tr>
 <tr class="separator:a00868d13919627f73ba5d40618001366"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80f953b1fa453ad25a7e9934958c2709"><td class="memItemLeft" align="right" valign="top">ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a80f953b1fa453ad25a7e9934958c2709">writeMsgPart</a> (UartOpcodeTx opCode, const uint8_t *const data, uint16_t size, UartProtocol::Encrypt encrypt=UartProtocol::ENCRYPT_ACCORDING_TO_TYPE)</td></tr>
+<tr class="memitem:a80f953b1fa453ad25a7e9934958c2709"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a80f953b1fa453ad25a7e9934958c2709">writeMsgPart</a> (<a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a> opCode, const uint8_t *const data, uint16_t size, <a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a> encrypt=<a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23ad48a7e1cffa49bab2d51c2e32b2ed824">UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</a>)</td></tr>
 <tr class="memdesc:a80f953b1fa453ad25a7e9934958c2709"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a msg over UART in a streaming manner.  <a href="classUartHandler.html#a80f953b1fa453ad25a7e9934958c2709">More...</a><br /></td></tr>
 <tr class="separator:a80f953b1fa453ad25a7e9934958c2709"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c0037dea47028a61cb9f3af54f02ff4"><td class="memItemLeft" align="right" valign="top">ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a4c0037dea47028a61cb9f3af54f02ff4">writeMsgEnd</a> (UartOpcodeTx opCode, UartProtocol::Encrypt encrypt=UartProtocol::ENCRYPT_ACCORDING_TO_TYPE)</td></tr>
+<tr class="memitem:a4c0037dea47028a61cb9f3af54f02ff4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a4c0037dea47028a61cb9f3af54f02ff4">writeMsgEnd</a> (<a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a> opCode, <a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a> encrypt=<a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23ad48a7e1cffa49bab2d51c2e32b2ed824">UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</a>)</td></tr>
 <tr class="memdesc:a4c0037dea47028a61cb9f3af54f02ff4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a msg over UART in a streaming manner.  <a href="classUartHandler.html#a4c0037dea47028a61cb9f3af54f02ff4">More...</a><br /></td></tr>
 <tr class="separator:a4c0037dea47028a61cb9f3af54f02ff4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc38ee8ff0dd725d80ca75d44830ef16"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#afc38ee8ff0dd725d80ca75d44830ef16">onRead</a> (uint8_t val)</td></tr>
@@ -158,10 +161,127 @@ ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>writeMsg</b> (U
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ace0538cb46ec413eb7924eeea5ce419e"><td class="memItemLeft" align="right" valign="top"><a id="ace0538cb46ec413eb7924eeea5ce419e" name="ace0538cb46ec413eb7924eeea5ce419e"></a>
-static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:ace0538cb46ec413eb7924eeea5ce419e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) of this class. <br /></td></tr>
+<tr class="memitem:ace0538cb46ec413eb7924eeea5ce419e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#ace0538cb46ec413eb7924eeea5ce419e">getInstance</a> ()</td></tr>
+<tr class="memdesc:ace0538cb46ec413eb7924eeea5ce419e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) of this class.  <a href="classUartHandler.html#ace0538cb46ec413eb7924eeea5ce419e">More...</a><br /></td></tr>
 <tr class="separator:ace0538cb46ec413eb7924eeea5ce419e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a0debe434d7d9f4831e9f1267ee27252b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a0debe434d7d9f4831e9f1267ee27252b">UartHandler</a> ()=default</td></tr>
+<tr class="memdesc:a0debe434d7d9f4831e9f1267ee27252b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classUartHandler.html#a0debe434d7d9f4831e9f1267ee27252b">More...</a><br /></td></tr>
+<tr class="separator:a0debe434d7d9f4831e9f1267ee27252b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeaf3d3951f4a77f3b306c2d32b13e11a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#aeaf3d3951f4a77f3b306c2d32b13e11a">UartHandler</a> (<a class="el" href="classUartHandler.html">UartHandler</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:aeaf3d3951f4a77f3b306c2d32b13e11a"><td class="mdescLeft">&#160;</td><td class="mdescRight">This class is singleton, deny implementation.  <a href="classUartHandler.html#aeaf3d3951f4a77f3b306c2d32b13e11a">More...</a><br /></td></tr>
+<tr class="separator:aeaf3d3951f4a77f3b306c2d32b13e11a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2634b6a2fabc8d15bbeb529cd50b1830"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a2634b6a2fabc8d15bbeb529cd50b1830">operator=</a> (<a class="el" href="classUartHandler.html">UartHandler</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:a2634b6a2fabc8d15bbeb529cd50b1830"><td class="mdescLeft">&#160;</td><td class="mdescRight">This class is singleton, deny implementation.  <a href="classUartHandler.html#a2634b6a2fabc8d15bbeb529cd50b1830">More...</a><br /></td></tr>
+<tr class="separator:a2634b6a2fabc8d15bbeb529cd50b1830"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ea3fe9870afae4d8197f88e2fab80f8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a3ea3fe9870afae4d8197f88e2fab80f8">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a600087449ca2a14b73314822baca5fe9">CONFIG_CROWNSTONE_ID</a>) _stoneId=0</td></tr>
+<tr class="memdesc:a3ea3fe9870afae4d8197f88e2fab80f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stone ID, part of the msg header.  <a href="classUartHandler.html#a3ea3fe9870afae4d8197f88e2fab80f8">More...</a><br /></td></tr>
+<tr class="separator:a3ea3fe9870afae4d8197f88e2fab80f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a24c6fa3c7c6801a363d5ddb152a233"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a0a24c6fa3c7c6801a363d5ddb152a233">writeStartByte</a> ()</td></tr>
+<tr class="memdesc:a0a24c6fa3c7c6801a363d5ddb152a233"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the start byte.  <a href="classUartHandler.html#a0a24c6fa3c7c6801a363d5ddb152a233">More...</a><br /></td></tr>
+<tr class="separator:a0a24c6fa3c7c6801a363d5ddb152a233"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e1f32d28780efccf06292c16012d407"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a4e1f32d28780efccf06292c16012d407">writeBytes</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> data, bool updateCrc)</td></tr>
+<tr class="memdesc:a4e1f32d28780efccf06292c16012d407"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write bytes to UART.  <a href="classUartHandler.html#a4e1f32d28780efccf06292c16012d407">More...</a><br /></td></tr>
+<tr class="separator:a4e1f32d28780efccf06292c16012d407"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8a5cd401c46cbcb9a42b8d74b452379"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#ac8a5cd401c46cbcb9a42b8d74b452379">writeWrapperStart</a> (<a class="el" href="cs__UartProtocol_8h.html#ad31ba3e5fdea11794f1863c70578e601">UartMsgType</a> msgType, uint16_t payloadSize)</td></tr>
+<tr class="memdesc:ac8a5cd401c46cbcb9a42b8d74b452379"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes wrapper header (including start and size), and initializes CRC.  <a href="classUartHandler.html#ac8a5cd401c46cbcb9a42b8d74b452379">More...</a><br /></td></tr>
+<tr class="separator:ac8a5cd401c46cbcb9a42b8d74b452379"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fe36702430a9debbc9150522b1600b3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a1fe36702430a9debbc9150522b1600b3">mustEncrypt</a> (<a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a> encrypt, <a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a> opCode)</td></tr>
+<tr class="memdesc:a1fe36702430a9debbc9150522b1600b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether to encrypt an outgoing msg.  <a href="classUartHandler.html#a1fe36702430a9debbc9150522b1600b3">More...</a><br /></td></tr>
+<tr class="separator:a1fe36702430a9debbc9150522b1600b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9966890a7960c422d44f54d74464629"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#ae9966890a7960c422d44f54d74464629">mustBeEncrypted</a> (<a class="el" href="cs__UartOpcodes_8h.html#ace6e382b1155379f769fa4b482ccc8b3">UartOpcodeRx</a> opCode)</td></tr>
+<tr class="memdesc:ae9966890a7960c422d44f54d74464629"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether an incoming msg must've been encrypted.  <a href="classUartHandler.html#ae9966890a7960c422d44f54d74464629">More...</a><br /></td></tr>
+<tr class="separator:ae9966890a7960c422d44f54d74464629"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab619f6722aebc80b527627d82e190797"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#ab619f6722aebc80b527627d82e190797">getEncryptedBufferSize</a> (<a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> uartMsgSize)</td></tr>
+<tr class="memdesc:ab619f6722aebc80b527627d82e190797"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get required buffer size, given the size of a uart msg.  <a href="classUartHandler.html#ab619f6722aebc80b527627d82e190797">More...</a><br /></td></tr>
+<tr class="separator:ab619f6722aebc80b527627d82e190797"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd63da67bee47b026f479520ea836301"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#acd63da67bee47b026f479520ea836301">writeEncryptedStart</a> (<a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> uartMsgSize)</td></tr>
+<tr class="memdesc:acd63da67bee47b026f479520ea836301"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write encrypted header, and update CRC.  <a href="classUartHandler.html#acd63da67bee47b026f479520ea836301">More...</a><br /></td></tr>
+<tr class="separator:acd63da67bee47b026f479520ea836301"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac61fa8df45ab41a46e41a2bef5c79060"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#ac61fa8df45ab41a46e41a2bef5c79060">writeEncryptedPart</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> data)</td></tr>
+<tr class="memdesc:ac61fa8df45ab41a46e41a2bef5c79060"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt given data and write it to UART.  <a href="classUartHandler.html#ac61fa8df45ab41a46e41a2bef5c79060">More...</a><br /></td></tr>
+<tr class="separator:ac61fa8df45ab41a46e41a2bef5c79060"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9540e18ba45395ead32193f56ed645d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#af9540e18ba45395ead32193f56ed645d">writeEncryptedEnd</a> ()</td></tr>
+<tr class="memdesc:af9540e18ba45395ead32193f56ed645d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write last encryption block, and update CRC.  <a href="classUartHandler.html#af9540e18ba45395ead32193f56ed645d">More...</a><br /></td></tr>
+<tr class="separator:af9540e18ba45395ead32193f56ed645d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1cbd1406a94096970a81df137f62177"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#ab1cbd1406a94096970a81df137f62177">writeEncryptedBlock</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> key)</td></tr>
+<tr class="memdesc:ab1cbd1406a94096970a81df137f62177"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt 1 block of data from encryption buffer, update CRC, and write to uart.  <a href="classUartHandler.html#ab1cbd1406a94096970a81df137f62177">More...</a><br /></td></tr>
+<tr class="separator:ab1cbd1406a94096970a81df137f62177"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45657efcd08ce2e21d5e50fd93d82e1e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a45657efcd08ce2e21d5e50fd93d82e1e">writeErrorReplyStatus</a> ()</td></tr>
+<tr class="memdesc:a45657efcd08ce2e21d5e50fd93d82e1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write an error reply: status.  <a href="classUartHandler.html#a45657efcd08ce2e21d5e50fd93d82e1e">More...</a><br /></td></tr>
+<tr class="separator:a45657efcd08ce2e21d5e50fd93d82e1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37d4e7b084040ae049825c3f807bc046"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a37d4e7b084040ae049825c3f807bc046">handleMsg</a> (uint8_t *data, uint16_t size)</td></tr>
+<tr class="memdesc:a37d4e7b084040ae049825c3f807bc046"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles read msgs.  <a href="classUartHandler.html#a37d4e7b084040ae049825c3f807bc046">More...</a><br /></td></tr>
+<tr class="separator:a37d4e7b084040ae049825c3f807bc046"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01f81148a9206e059547c2286197bd27"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a01f81148a9206e059547c2286197bd27">handleEncryptedUartMsg</a> (uint8_t *data, uint16_t size)</td></tr>
+<tr class="memdesc:a01f81148a9206e059547c2286197bd27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles encrypted UART msg.  <a href="classUartHandler.html#a01f81148a9206e059547c2286197bd27">More...</a><br /></td></tr>
+<tr class="separator:a01f81148a9206e059547c2286197bd27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a84936ccf2866ed800ff3fe073f8a58"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a2a84936ccf2866ed800ff3fe073f8a58">handleUartMsg</a> (uint8_t *data, uint16_t size, <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel)</td></tr>
+<tr class="memdesc:a2a84936ccf2866ed800ff3fe073f8a58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles unencrypted UART msg.  <a href="classUartHandler.html#a2a84936ccf2866ed800ff3fe073f8a58">More...</a><br /></td></tr>
+<tr class="separator:a2a84936ccf2866ed800ff3fe073f8a58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1aa140b42b44aec0efa2f5e071a37434"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a1aa140b42b44aec0efa2f5e071a37434">resetReadBuf</a> ()</td></tr>
+<tr class="memdesc:a1aa140b42b44aec0efa2f5e071a37434"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the read buffer and status.  <a href="classUartHandler.html#a1aa140b42b44aec0efa2f5e071a37434">More...</a><br /></td></tr>
+<tr class="separator:a1aa140b42b44aec0efa2f5e071a37434"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30e5bf011982a68fdc554f5269eb75dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a30e5bf011982a68fdc554f5269eb75dd">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
+<tr class="memdesc:a30e5bf011982a68fdc554f5269eb75dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events as <a class="el" href="classEventListener.html" title="Event listener.">EventListener</a>.  <a href="classUartHandler.html#a30e5bf011982a68fdc554f5269eb75dd">More...</a><br /></td></tr>
+<tr class="separator:a30e5bf011982a68fdc554f5269eb75dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a71292935d354993dc60de2fc7fd8814d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a71292935d354993dc60de2fc7fd8814d">_initialized</a> = false</td></tr>
+<tr class="separator:a71292935d354993dc60de2fc7fd8814d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e0b2d6a6d35901f5fad36ed67ee1222"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classUartCommandHandler.html">UartCommandHandler</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a7e0b2d6a6d35901f5fad36ed67ee1222">_commandHandler</a></td></tr>
+<tr class="separator:a7e0b2d6a6d35901f5fad36ed67ee1222"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b83c3f6956fe152230045e2ef3c4bf9"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a2b83c3f6956fe152230045e2ef3c4bf9">_readBuffer</a> = nullptr</td></tr>
+<tr class="memdesc:a2b83c3f6956fe152230045e2ef3c4bf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the read buffer.  <a href="classUartHandler.html#a2b83c3f6956fe152230045e2ef3c4bf9">More...</a><br /></td></tr>
+<tr class="separator:a2b83c3f6956fe152230045e2ef3c4bf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bae4699f3d87bcab200c602d6b86059"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a1bae4699f3d87bcab200c602d6b86059">_readBufferIdx</a> = 0</td></tr>
+<tr class="memdesc:a1bae4699f3d87bcab200c602d6b86059"><td class="mdescLeft">&#160;</td><td class="mdescRight">Where to read the next byte into the read buffer.  <a href="classUartHandler.html#a1bae4699f3d87bcab200c602d6b86059">More...</a><br /></td></tr>
+<tr class="separator:a1bae4699f3d87bcab200c602d6b86059"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a329c7fd6f5baee5489b92232e70c754d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a329c7fd6f5baee5489b92232e70c754d">_startedReading</a> = false</td></tr>
+<tr class="memdesc:a329c7fd6f5baee5489b92232e70c754d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keeps up whether we started reading into the read buffer.  <a href="classUartHandler.html#a329c7fd6f5baee5489b92232e70c754d">More...</a><br /></td></tr>
+<tr class="separator:a329c7fd6f5baee5489b92232e70c754d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f9a28f1f95ffd136152eb1aa9f9425c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a4f9a28f1f95ffd136152eb1aa9f9425c">_escapeNextByte</a> = false</td></tr>
+<tr class="memdesc:a4f9a28f1f95ffd136152eb1aa9f9425c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keeps up whether to escape the next read byte.  <a href="classUartHandler.html#a4f9a28f1f95ffd136152eb1aa9f9425c">More...</a><br /></td></tr>
+<tr class="separator:a4f9a28f1f95ffd136152eb1aa9f9425c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b499bbe51e5f41b42ce675c2ad5a881"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a0b499bbe51e5f41b42ce675c2ad5a881">_sizeToRead</a> = 0</td></tr>
+<tr class="memdesc:a0b499bbe51e5f41b42ce675c2ad5a881"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of the msg to read, including header and tail, excluding start byte.  <a href="classUartHandler.html#a0b499bbe51e5f41b42ce675c2ad5a881">More...</a><br /></td></tr>
+<tr class="separator:a0b499bbe51e5f41b42ce675c2ad5a881"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa354b008877f3ade9ab97f975a7e0b26"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#aa354b008877f3ade9ab97f975a7e0b26">_readBusy</a> = false</td></tr>
+<tr class="memdesc:aa354b008877f3ade9ab97f975a7e0b26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether reading is busy (if true, can't read anything, until the read buffer was processed)  <a href="classUartHandler.html#aa354b008877f3ade9ab97f975a7e0b26">More...</a><br /></td></tr>
+<tr class="separator:aa354b008877f3ade9ab97f975a7e0b26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abee4fb30d13614ba5619b5ad8208d2e6"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#abee4fb30d13614ba5619b5ad8208d2e6">_writeBuffer</a> = nullptr</td></tr>
+<tr class="memdesc:abee4fb30d13614ba5619b5ad8208d2e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write buffer. Currently only used as result buffer for control commands.  <a href="classUartHandler.html#abee4fb30d13614ba5619b5ad8208d2e6">More...</a><br /></td></tr>
+<tr class="separator:abee4fb30d13614ba5619b5ad8208d2e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9be713e79c150a913a5ccd3dd1e7957"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#aa9be713e79c150a913a5ccd3dd1e7957">_encryptionBuffer</a> = nullptr</td></tr>
+<tr class="memdesc:aa9be713e79c150a913a5ccd3dd1e7957"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encryption buffer.  <a href="classUartHandler.html#aa9be713e79c150a913a5ccd3dd1e7957">More...</a><br /></td></tr>
+<tr class="separator:aa9be713e79c150a913a5ccd3dd1e7957"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f238ae8422f7b712bea658071e56fc5"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a2f238ae8422f7b712bea658071e56fc5">_encryptionBufferWritten</a> = 0</td></tr>
+<tr class="memdesc:a2f238ae8422f7b712bea658071e56fc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of bytes written to the encryption buffer currently.  <a href="classUartHandler.html#a2f238ae8422f7b712bea658071e56fc5">More...</a><br /></td></tr>
+<tr class="separator:a2f238ae8422f7b712bea658071e56fc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cb22b1da3e31ef635ad797a4e278d90"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a6cb22b1da3e31ef635ad797a4e278d90">_encryptionBlocksWritten</a> = 0</td></tr>
+<tr class="memdesc:a6cb22b1da3e31ef635ad797a4e278d90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of blocks encrypted so far.  <a href="classUartHandler.html#a6cb22b1da3e31ef635ad797a4e278d90">More...</a><br /></td></tr>
+<tr class="separator:a6cb22b1da3e31ef635ad797a4e278d90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc00783769118a7d1cf772690d0b0cf0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structencryption__nonce__t.html">encryption_nonce_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#afc00783769118a7d1cf772690d0b0cf0">_writeNonce</a></td></tr>
+<tr class="memdesc:afc00783769118a7d1cf772690d0b0cf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Packet nonce to use for writing current msg.  <a href="classUartHandler.html#afc00783769118a7d1cf772690d0b0cf0">More...</a><br /></td></tr>
+<tr class="separator:afc00783769118a7d1cf772690d0b0cf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a343d87a05af8b142482b9ddb58229779"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUartHandler.html#a343d87a05af8b142482b9ddb58229779">_crc</a></td></tr>
+<tr class="memdesc:a343d87a05af8b142482b9ddb58229779"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keeps up the crc so far.  <a href="classUartHandler.html#a343d87a05af8b142482b9ddb58229779">More...</a><br /></td></tr>
+<tr class="separator:a343d87a05af8b142482b9ddb58229779"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that implements the binary UART protocol. </p>
@@ -172,9 +292,196 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
 <li>Encrypts outgoing UART messages.</li>
 <li>Decrypts incoming UART messages. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a0debe434d7d9f4831e9f1267ee27252b" name="a0debe434d7d9f4831e9f1267ee27252b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0debe434d7d9f4831e9f1267ee27252b">&#9670;&#160;</a></span>UartHandler() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUartHandler.html">UartHandler::UartHandler</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor. </p>
+
+</div>
+</div>
+<a id="aeaf3d3951f4a77f3b306c2d32b13e11a" name="aeaf3d3951f4a77f3b306c2d32b13e11a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeaf3d3951f4a77f3b306c2d32b13e11a">&#9670;&#160;</a></span>UartHandler() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUartHandler.html">UartHandler::UartHandler</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classUartHandler.html">UartHandler</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>This class is singleton, deny implementation. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ab619f6722aebc80b527627d82e190797" name="ab619f6722aebc80b527627d82e190797"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab619f6722aebc80b527627d82e190797">&#9670;&#160;</a></span>getEncryptedBufferSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> UartHandler::getEncryptedBufferSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td>
+          <td class="paramname"><em>uartMsgSize</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get required buffer size, given the size of a uart msg. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">uartMsgSize</td><td>Size of the msg to encrypt. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Size of the buffer, includes size of encryption headers. </dd></dl>
+
+</div>
+</div>
+<a id="ace0538cb46ec413eb7924eeea5ce419e" name="ace0538cb46ec413eb7924eeea5ce419e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace0538cb46ec413eb7924eeea5ce419e">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classUartHandler.html">UartHandler</a> &amp; UartHandler::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets a static singleton (no dynamic memory allocation) of this class. </p>
+
+</div>
+</div>
+<a id="a01f81148a9206e059547c2286197bd27" name="a01f81148a9206e059547c2286197bd27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01f81148a9206e059547c2286197bd27">&#9670;&#160;</a></span>handleEncryptedUartMsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartHandler::handleEncryptedUartMsg </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handles encrypted UART msg. </p>
+<p >Data includes encryption header. </p>
+
+</div>
+</div>
+<a id="a30e5bf011982a68fdc554f5269eb75dd" name="a30e5bf011982a68fdc554f5269eb75dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30e5bf011982a68fdc554f5269eb75dd">&#9670;&#160;</a></span>handleEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartHandler::handleEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classevent__t.html">event_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle events as <a class="el" href="classEventListener.html" title="Event listener.">EventListener</a>. </p>
+
+<p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
 <a id="a63d1f6e983a7d8f2940b821f97fd4926" name="a63d1f6e983a7d8f2940b821f97fd4926"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a63d1f6e983a7d8f2940b821f97fd4926">&#9670;&#160;</a></span>handleMsg()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a63d1f6e983a7d8f2940b821f97fd4926">&#9670;&#160;</a></span>handleMsg() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -194,6 +501,90 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
 
 </div>
 </div>
+<a id="a37d4e7b084040ae049825c3f807bc046" name="a37d4e7b084040ae049825c3f807bc046"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37d4e7b084040ae049825c3f807bc046">&#9670;&#160;</a></span>handleMsg() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartHandler::handleMsg </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handles read msgs. </p>
+<p >Data starts after size header, and includes wrapper header and tail (CRC). </p>
+
+</div>
+</div>
+<a id="a2a84936ccf2866ed800ff3fe073f8a58" name="a2a84936ccf2866ed800ff3fe073f8a58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a84936ccf2866ed800ff3fe073f8a58">&#9670;&#160;</a></span>handleUartMsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartHandler::handleUartMsg </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>accessLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handles unencrypted UART msg. </p>
+<p >Data includes uart msg header. </p>
+
+</div>
+</div>
 <a id="a20dd48e5e5ded3b30464d46e8adaebe9" name="a20dd48e5e5ded3b30464d46e8adaebe9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a20dd48e5e5ded3b30464d46e8adaebe9">&#9670;&#160;</a></span>init()</h2>
 
@@ -203,7 +594,7 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
         <tr>
           <td class="memname">void UartHandler::init </td>
           <td>(</td>
-          <td class="paramtype">serial_enable_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__SerialTypes_8h.html#a346130c6654d55e5a721d226438f73d7">serial_enable_t</a>&#160;</td>
           <td class="paramname"><em>serialEnabled</em></td><td>)</td>
           <td></td>
         </tr>
@@ -216,6 +607,72 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
 <li>Reads settings from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>.</li>
 <li>Starts listening for events </li>
 </ul>
+
+</div>
+</div>
+<a id="ae9966890a7960c422d44f54d74464629" name="ae9966890a7960c422d44f54d74464629"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9966890a7960c422d44f54d74464629">&#9670;&#160;</a></span>mustBeEncrypted()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartHandler::mustBeEncrypted </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__UartOpcodes_8h.html#ace6e382b1155379f769fa4b482ccc8b3">UartOpcodeRx</a>&#160;</td>
+          <td class="paramname"><em>opCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether an incoming msg must've been encrypted. </p>
+
+</div>
+</div>
+<a id="a1fe36702430a9debbc9150522b1600b3" name="a1fe36702430a9debbc9150522b1600b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fe36702430a9debbc9150522b1600b3">&#9670;&#160;</a></span>mustEncrypt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartHandler::mustEncrypt </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a>&#160;</td>
+          <td class="paramname"><em>encrypt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a>&#160;</td>
+          <td class="paramname"><em>opCode</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether to encrypt an outgoing msg. </p>
 
 </div>
 </div>
@@ -246,16 +703,326 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
 
 </div>
 </div>
-<a id="a1ab2ac1b3c1ddb8911409469c58de9df" name="a1ab2ac1b3c1ddb8911409469c58de9df"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1ab2ac1b3c1ddb8911409469c58de9df">&#9670;&#160;</a></span>writeMsg()</h2>
+<a id="a2634b6a2fabc8d15bbeb529cd50b1830" name="a2634b6a2fabc8d15bbeb529cd50b1830"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2634b6a2fabc8d15bbeb529cd50b1830">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartHandler::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classUartHandler.html">UartHandler</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>This class is singleton, deny implementation. </p>
+
+</div>
+</div>
+<a id="a1aa140b42b44aec0efa2f5e071a37434" name="a1aa140b42b44aec0efa2f5e071a37434"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1aa140b42b44aec0efa2f5e071a37434">&#9670;&#160;</a></span>resetReadBuf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartHandler::resetReadBuf </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reset the read buffer and status. </p>
+
+</div>
+</div>
+<a id="a3ea3fe9870afae4d8197f88e2fab80f8" name="a3ea3fe9870afae4d8197f88e2fab80f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ea3fe9870afae4d8197f88e2fab80f8">&#9670;&#160;</a></span>TYPIFY()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">UartHandler::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a600087449ca2a14b73314822baca5fe9">CONFIG_CROWNSTONE_ID</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stone ID, part of the msg header. </p>
+
+</div>
+</div>
+<a id="a4e1f32d28780efccf06292c16012d407" name="a4e1f32d28780efccf06292c16012d407"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e1f32d28780efccf06292c16012d407">&#9670;&#160;</a></span>writeBytes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UartHandler::writeBytes </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>updateCrc</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write bytes to UART. </p>
+<p >Values get escaped when necessary.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>Data to write to UART. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">updateCrc</td><td>Whether to update the CRC with thise data. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Result code. </dd></dl>
+
+</div>
+</div>
+<a id="ab1cbd1406a94096970a81df137f62177" name="ab1cbd1406a94096970a81df137f62177"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1cbd1406a94096970a81df137f62177">&#9670;&#160;</a></span>writeEncryptedBlock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UartHandler::writeEncryptedBlock </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>key</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Encrypt 1 block of data from encryption buffer, update CRC, and write to uart. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>Key to use for encryption. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Return code. </dd></dl>
+
+</div>
+</div>
+<a id="af9540e18ba45395ead32193f56ed645d" name="af9540e18ba45395ead32193f56ed645d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9540e18ba45395ead32193f56ed645d">&#9670;&#160;</a></span>writeEncryptedEnd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UartHandler::writeEncryptedEnd </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write last encryption block, and update CRC. </p>
+
+</div>
+</div>
+<a id="ac61fa8df45ab41a46e41a2bef5c79060" name="ac61fa8df45ab41a46e41a2bef5c79060"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac61fa8df45ab41a46e41a2bef5c79060">&#9670;&#160;</a></span>writeEncryptedPart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UartHandler::writeEncryptedPart </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Encrypt given data and write it to UART. </p>
+<p >Also updates the CRC.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>Data to encrypt and write. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Return code. </dd></dl>
+
+</div>
+</div>
+<a id="acd63da67bee47b026f479520ea836301" name="acd63da67bee47b026f479520ea836301"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd63da67bee47b026f479520ea836301">&#9670;&#160;</a></span>writeEncryptedStart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UartHandler::writeEncryptedStart </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td>
+          <td class="paramname"><em>uartMsgSize</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write encrypted header, and update CRC. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">uartMsgSize</td><td>Size of the msg to encrypt. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Result code. </dd></dl>
+
+</div>
+</div>
+<a id="a45657efcd08ce2e21d5e50fd93d82e1e" name="a45657efcd08ce2e21d5e50fd93d82e1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45657efcd08ce2e21d5e50fd93d82e1e">&#9670;&#160;</a></span>writeErrorReplyStatus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void UartHandler::writeErrorReplyStatus </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write an error reply: status. </p>
+
+</div>
+</div>
+<a id="a284f1e4a897211f48338e0ba7c29eb19" name="a284f1e4a897211f48338e0ba7c29eb19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a284f1e4a897211f48338e0ba7c29eb19">&#9670;&#160;</a></span>writeMsg() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">ret_code_t UartHandler::writeMsg </td>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UartHandler::writeMsg </td>
           <td>(</td>
-          <td class="paramtype">UartOpcodeTx&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a>&#160;</td>
+          <td class="paramname"><em>opCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Convenience method to write a msg over UART without payload data. </p>
+
+</div>
+</div>
+<a id="a1ab2ac1b3c1ddb8911409469c58de9df" name="a1ab2ac1b3c1ddb8911409469c58de9df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ab2ac1b3c1ddb8911409469c58de9df">&#9670;&#160;</a></span>writeMsg() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UartHandler::writeMsg </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a>&#160;</td>
           <td class="paramname"><em>opCode</em>, </td>
         </tr>
         <tr>
@@ -273,8 +1040,8 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">UartProtocol::Encrypt&#160;</td>
-          <td class="paramname"><em>encrypt</em> = <code>UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</code>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a>&#160;</td>
+          <td class="paramname"><em>encrypt</em> = <code><a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23ad48a7e1cffa49bab2d51c2e32b2ed824">UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -304,16 +1071,16 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">ret_code_t UartHandler::writeMsgEnd </td>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UartHandler::writeMsgEnd </td>
           <td>(</td>
-          <td class="paramtype">UartOpcodeTx&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a>&#160;</td>
           <td class="paramname"><em>opCode</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">UartProtocol::Encrypt&#160;</td>
-          <td class="paramname"><em>encrypt</em> = <code>UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</code>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a>&#160;</td>
+          <td class="paramname"><em>encrypt</em> = <code><a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23ad48a7e1cffa49bab2d51c2e32b2ed824">UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -342,9 +1109,9 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">ret_code_t UartHandler::writeMsgPart </td>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UartHandler::writeMsgPart </td>
           <td>(</td>
-          <td class="paramtype">UartOpcodeTx&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a>&#160;</td>
           <td class="paramname"><em>opCode</em>, </td>
         </tr>
         <tr>
@@ -362,8 +1129,8 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">UartProtocol::Encrypt&#160;</td>
-          <td class="paramname"><em>encrypt</em> = <code>UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</code>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a>&#160;</td>
+          <td class="paramname"><em>encrypt</em> = <code><a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23ad48a7e1cffa49bab2d51c2e32b2ed824">UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -394,9 +1161,9 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">ret_code_t UartHandler::writeMsgStart </td>
+          <td class="memname"><a class="el" href="cs__Nordic_8h.html#af6c20fb483036617204f12e99e0b997b">ret_code_t</a> UartHandler::writeMsgStart </td>
           <td>(</td>
-          <td class="paramtype">UartOpcodeTx&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76">UartOpcodeTx</a>&#160;</td>
           <td class="paramname"><em>opCode</em>, </td>
         </tr>
         <tr>
@@ -408,8 +1175,8 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">UartProtocol::Encrypt&#160;</td>
-          <td class="paramname"><em>encrypt</em> = <code>UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</code>&#160;</td>
+          <td class="paramtype"><a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23">UartProtocol::Encrypt</a>&#160;</td>
+          <td class="paramname"><em>encrypt</em> = <code><a class="el" href="namespaceUartProtocol.html#a40ae47bfe8accde2ee3c37032243ba23ad48a7e1cffa49bab2d51c2e32b2ed824">UartProtocol::ENCRYPT_ACCORDING_TO_TYPE</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -429,6 +1196,407 @@ static <a class="el" href="classUartHandler.html">UartHandler</a> &amp;&#160;</t
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a0a24c6fa3c7c6801a363d5ddb152a233" name="a0a24c6fa3c7c6801a363d5ddb152a233"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a24c6fa3c7c6801a363d5ddb152a233">&#9670;&#160;</a></span>writeStartByte()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UartHandler::writeStartByte </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write the start byte. </p>
+
+</div>
+</div>
+<a id="ac8a5cd401c46cbcb9a42b8d74b452379" name="ac8a5cd401c46cbcb9a42b8d74b452379"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8a5cd401c46cbcb9a42b8d74b452379">&#9670;&#160;</a></span>writeWrapperStart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> UartHandler::writeWrapperStart </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__UartProtocol_8h.html#ad31ba3e5fdea11794f1863c70578e601">UartMsgType</a>&#160;</td>
+          <td class="paramname"><em>msgType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>payloadSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Writes wrapper header (including start and size), and initializes CRC. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a7e0b2d6a6d35901f5fad36ed67ee1222" name="a7e0b2d6a6d35901f5fad36ed67ee1222"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e0b2d6a6d35901f5fad36ed67ee1222">&#9670;&#160;</a></span>_commandHandler</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUartCommandHandler.html">UartCommandHandler</a> UartHandler::_commandHandler</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a343d87a05af8b142482b9ddb58229779" name="a343d87a05af8b142482b9ddb58229779"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a343d87a05af8b142482b9ddb58229779">&#9670;&#160;</a></span>_crc</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t UartHandler::_crc</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keeps up the crc so far. </p>
+
+</div>
+</div>
+<a id="a6cb22b1da3e31ef635ad797a4e278d90" name="a6cb22b1da3e31ef635ad797a4e278d90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6cb22b1da3e31ef635ad797a4e278d90">&#9670;&#160;</a></span>_encryptionBlocksWritten</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t UartHandler::_encryptionBlocksWritten = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of blocks encrypted so far. </p>
+
+</div>
+</div>
+<a id="aa9be713e79c150a913a5ccd3dd1e7957" name="aa9be713e79c150a913a5ccd3dd1e7957"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9be713e79c150a913a5ccd3dd1e7957">&#9670;&#160;</a></span>_encryptionBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t* UartHandler::_encryptionBuffer = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Encryption buffer. </p>
+<p >Used to encrypt outgoing msgs.</p>
+<p >Only has to be 1 block size large, as we can stream the writes. </p>
+
+</div>
+</div>
+<a id="a2f238ae8422f7b712bea658071e56fc5" name="a2f238ae8422f7b712bea658071e56fc5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f238ae8422f7b712bea658071e56fc5">&#9670;&#160;</a></span>_encryptionBufferWritten</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t UartHandler::_encryptionBufferWritten = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of bytes written to the encryption buffer currently. </p>
+
+</div>
+</div>
+<a id="a4f9a28f1f95ffd136152eb1aa9f9425c" name="a4f9a28f1f95ffd136152eb1aa9f9425c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f9a28f1f95ffd136152eb1aa9f9425c">&#9670;&#160;</a></span>_escapeNextByte</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartHandler::_escapeNextByte = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keeps up whether to escape the next read byte. </p>
+
+</div>
+</div>
+<a id="a71292935d354993dc60de2fc7fd8814d" name="a71292935d354993dc60de2fc7fd8814d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71292935d354993dc60de2fc7fd8814d">&#9670;&#160;</a></span>_initialized</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartHandler::_initialized = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2b83c3f6956fe152230045e2ef3c4bf9" name="a2b83c3f6956fe152230045e2ef3c4bf9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b83c3f6956fe152230045e2ef3c4bf9">&#9670;&#160;</a></span>_readBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t* UartHandler::_readBuffer = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Pointer to the read buffer. </p>
+
+</div>
+</div>
+<a id="a1bae4699f3d87bcab200c602d6b86059" name="a1bae4699f3d87bcab200c602d6b86059"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bae4699f3d87bcab200c602d6b86059">&#9670;&#160;</a></span>_readBufferIdx</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t UartHandler::_readBufferIdx = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Where to read the next byte into the read buffer. </p>
+
+</div>
+</div>
+<a id="aa354b008877f3ade9ab97f975a7e0b26" name="aa354b008877f3ade9ab97f975a7e0b26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa354b008877f3ade9ab97f975a7e0b26">&#9670;&#160;</a></span>_readBusy</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartHandler::_readBusy = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether reading is busy (if true, can't read anything, until the read buffer was processed) </p>
+
+</div>
+</div>
+<a id="a0b499bbe51e5f41b42ce675c2ad5a881" name="a0b499bbe51e5f41b42ce675c2ad5a881"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b499bbe51e5f41b42ce675c2ad5a881">&#9670;&#160;</a></span>_sizeToRead</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t UartHandler::_sizeToRead = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Size of the msg to read, including header and tail, excluding start byte. </p>
+<p >Once set, the read buffer index is set to 0. </p>
+
+</div>
+</div>
+<a id="a329c7fd6f5baee5489b92232e70c754d" name="a329c7fd6f5baee5489b92232e70c754d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a329c7fd6f5baee5489b92232e70c754d">&#9670;&#160;</a></span>_startedReading</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool UartHandler::_startedReading = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keeps up whether we started reading into the read buffer. </p>
+
+</div>
+</div>
+<a id="abee4fb30d13614ba5619b5ad8208d2e6" name="abee4fb30d13614ba5619b5ad8208d2e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abee4fb30d13614ba5619b5ad8208d2e6">&#9670;&#160;</a></span>_writeBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t* UartHandler::_writeBuffer = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write buffer. Currently only used as result buffer for control commands. </p>
+
+</div>
+</div>
+<a id="afc00783769118a7d1cf772690d0b0cf0" name="afc00783769118a7d1cf772690d0b0cf0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc00783769118a7d1cf772690d0b0cf0">&#9670;&#160;</a></span>_writeNonce</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structencryption__nonce__t.html">encryption_nonce_t</a> UartHandler::_writeNonce</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Packet nonce to use for writing current msg. </p>
 
 </div>
 </div>

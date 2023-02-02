@@ -1,4 +1,6 @@
 <map id="CuckooFilter" name="CuckooFilter">
-<area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr...." alt="" coords="11,79,112,104"/>
-<area shape="rect" id="node2" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,5,117,31"/>
+<area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr...." alt="" coords="60,181,161,207"/>
+<area shape="rect" id="node2" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,93,117,119"/>
+<area shape="rect" id="node3" href="$structcuckoo__filter__data__t.html" title="Data content of the cuckoo filter." alt="" coords="141,93,294,119"/>
+<area shape="rect" id="node4" href="$structcuckoo__extended__fingerprint__t.html" title="Representation of an object (O) in this filter comprises of a fingerprint (F) and a the bucket index ..." alt="" coords="106,5,329,31"/>
 </map>

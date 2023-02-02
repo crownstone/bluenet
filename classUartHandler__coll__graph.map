@@ -1,4 +1,6 @@
 <map id="UartHandler" name="UartHandler">
-<area shape="rect" id="node1" title="Class that implements the binary UART protocol." alt="" coords="10,79,111,104"/>
+<area shape="rect" id="node1" title="Class that implements the binary UART protocol." alt="" coords="174,93,275,119"/>
 <area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node3" href="$classUartCommandHandler.html" title=" " alt="" coords="141,5,309,31"/>
+<area shape="rect" id="node4" href="$structencryption__nonce__t.html" title="Nonce used for encryption." alt="" coords="333,5,482,31"/>
 </map>

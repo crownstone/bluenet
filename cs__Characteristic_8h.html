@@ -32,9 +32,9 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Bluenet
-   &#160;<span id="projectnumber">5.4.0</span>
+   &#160;<span id="projectnumber">5.7.0</span>
    </div>
-   <div id="projectbrief">Bluenet, the firmware for the Crownstone power outlet</div>
+   <div id="projectbrief">Bluenet, firmware for nRF52 smart home devices</div>
   </td>
  </tr>
  </tbody>
@@ -98,83 +98,79 @@ $(document).ready(function(){initNavTree('cs__Characteristic_8h.html',''); initR
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
-<a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#nested-classes">Classes</a>  </div>
   <div class="headertitle"><div class="title">cs_Characteristic.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-
-<p>Bluetooth Low Energy characteristics.  
-<a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;ble/cs_Nordic.h&gt;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="cs__CharacteristicBase_8h_source.html">ble/cs_CharacteristicBase.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__Nordic_8h_source.html">ble/cs_Nordic.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="cs__Service_8h_source.html">ble/cs_Service.h</a>&gt;</code><br />
-<code>#include &lt;ble/cs_UUID.h&gt;</code><br />
-<code>#include &lt;cfg/cs_Config.h&gt;</code><br />
-<code>#include &lt;cfg/cs_Strings.h&gt;</code><br />
-<code>#include &lt;common/cs_Types.h&gt;</code><br />
-<code>#include &lt;encryption/cs_ConnectionEncryption.h&gt;</code><br />
-<code>#include &lt;encryption/cs_KeysAndAccess.h&gt;</code><br />
-<code>#include &lt;logging/cs_Logger.h&gt;</code><br />
-<code>#include &lt;structs/buffer/cs_EncryptedBuffer.h&gt;</code><br />
-<code>#include &lt;third/std/function.h&gt;</code><br />
-<code>#include &lt;util/cs_BleError.h&gt;</code><br />
-<code>#include &lt;util/cs_Utils.h&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__UUID_8h_source.html">ble/cs_UUID.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__Config_8h_source.html">cfg/cs_Config.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__Strings_8h_source.html">cfg/cs_Strings.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__Types_8h_source.html">common/cs_Types.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__ConnectionEncryption_8h_source.html">encryption/cs_ConnectionEncryption.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__KeysAndAccess_8h_source.html">encryption/cs_KeysAndAccess.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__Logger_8h_source.html">logging/cs_Logger.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__EncryptedBuffer_8h_source.html">structs/buffer/cs_EncryptedBuffer.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="function_8h_source.html">third/std/function.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__BleError_8h_source.html">util/cs_BleError.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="cs__Utils_8h_source.html">util/cs_Utils.h</a>&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for cs_Characteristic.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="cs__Characteristic_8h__incl.png" border="0" usemap="#asource_2include_2ble_2cs__Characteristic_8h" alt=""/></div>
 <map name="asource_2include_2ble_2cs__Characteristic_8h" id="asource_2include_2ble_2cs__Characteristic_8h">
-<area shape="rect" title="Bluetooth Low Energy characteristics." alt="" coords="2461,5,2611,45"/>
-<area shape="rect" href="cs__Nordic_8h_source.html" title=" " alt="" coords="2087,255,2209,280"/>
-<area shape="rect" href="cs__Service_8h.html" title="BLE service." alt="" coords="2159,101,2286,126"/>
-<area shape="rect" href="cs__Strings_8h_source.html" title=" " alt="" coords="2418,255,2542,280"/>
-<area shape="rect" href="cs__BleError_8h_source.html" title=" " alt="" coords="2009,181,2141,207"/>
-<area shape="rect" href="cs__UUID_8h_source.html" title=" " alt="" coords="2165,181,2278,207"/>
-<area shape="rect" href="cs__Config_8h_source.html" title=" " alt="" coords="2798,255,2919,280"/>
-<area shape="rect" href="cs__Types_8h_source.html" title=" " alt="" coords="2725,181,2878,207"/>
-<area shape="rect" href="cs__ConnectionEncryption_8h_source.html" title=" " alt="" coords="2953,93,3143,133"/>
-<area shape="rect" href="cs__KeysAndAccess_8h_source.html" title=" " alt="" coords="2599,101,2828,126"/>
-<area shape="rect" href="cs__Logger_8h_source.html" title=" " alt="" coords="2405,181,2555,207"/>
-<area shape="rect" href="cs__EncryptedBuffer_8h_source.html" title=" " alt="" coords="3167,93,3366,133"/>
-<area shape="rect" href="function_8h_source.html" title=" " alt="" coords="3390,101,3535,126"/>
-<area shape="rect" href="cs__Utils_8h_source.html" title=" " alt="" coords="2362,101,2473,126"/>
-<area shape="rect" title=" " alt="" coords="5,328,155,353"/>
-<area shape="rect" title=" " alt="" coords="179,328,307,353"/>
-<area shape="rect" title=" " alt="" coords="331,328,418,353"/>
-<area shape="rect" title=" " alt="" coords="442,328,497,353"/>
-<area shape="rect" title=" " alt="" coords="521,328,636,353"/>
-<area shape="rect" title=" " alt="" coords="660,328,745,353"/>
-<area shape="rect" title=" " alt="" coords="770,328,857,353"/>
-<area shape="rect" title=" " alt="" coords="881,328,975,353"/>
-<area shape="rect" title=" " alt="" coords="999,328,1094,353"/>
-<area shape="rect" title=" " alt="" coords="1119,328,1199,353"/>
-<area shape="rect" title=" " alt="" coords="1223,328,1369,353"/>
-<area shape="rect" title=" " alt="" coords="1393,328,1497,353"/>
-<area shape="rect" title=" " alt="" coords="1522,328,1577,353"/>
-<area shape="rect" title=" " alt="" coords="1601,328,1652,353"/>
-<area shape="rect" title=" " alt="" coords="1676,328,1769,353"/>
-<area shape="rect" title=" " alt="" coords="1793,328,1884,353"/>
-<area shape="rect" title=" " alt="" coords="1909,328,2022,353"/>
-<area shape="rect" title=" " alt="" coords="2046,328,2133,353"/>
-<area shape="rect" title=" " alt="" coords="2157,328,2257,353"/>
-<area shape="rect" title=" " alt="" coords="2281,328,2367,353"/>
-<area shape="rect" title=" " alt="" coords="2392,328,2491,353"/>
-<area shape="rect" title=" " alt="" coords="2515,328,2597,353"/>
-<area shape="rect" title=" " alt="" coords="2621,328,2731,353"/>
-<area shape="rect" title=" " alt="" coords="2755,328,2866,353"/>
-<area shape="rect" title=" " alt="" coords="2890,328,2977,353"/>
-<area shape="rect" title=" " alt="" coords="3001,328,3095,353"/>
-<area shape="rect" title=" " alt="" coords="3119,328,3214,353"/>
-<area shape="rect" title=" " alt="" coords="3238,328,3341,353"/>
-<area shape="rect" title=" " alt="" coords="3365,328,3510,353"/>
-<area shape="rect" title=" " alt="" coords="3535,328,3625,353"/>
-<area shape="rect" title=" " alt="" coords="3649,328,3719,353"/>
-<area shape="rect" title=" " alt="" coords="3743,328,3812,353"/>
-<area shape="rect" title=" " alt="" coords="3837,328,3915,353"/>
-<area shape="rect" title=" " alt="" coords="3939,328,4037,353"/>
-<area shape="rect" title=" " alt="" coords="4061,328,4155,353"/>
-<area shape="rect" title=" " alt="" coords="4180,328,4265,353"/>
+<area shape="rect" title=" " alt="" coords="2201,5,2350,45"/>
+<area shape="rect" href="cs__CharacteristicBase_8h.html" title="Bluetooth Low Energy characteristics." alt="" coords="2291,101,2492,126"/>
+<area shape="rect" href="cs__Nordic_8h.html" title=" " alt="" coords="1937,357,2059,383"/>
+<area shape="rect" href="cs__Service_8h.html" title="BLE service." alt="" coords="2512,189,2639,214"/>
+<area shape="rect" href="cs__Strings_8h.html" title=" " alt="" coords="2021,277,2145,302"/>
+<area shape="rect" href="cs__BleError_8h.html" title=" " alt="" coords="2512,277,2644,302"/>
+<area shape="rect" href="cs__Types_8h.html" title=" " alt="" coords="2761,189,2915,214"/>
+<area shape="rect" href="cs__Config_8h.html" title=" " alt="" coords="3096,277,3217,302"/>
+<area shape="rect" href="cs__ConnectionEncryption_8h.html" title=" " alt="" coords="1807,269,1997,309"/>
+<area shape="rect" href="function_8h.html" title=" " alt="" coords="2085,189,2231,214"/>
+<area shape="rect" href="cs__UUID_8h.html" title=" " alt="" coords="2169,277,2283,302"/>
+<area shape="rect" href="cs__KeysAndAccess_8h.html" title=" " alt="" coords="2618,101,2847,126"/>
+<area shape="rect" href="cs__Logger_8h.html" title=" " alt="" coords="1808,189,1959,214"/>
+<area shape="rect" href="cs__EncryptedBuffer_8h.html" title=" " alt="" coords="2921,93,3120,133"/>
+<area shape="rect" href="cs__Utils_8h.html" title=" " alt="" coords="1797,101,1908,126"/>
+<area shape="rect" href="cs__CharacteristicStructs_8h.html" title=" " alt="" coords="2255,181,2437,221"/>
+<area shape="rect" title=" " alt="" coords="3602,431,3751,456"/>
+<area shape="rect" title=" " alt="" coords="3775,431,3903,456"/>
+<area shape="rect" title=" " alt="" coords="5,431,92,456"/>
+<area shape="rect" title=" " alt="" coords="116,431,171,456"/>
+<area shape="rect" title=" " alt="" coords="195,431,310,456"/>
+<area shape="rect" title=" " alt="" coords="334,431,419,456"/>
+<area shape="rect" title=" " alt="" coords="444,431,531,456"/>
+<area shape="rect" title=" " alt="" coords="555,431,649,456"/>
+<area shape="rect" title=" " alt="" coords="673,431,768,456"/>
+<area shape="rect" title=" " alt="" coords="793,431,873,456"/>
+<area shape="rect" title=" " alt="" coords="897,431,1043,456"/>
+<area shape="rect" title=" " alt="" coords="1067,431,1171,456"/>
+<area shape="rect" title=" " alt="" coords="1196,431,1251,456"/>
+<area shape="rect" title=" " alt="" coords="1275,431,1326,456"/>
+<area shape="rect" title=" " alt="" coords="1350,431,1443,456"/>
+<area shape="rect" title=" " alt="" coords="1467,431,1558,456"/>
+<area shape="rect" title=" " alt="" coords="1583,431,1696,456"/>
+<area shape="rect" title=" " alt="" coords="1720,431,1807,456"/>
+<area shape="rect" title=" " alt="" coords="1831,431,1931,456"/>
+<area shape="rect" title=" " alt="" coords="1955,431,2041,456"/>
+<area shape="rect" title=" " alt="" coords="2066,431,2165,456"/>
+<area shape="rect" title=" " alt="" coords="2189,431,2271,456"/>
+<area shape="rect" title=" " alt="" coords="3927,431,4037,456"/>
+<area shape="rect" title=" " alt="" coords="2296,431,2407,456"/>
+<area shape="rect" title=" " alt="" coords="2431,431,2517,456"/>
+<area shape="rect" title=" " alt="" coords="2541,431,2636,456"/>
+<area shape="rect" title=" " alt="" coords="2660,431,2755,456"/>
+<area shape="rect" title=" " alt="" coords="2779,431,2881,456"/>
+<area shape="rect" title=" " alt="" coords="2905,431,3051,456"/>
+<area shape="rect" title=" " alt="" coords="3075,431,3166,456"/>
+<area shape="rect" title=" " alt="" coords="3190,431,3259,456"/>
+<area shape="rect" title=" " alt="" coords="3283,431,3353,456"/>
+<area shape="rect" title=" " alt="" coords="3377,431,3456,456"/>
+<area shape="rect" title=" " alt="" coords="3480,431,3577,456"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -182,16 +178,13 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="cs__Characteristic_8h__dep__incl.png" border="0" usemap="#asource_2include_2ble_2cs__Characteristic_8hdep" alt=""/></div>
 <map name="asource_2include_2ble_2cs__Characteristic_8hdep" id="asource_2include_2ble_2cs__Characteristic_8hdep">
-<area shape="rect" title="Bluetooth Low Energy characteristics." alt="" coords="314,5,463,45"/>
-<area shape="rect" href="cs__Service_8h.html" title="BLE service." alt="" coords="319,93,459,133"/>
-<area shape="rect" href="cs__CrownstoneService_8h_source.html" title=" " alt="" coords="130,181,314,221"/>
-<area shape="rect" href="cs__SetupService_8h_source.html" title=" " alt="" coords="5,269,180,309"/>
-<area shape="rect" href="cs__DeviceInformationService_8h_source.html" title=" " alt="" coords="503,181,731,221"/>
-<area shape="rect" href="cs__Stack_8h.html" title="Manufacturing data." alt="" coords="339,181,479,221"/>
-<area shape="rect" href="cs__Advertiser_8h_source.html" title=" " alt="" coords="307,269,447,309"/>
-<area shape="rect" href="cs__Crownstone_8h_source.html" title=" " alt="" coords="261,357,492,383"/>
-<area shape="rect" href="cs__CommandHandler_8h_source.html" title=" " alt="" coords="471,269,661,309"/>
-<area shape="rect" href="cs__Scanner_8h_source.html" title=" " alt="" coords="685,269,876,309"/>
+<area shape="rect" title=" " alt="" coords="223,5,373,45"/>
+<area shape="rect" href="cs__CrownstoneService_8h.html" title=" " alt="" coords="29,93,213,133"/>
+<area shape="rect" href="cs__SetupService_8h.html" title=" " alt="" coords="33,181,208,221"/>
+<area shape="rect" href="cs__DeviceInformationService_8h.html" title=" " alt="" coords="232,181,460,221"/>
+<area shape="rect" href="cs__MicroappService_8h.html" title=" " alt="" coords="429,93,604,133"/>
+<area shape="rect" href="cs__Crownstone_8h.html" title=" " alt="" coords="5,269,236,295"/>
+<area shape="rect" href="cs__MicroappController_8h.html" title=" " alt="" coords="484,181,667,221"/>
 </map>
 </div>
 </div>
@@ -199,135 +192,16 @@ This graph shows which files directly or indirectly include this file:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structStatus.html">Status</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structStatus.html" title="Status of a Characteristic.">Status</a> of a <a class="el" href="classCharacteristic.html" title="A default characteristic.">Characteristic</a>.  <a href="structStatus.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristicBase.html">CharacteristicBase</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Non-template base class for Characteristics.  <a href="classCharacteristicBase.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristicGeneric.html">CharacteristicGeneric&lt; T &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classCharacteristic.html" title="A default characteristic.">Characteristic</a> of generic type T.  <a href="classCharacteristicGeneric.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic.html">Characteristic&lt; T, E &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A default characteristic.  <a href="classCharacteristic.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_3_01T_01_4_1_1value_01_4_1_1type_01_4.html">Characteristic&lt; T, typename std::enable_if&lt; std::is_arithmetic&lt; T &gt;::value &gt;::type &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A characteristic for built-in arithmetic types (int, float, etc)  <a href="classCharacteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_3_01T_01_4_1_1value_01_4_1_1type_01_4.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic_3_01std_1_1string_01_4.html">Characteristic&lt; std::string &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A characteristic for strings.  <a href="classCharacteristic_3_01std_1_1string_01_4.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic.html">Characteristic&lt; T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classCharacteristic.html" title="Characteristic of generic type T.">Characteristic</a> of generic type T.  <a href="classCharacteristic.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic_3_01buffer__ptr__t_01_4.html">Characteristic&lt; buffer_ptr_t &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This template implements the functions specific for a pointer to a buffer.  <a href="classCharacteristic_3_01buffer__ptr__t_01_4.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The base class is already using a buffer as value.  <a href="classCharacteristic_3_01buffer__ptr__t_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a7e0ec86b63ee75c68377edced113ffb7"><td class="memItemLeft" align="right" valign="top"><a id="a7e0ec86b63ee75c68377edced113ffb7" name="a7e0ec86b63ee75c68377edced113ffb7"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOGCharacteristicDebug</b>&#160;&#160;&#160;LOGvv</td></tr>
-<tr class="separator:a7e0ec86b63ee75c68377edced113ffb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a229e1e80f1076a67dbbdf48a8432f8d8"><td class="memItemLeft" align="right" valign="top"><a id="a229e1e80f1076a67dbbdf48a8432f8d8" name="a229e1e80f1076a67dbbdf48a8432f8d8"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>LogLevelCharacteristicDebug</b>&#160;&#160;&#160;SERIAL_VERY_VERBOSE</td></tr>
-<tr class="separator:a229e1e80f1076a67dbbdf48a8432f8d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:ad0f5361a360defe77def9d0ed1019c97"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ad0f5361a360defe77def9d0ed1019c97"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="cs__Characteristic_8h.html#ad0f5361a360defe77def9d0ed1019c97">ble_type</a> ()</td></tr>
-<tr class="memdesc:ad0f5361a360defe77def9d0ed1019c97"><td class="mdescLeft">&#160;</td><td class="mdescRight">The templated version of ble_type.  <a href="cs__Characteristic_8h.html#ad0f5361a360defe77def9d0ed1019c97">More...</a><br /></td></tr>
-<tr class="separator:ad0f5361a360defe77def9d0ed1019c97"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b996fd5a8d6c08e95c8c6d49b2b81a6"><td class="memItemLeft" align="right" valign="top"><a id="a5b996fd5a8d6c08e95c8c6d49b2b81a6" name="a5b996fd5a8d6c08e95c8c6d49b2b81a6"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:a5b996fd5a8d6c08e95c8c6d49b2b81a6"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; std::string &gt;</b> ()</td></tr>
-<tr class="memdesc:a5b996fd5a8d6c08e95c8c6d49b2b81a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for strings. <br /></td></tr>
-<tr class="separator:a5b996fd5a8d6c08e95c8c6d49b2b81a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3a31592aeacac895016ef2fde1bf593"><td class="memItemLeft" align="right" valign="top"><a id="ad3a31592aeacac895016ef2fde1bf593" name="ad3a31592aeacac895016ef2fde1bf593"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:ad3a31592aeacac895016ef2fde1bf593"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; uint8_t &gt;</b> ()</td></tr>
-<tr class="memdesc:ad3a31592aeacac895016ef2fde1bf593"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for 8-bit unsigned values. <br /></td></tr>
-<tr class="separator:ad3a31592aeacac895016ef2fde1bf593"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2da3df36da33695dc3ca6ad2f4d3e921"><td class="memItemLeft" align="right" valign="top"><a id="a2da3df36da33695dc3ca6ad2f4d3e921" name="a2da3df36da33695dc3ca6ad2f4d3e921"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:a2da3df36da33695dc3ca6ad2f4d3e921"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; uint16_t &gt;</b> ()</td></tr>
-<tr class="memdesc:a2da3df36da33695dc3ca6ad2f4d3e921"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for 16-bit unsigned values. <br /></td></tr>
-<tr class="separator:a2da3df36da33695dc3ca6ad2f4d3e921"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1ce39c5d817942e1e32c235099c4e69"><td class="memItemLeft" align="right" valign="top"><a id="ad1ce39c5d817942e1e32c235099c4e69" name="ad1ce39c5d817942e1e32c235099c4e69"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:ad1ce39c5d817942e1e32c235099c4e69"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; uint32_t &gt;</b> ()</td></tr>
-<tr class="memdesc:ad1ce39c5d817942e1e32c235099c4e69"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for 32-bit unsigned values. <br /></td></tr>
-<tr class="separator:ad1ce39c5d817942e1e32c235099c4e69"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32c97f20a35eec5ec64f2772ec22c73c"><td class="memItemLeft" align="right" valign="top"><a id="a32c97f20a35eec5ec64f2772ec22c73c" name="a32c97f20a35eec5ec64f2772ec22c73c"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:a32c97f20a35eec5ec64f2772ec22c73c"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; int8_t &gt;</b> ()</td></tr>
-<tr class="memdesc:a32c97f20a35eec5ec64f2772ec22c73c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for 8-bit signed values. <br /></td></tr>
-<tr class="separator:a32c97f20a35eec5ec64f2772ec22c73c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80a22cbe5028b74b1d81c21b53a4177a"><td class="memItemLeft" align="right" valign="top"><a id="a80a22cbe5028b74b1d81c21b53a4177a" name="a80a22cbe5028b74b1d81c21b53a4177a"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:a80a22cbe5028b74b1d81c21b53a4177a"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; int16_t &gt;</b> ()</td></tr>
-<tr class="memdesc:a80a22cbe5028b74b1d81c21b53a4177a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for 16-bit signed values. <br /></td></tr>
-<tr class="separator:a80a22cbe5028b74b1d81c21b53a4177a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab52a95e38198c1757631ba9d416ec179"><td class="memItemLeft" align="right" valign="top"><a id="ab52a95e38198c1757631ba9d416ec179" name="ab52a95e38198c1757631ba9d416ec179"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:ab52a95e38198c1757631ba9d416ec179"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; int32_t &gt;</b> ()</td></tr>
-<tr class="memdesc:ab52a95e38198c1757631ba9d416ec179"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for 32-bit signed values. <br /></td></tr>
-<tr class="separator:ab52a95e38198c1757631ba9d416ec179"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7aac1977052aaac282106824c7e3c105"><td class="memItemLeft" align="right" valign="top"><a id="a7aac1977052aaac282106824c7e3c105" name="a7aac1977052aaac282106824c7e3c105"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:a7aac1977052aaac282106824c7e3c105"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; float &gt;</b> ()</td></tr>
-<tr class="memdesc:a7aac1977052aaac282106824c7e3c105"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for floats (32 bits) <br /></td></tr>
-<tr class="separator:a7aac1977052aaac282106824c7e3c105"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14884a967ffaa3c4d39fef8b14aef684"><td class="memItemLeft" align="right" valign="top"><a id="a14884a967ffaa3c4d39fef8b14aef684" name="a14884a967ffaa3c4d39fef8b14aef684"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:a14884a967ffaa3c4d39fef8b14aef684"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; double &gt;</b> ()</td></tr>
-<tr class="memdesc:a14884a967ffaa3c4d39fef8b14aef684"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for doubles (64 bits) <br /></td></tr>
-<tr class="separator:a14884a967ffaa3c4d39fef8b14aef684"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d717a09ffe29490af9f5a7ec031d05f"><td class="memItemLeft" align="right" valign="top"><a id="a2d717a09ffe29490af9f5a7ec031d05f" name="a2d717a09ffe29490af9f5a7ec031d05f"></a>
-template&lt;&gt; </td></tr>
-<tr class="memitem:a2d717a09ffe29490af9f5a7ec031d05f"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><b>ble_type&lt; bool &gt;</b> ()</td></tr>
-<tr class="memdesc:a2d717a09ffe29490af9f5a7ec031d05f"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ble_type for booleans (8 bits) <br /></td></tr>
-<tr class="separator:a2d717a09ffe29490af9f5a7ec031d05f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCharacteristic_3_01const_01char_01_5_01_4.html">Characteristic&lt; const char * &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A string value.  <a href="classCharacteristic_3_01const_01char_01_5_01_4.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p >Bluetooth Low Energy characteristics. </p>
-<dl class="section author"><dt>Authors</dt><dd><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> Team, Christopher Mason </dd></dl>
-<dl class="section copyright"><dt>Copyright</dt><dd><a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> B.V. </dd></dl>
-<dl class="section date"><dt>Date</dt><dd>Apr 23, 2015 License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed) </dd></dl>
-</div><h2 class="groupheader">Function Documentation</h2>
-<a id="ad0f5361a360defe77def9d0ed1019c97" name="ad0f5361a360defe77def9d0ed1019c97"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0f5361a360defe77def9d0ed1019c97">&#9670;&#160;</a></span>ble_type()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint8_t ble_type </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>The templated version of ble_type. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">T</td><td>The class / primitive to template ble_type with </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

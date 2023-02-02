@@ -99,6 +99,8 @@ $(document).ready(function(){initNavTree('classMeshMsgSender.html',''); initResi
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classMeshMsgSender-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">MeshMsgSender Class Reference</div></div>
 </div><!--header-->
@@ -122,64 +124,78 @@ Collaboration diagram for MeshMsgSender:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMeshMsgSender__coll__graph.png" border="0" usemap="#aMeshMsgSender_coll__map" alt="Collaboration graph"/></div>
 <map name="aMeshMsgSender_coll__map" id="aMeshMsgSender_coll__map">
-<area shape="rect" title="Class that:" alt="" coords="5,79,135,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="15,5,125,31"/>
+<area shape="rect" title="Class that:" alt="" coords="1469,145,1599,171"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="1227,121,1337,147"/>
+<area shape="rect" href="classMeshModelSelector.html" title="Class that selects which model to use to send a message." alt="" coords="1207,171,1357,196"/>
+<area shape="rect" href="classMeshModelMulticast.html" title="Class that:" alt="" coords="778,96,935,121"/>
+<area shape="rect" title=" " alt="" coords="319,157,541,197"/>
+<area shape="rect" href="classMeshModelMulticastAcked.html" title="Class that:" alt="" coords="759,285,955,311"/>
+<area shape="rect" href="classMeshModelMulticastNeighbours.html" title="Class that:" alt="" coords="741,195,972,220"/>
+<area shape="rect" href="classMeshModelUnicast.html" title="Class that:" alt="" coords="783,145,930,171"/>
+<area shape="rect" href="structMeshModelMulticast_1_1cs__multicast__queue__item__t.html" title=" " alt="" coords="351,5,509,60"/>
+<area shape="rect" href="structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html" title="Data needed in each model queue." alt="" coords="5,182,197,222"/>
+<area shape="rect" href="structMeshModelMulticastAcked_1_1cs__multicast__acked__queue__item__t.html" title=" " alt="" coords="328,367,532,421"/>
+<area shape="rect" href="structMeshModelMulticastNeighbours_1_1cs__multicast__queue__item__t.html" title=" " alt="" coords="315,231,545,271"/>
+<area shape="rect" href="structMeshModelUnicast_1_1cs__unicast__queue__item__t.html" title=" " alt="" coords="344,87,516,127"/>
+<area shape="rect" href="classBitmaskVarSize.html" title="Class that holds a bitmask of variable size." alt="" coords="367,317,493,343"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad33c91daf88788ce4d90038e2c572951"><td class="memItemLeft" align="right" valign="top"><a id="ad33c91daf88788ce4d90038e2c572951" name="ad33c91daf88788ce4d90038e2c572951"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (<a class="el" href="classMeshModelSelector.html">MeshModelSelector</a> *selector)</td></tr>
+<tr class="memitem:ad33c91daf88788ce4d90038e2c572951"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#ad33c91daf88788ce4d90038e2c572951">init</a> (<a class="el" href="classMeshModelSelector.html">MeshModelSelector</a> *selector)</td></tr>
 <tr class="separator:ad33c91daf88788ce4d90038e2c572951"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74df97c055719ff7dbebc7dd39722865"><td class="memItemLeft" align="right" valign="top"><a id="a74df97c055719ff7dbebc7dd39722865" name="a74df97c055719ff7dbebc7dd39722865"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendMsg</b> (<a class="el" href="structcs__mesh__msg__t.html">cs_mesh_msg_t</a> *meshMsg)</td></tr>
+<tr class="memitem:a74df97c055719ff7dbebc7dd39722865"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a74df97c055719ff7dbebc7dd39722865">sendMsg</a> (<a class="el" href="structcs__mesh__msg__t.html">cs_mesh_msg_t</a> *meshMsg)</td></tr>
 <tr class="separator:a74df97c055719ff7dbebc7dd39722865"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0a0220594b3669496d484b271263ca9"><td class="memItemLeft" align="right" valign="top"><a id="ab0a0220594b3669496d484b271263ca9" name="ab0a0220594b3669496d484b271263ca9"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendTestMsg</b> ()</td></tr>
+<tr class="memitem:ab0a0220594b3669496d484b271263ca9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#ab0a0220594b3669496d484b271263ca9">sendTestMsg</a> ()</td></tr>
 <tr class="separator:ab0a0220594b3669496d484b271263ca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afef0da62835a64f69991afe4307ea078"><td class="memItemLeft" align="right" valign="top"><a id="afef0da62835a64f69991afe4307ea078" name="afef0da62835a64f69991afe4307ea078"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendNoop</b> (uint8_t transmissions=0)</td></tr>
+<tr class="memitem:afef0da62835a64f69991afe4307ea078"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#afef0da62835a64f69991afe4307ea078">sendNoop</a> (uint8_t transmissions=0)</td></tr>
 <tr class="separator:afef0da62835a64f69991afe4307ea078"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a39674891243b972f4c79b5e206384b69"><td class="memItemLeft" align="right" valign="top"><a id="a39674891243b972f4c79b5e206384b69" name="a39674891243b972f4c79b5e206384b69"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendMultiSwitchItem</b> (const <a class="el" href="structinternal__multi__switch__item__t.html">internal_multi_switch_item_t</a> *item, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> &amp;source, uint8_t transmissions=0)</td></tr>
+<tr class="memitem:a39674891243b972f4c79b5e206384b69"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a39674891243b972f4c79b5e206384b69">sendMultiSwitchItem</a> (const <a class="el" href="structinternal__multi__switch__item__t.html">internal_multi_switch_item_t</a> *item, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> &amp;source, uint8_t transmissions=0)</td></tr>
 <tr class="separator:a39674891243b972f4c79b5e206384b69"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab948c9c12bdde81a6cd91d5e5cc63fba"><td class="memItemLeft" align="right" valign="top"><a id="ab948c9c12bdde81a6cd91d5e5cc63fba" name="ab948c9c12bdde81a6cd91d5e5cc63fba"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendSetTime</b> (const <a class="el" href="structcs__mesh__model__msg__time__t.html">cs_mesh_model_msg_time_t</a> *item, uint8_t transmissions=0)</td></tr>
+<tr class="memitem:ab948c9c12bdde81a6cd91d5e5cc63fba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#ab948c9c12bdde81a6cd91d5e5cc63fba">sendSetTime</a> (const <a class="el" href="structcs__mesh__model__msg__time__t.html">cs_mesh_model_msg_time_t</a> *item, uint8_t transmissions=0)</td></tr>
 <tr class="separator:ab948c9c12bdde81a6cd91d5e5cc63fba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2143fff7170c30104e3373d64a74f692"><td class="memItemLeft" align="right" valign="top"><a id="a2143fff7170c30104e3373d64a74f692" name="a2143fff7170c30104e3373d64a74f692"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendBehaviourSettings</b> (const <a class="el" href="unionbehaviour__settings__t.html">behaviour_settings_t</a> *item, uint8_t transmissions=0)</td></tr>
+<tr class="memitem:a2143fff7170c30104e3373d64a74f692"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a2143fff7170c30104e3373d64a74f692">sendBehaviourSettings</a> (const <a class="el" href="unionbehaviour__settings__t.html">behaviour_settings_t</a> *item, uint8_t transmissions=0)</td></tr>
 <tr class="separator:a2143fff7170c30104e3373d64a74f692"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8072cf4b04291f8954cb4ee1b1c82848"><td class="memItemLeft" align="right" valign="top"><a id="a8072cf4b04291f8954cb4ee1b1c82848" name="a8072cf4b04291f8954cb4ee1b1c82848"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendProfileLocation</b> (const <a class="el" href="structcs__mesh__model__msg__profile__location__t.html">cs_mesh_model_msg_profile_location_t</a> *item, uint8_t transmissions=0)</td></tr>
+<tr class="memitem:a8072cf4b04291f8954cb4ee1b1c82848"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a8072cf4b04291f8954cb4ee1b1c82848">sendProfileLocation</a> (const <a class="el" href="structcs__mesh__model__msg__profile__location__t.html">cs_mesh_model_msg_profile_location_t</a> *item, uint8_t transmissions=0)</td></tr>
 <tr class="separator:a8072cf4b04291f8954cb4ee1b1c82848"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d57f46cf6a95b4574b6a04733a53d6d"><td class="memItemLeft" align="right" valign="top"><a id="a1d57f46cf6a95b4574b6a04733a53d6d" name="a1d57f46cf6a95b4574b6a04733a53d6d"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendTrackedDeviceRegister</b> (const <a class="el" href="structcs__mesh__model__msg__device__register__t.html">cs_mesh_model_msg_device_register_t</a> *item, uint8_t transmissions=0)</td></tr>
+<tr class="memitem:a1d57f46cf6a95b4574b6a04733a53d6d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a1d57f46cf6a95b4574b6a04733a53d6d">sendTrackedDeviceRegister</a> (const <a class="el" href="structcs__mesh__model__msg__device__register__t.html">cs_mesh_model_msg_device_register_t</a> *item, uint8_t transmissions=0)</td></tr>
 <tr class="separator:a1d57f46cf6a95b4574b6a04733a53d6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab6f03cf53a138bc5fb468d01b5069110"><td class="memItemLeft" align="right" valign="top"><a id="ab6f03cf53a138bc5fb468d01b5069110" name="ab6f03cf53a138bc5fb468d01b5069110"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendTrackedDeviceToken</b> (const <a class="el" href="structcs__mesh__model__msg__device__token__t.html">cs_mesh_model_msg_device_token_t</a> *item, uint8_t transmissions=0)</td></tr>
+<tr class="memitem:ab6f03cf53a138bc5fb468d01b5069110"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#ab6f03cf53a138bc5fb468d01b5069110">sendTrackedDeviceToken</a> (const <a class="el" href="structcs__mesh__model__msg__device__token__t.html">cs_mesh_model_msg_device_token_t</a> *item, uint8_t transmissions=0)</td></tr>
 <tr class="separator:ab6f03cf53a138bc5fb468d01b5069110"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43c72c84c3679cfe699089cd9f2ddc64"><td class="memItemLeft" align="right" valign="top"><a id="a43c72c84c3679cfe699089cd9f2ddc64" name="a43c72c84c3679cfe699089cd9f2ddc64"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendTrackedDeviceHeartbeat</b> (const <a class="el" href="structcs__mesh__model__msg__device__heartbeat__t.html">cs_mesh_model_msg_device_heartbeat_t</a> *item, uint8_t transmissions=0)</td></tr>
+<tr class="memitem:a43c72c84c3679cfe699089cd9f2ddc64"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a43c72c84c3679cfe699089cd9f2ddc64">sendTrackedDeviceHeartbeat</a> (const <a class="el" href="structcs__mesh__model__msg__device__heartbeat__t.html">cs_mesh_model_msg_device_heartbeat_t</a> *item, uint8_t transmissions=0)</td></tr>
 <tr class="separator:a43c72c84c3679cfe699089cd9f2ddc64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af349f206b0f4060c37d34726606a8506"><td class="memItemLeft" align="right" valign="top"><a id="af349f206b0f4060c37d34726606a8506" name="af349f206b0f4060c37d34726606a8506"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>sendTrackedDeviceListSize</b> (const <a class="el" href="structcs__mesh__model__msg__device__list__size__t.html">cs_mesh_model_msg_device_list_size_t</a> *item, uint8_t transmissions=0)</td></tr>
+<tr class="memitem:af349f206b0f4060c37d34726606a8506"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#af349f206b0f4060c37d34726606a8506">sendTrackedDeviceListSize</a> (const <a class="el" href="structcs__mesh__model__msg__device__list__size__t.html">cs_mesh_model_msg_device_list_size_t</a> *item, uint8_t transmissions=0)</td></tr>
 <tr class="separator:af349f206b0f4060c37d34726606a8506"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17f1271949df0eab1c4063978aae99ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a17f1271949df0eab1c4063978aae99ae">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:a17f1271949df0eab1c4063978aae99ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classMeshMsgSender.html#a17f1271949df0eab1c4063978aae99ae">More...</a><br /></td></tr>
 <tr class="separator:a17f1271949df0eab1c4063978aae99ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:abaa2e2296308e8fcf4f0176e2b66d4c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#abaa2e2296308e8fcf4f0176e2b66d4c7">handleSendMeshCommand</a> (<a class="el" href="structmesh__control__command__packet__t.html">mesh_control_command_packet_t</a> *command, const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> &amp;source)</td></tr>
+<tr class="separator:abaa2e2296308e8fcf4f0176e2b66d4c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4980aef06217ef341ab95c5202e9ae2f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a4980aef06217ef341ab95c5202e9ae2f">addToQueue</a> (<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;item)</td></tr>
+<tr class="separator:a4980aef06217ef341ab95c5202e9ae2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90a54bdf21f8bf9b1a25748753bb78da"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a90a54bdf21f8bf9b1a25748753bb78da">remFromQueue</a> (<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;item)</td></tr>
+<tr class="separator:a90a54bdf21f8bf9b1a25748753bb78da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a1cdfd128a211d934235129f73c2dc272"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelSelector.html">MeshModelSelector</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshMsgSender.html#a1cdfd128a211d934235129f73c2dc272">_selector</a></td></tr>
+<tr class="separator:a1cdfd128a211d934235129f73c2dc272"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that: </p>
@@ -187,6 +203,32 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></t
 <li>Sends messages to the mesh. </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4980aef06217ef341ab95c5202e9ae2f" name="a4980aef06217ef341ab95c5202e9ae2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4980aef06217ef341ab95c5202e9ae2f">&#9670;&#160;</a></span>addToQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::addToQueue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>item</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a17f1271949df0eab1c4063978aae99ae" name="a17f1271949df0eab1c4063978aae99ae"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a17f1271949df0eab1c4063978aae99ae">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -214,6 +256,392 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></t
 <p>Internal usage. </p>
 
 <p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="abaa2e2296308e8fcf4f0176e2b66d4c7" name="abaa2e2296308e8fcf4f0176e2b66d4c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abaa2e2296308e8fcf4f0176e2b66d4c7">&#9670;&#160;</a></span>handleSendMeshCommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::handleSendMeshCommand </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmesh__control__command__packet__t.html">mesh_control_command_packet_t</a> *&#160;</td>
+          <td class="paramname"><em>command</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>source</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad33c91daf88788ce4d90038e2c572951" name="ad33c91daf88788ce4d90038e2c572951"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad33c91daf88788ce4d90038e2c572951">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshMsgSender::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMeshModelSelector.html">MeshModelSelector</a> *&#160;</td>
+          <td class="paramname"><em>selector</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a90a54bdf21f8bf9b1a25748753bb78da" name="a90a54bdf21f8bf9b1a25748753bb78da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90a54bdf21f8bf9b1a25748753bb78da">&#9670;&#160;</a></span>remFromQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::remFromQueue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>item</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2143fff7170c30104e3373d64a74f692" name="a2143fff7170c30104e3373d64a74f692"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2143fff7170c30104e3373d64a74f692">&#9670;&#160;</a></span>sendBehaviourSettings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendBehaviourSettings </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="unionbehaviour__settings__t.html">behaviour_settings_t</a> *&#160;</td>
+          <td class="paramname"><em>item</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>transmissions</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a74df97c055719ff7dbebc7dd39722865" name="a74df97c055719ff7dbebc7dd39722865"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74df97c055719ff7dbebc7dd39722865">&#9670;&#160;</a></span>sendMsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendMsg </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__mesh__msg__t.html">cs_mesh_msg_t</a> *&#160;</td>
+          <td class="paramname"><em>meshMsg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a39674891243b972f4c79b5e206384b69" name="a39674891243b972f4c79b5e206384b69"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39674891243b972f4c79b5e206384b69">&#9670;&#160;</a></span>sendMultiSwitchItem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendMultiSwitchItem </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structinternal__multi__switch__item__t.html">internal_multi_switch_item_t</a> *&#160;</td>
+          <td class="paramname"><em>item</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcmd__source__with__counter__t.html">cmd_source_with_counter_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>transmissions</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afef0da62835a64f69991afe4307ea078" name="afef0da62835a64f69991afe4307ea078"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afef0da62835a64f69991afe4307ea078">&#9670;&#160;</a></span>sendNoop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendNoop </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>transmissions</em> = <code>0</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8072cf4b04291f8954cb4ee1b1c82848" name="a8072cf4b04291f8954cb4ee1b1c82848"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8072cf4b04291f8954cb4ee1b1c82848">&#9670;&#160;</a></span>sendProfileLocation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendProfileLocation </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcs__mesh__model__msg__profile__location__t.html">cs_mesh_model_msg_profile_location_t</a> *&#160;</td>
+          <td class="paramname"><em>item</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>transmissions</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab948c9c12bdde81a6cd91d5e5cc63fba" name="ab948c9c12bdde81a6cd91d5e5cc63fba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab948c9c12bdde81a6cd91d5e5cc63fba">&#9670;&#160;</a></span>sendSetTime()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendSetTime </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcs__mesh__model__msg__time__t.html">cs_mesh_model_msg_time_t</a> *&#160;</td>
+          <td class="paramname"><em>item</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>transmissions</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab0a0220594b3669496d484b271263ca9" name="ab0a0220594b3669496d484b271263ca9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0a0220594b3669496d484b271263ca9">&#9670;&#160;</a></span>sendTestMsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendTestMsg </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a43c72c84c3679cfe699089cd9f2ddc64" name="a43c72c84c3679cfe699089cd9f2ddc64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43c72c84c3679cfe699089cd9f2ddc64">&#9670;&#160;</a></span>sendTrackedDeviceHeartbeat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendTrackedDeviceHeartbeat </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcs__mesh__model__msg__device__heartbeat__t.html">cs_mesh_model_msg_device_heartbeat_t</a> *&#160;</td>
+          <td class="paramname"><em>item</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>transmissions</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af349f206b0f4060c37d34726606a8506" name="af349f206b0f4060c37d34726606a8506"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af349f206b0f4060c37d34726606a8506">&#9670;&#160;</a></span>sendTrackedDeviceListSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendTrackedDeviceListSize </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcs__mesh__model__msg__device__list__size__t.html">cs_mesh_model_msg_device_list_size_t</a> *&#160;</td>
+          <td class="paramname"><em>item</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>transmissions</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1d57f46cf6a95b4574b6a04733a53d6d" name="a1d57f46cf6a95b4574b6a04733a53d6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d57f46cf6a95b4574b6a04733a53d6d">&#9670;&#160;</a></span>sendTrackedDeviceRegister()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendTrackedDeviceRegister </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcs__mesh__model__msg__device__register__t.html">cs_mesh_model_msg_device_register_t</a> *&#160;</td>
+          <td class="paramname"><em>item</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>transmissions</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab6f03cf53a138bc5fb468d01b5069110" name="ab6f03cf53a138bc5fb468d01b5069110"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6f03cf53a138bc5fb468d01b5069110">&#9670;&#160;</a></span>sendTrackedDeviceToken()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshMsgSender::sendTrackedDeviceToken </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcs__mesh__model__msg__device__token__t.html">cs_mesh_model_msg_device_token_t</a> *&#160;</td>
+          <td class="paramname"><em>item</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>transmissions</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a1cdfd128a211d934235129f73c2dc272" name="a1cdfd128a211d934235129f73c2dc272"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1cdfd128a211d934235129f73c2dc272">&#9670;&#160;</a></span>_selector</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelSelector.html">MeshModelSelector</a>* MeshMsgSender::_selector</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

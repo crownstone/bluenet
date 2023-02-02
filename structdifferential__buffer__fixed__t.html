@@ -111,27 +111,96 @@ $(document).ready(function(){initNavTree('structdifferential__buffer__fixed__t.h
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a831b0fb6c63a044590e71b42167d7c54"><td class="memItemLeft" align="right" valign="top"><a id="a831b0fb6c63a044590e71b42167d7c54" name="a831b0fb6c63a044590e71b42167d7c54"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>length</b></td></tr>
-<tr class="memdesc:a831b0fb6c63a044590e71b42167d7c54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of elements stored in this struct. <br /></td></tr>
+<tr class="memitem:a831b0fb6c63a044590e71b42167d7c54"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdifferential__buffer__fixed__t.html#a831b0fb6c63a044590e71b42167d7c54">length</a></td></tr>
+<tr class="memdesc:a831b0fb6c63a044590e71b42167d7c54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of elements stored in this struct.  <a href="structdifferential__buffer__fixed__t.html#a831b0fb6c63a044590e71b42167d7c54">More...</a><br /></td></tr>
 <tr class="separator:a831b0fb6c63a044590e71b42167d7c54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3dafa4ec10992ad90a136001206ef078"><td class="memItemLeft" align="right" valign="top"><a id="a3dafa4ec10992ad90a136001206ef078" name="a3dafa4ec10992ad90a136001206ef078"></a>
-T&#160;</td><td class="memItemRight" valign="bottom"><b>firstVal</b></td></tr>
-<tr class="memdesc:a3dafa4ec10992ad90a136001206ef078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value of the oldest element in the buffer. <br /></td></tr>
+<tr class="memitem:a3dafa4ec10992ad90a136001206ef078"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdifferential__buffer__fixed__t.html#a3dafa4ec10992ad90a136001206ef078">firstVal</a></td></tr>
+<tr class="memdesc:a3dafa4ec10992ad90a136001206ef078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value of the oldest element in the buffer.  <a href="structdifferential__buffer__fixed__t.html#a3dafa4ec10992ad90a136001206ef078">More...</a><br /></td></tr>
 <tr class="separator:a3dafa4ec10992ad90a136001206ef078"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76f698aace8607ea6527dddf06b2f3ea"><td class="memItemLeft" align="right" valign="top"><a id="a76f698aace8607ea6527dddf06b2f3ea" name="a76f698aace8607ea6527dddf06b2f3ea"></a>
-T&#160;</td><td class="memItemRight" valign="bottom"><b>lastVal</b></td></tr>
-<tr class="memdesc:a76f698aace8607ea6527dddf06b2f3ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value of the newest element in the buffer. <br /></td></tr>
+<tr class="memitem:a76f698aace8607ea6527dddf06b2f3ea"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdifferential__buffer__fixed__t.html#a76f698aace8607ea6527dddf06b2f3ea">lastVal</a></td></tr>
+<tr class="memdesc:a76f698aace8607ea6527dddf06b2f3ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value of the newest element in the buffer.  <a href="structdifferential__buffer__fixed__t.html#a76f698aace8607ea6527dddf06b2f3ea">More...</a><br /></td></tr>
 <tr class="separator:a76f698aace8607ea6527dddf06b2f3ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef2ee8967e05e50f88810db8ae1046da"><td class="memItemLeft" align="right" valign="top"><a id="aef2ee8967e05e50f88810db8ae1046da" name="aef2ee8967e05e50f88810db8ae1046da"></a>
-int8_t&#160;</td><td class="memItemRight" valign="bottom"><b>array</b> [S - 1]</td></tr>
-<tr class="memdesc:aef2ee8967e05e50f88810db8ae1046da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the array storing the difference of elements compared to the previous element. <br /></td></tr>
+<tr class="memitem:aef2ee8967e05e50f88810db8ae1046da"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdifferential__buffer__fixed__t.html#aef2ee8967e05e50f88810db8ae1046da">array</a> [S - 1]</td></tr>
+<tr class="memdesc:aef2ee8967e05e50f88810db8ae1046da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the array storing the difference of elements compared to the previous element.  <a href="structdifferential__buffer__fixed__t.html#aef2ee8967e05e50f88810db8ae1046da">More...</a><br /></td></tr>
 <tr class="separator:aef2ee8967e05e50f88810db8ae1046da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T, uint16_t S&gt;<br />
 struct differential_buffer_fixed_t&lt; T, S &gt;</div><p >Struct with fixed length, useful when sending as payload. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="aef2ee8967e05e50f88810db8ae1046da" name="aef2ee8967e05e50f88810db8ae1046da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef2ee8967e05e50f88810db8ae1046da">&#9670;&#160;</a></span>array</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , uint16_t S&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t <a class="el" href="structdifferential__buffer__fixed__t.html">differential_buffer_fixed_t</a>&lt; T, S &gt;::array[S - 1]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Pointer to the array storing the difference of elements compared to the previous element. </p>
+
+</div>
+</div>
+<a id="a3dafa4ec10992ad90a136001206ef078" name="a3dafa4ec10992ad90a136001206ef078"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3dafa4ec10992ad90a136001206ef078">&#9670;&#160;</a></span>firstVal</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , uint16_t S&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="structdifferential__buffer__fixed__t.html">differential_buffer_fixed_t</a>&lt; T, S &gt;::firstVal</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Value of the oldest element in the buffer. </p>
+
+</div>
+</div>
+<a id="a76f698aace8607ea6527dddf06b2f3ea" name="a76f698aace8607ea6527dddf06b2f3ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76f698aace8607ea6527dddf06b2f3ea">&#9670;&#160;</a></span>lastVal</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , uint16_t S&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="structdifferential__buffer__fixed__t.html">differential_buffer_fixed_t</a>&lt; T, S &gt;::lastVal</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Value of the newest element in the buffer. </p>
+
+</div>
+</div>
+<a id="a831b0fb6c63a044590e71b42167d7c54" name="a831b0fb6c63a044590e71b42167d7c54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a831b0fb6c63a044590e71b42167d7c54">&#9670;&#160;</a></span>length</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , uint16_t S&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="structdifferential__buffer__fixed__t.html">differential_buffer_fixed_t</a>&lt; T, S &gt;::length</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Number of elements stored in this struct. </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>source/include/structs/buffer/<a class="el" href="cs__DifferentialBuffer_8h_source.html">cs_DifferentialBuffer.h</a></li>
 </ul>
 </div><!-- contents -->

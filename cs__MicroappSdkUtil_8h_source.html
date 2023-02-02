@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__MicroappSdkUtil_8h_source.html',''
   <div class="headertitle"><div class="title">cs_MicroappSdkUtil.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__MicroappSdkUtil_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Aug 29, 2022</span></div>
@@ -109,9 +109,9 @@ $(document).ready(function(){initNavTree('cs__MicroappSdkUtil_8h_source.html',''
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;ble/cs_UUID.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__UUID_8h.html">ble/cs_UUID.h</a>&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;cs_MicroappStructs.h&gt;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;protocol/cs_Typedefs.h&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Typedefs_8h.html">protocol/cs_Typedefs.h</a>&gt;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
@@ -121,23 +121,28 @@ $(document).ready(function(){initNavTree('cs__MicroappSdkUtil_8h_source.html',''
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="classMicroappSdkUtil.html#ab4f9069a811aff55537a4e8aeefcff2a">   26</a></span>    <span class="keyword">static</span> uint8_t <a class="code hl_function" href="classMicroappSdkUtil.html#ab4f9069a811aff55537a4e8aeefcff2a">interruptToDigitalPin</a>(uint8_t interrupt);</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classMicroappSdkUtil.html#aee2ca92dd8ad77a193925bf101da73f1">   31</a></span>    <span class="keyword">static</span> MicroappSdkAck <a class="code hl_function" href="classMicroappSdkUtil.html#aee2ca92dd8ad77a193925bf101da73f1">bluenetResultToMicroapp</a>(cs_ret_code_t retCode);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classMicroappSdkUtil.html#aee2ca92dd8ad77a193925bf101da73f1">   31</a></span>    <span class="keyword">static</span> MicroappSdkAck <a class="code hl_function" href="classMicroappSdkUtil.html#aee2ca92dd8ad77a193925bf101da73f1">bluenetResultToMicroapp</a>(<a class="code hl_typedef" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> retCode);</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">static</span> microapp_sdk_ble_uuid_t convertUuid(<span class="keyword">const</span> <a class="code hl_class" href="classUUID.html">UUID</a>&amp; uuid);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classMicroappSdkUtil.html#ad310bd58bda006934437a5eb311de1fe">   33</a></span>    <span class="keyword">static</span> microapp_sdk_ble_uuid_t <a class="code hl_function" href="classMicroappSdkUtil.html#ad310bd58bda006934437a5eb311de1fe">convertUuid</a>(<span class="keyword">const</span> <a class="code hl_class" href="classUUID.html">UUID</a>&amp; uuid);</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keyword">static</span> <a class="code hl_class" href="classUUID.html">UUID</a> convertUuid(<span class="keyword">const</span> microapp_sdk_ble_uuid_t&amp; uuid);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="classMicroappSdkUtil.html#a9e4a740955d16bab2e79bbf7434412b3">   35</a></span>    <span class="keyword">static</span> <a class="code hl_class" href="classUUID.html">UUID</a> <a class="code hl_function" href="classMicroappSdkUtil.html#a9e4a740955d16bab2e79bbf7434412b3">convertUuid</a>(<span class="keyword">const</span> microapp_sdk_ble_uuid_t&amp; uuid);</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>};</div>
 <div class="ttc" id="aclassMicroappSdkUtil_html"><div class="ttname"><a href="classMicroappSdkUtil.html">MicroappSdkUtil</a></div><div class="ttdef"><b>Definition:</b> cs_MicroappSdkUtil.h:16</div></div>
 <div class="ttc" id="aclassMicroappSdkUtil_html_a2b094d457e82d51fd05f981b7b34343e"><div class="ttname"><a href="classMicroappSdkUtil.html#a2b094d457e82d51fd05f981b7b34343e">MicroappSdkUtil::digitalPinToInterrupt</a></div><div class="ttdeci">static uint8_t digitalPinToInterrupt(uint8_t pinIndex)</div><div class="ttdoc">Maps digital pins to interrupts.</div></div>
+<div class="ttc" id="aclassMicroappSdkUtil_html_a9e4a740955d16bab2e79bbf7434412b3"><div class="ttname"><a href="classMicroappSdkUtil.html#a9e4a740955d16bab2e79bbf7434412b3">MicroappSdkUtil::convertUuid</a></div><div class="ttdeci">static UUID convertUuid(const microapp_sdk_ble_uuid_t &amp;uuid)</div></div>
 <div class="ttc" id="aclassMicroappSdkUtil_html_ab4f9069a811aff55537a4e8aeefcff2a"><div class="ttname"><a href="classMicroappSdkUtil.html#ab4f9069a811aff55537a4e8aeefcff2a">MicroappSdkUtil::interruptToDigitalPin</a></div><div class="ttdeci">static uint8_t interruptToDigitalPin(uint8_t interrupt)</div><div class="ttdoc">Maps interrupts to digital pins.</div></div>
+<div class="ttc" id="aclassMicroappSdkUtil_html_ad310bd58bda006934437a5eb311de1fe"><div class="ttname"><a href="classMicroappSdkUtil.html#ad310bd58bda006934437a5eb311de1fe">MicroappSdkUtil::convertUuid</a></div><div class="ttdeci">static microapp_sdk_ble_uuid_t convertUuid(const UUID &amp;uuid)</div></div>
 <div class="ttc" id="aclassMicroappSdkUtil_html_aee2ca92dd8ad77a193925bf101da73f1"><div class="ttname"><a href="classMicroappSdkUtil.html#aee2ca92dd8ad77a193925bf101da73f1">MicroappSdkUtil::bluenetResultToMicroapp</a></div><div class="ttdeci">static MicroappSdkAck bluenetResultToMicroapp(cs_ret_code_t retCode)</div><div class="ttdoc">Maps a bluenet return code to a microapp ack code.</div></div>
 <div class="ttc" id="aclassUUID_html"><div class="ttname"><a href="classUUID.html">UUID</a></div><div class="ttdoc">Class that enables the use of 128 bit service UUIDs.</div><div class="ttdef"><b>Definition:</b> cs_UUID.h:35</div></div>
+<div class="ttc" id="acs__Typedefs_8h_html"><div class="ttname"><a href="cs__Typedefs_8h.html">cs_Typedefs.h</a></div></div>
+<div class="ttc" id="acs__Typedefs_8h_html_ab09e5fe247ba3ab46e9e728c8499ecaf"><div class="ttname"><a href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a></div><div class="ttdeci">uint16_t cs_ret_code_t</div><div class="ttdef"><b>Definition:</b> cs_Typedefs.h:21</div></div>
+<div class="ttc" id="acs__UUID_8h_html"><div class="ttname"><a href="cs__UUID_8h.html">cs_UUID.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_35089e7b9295773053fce0d416083a1f.html">microapp</a></li><li class="navelem"><b>cs_MicroappSdkUtil.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_35089e7b9295773053fce0d416083a1f.html">microapp</a></li><li class="navelem"><a class="el" href="cs__MicroappSdkUtil_8h.html">cs_MicroappSdkUtil.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

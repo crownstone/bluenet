@@ -100,6 +100,7 @@ $(document).ready(function(){initNavTree('classTimer.html',''); initResizable();
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="classTimer-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Timer Class Reference</div></div>
 </div><!--header-->
@@ -112,34 +113,90 @@ $(document).ready(function(){initNavTree('classTimer.html',''); initResizable();
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a00eca12a53538b339a927723a246e2d7"><td class="memItemLeft" align="right" valign="top"><a id="a00eca12a53538b339a927723a246e2d7" name="a00eca12a53538b339a927723a246e2d7"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
+<tr class="memitem:a00eca12a53538b339a927723a246e2d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimer.html#a00eca12a53538b339a927723a246e2d7">init</a> ()</td></tr>
 <tr class="separator:a00eca12a53538b339a927723a246e2d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e2c7d8592dfc1f1620352985879c0ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimer.html#a4e2c7d8592dfc1f1620352985879c0ea">createSingleShot</a> (app_timer_id_t &amp;timer_handle, app_timer_timeout_handler_t func)</td></tr>
 <tr class="memdesc:a4e2c7d8592dfc1f1620352985879c0ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create single shot timer.  <a href="classTimer.html#a4e2c7d8592dfc1f1620352985879c0ea">More...</a><br /></td></tr>
 <tr class="separator:a4e2c7d8592dfc1f1620352985879c0ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ee744e4af0dd4f32a038efbebe925b9"><td class="memItemLeft" align="right" valign="top"><a id="a4ee744e4af0dd4f32a038efbebe925b9" name="a4ee744e4af0dd4f32a038efbebe925b9"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>start</b> (app_timer_id_t &amp;timer_handle, uint32_t ticks, void *obj)</td></tr>
-<tr class="memdesc:a4ee744e4af0dd4f32a038efbebe925b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start a previously created timer @timer_handle Reference to previously created timer @ticks Number of ticks till timeout (minimum is 5) @obj Reference to the object on which the function should be executed. <br /></td></tr>
+<tr class="memitem:a4ee744e4af0dd4f32a038efbebe925b9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimer.html#a4ee744e4af0dd4f32a038efbebe925b9">start</a> (app_timer_id_t &amp;timer_handle, uint32_t ticks, void *obj)</td></tr>
+<tr class="memdesc:a4ee744e4af0dd4f32a038efbebe925b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start a previously created timer @timer_handle Reference to previously created timer @ticks Number of ticks till timeout (minimum is 5) @obj Reference to the object on which the function should be executed.  <a href="classTimer.html#a4ee744e4af0dd4f32a038efbebe925b9">More...</a><br /></td></tr>
 <tr class="separator:a4ee744e4af0dd4f32a038efbebe925b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27947e817b21230c6a28b8429ec40f5a"><td class="memItemLeft" align="right" valign="top"><a id="a27947e817b21230c6a28b8429ec40f5a" name="a27947e817b21230c6a28b8429ec40f5a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> (app_timer_id_t &amp;timer_handle)</td></tr>
-<tr class="memdesc:a27947e817b21230c6a28b8429ec40f5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop a timer @timer_handle Reference to previously created timer. <br /></td></tr>
+<tr class="memitem:a27947e817b21230c6a28b8429ec40f5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimer.html#a27947e817b21230c6a28b8429ec40f5a">stop</a> (app_timer_id_t &amp;timer_handle)</td></tr>
+<tr class="memdesc:a27947e817b21230c6a28b8429ec40f5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop a timer @timer_handle Reference to previously created timer.  <a href="classTimer.html#a27947e817b21230c6a28b8429ec40f5a">More...</a><br /></td></tr>
 <tr class="separator:a27947e817b21230c6a28b8429ec40f5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0506cca8fce7a509f2dba102ab843fba"><td class="memItemLeft" align="right" valign="top"><a id="a0506cca8fce7a509f2dba102ab843fba" name="a0506cca8fce7a509f2dba102ab843fba"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>reset</b> (app_timer_id_t &amp;timer_handle, uint32_t ticks, void *obj)</td></tr>
-<tr class="memdesc:a0506cca8fce7a509f2dba102ab843fba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets a timer (if already active) to the new ticks @timer_handle Reference to previously created timer @ticks Number of ticks till timeout (minimum is 5) @obj Reference to the object on which the function should be executed. <br /></td></tr>
+<tr class="memitem:a0506cca8fce7a509f2dba102ab843fba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimer.html#a0506cca8fce7a509f2dba102ab843fba">reset</a> (app_timer_id_t &amp;timer_handle, uint32_t ticks, void *obj)</td></tr>
+<tr class="memdesc:a0506cca8fce7a509f2dba102ab843fba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets a timer (if already active) to the new ticks @timer_handle Reference to previously created timer @ticks Number of ticks till timeout (minimum is 5) @obj Reference to the object on which the function should be executed.  <a href="classTimer.html#a0506cca8fce7a509f2dba102ab843fba">More...</a><br /></td></tr>
 <tr class="separator:a0506cca8fce7a509f2dba102ab843fba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a8357f90f20707f9693fc713319de923a"><td class="memItemLeft" align="right" valign="top"><a id="a8357f90f20707f9693fc713319de923a" name="a8357f90f20707f9693fc713319de923a"></a>
-static <a class="el" href="classTimer.html">Timer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
+<tr class="memitem:a8357f90f20707f9693fc713319de923a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classTimer.html">Timer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimer.html#a8357f90f20707f9693fc713319de923a">getInstance</a> ()</td></tr>
 <tr class="separator:a8357f90f20707f9693fc713319de923a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a5f16e8da27d2a5a5242dead46de05d97"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimer.html#a5f16e8da27d2a5a5242dead46de05d97">Timer</a> ()</td></tr>
+<tr class="separator:a5f16e8da27d2a5a5242dead46de05d97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae29b55f9b36d870c0e9db4e8445c1d6e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimer.html#ae29b55f9b36d870c0e9db4e8445c1d6e">Timer</a> (<a class="el" href="classTimer.html">Timer</a> const &amp;)</td></tr>
+<tr class="separator:ae29b55f9b36d870c0e9db4e8445c1d6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a967a650da4cd2dfe09d7bdf9bed68bd0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimer.html#a967a650da4cd2dfe09d7bdf9bed68bd0">operator=</a> (<a class="el" href="classTimer.html">Timer</a> const &amp;)</td></tr>
+<tr class="separator:a967a650da4cd2dfe09d7bdf9bed68bd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p ><a class="el" href="classTimer.html" title="Timer on top of the timer peripheral.">Timer</a> on top of the timer peripheral. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a5f16e8da27d2a5a5242dead46de05d97" name="a5f16e8da27d2a5a5242dead46de05d97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f16e8da27d2a5a5242dead46de05d97">&#9670;&#160;</a></span>Timer() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimer.html">Timer::Timer</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae29b55f9b36d870c0e9db4e8445c1d6e" name="ae29b55f9b36d870c0e9db4e8445c1d6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae29b55f9b36d870c0e9db4e8445c1d6e">&#9670;&#160;</a></span>Timer() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimer.html">Timer::Timer</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTimer.html">Timer</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a id="a4e2c7d8592dfc1f1620352985879c0ea" name="a4e2c7d8592dfc1f1620352985879c0ea"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4e2c7d8592dfc1f1620352985879c0ea">&#9670;&#160;</a></span>createSingleShot()</h2>
 
@@ -169,6 +226,166 @@ static <a class="el" href="classTimer.html">Timer</a> &amp;&#160;</td><td class=
 <p>Create single shot timer. </p>
 <p >function will only be called once and after that timer will be stopped @timer_handle An id or handle to reference the timer, set by this function (actually, just a Uint32_t) @func The function to be called</p>
 <p >Create a timer for a specific purpose. </p>
+
+</div>
+</div>
+<a id="a8357f90f20707f9693fc713319de923a" name="a8357f90f20707f9693fc713319de923a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8357f90f20707f9693fc713319de923a">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTimer.html">Timer</a> &amp; Timer::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a00eca12a53538b339a927723a246e2d7" name="a00eca12a53538b339a927723a246e2d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00eca12a53538b339a927723a246e2d7">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Timer::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a967a650da4cd2dfe09d7bdf9bed68bd0" name="a967a650da4cd2dfe09d7bdf9bed68bd0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a967a650da4cd2dfe09d7bdf9bed68bd0">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Timer::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTimer.html">Timer</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0506cca8fce7a509f2dba102ab843fba" name="a0506cca8fce7a509f2dba102ab843fba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0506cca8fce7a509f2dba102ab843fba">&#9670;&#160;</a></span>reset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Timer::reset </td>
+          <td>(</td>
+          <td class="paramtype">app_timer_id_t &amp;&#160;</td>
+          <td class="paramname"><em>timer_handle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>ticks</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>obj</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Resets a timer (if already active) to the new ticks @timer_handle Reference to previously created timer @ticks Number of ticks till timeout (minimum is 5) @obj Reference to the object on which the function should be executed. </p>
+
+</div>
+</div>
+<a id="a4ee744e4af0dd4f32a038efbebe925b9" name="a4ee744e4af0dd4f32a038efbebe925b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ee744e4af0dd4f32a038efbebe925b9">&#9670;&#160;</a></span>start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Timer::start </td>
+          <td>(</td>
+          <td class="paramtype">app_timer_id_t &amp;&#160;</td>
+          <td class="paramname"><em>timer_handle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>ticks</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>obj</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Start a previously created timer @timer_handle Reference to previously created timer @ticks Number of ticks till timeout (minimum is 5) @obj Reference to the object on which the function should be executed. </p>
+
+</div>
+</div>
+<a id="a27947e817b21230c6a28b8429ec40f5a" name="a27947e817b21230c6a28b8429ec40f5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27947e817b21230c6a28b8429ec40f5a">&#9670;&#160;</a></span>stop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Timer::stop </td>
+          <td>(</td>
+          <td class="paramtype">app_timer_id_t &amp;&#160;</td>
+          <td class="paramname"><em>timer_handle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Stop a timer @timer_handle Reference to previously created timer. </p>
 
 </div>
 </div>

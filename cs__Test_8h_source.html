@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__Test_8h_source.html',''); initResi
   <div class="headertitle"><div class="title">cs_Test.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__Test_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Jan 15, 2020</span></div>
@@ -109,12 +109,12 @@ $(document).ready(function(){initNavTree('cs__Test_8h_source.html',''); initResi
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;uart/cs_UartHandler.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__UartHandler_8h.html">uart/cs_UartHandler.h</a>&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;cstdarg&gt;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#ifdef DEBUG</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">inline</span> <span class="keywordtype">int</span> cs_write_test(<span class="keyword">const</span> <span class="keywordtype">char</span>* str, ...) {</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code hl_define" href="cs__Test_8h.html#a789b83344d31ac02227ad8e3a6d4b847">cs_write_test</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* str, ...) {</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keywordtype">char</span> buffer[128];</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    va_list ap;</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    va_start(ap, str);</div>
@@ -128,7 +128,7 @@ $(document).ready(function(){initNavTree('cs__Test_8h_source.html',''); initResi
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        va_start(ap, str);</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        len = vsprintf(buffer, str, ap);</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        va_end(ap);</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <a class="code hl_function" href="classUartHandler.html#ace0538cb46ec413eb7924eeea5ce419e">UartHandler::getInstance</a>().<a class="code hl_function" href="classUartHandler.html#a1ab2ac1b3c1ddb8911409469c58de9df">writeMsg</a>(UART_OPCODE_TX_FIRMWARESTATE, (uint8_t*)buffer, len);</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <a class="code hl_function" href="classUartHandler.html#ace0538cb46ec413eb7924eeea5ce419e">UartHandler::getInstance</a>().<a class="code hl_function" href="classUartHandler.html#a1ab2ac1b3c1ddb8911409469c58de9df">writeMsg</a>(<a class="code hl_enumvalue" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76aafe8ee2dfecaa66ecdcfc5ffc7978fff">UART_OPCODE_TX_FIRMWARESTATE</a>, (uint8_t*)buffer, len);</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    }</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordtype">char</span>* p_buf = (<span class="keywordtype">char</span>*)malloc(len + 1);</div>
@@ -136,7 +136,7 @@ $(document).ready(function(){initNavTree('cs__Test_8h_source.html',''); initResi
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        va_start(ap, str);</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        len = vsprintf(p_buf, str, ap);</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        va_end(ap);</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <a class="code hl_function" href="classUartHandler.html#ace0538cb46ec413eb7924eeea5ce419e">UartHandler::getInstance</a>().<a class="code hl_function" href="classUartHandler.html#a1ab2ac1b3c1ddb8911409469c58de9df">writeMsg</a>(UART_OPCODE_TX_FIRMWARESTATE, (uint8_t*)p_buf, len);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <a class="code hl_function" href="classUartHandler.html#ace0538cb46ec413eb7924eeea5ce419e">UartHandler::getInstance</a>().<a class="code hl_function" href="classUartHandler.html#a1ab2ac1b3c1ddb8911409469c58de9df">writeMsg</a>(<a class="code hl_enumvalue" href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76aafe8ee2dfecaa66ecdcfc5ffc7978fff">UART_OPCODE_TX_FIRMWARESTATE</a>, (uint8_t*)p_buf, len);</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        free(p_buf);</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    }</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">return</span> len;</div>
@@ -144,24 +144,24 @@ $(document).ready(function(){initNavTree('cs__Test_8h_source.html',''); initResi
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#else</span></div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// when debug is not defined, define the centralized method</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">// as empty symbol so that all calls to it result in no generated code.</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#define cs_write_test(...)</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a789b83344d31ac02227ad8e3a6d4b847">   45</a></span><span class="preprocessor">#define cs_write_test(...)</span></div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> U&gt;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keyword">inline</span> <span class="keywordtype">long</span> <span class="keywordtype">int</span> OptionalUnsignedToInt(std::optional&lt;U&gt; opt) {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#abbc740cee814fcfaf7bc0522c5b2b3e2">   52</a></span><span class="keyword">inline</span> <span class="keywordtype">long</span> <span class="keywordtype">int</span> <a class="code hl_function" href="cs__Test_8h.html#abbc740cee814fcfaf7bc0522c5b2b3e2">OptionalUnsignedToInt</a>(std::optional&lt;U&gt; opt) {</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">return</span> (opt ? <span class="keyword">static_cast&lt;</span><span class="keywordtype">long</span> <span class="keywordtype">int</span><span class="keyword">&gt;</span>(opt.value()) : -1);</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">// folds in pretty_function name</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#define TEST_PUSH_DATA(form, self, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#aa1af4132ff61132eb6998da2f526a1d7">   62</a></span><span class="preprocessor">#define TEST_PUSH_DATA(form, self, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">    cs_write_test(form, self, __PRETTY_FUNCTION__, expressionnamestr, expr)</span></div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#if CS_UART_BINARY_PROTOCOL_ENABLED == 0</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#define TEST_PUSH_EXPR_S(self, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a333879df9c38b88d615d5f178d2bd3b8">   69</a></span><span class="preprocessor">#define TEST_PUSH_EXPR_S(self, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">    TEST_PUSH_DATA(&quot;%x@%s@%s@%s\r\n&quot;</span>, self, expressionnamestr, expr)  <span class="comment">// string</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#define TEST_PUSH_EXPR_D(self, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a83c9693ae7f0964c202607123ee7190b">   71</a></span><span class="preprocessor">#define TEST_PUSH_EXPR_D(self, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">    TEST_PUSH_DATA(&quot;%x@%s@%s@%d\r\n&quot;</span>, self, expressionnamestr, expr)  <span class="comment">// decimal</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#define TEST_PUSH_EXPR_X(self, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a6e47c60e8652c2b6f41aa7ee2cec84bd">   73</a></span><span class="preprocessor">#define TEST_PUSH_EXPR_X(self, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">    TEST_PUSH_DATA(&quot;%x@%s@%s@%x\r\n&quot;</span>, self, expressionnamestr, expr)  <span class="comment">// hexadecimal</span></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#else</span></div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#define TEST_PUSH_EXPR_S(self, expressionnamestr, expr) \</span></div>
@@ -173,27 +173,27 @@ $(document).ready(function(){initNavTree('cs__Test_8h_source.html',''); initResi
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="comment">// boolean remap to string</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#define TEST_PUSH_EXPR_B(self, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a2c34ab36685fb8f2af4e0352bb89af27">   85</a></span><span class="preprocessor">#define TEST_PUSH_EXPR_B(self, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">    TEST_PUSH_EXPR_S(self, expressionnamestr, (expr ? &quot;True&quot;</span> : &quot;False&quot;))</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="comment">// std::optional&lt;uint*_t&gt; remap to Decimal</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">#define TEST_PUSH_EXPR_O(self, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a8c1ca1652b04d60814ef1d92ed6e729f">   89</a></span><span class="preprocessor">#define TEST_PUSH_EXPR_O(self, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">    TEST_PUSH_EXPR_D(self, expressionnamestr, OptionalUnsignedToInt(expr))</span></div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">#define TEST_PUSH_S(self, variablename) TEST_PUSH_EXPR_S(self, #variablename, self-&gt;variablename)</span></div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="preprocessor">#define TEST_PUSH_D(self, variablename) TEST_PUSH_EXPR_D(self, #variablename, self-&gt;variablename)</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">#define TEST_PUSH_X(self, variablename) TEST_PUSH_EXPR_X(self, #variablename, self-&gt;variablename)</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">#define TEST_PUSH_B(self, variablename) TEST_PUSH_EXPR_B(self, #variablename, self-&gt;variablename)</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#define TEST_PUSH_O(self, variablename) TEST_PUSH_EXPR_O(self, #variablename, self-&gt;variablename)</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a5514a8383169803cc4e07ad4841940e8">   95</a></span><span class="preprocessor">#define TEST_PUSH_S(self, variablename) TEST_PUSH_EXPR_S(self, #variablename, self-&gt;variablename)</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a3d3d2dcb364a421e9649b9ca8468fc86">   96</a></span><span class="preprocessor">#define TEST_PUSH_D(self, variablename) TEST_PUSH_EXPR_D(self, #variablename, self-&gt;variablename)</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#aba31a66635495788210e0e3a39ace645">   97</a></span><span class="preprocessor">#define TEST_PUSH_X(self, variablename) TEST_PUSH_EXPR_X(self, #variablename, self-&gt;variablename)</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a68a1a4d8dac707da2f6c9dd56b4aeca7">   98</a></span><span class="preprocessor">#define TEST_PUSH_B(self, variablename) TEST_PUSH_EXPR_B(self, #variablename, self-&gt;variablename)</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a44889eff91cc11f72309058b190dbbd4">   99</a></span><span class="preprocessor">#define TEST_PUSH_O(self, variablename) TEST_PUSH_EXPR_O(self, #variablename, self-&gt;variablename)</span></div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="preprocessor">#if CS_UART_BINARY_PROTOCOL_ENABLED == 0</span></div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">#define TEST_PUSH_STATIC_S(context, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a1a23e7610ec165f788f6dfde07b9c4ed">  107</a></span><span class="preprocessor">#define TEST_PUSH_STATIC_S(context, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="preprocessor">    TEST_PUSH_DATA(&quot;%s@%s@%s@%s\r\n&quot;</span>, context, expressionnamestr, expr)</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#define TEST_PUSH_STATIC_D(context, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#aa0cb3c1aa35a9c5bc862d4c9e1dbf45c">  109</a></span><span class="preprocessor">#define TEST_PUSH_STATIC_D(context, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="preprocessor">    TEST_PUSH_DATA(&quot;%s@%s@%s@%d\r\n&quot;</span>, context, expressionnamestr, expr)</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="preprocessor">#define TEST_PUSH_STATIC_X(context, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#a02f2f66aaa5d15ee4ed906e55f2e3cfe">  111</a></span><span class="preprocessor">#define TEST_PUSH_STATIC_X(context, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="preprocessor">    TEST_PUSH_DATA(&quot;%s@%s@%s@%x\r\n&quot;</span>, context, expressionnamestr, expr)</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#define TEST_PUSH_STATIC_B(context, expressionnamestr, expr) \</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="cs__Test_8h.html#ab17998be00f29cd40f7faf03f98ee324">  113</a></span><span class="preprocessor">#define TEST_PUSH_STATIC_B(context, expressionnamestr, expr) \</span></div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="preprocessor">    TEST_PUSH_DATA(&quot;%s@%s@%s@%s\r\n&quot;</span>, context, expressionnamestr, (expr ? &quot;True&quot; : &quot;False&quot;))</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#else</span></div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="preprocessor">#define TEST_PUSH_STATIC_S(context, expressionnamestr, expr) \</span></div>
@@ -207,12 +207,16 @@ $(document).ready(function(){initNavTree('cs__Test_8h_source.html',''); initResi
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassUartHandler_html_a1ab2ac1b3c1ddb8911409469c58de9df"><div class="ttname"><a href="classUartHandler.html#a1ab2ac1b3c1ddb8911409469c58de9df">UartHandler::writeMsg</a></div><div class="ttdeci">ret_code_t writeMsg(UartOpcodeTx opCode, uint8_t *data, uint16_t size, UartProtocol::Encrypt encrypt=UartProtocol::ENCRYPT_ACCORDING_TO_TYPE)</div><div class="ttdoc">Write a msg over UART.</div></div>
 <div class="ttc" id="aclassUartHandler_html_ace0538cb46ec413eb7924eeea5ce419e"><div class="ttname"><a href="classUartHandler.html#ace0538cb46ec413eb7924eeea5ce419e">UartHandler::getInstance</a></div><div class="ttdeci">static UartHandler &amp; getInstance()</div><div class="ttdoc">Gets a static singleton (no dynamic memory allocation) of this class.</div><div class="ttdef"><b>Definition:</b> cs_UartHandler.h:31</div></div>
+<div class="ttc" id="acs__Test_8h_html_a789b83344d31ac02227ad8e3a6d4b847"><div class="ttname"><a href="cs__Test_8h.html#a789b83344d31ac02227ad8e3a6d4b847">cs_write_test</a></div><div class="ttdeci">#define cs_write_test(...)</div><div class="ttdef"><b>Definition:</b> cs_Test.h:45</div></div>
+<div class="ttc" id="acs__Test_8h_html_abbc740cee814fcfaf7bc0522c5b2b3e2"><div class="ttname"><a href="cs__Test_8h.html#abbc740cee814fcfaf7bc0522c5b2b3e2">OptionalUnsignedToInt</a></div><div class="ttdeci">long int OptionalUnsignedToInt(std::optional&lt; U &gt; opt)</div><div class="ttdoc">Cast optional into integer for easy printing.</div><div class="ttdef"><b>Definition:</b> cs_Test.h:52</div></div>
+<div class="ttc" id="acs__UartHandler_8h_html"><div class="ttname"><a href="cs__UartHandler_8h.html">cs_UartHandler.h</a></div></div>
+<div class="ttc" id="acs__UartOpcodes_8h_html_aa56aea1581e4eece8c88a06d9409dd76aafe8ee2dfecaa66ecdcfc5ffc7978fff"><div class="ttname"><a href="cs__UartOpcodes_8h.html#aa56aea1581e4eece8c88a06d9409dd76aafe8ee2dfecaa66ecdcfc5ffc7978fff">UART_OPCODE_TX_FIRMWARESTATE</a></div><div class="ttdeci">@ UART_OPCODE_TX_FIRMWARESTATE</div><div class="ttdef"><b>Definition:</b> cs_UartOpcodes.h:143</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_933ecdb02ee7831305b91036a26acf32.html">test</a></li><li class="navelem"><b>cs_Test.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_933ecdb02ee7831305b91036a26acf32.html">test</a></li><li class="navelem"><a class="el" href="cs__Test_8h.html">cs_Test.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

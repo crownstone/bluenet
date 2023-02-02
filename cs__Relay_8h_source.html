@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__Relay_8h_source.html',''); initRes
   <div class="headertitle"><div class="title">cs_Relay.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__Relay_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Jan 29, 2020</span></div>
@@ -108,40 +108,53 @@ $(document).ready(function(){initNavTree('cs__Relay_8h_source.html',''); initRes
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;cfg/cs_Boards.h&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;common/cs_Types.h&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Boards_8h.html">cfg/cs_Boards.h</a>&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Types_8h.html">common/cs_Types.h</a>&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classRelay.html">   18</a></span><span class="keyword">class </span><a class="code hl_class" href="classRelay.html">Relay</a> {</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keywordtype">void</span> init(<span class="keyword">const</span> <a class="code hl_struct" href="structboards__config__t.html">boards_config_t</a>&amp; board);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="classRelay.html#a1543512559b8f352d0b3e5d21c52a700">   20</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classRelay.html#a1543512559b8f352d0b3e5d21c52a700">init</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structboards__config__t.html">boards_config_t</a>&amp; board);</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classRelay.html#a614a57cce6fb4965f1f3c793a325f4be">   25</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classRelay.html#a614a57cce6fb4965f1f3c793a325f4be">hasRelay</a>();</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classRelay.html#aa59cb12776c8603f53f45f3408270629">   33</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classRelay.html#aa59cb12776c8603f53f45f3408270629">set</a>(<span class="keywordtype">bool</span> value);</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keywordtype">bool</span> _initialized = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keywordtype">bool</span> _hasRelay;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    uint8_t _pinRelayOn;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    uint8_t _pinRelayOff;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    TYPIFY(CONFIG_RELAY_HIGH_DURATION) _relayHighDurationMs;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classRelay.html#ab46fac3e86ce75e5c0db0a58c36a5082">   36</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="classRelay.html#ab46fac3e86ce75e5c0db0a58c36a5082">_initialized</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="classRelay.html#a6d3cc60326f6adbfda619f5e3ba06ded">   37</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="classRelay.html#a6d3cc60326f6adbfda619f5e3ba06ded">_hasRelay</a>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="classRelay.html#a4c604d78e6b407b1e7772a72cba2a9e5">   38</a></span>    uint8_t <a class="code hl_variable" href="classRelay.html#a4c604d78e6b407b1e7772a72cba2a9e5">_pinRelayOn</a>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classRelay.html#a6b3ee5753371f66e787ef37856d51ad0">   39</a></span>    uint8_t <a class="code hl_variable" href="classRelay.html#a6b3ee5753371f66e787ef37856d51ad0">_pinRelayOff</a>;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="classRelay.html#a006b5a42397c9b1a66e55593a7d15629">   40</a></span>    <a class="code hl_function" href="classRelay.html#a006b5a42397c9b1a66e55593a7d15629">TYPIFY</a>(<a class="code hl_enumvalue" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1ae100a9ff108bb283cf2248a2ea3b3577">CONFIG_RELAY_HIGH_DURATION</a>) _relayHighDurationMs;</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    uint8_t _pinRelayDebug;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">bool</span> _ledInverted;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classRelay.html#a4d06a8b1d682e63e653832b5a091c888">   42</a></span>    uint8_t <a class="code hl_variable" href="classRelay.html#a4d06a8b1d682e63e653832b5a091c888">_pinRelayDebug</a>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="classRelay.html#a83f936655068c15fa5d718a12f40b145">   43</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="classRelay.html#a83f936655068c15fa5d718a12f40b145">_ledInverted</a>;</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">bool</span> turnOn();</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">bool</span> turnOff();</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classRelay.html#ae6f8a4df732b266db36bfbcad4faf81d">   45</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classRelay.html#ae6f8a4df732b266db36bfbcad4faf81d">turnOn</a>();</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="classRelay.html#a587e280d331af3e5f6827d4aad863a20">   46</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="classRelay.html#a587e280d331af3e5f6827d4aad863a20">turnOff</a>();</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>};</div>
 <div class="ttc" id="aclassRelay_html"><div class="ttname"><a href="classRelay.html">Relay</a></div><div class="ttdoc">Class that provides a bi-stable relay.</div><div class="ttdef"><b>Definition:</b> cs_Relay.h:18</div></div>
+<div class="ttc" id="aclassRelay_html_a006b5a42397c9b1a66e55593a7d15629"><div class="ttname"><a href="classRelay.html#a006b5a42397c9b1a66e55593a7d15629">Relay::TYPIFY</a></div><div class="ttdeci">TYPIFY(CONFIG_RELAY_HIGH_DURATION) _relayHighDurationMs</div></div>
+<div class="ttc" id="aclassRelay_html_a1543512559b8f352d0b3e5d21c52a700"><div class="ttname"><a href="classRelay.html#a1543512559b8f352d0b3e5d21c52a700">Relay::init</a></div><div class="ttdeci">void init(const boards_config_t &amp;board)</div></div>
+<div class="ttc" id="aclassRelay_html_a4c604d78e6b407b1e7772a72cba2a9e5"><div class="ttname"><a href="classRelay.html#a4c604d78e6b407b1e7772a72cba2a9e5">Relay::_pinRelayOn</a></div><div class="ttdeci">uint8_t _pinRelayOn</div><div class="ttdef"><b>Definition:</b> cs_Relay.h:38</div></div>
+<div class="ttc" id="aclassRelay_html_a4d06a8b1d682e63e653832b5a091c888"><div class="ttname"><a href="classRelay.html#a4d06a8b1d682e63e653832b5a091c888">Relay::_pinRelayDebug</a></div><div class="ttdeci">uint8_t _pinRelayDebug</div><div class="ttdef"><b>Definition:</b> cs_Relay.h:42</div></div>
+<div class="ttc" id="aclassRelay_html_a587e280d331af3e5f6827d4aad863a20"><div class="ttname"><a href="classRelay.html#a587e280d331af3e5f6827d4aad863a20">Relay::turnOff</a></div><div class="ttdeci">bool turnOff()</div></div>
 <div class="ttc" id="aclassRelay_html_a614a57cce6fb4965f1f3c793a325f4be"><div class="ttname"><a href="classRelay.html#a614a57cce6fb4965f1f3c793a325f4be">Relay::hasRelay</a></div><div class="ttdeci">bool hasRelay()</div><div class="ttdoc">Returns true when this board has a relay.</div></div>
+<div class="ttc" id="aclassRelay_html_a6b3ee5753371f66e787ef37856d51ad0"><div class="ttname"><a href="classRelay.html#a6b3ee5753371f66e787ef37856d51ad0">Relay::_pinRelayOff</a></div><div class="ttdeci">uint8_t _pinRelayOff</div><div class="ttdef"><b>Definition:</b> cs_Relay.h:39</div></div>
+<div class="ttc" id="aclassRelay_html_a6d3cc60326f6adbfda619f5e3ba06ded"><div class="ttname"><a href="classRelay.html#a6d3cc60326f6adbfda619f5e3ba06ded">Relay::_hasRelay</a></div><div class="ttdeci">bool _hasRelay</div><div class="ttdef"><b>Definition:</b> cs_Relay.h:37</div></div>
+<div class="ttc" id="aclassRelay_html_a83f936655068c15fa5d718a12f40b145"><div class="ttname"><a href="classRelay.html#a83f936655068c15fa5d718a12f40b145">Relay::_ledInverted</a></div><div class="ttdeci">bool _ledInverted</div><div class="ttdef"><b>Definition:</b> cs_Relay.h:43</div></div>
 <div class="ttc" id="aclassRelay_html_aa59cb12776c8603f53f45f3408270629"><div class="ttname"><a href="classRelay.html#aa59cb12776c8603f53f45f3408270629">Relay::set</a></div><div class="ttdeci">bool set(bool value)</div><div class="ttdoc">Set relay on or off.</div></div>
+<div class="ttc" id="aclassRelay_html_ab46fac3e86ce75e5c0db0a58c36a5082"><div class="ttname"><a href="classRelay.html#ab46fac3e86ce75e5c0db0a58c36a5082">Relay::_initialized</a></div><div class="ttdeci">bool _initialized</div><div class="ttdef"><b>Definition:</b> cs_Relay.h:36</div></div>
+<div class="ttc" id="aclassRelay_html_ae6f8a4df732b266db36bfbcad4faf81d"><div class="ttname"><a href="classRelay.html#ae6f8a4df732b266db36bfbcad4faf81d">Relay::turnOn</a></div><div class="ttdeci">bool turnOn()</div></div>
+<div class="ttc" id="acs__Boards_8h_html"><div class="ttname"><a href="cs__Boards_8h.html">cs_Boards.h</a></div></div>
+<div class="ttc" id="acs__Types_8h_html"><div class="ttname"><a href="cs__Types_8h.html">cs_Types.h</a></div></div>
+<div class="ttc" id="acs__Types_8h_html_ae6f00cc15d63d5331e90d1e880a35ae1ae100a9ff108bb283cf2248a2ea3b3577"><div class="ttname"><a href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1ae100a9ff108bb283cf2248a2ea3b3577">CS_TYPE::CONFIG_RELAY_HIGH_DURATION</a></div><div class="ttdeci">@ CONFIG_RELAY_HIGH_DURATION</div></div>
 <div class="ttc" id="astructboards__config__t_html"><div class="ttname"><a href="structboards__config__t.html">boards_config_t</a></div><div class="ttdoc">Board configuration.</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:169</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><b>cs_Relay.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><a class="el" href="cs__Relay_8h.html">cs_Relay.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

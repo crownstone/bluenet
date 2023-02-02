@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__Logger_8h_source.html',''); initRe
   <div class="headertitle"><div class="title">cs_Logger.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__Logger_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Dec 9, 2020</span></div>
@@ -109,34 +109,34 @@ $(document).ready(function(){initNavTree('cs__Logger_8h_source.html',''); initRe
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;cfg/cs_Strings.h&gt;</span>  <span class="comment">// Should actually be included by the files that use these.</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;protocol/cs_SerialTypes.h&gt;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;protocol/cs_UartMsgTypes.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Strings_8h.html">cfg/cs_Strings.h</a>&gt;</span>  <span class="comment">// Should actually be included by the files that use these.</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;<a class="code" href="cs__SerialTypes_8h.html">protocol/cs_SerialTypes.h</a>&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;<a class="code" href="cs__UartMsgTypes_8h.html">protocol/cs_UartMsgTypes.h</a>&gt;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#if !defined HOST_TARGET &amp;&amp; (CS_SERIAL_NRF_LOG_ENABLED &gt; 0)</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;logging/impl/cs_LogNrf.h&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;<a class="code" href="cs__LogNrf_8h.html">logging/impl/cs_LogNrf.h</a>&gt;</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#else</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#if HOST_TARGET</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;logging/impl/cs_LogStdPrintf.h&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;<a class="code" href="cs__LogStdPrintf_8h.html">logging/impl/cs_LogStdPrintf.h</a>&gt;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#elif CS_UART_BINARY_PROTOCOL_ENABLED == 0</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;logging/impl/cs_LogPlainText.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;<a class="code" href="cs__LogPlainText_8h.html">logging/impl/cs_LogPlainText.h</a>&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#elif SERIAL_VERBOSITY &gt; SERIAL_BYTE_PROTOCOL_ONLY</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;logging/impl/cs_LogBinaryProtocol.h&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;<a class="code" href="cs__LogBinaryProtocol_8h.html">logging/impl/cs_LogBinaryProtocol.h</a>&gt;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;logging/impl/cs_LogNone.h&gt;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;<a class="code" href="cs__LogNone_8h.html">logging/impl/cs_LogNone.h</a>&gt;</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">// Deprecated, use LOGvv instead. To disable particular logs, but without commenting it.</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#define LOGnone(fmt, ...)</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="cs__Logger_8h.html#aa9c4e3dd653e868c90508ed030f3d645">   72</a></span><span class="preprocessor">#define LOGnone(fmt, ...)</span></div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#if !defined HOST_TARGET &amp;&amp; (CS_SERIAL_NRF_LOG_ENABLED &gt; 0)</span></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#define LOG_FLUSH NRF_LOG_FLUSH</span></div>
@@ -150,15 +150,15 @@ $(document).ready(function(){initNavTree('cs__Logger_8h_source.html',''); initRe
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="preprocessor">#define LOGf NRF_LOG_ERROR</span></div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#define LOG_FLUSH()</span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="cs__Logger_8h.html#a0aff9308e67c2fb91b33dfac1b243057">   86</a></span><span class="preprocessor">#define LOG_FLUSH()</span></div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#define LOGvv(fmt, ...) _log(SERIAL_VERY_VERBOSE, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">#define LOGv(fmt, ...) _log(SERIAL_VERBOSE, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="preprocessor">#define LOGd(fmt, ...) _log(SERIAL_DEBUG, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="preprocessor">#define LOGi(fmt, ...) _log(SERIAL_INFO, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="preprocessor">#define LOGw(fmt, ...) _log(SERIAL_WARN, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="preprocessor">#define LOGe(fmt, ...) _log(SERIAL_ERROR, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#define LOGf(fmt, ...) _log(SERIAL_FATAL, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="cs__Logger_8h.html#af8057386053320d8c594503fa9f7be36">   88</a></span><span class="preprocessor">#define LOGvv(fmt, ...) _log(SERIAL_VERY_VERBOSE, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="cs__Logger_8h.html#a06b5c5a446cdb9b0e888af6d655016ba">   89</a></span><span class="preprocessor">#define LOGv(fmt, ...) _log(SERIAL_VERBOSE, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="cs__Logger_8h.html#a885fd6cf9ff0bf382d596f3dc1bee954">   90</a></span><span class="preprocessor">#define LOGd(fmt, ...) _log(SERIAL_DEBUG, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="cs__Logger_8h.html#ae52340dc98580e5974f5f1236618cfb3">   91</a></span><span class="preprocessor">#define LOGi(fmt, ...) _log(SERIAL_INFO, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="cs__Logger_8h.html#a7c42a0cefdd2c2e48572bee697e644dc">   92</a></span><span class="preprocessor">#define LOGw(fmt, ...) _log(SERIAL_WARN, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="cs__Logger_8h.html#aa1fa90f2e8223ea0e707860d943d88a8">   93</a></span><span class="preprocessor">#define LOGe(fmt, ...) _log(SERIAL_ERROR, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="cs__Logger_8h.html#afc626faff318a5cf2873a0a79fe5c330">   94</a></span><span class="preprocessor">#define LOGf(fmt, ...) _log(SERIAL_FATAL, true, fmt, ##__VA_ARGS__)</span></div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment">// undefine macros based on SERIAL_VERBOSITY</span></div>
@@ -197,12 +197,20 @@ $(document).ready(function(){initNavTree('cs__Logger_8h_source.html',''); initRe
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="preprocessor">#undef LOGf</span></div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="preprocessor">#define LOGf(fmt, ...)</span></div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="acs__LogBinaryProtocol_8h_html"><div class="ttname"><a href="cs__LogBinaryProtocol_8h.html">cs_LogBinaryProtocol.h</a></div></div>
+<div class="ttc" id="acs__LogNone_8h_html"><div class="ttname"><a href="cs__LogNone_8h.html">cs_LogNone.h</a></div></div>
+<div class="ttc" id="acs__LogNrf_8h_html"><div class="ttname"><a href="cs__LogNrf_8h.html">cs_LogNrf.h</a></div></div>
+<div class="ttc" id="acs__LogPlainText_8h_html"><div class="ttname"><a href="cs__LogPlainText_8h.html">cs_LogPlainText.h</a></div></div>
+<div class="ttc" id="acs__LogStdPrintf_8h_html"><div class="ttname"><a href="cs__LogStdPrintf_8h.html">cs_LogStdPrintf.h</a></div></div>
+<div class="ttc" id="acs__SerialTypes_8h_html"><div class="ttname"><a href="cs__SerialTypes_8h.html">cs_SerialTypes.h</a></div></div>
+<div class="ttc" id="acs__Strings_8h_html"><div class="ttname"><a href="cs__Strings_8h.html">cs_Strings.h</a></div></div>
+<div class="ttc" id="acs__UartMsgTypes_8h_html"><div class="ttname"><a href="cs__UartMsgTypes_8h.html">cs_UartMsgTypes.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b25cd48746385db9a78c677f87e228d3.html">logging</a></li><li class="navelem"><b>cs_Logger.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b25cd48746385db9a78c677f87e228d3.html">logging</a></li><li class="navelem"><a class="el" href="cs__Logger_8h.html">cs_Logger.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

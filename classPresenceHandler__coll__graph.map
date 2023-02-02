@@ -1,5 +1,8 @@
 <map id="PresenceHandler" name="PresenceHandler">
-<area shape="rect" id="node1" title="Keeps up all the locations each profile is present in." alt="" coords="59,79,191,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
-<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
+<area shape="rect" id="node1" title="Keeps up all the locations each profile is present in." alt="" coords="123,328,255,353"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,225,116,251"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,225,237,251"/>
+<area shape="rect" id="node4" href="$classStore.html" title=" " alt="" coords="339,211,521,265"/>
+<area shape="rect" id="node5" href="$structPresenceHandler_1_1PresenceRecord.html" title=" " alt="" coords="331,108,529,148"/>
+<area shape="rect" id="node6" href="$structPresenceHandler_1_1ProfileLocation.html" title=" " alt="" coords="339,5,521,45"/>
 </map>

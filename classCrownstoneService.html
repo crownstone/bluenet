@@ -101,6 +101,7 @@ $(document).ready(function(){initNavTree('classCrownstoneService.html',''); init
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classCrownstoneService-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">CrownstoneService Class Reference</div></div>
 </div><!--header-->
@@ -127,19 +128,31 @@ Collaboration diagram for CrownstoneService:</div>
 <div class="dyncontent">
 <div class="center"><img src="classCrownstoneService__coll__graph.png" border="0" usemap="#aCrownstoneService_coll__map" alt="Collaboration graph"/></div>
 <map name="aCrownstoneService_coll__map" id="aCrownstoneService_coll__map">
-<area shape="rect" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,..." alt="" coords="973,112,1120,137"/>
-<area shape="rect" href="classService.html" title="Base class for a BLE service." alt="" coords="647,5,718,31"/>
-<area shape="rect" href="classBaseClass.html" title=" " alt="" coords="328,5,455,31"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="627,55,738,80"/>
-<area shape="rect" href="classCharacteristic_3_01buffer__ptr__t_01_4.html" title="The base class is already using a buffer as value." alt="" coords="599,105,766,145"/>
-<area shape="rect" href="classCharacteristicBase.html" title="Base class for a BLE characteristic." alt="" coords="319,105,463,131"/>
-<area shape="rect" href="classControlPacketAccessor.html" title=" " alt="" coords="597,239,768,279"/>
-<area shape="rect" href="classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="331,233,451,259"/>
-<area shape="rect" href="classResultPacketAccessor.html" title=" " alt="" coords="601,169,765,209"/>
-<area shape="rect" href="structcontrol__packet__t.html" title=" " alt="" coords="284,283,499,337"/>
-<area shape="rect" href="structcontrol__packet__header__t.html" title="Header of a control packet." alt="" coords="5,297,187,323"/>
-<area shape="rect" href="structresult__packet__t.html" title=" " alt="" coords="291,155,492,209"/>
-<area shape="rect" href="structresult__packet__header__t.html" title="Header of a result packet." alt="" coords="9,169,183,195"/>
+<area shape="rect" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,..." alt="" coords="2213,245,2360,271"/>
+<area shape="rect" href="classService.html" title="Base class for a BLE service." alt="" coords="1090,200,1161,225"/>
+<area shape="rect" href="classCharacteristicBase.html" title="Base class for a BLE characteristic." alt="" coords="1431,120,1575,145"/>
+<area shape="rect" href="classBaseClass.html" title=" " alt="" coords="689,125,815,151"/>
+<area shape="rect" href="classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,175,781,200"/>
+<area shape="rect" href="classBaseClass.html" title=" " alt="" coords="365,196,491,221"/>
+<area shape="rect" href="classfixed__tuple.html" title=" " alt="" coords="327,131,529,171"/>
+<area shape="rect" href="classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="184,139,277,164"/>
+<area shape="rect" title=" " alt="" coords="5,139,135,164"/>
+<area shape="rect" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,224,780,249"/>
+<area shape="rect" href="classtuple.html" title=" " alt="" coords="643,273,861,299"/>
+<area shape="rect" title=" " alt="" coords="330,266,526,306"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="1751,271,1862,296"/>
+<area shape="rect" href="classCharacteristic_3_01buffer__ptr__t_01_4.html" title="The base class is already using a buffer as value." alt="" coords="1723,150,1890,190"/>
+<area shape="rect" href="classCharacteristic.html" title=" " alt="" coords="1709,91,1904,116"/>
+<area shape="rect" href="structcharacteristic__config__t.html" title=" " alt="" coords="1041,133,1210,159"/>
+<area shape="rect" title=" " alt="" coords="1016,5,1235,60"/>
+<area shape="rect" href="structcs__data__t.html" title="Packets (structs) that are used internally in the firmware, and can be changed freely." alt="" coords="1083,84,1167,109"/>
+<area shape="rect" href="classControlPacketAccessor.html" title=" " alt="" coords="1721,385,1892,425"/>
+<area shape="rect" href="classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="1443,361,1563,387"/>
+<area shape="rect" href="classResultPacketAccessor.html" title=" " alt="" coords="1725,321,1889,361"/>
+<area shape="rect" href="structcontrol__packet__t.html" title=" " alt="" coords="1396,411,1611,465"/>
+<area shape="rect" href="structcontrol__packet__header__t.html" title="Header of a control packet." alt="" coords="1035,425,1216,451"/>
+<area shape="rect" href="structresult__packet__t.html" title=" " alt="" coords="1403,283,1604,337"/>
+<area shape="rect" href="structresult__packet__header__t.html" title="Header of a result packet." alt="" coords="1039,297,1212,323"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -152,61 +165,50 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a1426774f44342ba899e25e50d3be4e65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform non urgent functionality every main loop.  <a href="classCrownstoneService.html#a1426774f44342ba899e25e50d3be4e65">More...</a><br /></td></tr>
 <tr class="separator:a1426774f44342ba899e25e50d3be4e65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classService"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classService')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classService.html">Service</a></td></tr>
+<tr class="memitem:acc246c9f7ed3c51e2d91d10fe257513f inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#acc246c9f7ed3c51e2d91d10fe257513f">Service</a> ()</td></tr>
+<tr class="separator:acc246c9f7ed3c51e2d91d10fe257513f inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa173db92a095e3198256fcd6b9b47d9d inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#aa173db92a095e3198256fcd6b9b47d9d">~Service</a> ()</td></tr>
 <tr class="memdesc:aa173db92a095e3198256fcd6b9b47d9d inherit pub_methods_classService"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default empty destructor.  <a href="classService.html#aa173db92a095e3198256fcd6b9b47d9d">More...</a><br /></td></tr>
 <tr class="separator:aa173db92a095e3198256fcd6b9b47d9d inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2bcd00d2f73bfc69c4365d6874ca91b2 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="a2bcd00d2f73bfc69c4365d6874ca91b2" name="a2bcd00d2f73bfc69c4365d6874ca91b2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (<a class="el" href="classStack.html">Stack</a> *stack)</td></tr>
-<tr class="memdesc:a2bcd00d2f73bfc69c4365d6874ca91b2 inherit pub_methods_classService"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the service: register it at the softdevice. <br /></td></tr>
+<tr class="memitem:a2bcd00d2f73bfc69c4365d6874ca91b2 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a2bcd00d2f73bfc69c4365d6874ca91b2">init</a> (<a class="el" href="classStack.html">Stack</a> *stack)</td></tr>
+<tr class="memdesc:a2bcd00d2f73bfc69c4365d6874ca91b2 inherit pub_methods_classService"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the service: register it at the softdevice.  <a href="classService.html#a2bcd00d2f73bfc69c4365d6874ca91b2">More...</a><br /></td></tr>
 <tr class="separator:a2bcd00d2f73bfc69c4365d6874ca91b2 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42a824c4b2fee024c423e376b9dd907f inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a42a824c4b2fee024c423e376b9dd907f">setUUID</a> (const <a class="el" href="classUUID.html">UUID</a> &amp;uuid)</td></tr>
 <tr class="memdesc:a42a824c4b2fee024c423e376b9dd907f inherit pub_methods_classService"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>.  <a href="classService.html#a42a824c4b2fee024c423e376b9dd907f">More...</a><br /></td></tr>
 <tr class="separator:a42a824c4b2fee024c423e376b9dd907f inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab64dd9a0e966d2e45323d4c543eb4679 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="ab64dd9a0e966d2e45323d4c543eb4679" name="ab64dd9a0e966d2e45323d4c543eb4679"></a>
-<a class="el" href="classStack.html">Stack</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getStack</b> ()</td></tr>
+<tr class="memitem:ab64dd9a0e966d2e45323d4c543eb4679 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classStack.html">Stack</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#ab64dd9a0e966d2e45323d4c543eb4679">getStack</a> ()</td></tr>
 <tr class="separator:ab64dd9a0e966d2e45323d4c543eb4679 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42381afad04053df2d33815bdf5fd574 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="a42381afad04053df2d33815bdf5fd574" name="a42381afad04053df2d33815bdf5fd574"></a>
-const <a class="el" href="classUUID.html">UUID</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getUUID</b> () const</td></tr>
+<tr class="memitem:a42381afad04053df2d33815bdf5fd574 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classUUID.html">UUID</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a42381afad04053df2d33815bdf5fd574">getUUID</a> () const</td></tr>
 <tr class="separator:a42381afad04053df2d33815bdf5fd574 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aacf6d1a130e17d476a34fe7e9e6c4220 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="aacf6d1a130e17d476a34fe7e9e6c4220" name="aacf6d1a130e17d476a34fe7e9e6c4220"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getHandle</b> ()</td></tr>
+<tr class="memitem:aacf6d1a130e17d476a34fe7e9e6c4220 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#aacf6d1a130e17d476a34fe7e9e6c4220">getHandle</a> ()</td></tr>
 <tr class="separator:aacf6d1a130e17d476a34fe7e9e6c4220 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae76b07e4d8846d3d7cff688898ffda32 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="ae76b07e4d8846d3d7cff688898ffda32" name="ae76b07e4d8846d3d7cff688898ffda32"></a>
-<a class="el" href="classtuple.html">tuple</a>&lt; <a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getCharacteristics</b> ()</td></tr>
+<tr class="memitem:ae76b07e4d8846d3d7cff688898ffda32 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtuple.html">tuple</a>&lt; <a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#ae76b07e4d8846d3d7cff688898ffda32">getCharacteristics</a> ()</td></tr>
 <tr class="separator:ae76b07e4d8846d3d7cff688898ffda32 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3cb5e053a509b8602dc59f47ed5db25 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#ac3cb5e053a509b8602dc59f47ed5db25">createCharacteristics</a> ()=0</td></tr>
 <tr class="separator:ac3cb5e053a509b8602dc59f47ed5db25 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9e14e23368ee5dd420bd40c9df21d651 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="a9e14e23368ee5dd420bd40c9df21d651" name="a9e14e23368ee5dd420bd40c9df21d651"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onBleEvent</b> (const ble_evt_t *event)</td></tr>
+<tr class="memitem:a9e14e23368ee5dd420bd40c9df21d651 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a9e14e23368ee5dd420bd40c9df21d651">onBleEvent</a> (const ble_evt_t *event)</td></tr>
 <tr class="separator:a9e14e23368ee5dd420bd40c9df21d651 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9815068f73b1ef098dee0ecae37b10a3 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="a9815068f73b1ef098dee0ecae37b10a3" name="a9815068f73b1ef098dee0ecae37b10a3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onConnect</b> (uint16_t connectionHandle, const ble_gap_evt_connected_t &amp;event)</td></tr>
+<tr class="memitem:a9815068f73b1ef098dee0ecae37b10a3 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a9815068f73b1ef098dee0ecae37b10a3">onConnect</a> (uint16_t connectionHandle, const ble_gap_evt_connected_t &amp;event)</td></tr>
 <tr class="separator:a9815068f73b1ef098dee0ecae37b10a3 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a951105dc48fe3938e7297d1398f60fe0 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="a951105dc48fe3938e7297d1398f60fe0" name="a951105dc48fe3938e7297d1398f60fe0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onDisconnect</b> (uint16_t connectionHandle, const ble_gap_evt_disconnected_t &amp;event)</td></tr>
+<tr class="memitem:a951105dc48fe3938e7297d1398f60fe0 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a951105dc48fe3938e7297d1398f60fe0">onDisconnect</a> (uint16_t connectionHandle, const ble_gap_evt_disconnected_t &amp;event)</td></tr>
 <tr class="separator:a951105dc48fe3938e7297d1398f60fe0 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab5509a2177e844778dbbc95b2cddce8 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="aab5509a2177e844778dbbc95b2cddce8" name="aab5509a2177e844778dbbc95b2cddce8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>onWrite</b> (const ble_gatts_evt_write_t &amp;event, uint16_t gattHandle)</td></tr>
+<tr class="memitem:aab5509a2177e844778dbbc95b2cddce8 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#aab5509a2177e844778dbbc95b2cddce8">onWrite</a> (const ble_gatts_evt_write_t &amp;event, uint16_t gattHandle)</td></tr>
 <tr class="separator:aab5509a2177e844778dbbc95b2cddce8 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a540f63c5f0b29ff59176679675bcaa09 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="a540f63c5f0b29ff59176679675bcaa09" name="a540f63c5f0b29ff59176679675bcaa09"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onTxComplete</b> (const ble_common_evt_t *event)</td></tr>
+<tr class="memitem:a540f63c5f0b29ff59176679675bcaa09 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a540f63c5f0b29ff59176679675bcaa09">onTxComplete</a> (const ble_common_evt_t *event)</td></tr>
 <tr class="separator:a540f63c5f0b29ff59176679675bcaa09 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8065ead60cae0193d46bcecb4d6769d9 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="a8065ead60cae0193d46bcecb4d6769d9" name="a8065ead60cae0193d46bcecb4d6769d9"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addCharacteristic</b> (<a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> *characteristic)</td></tr>
-<tr class="memdesc:a8065ead60cae0193d46bcecb4d6769d9 inherit pub_methods_classService"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a single characteristic to the list @characteristic <a class="el" href="classCharacteristic.html" title="Characteristic of generic type T.">Characteristic</a> to add. <br /></td></tr>
+<tr class="memitem:a8065ead60cae0193d46bcecb4d6769d9 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a8065ead60cae0193d46bcecb4d6769d9">addCharacteristic</a> (<a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> *characteristic)</td></tr>
+<tr class="memdesc:a8065ead60cae0193d46bcecb4d6769d9 inherit pub_methods_classService"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a single characteristic to the list @characteristic <a class="el" href="classCharacteristic.html" title="Characteristic of generic type T.">Characteristic</a> to add.  <a href="classService.html#a8065ead60cae0193d46bcecb4d6769d9">More...</a><br /></td></tr>
 <tr class="separator:a8065ead60cae0193d46bcecb4d6769d9 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54f52ec43877f997d134e5234919d3c3 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top"><a id="a54f52ec43877f997d134e5234919d3c3" name="a54f52ec43877f997d134e5234919d3c3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>updatedCharacteristics</b> ()</td></tr>
+<tr class="memitem:a54f52ec43877f997d134e5234919d3c3 inherit pub_methods_classService"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a54f52ec43877f997d134e5234919d3c3">updatedCharacteristics</a> ()</td></tr>
 <tr class="separator:a54f52ec43877f997d134e5234919d3c3 inherit pub_methods_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classBaseClass"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classBaseClass')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classBaseClass.html">BaseClass&lt; 1 &gt;</a></td></tr>
-<tr class="memitem:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a9e2337c2676bf9fbcca00ab7750bbf14" name="a9e2337c2676bf9fbcca00ab7750bbf14"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:aa8b0502f9dd06a726a07526f4a344354 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#aa8b0502f9dd06a726a07526f4a344354">BaseClass</a> ()</td></tr>
+<tr class="separator:aa8b0502f9dd06a726a07526f4a344354 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a9e2337c2676bf9fbcca00ab7750bbf14">isInitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a0290904b966a159231f848cfb5fd97a4" name="a0290904b966a159231f848cfb5fd97a4"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setInitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a0290904b966a159231f848cfb5fd97a4">setInitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a4391d2f80e021fc4420fb48278a314ae" name="a4391d2f80e021fc4420fb48278a314ae"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setUninitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a4391d2f80e021fc4420fb48278a314ae">setUninitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
@@ -214,57 +216,69 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ad4061ade78a2b0cda2d48b6a4af143ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#ad4061ade78a2b0cda2d48b6a4af143ce">createCharacteristics</a> ()</td></tr>
 <tr class="memdesc:ad4061ade78a2b0cda2d48b6a4af143ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a <a class="el" href="classCrownstoneService.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,...">CrownstoneService</a> object.  <a href="classCrownstoneService.html#ad4061ade78a2b0cda2d48b6a4af143ce">More...</a><br /></td></tr>
 <tr class="separator:ad4061ade78a2b0cda2d48b6a4af143ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a826dae9839b04d9b2a61f8441fbbb4c3"><td class="memItemLeft" align="right" valign="top"><a id="a826dae9839b04d9b2a61f8441fbbb4c3" name="a826dae9839b04d9b2a61f8441fbbb4c3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addControlCharacteristic</b> (buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid, EncryptionAccessLevel minimumAccessLevel)</td></tr>
-<tr class="memdesc:a826dae9839b04d9b2a61f8441fbbb4c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the control characteristic. <br /></td></tr>
+<tr class="memitem:a826dae9839b04d9b2a61f8441fbbb4c3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a826dae9839b04d9b2a61f8441fbbb4c3">addControlCharacteristic</a> (<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> buffer, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> size, uint16_t charUuid, <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> minimumAccessLevel)</td></tr>
+<tr class="memdesc:a826dae9839b04d9b2a61f8441fbbb4c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the control characteristic.  <a href="classCrownstoneService.html#a826dae9839b04d9b2a61f8441fbbb4c3">More...</a><br /></td></tr>
 <tr class="separator:a826dae9839b04d9b2a61f8441fbbb4c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c731f7c631c40d64bf4f38d086d9d6c"><td class="memItemLeft" align="right" valign="top"><a id="a9c731f7c631c40d64bf4f38d086d9d6c" name="a9c731f7c631c40d64bf4f38d086d9d6c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addResultCharacteristic</b> (buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid, EncryptionAccessLevel minimumAccessLevel)</td></tr>
-<tr class="memdesc:a9c731f7c631c40d64bf4f38d086d9d6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the result characteristic. <br /></td></tr>
+<tr class="memitem:a9c731f7c631c40d64bf4f38d086d9d6c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a9c731f7c631c40d64bf4f38d086d9d6c">addResultCharacteristic</a> (<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> buffer, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> size, uint16_t charUuid, <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> minimumAccessLevel)</td></tr>
+<tr class="memdesc:a9c731f7c631c40d64bf4f38d086d9d6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable the result characteristic.  <a href="classCrownstoneService.html#a9c731f7c631c40d64bf4f38d086d9d6c">More...</a><br /></td></tr>
 <tr class="separator:a9c731f7c631c40d64bf4f38d086d9d6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea2dd6e212f1c51957ce9bdbfe48acd4"><td class="memItemLeft" align="right" valign="top"><a id="aea2dd6e212f1c51957ce9bdbfe48acd4" name="aea2dd6e212f1c51957ce9bdbfe48acd4"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addFactoryResetCharacteristic</b> ()</td></tr>
+<tr class="memitem:aea2dd6e212f1c51957ce9bdbfe48acd4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#aea2dd6e212f1c51957ce9bdbfe48acd4">addFactoryResetCharacteristic</a> ()</td></tr>
 <tr class="separator:aea2dd6e212f1c51957ce9bdbfe48acd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9f38ff783d926b24b990c39ecb00bec2"><td class="memItemLeft" align="right" valign="top"><a id="a9f38ff783d926b24b990c39ecb00bec2" name="a9f38ff783d926b24b990c39ecb00bec2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addSessionDataCharacteristic</b> (buffer_ptr_t buffer, cs_buffer_size_t size, EncryptionAccessLevel minimumAccessLevel=BASIC)</td></tr>
+<tr class="memitem:a9f38ff783d926b24b990c39ecb00bec2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a9f38ff783d926b24b990c39ecb00bec2">addSessionDataCharacteristic</a> (<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> buffer, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> size, <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> minimumAccessLevel=<a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756a13c45196813cb44e6e81e9c48a5ec1b4">BASIC</a>)</td></tr>
 <tr class="separator:a9f38ff783d926b24b990c39ecb00bec2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adab17ffe2318ab7996631f70363e2d49"><td class="memItemLeft" align="right" valign="top"><a id="adab17ffe2318ab7996631f70363e2d49" name="adab17ffe2318ab7996631f70363e2d49"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>getReadBuffer</b> (buffer_ptr_t &amp;buffer, cs_buffer_size_t &amp;maxLength)</td></tr>
+<tr class="memitem:adab17ffe2318ab7996631f70363e2d49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#adab17ffe2318ab7996631f70363e2d49">getReadBuffer</a> (<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> &amp;buffer, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;maxLength)</td></tr>
 <tr class="separator:adab17ffe2318ab7996631f70363e2d49"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a010957986f259d53364a6620619350ad"><td class="memItemLeft" align="right" valign="top"><a id="a010957986f259d53364a6620619350ad" name="a010957986f259d53364a6620619350ad"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>getWriteBuffer</b> (buffer_ptr_t &amp;buffer, cs_buffer_size_t &amp;maxLength)</td></tr>
+<tr class="memitem:a010957986f259d53364a6620619350ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a010957986f259d53364a6620619350ad">getWriteBuffer</a> (<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> &amp;buffer, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;maxLength)</td></tr>
 <tr class="separator:a010957986f259d53364a6620619350ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af454d3267de14aed2b3ad61151261ea2"><td class="memItemLeft" align="right" valign="top"><a id="af454d3267de14aed2b3ad61151261ea2" name="af454d3267de14aed2b3ad61151261ea2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>removeBuffer</b> ()</td></tr>
+<tr class="memitem:af454d3267de14aed2b3ad61151261ea2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#af454d3267de14aed2b3ad61151261ea2">removeBuffer</a> ()</td></tr>
 <tr class="separator:af454d3267de14aed2b3ad61151261ea2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d1dff235a4ca2a4b6d4649261bd0590"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a7d1dff235a4ca2a4b6d4649261bd0590">writeResult</a> (uint8_t protocol, CommandHandlerTypes type, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="memitem:a7d1dff235a4ca2a4b6d4649261bd0590"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a7d1dff235a4ca2a4b6d4649261bd0590">writeResult</a> (uint8_t protocol, <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a> type, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
 <tr class="memdesc:a7d1dff235a4ca2a4b6d4649261bd0590"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a result to the result characteristic.  <a href="classCrownstoneService.html#a7d1dff235a4ca2a4b6d4649261bd0590">More...</a><br /></td></tr>
 <tr class="separator:a7d1dff235a4ca2a4b6d4649261bd0590"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a49d9478d028b81b5e1a103a133ad6b8e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a49d9478d028b81b5e1a103a133ad6b8e">writeResult</a> (uint8_t protocol, CommandHandlerTypes type, cs_ret_code_t retCode, <a class="el" href="structcs__data__t.html">cs_data_t</a> data)</td></tr>
+<tr class="memitem:a49d9478d028b81b5e1a103a133ad6b8e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a49d9478d028b81b5e1a103a133ad6b8e">writeResult</a> (uint8_t protocol, <a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a> type, <a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> retCode, <a class="el" href="structcs__data__t.html">cs_data_t</a> data)</td></tr>
 <tr class="memdesc:a49d9478d028b81b5e1a103a133ad6b8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a result to the result characteristic.  <a href="classCrownstoneService.html#a49d9478d028b81b5e1a103a133ad6b8e">More...</a><br /></td></tr>
 <tr class="separator:a49d9478d028b81b5e1a103a133ad6b8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:ab810df03733d4510edea17ec4e91d86f"><td class="memItemLeft" align="right" valign="top"><a id="ab810df03733d4510edea17ec4e91d86f" name="ab810df03733d4510edea17ec4e91d86f"></a>
-<a class="el" href="classCharacteristic.html">Characteristic</a>&lt; buffer_ptr_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>_controlCharacteristic</b> = nullptr</td></tr>
+<tr class="memitem:ab810df03733d4510edea17ec4e91d86f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt; <a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#ab810df03733d4510edea17ec4e91d86f">_controlCharacteristic</a> = nullptr</td></tr>
 <tr class="separator:ab810df03733d4510edea17ec4e91d86f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10b14df747e6c94d1a503cd642fc9984"><td class="memItemLeft" align="right" valign="top"><a id="a10b14df747e6c94d1a503cd642fc9984" name="a10b14df747e6c94d1a503cd642fc9984"></a>
-<a class="el" href="classCharacteristic.html">Characteristic</a>&lt; buffer_ptr_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>_resultCharacteristic</b> = nullptr</td></tr>
+<tr class="memitem:a10b14df747e6c94d1a503cd642fc9984"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt; <a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a10b14df747e6c94d1a503cd642fc9984">_resultCharacteristic</a> = nullptr</td></tr>
 <tr class="separator:a10b14df747e6c94d1a503cd642fc9984"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab787692161eba45e6d0a3435183f95a3"><td class="memItemLeft" align="right" valign="top"><a id="ab787692161eba45e6d0a3435183f95a3" name="ab787692161eba45e6d0a3435183f95a3"></a>
-<a class="el" href="classControlPacketAccessor.html">ControlPacketAccessor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>_controlPacketAccessor</b> = nullptr</td></tr>
+<tr class="memitem:ab787692161eba45e6d0a3435183f95a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classControlPacketAccessor.html">ControlPacketAccessor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#ab787692161eba45e6d0a3435183f95a3">_controlPacketAccessor</a> = nullptr</td></tr>
 <tr class="separator:ab787692161eba45e6d0a3435183f95a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44a7e2c6882ba3738f16099a53c6ffa9"><td class="memItemLeft" align="right" valign="top"><a id="a44a7e2c6882ba3738f16099a53c6ffa9" name="a44a7e2c6882ba3738f16099a53c6ffa9"></a>
-<a class="el" href="classResultPacketAccessor.html">ResultPacketAccessor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>_resultPacketAccessor</b> = nullptr</td></tr>
+<tr class="memitem:a44a7e2c6882ba3738f16099a53c6ffa9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classResultPacketAccessor.html">ResultPacketAccessor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a44a7e2c6882ba3738f16099a53c6ffa9">_resultPacketAccessor</a> = nullptr</td></tr>
 <tr class="separator:a44a7e2c6882ba3738f16099a53c6ffa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a6dd34836029519c9db0a55cce30c45b8"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a6dd34836029519c9db0a55cce30c45b8">_keySessionDataBuffer</a> [sizeof(<a class="el" href="structsession__data__t.html">session_data_t</a>)]</td></tr>
+<tr class="separator:a6dd34836029519c9db0a55cce30c45b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a782ecb896536a19d1442a5e7569dc142"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt; <a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a782ecb896536a19d1442a5e7569dc142">_sessionDataCharacteristic</a> = nullptr</td></tr>
+<tr class="separator:a782ecb896536a19d1442a5e7569dc142"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d74c30498d746d4e4ec6bfa34e011b5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt; <a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a0d74c30498d746d4e4ec6bfa34e011b5">_sessionDataUnencryptedCharacteristic</a> = nullptr</td></tr>
+<tr class="separator:a0d74c30498d746d4e4ec6bfa34e011b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2356fa3724cda3036b924f1cb22aa79b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt; uint32_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCrownstoneService.html#a2356fa3724cda3036b924f1cb22aa79b">_factoryResetCharacteristic</a> = nullptr</td></tr>
+<tr class="separator:a2356fa3724cda3036b924f1cb22aa79b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pub_types_classService"><td colspan="2" onclick="javascript:toggleInherit('pub_types_classService')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="classService.html">Service</a></td></tr>
-<tr class="memitem:a62dd812bad9d002a6f4af7302c4e3433 inherit pub_types_classService"><td class="memItemLeft" align="right" valign="top"><a id="a62dd812bad9d002a6f4af7302c4e3433" name="a62dd812bad9d002a6f4af7302c4e3433"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>condition_t</b> { <b>C_SERVICE_INITIALIZED</b>
+<tr class="memitem:a62dd812bad9d002a6f4af7302c4e3433 inherit pub_types_classService"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a62dd812bad9d002a6f4af7302c4e3433">condition_t</a> { <a class="el" href="classService.html#a62dd812bad9d002a6f4af7302c4e3433aaea14d176f2e0ad82435e87a8db71696">C_SERVICE_INITIALIZED</a>
  }</td></tr>
 <tr class="separator:a62dd812bad9d002a6f4af7302c4e3433 inherit pub_types_classService"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Author: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> Team Copyright: <a class="el" href="classCrownstone.html" title="Crownstone encapsulates all functionality, stack, services, and configuration.">Crownstone</a> (<a href="https://crownstone.rocks">https://crownstone.rocks</a>) Date: Oct 22, 2014 License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed) </p>
@@ -293,6 +307,173 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a826dae9839b04d9b2a61f8441fbbb4c3" name="a826dae9839b04d9b2a61f8441fbbb4c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a826dae9839b04d9b2a61f8441fbbb4c3">&#9670;&#160;</a></span>addControlCharacteristic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CrownstoneService::addControlCharacteristic </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>charUuid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>minimumAccessLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enable the control characteristic. </p>
+
+</div>
+</div>
+<a id="aea2dd6e212f1c51957ce9bdbfe48acd4" name="aea2dd6e212f1c51957ce9bdbfe48acd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea2dd6e212f1c51957ce9bdbfe48acd4">&#9670;&#160;</a></span>addFactoryResetCharacteristic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CrownstoneService::addFactoryResetCharacteristic </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9c731f7c631c40d64bf4f38d086d9d6c" name="a9c731f7c631c40d64bf4f38d086d9d6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c731f7c631c40d64bf4f38d086d9d6c">&#9670;&#160;</a></span>addResultCharacteristic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CrownstoneService::addResultCharacteristic </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>charUuid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>minimumAccessLevel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enable the result characteristic. </p>
+
+</div>
+</div>
+<a id="a9f38ff783d926b24b990c39ecb00bec2" name="a9f38ff783d926b24b990c39ecb00bec2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f38ff783d926b24b990c39ecb00bec2">&#9670;&#160;</a></span>addSessionDataCharacteristic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CrownstoneService::addSessionDataCharacteristic </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
+          <td class="paramname"><em>minimumAccessLevel</em> = <code><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756a13c45196813cb44e6e81e9c48a5ec1b4">BASIC</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ad4061ade78a2b0cda2d48b6a4af143ce" name="ad4061ade78a2b0cda2d48b6a4af143ce"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad4061ade78a2b0cda2d48b6a4af143ce">&#9670;&#160;</a></span>createCharacteristics()</h2>
 
@@ -319,9 +500,81 @@ Additional Inherited Members</h2></td></tr>
 <p>Initialize a <a class="el" href="classCrownstoneService.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,...">CrownstoneService</a> object. </p>
 <p >Add all characteristics and initialize them where necessary. </p>
 
-<p>Implements <a class="el" href="classService.html">Service</a>.</p>
+<p>Implements <a class="el" href="classService.html#ac3cb5e053a509b8602dc59f47ed5db25">Service</a>.</p>
 
 <p>Reimplemented in <a class="el" href="classSetupService.html#af4515e2f76c0bac5e1bcb230bf07cd17">SetupService</a>.</p>
+
+</div>
+</div>
+<a id="adab17ffe2318ab7996631f70363e2d49" name="adab17ffe2318ab7996631f70363e2d49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adab17ffe2318ab7996631f70363e2d49">&#9670;&#160;</a></span>getReadBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CrownstoneService::getReadBuffer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>maxLength</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a010957986f259d53364a6620619350ad" name="a010957986f259d53364a6620619350ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a010957986f259d53364a6620619350ad">&#9670;&#160;</a></span>getWriteBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CrownstoneService::getWriteBuffer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>maxLength</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -358,6 +611,31 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a id="af454d3267de14aed2b3ad61151261ea2" name="af454d3267de14aed2b3ad61151261ea2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af454d3267de14aed2b3ad61151261ea2">&#9670;&#160;</a></span>removeBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CrownstoneService::removeBuffer </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a7d1dff235a4ca2a4b6d4649261bd0590" name="a7d1dff235a4ca2a4b6d4649261bd0590"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7d1dff235a4ca2a4b6d4649261bd0590">&#9670;&#160;</a></span>writeResult() <span class="overload">[1/2]</span></h2>
 
@@ -376,7 +654,7 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">CommandHandlerTypes&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a>&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
@@ -428,13 +706,13 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">CommandHandlerTypes&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__CommandTypes_8h.html#a009a18238139310702cd2374355dc659">CommandHandlerTypes</a>&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_ret_code_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td>
           <td class="paramname"><em>retCode</em>, </td>
         </tr>
         <tr>
@@ -466,6 +744,183 @@ Additional Inherited Members</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ab810df03733d4510edea17ec4e91d86f" name="ab810df03733d4510edea17ec4e91d86f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab810df03733d4510edea17ec4e91d86f">&#9670;&#160;</a></span>_controlCharacteristic</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt;<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&gt;* CrownstoneService::_controlCharacteristic = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab787692161eba45e6d0a3435183f95a3" name="ab787692161eba45e6d0a3435183f95a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab787692161eba45e6d0a3435183f95a3">&#9670;&#160;</a></span>_controlPacketAccessor</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classControlPacketAccessor.html">ControlPacketAccessor</a>* CrownstoneService::_controlPacketAccessor = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2356fa3724cda3036b924f1cb22aa79b" name="a2356fa3724cda3036b924f1cb22aa79b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2356fa3724cda3036b924f1cb22aa79b">&#9670;&#160;</a></span>_factoryResetCharacteristic</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt;uint32_t&gt;* CrownstoneService::_factoryResetCharacteristic = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6dd34836029519c9db0a55cce30c45b8" name="a6dd34836029519c9db0a55cce30c45b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6dd34836029519c9db0a55cce30c45b8">&#9670;&#160;</a></span>_keySessionDataBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t CrownstoneService::_keySessionDataBuffer[sizeof(<a class="el" href="structsession__data__t.html">session_data_t</a>)]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a10b14df747e6c94d1a503cd642fc9984" name="a10b14df747e6c94d1a503cd642fc9984"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10b14df747e6c94d1a503cd642fc9984">&#9670;&#160;</a></span>_resultCharacteristic</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt;<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&gt;* CrownstoneService::_resultCharacteristic = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a44a7e2c6882ba3738f16099a53c6ffa9" name="a44a7e2c6882ba3738f16099a53c6ffa9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44a7e2c6882ba3738f16099a53c6ffa9">&#9670;&#160;</a></span>_resultPacketAccessor</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classResultPacketAccessor.html">ResultPacketAccessor</a>* CrownstoneService::_resultPacketAccessor = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a782ecb896536a19d1442a5e7569dc142" name="a782ecb896536a19d1442a5e7569dc142"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a782ecb896536a19d1442a5e7569dc142">&#9670;&#160;</a></span>_sessionDataCharacteristic</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt;<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&gt;* CrownstoneService::_sessionDataCharacteristic = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0d74c30498d746d4e4ec6bfa34e011b5" name="a0d74c30498d746d4e4ec6bfa34e011b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d74c30498d746d4e4ec6bfa34e011b5">&#9670;&#160;</a></span>_sessionDataUnencryptedCharacteristic</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCharacteristic.html">Characteristic</a>&lt;<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&gt;* CrownstoneService::_sessionDataUnencryptedCharacteristic = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

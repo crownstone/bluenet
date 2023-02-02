@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classMicroapp.html',''); initResizable
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classMicroapp-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Microapp Class Reference</div></div>
 </div><!--header-->
@@ -123,42 +125,126 @@ Collaboration diagram for Microapp:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMicroapp__coll__graph.png" border="0" usemap="#aMicroapp_coll__map" alt="Collaboration graph"/></div>
 <map name="aMicroapp_coll__map" id="aMicroapp_coll__map">
-<area shape="rect" title="Class that enables the feature to run microapps on the firmware." alt="" coords="19,79,102,104"/>
+<area shape="rect" title="Class that enables the feature to run microapps on the firmware." alt="" coords="93,93,175,119"/>
 <area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" href="structmicroapp__state__t.html" title="State of tests of a microapp, also stored in flash." alt="" coords="140,5,275,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3d66deeb5c2acdca66fdde857c1afa37"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a3d66deeb5c2acdca66fdde857c1afa37">init</a> (OperationMode operationMode)</td></tr>
+<tr class="memitem:a3d66deeb5c2acdca66fdde857c1afa37"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a3d66deeb5c2acdca66fdde857c1afa37">init</a> (<a class="el" href="cs__Types_8h.html#a25bbfb7442459b8d546e1f1551835479">OperationMode</a> operationMode)</td></tr>
 <tr class="memdesc:a3d66deeb5c2acdca66fdde857c1afa37"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize storage, and load microapps in normal mode.  <a href="classMicroapp.html#a3d66deeb5c2acdca66fdde857c1afa37">More...</a><br /></td></tr>
 <tr class="separator:a3d66deeb5c2acdca66fdde857c1afa37"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8517df188642f3a2de5dd5411e816a13"><td class="memItemLeft" align="right" valign="top"><a id="a8517df188642f3a2de5dd5411e816a13" name="a8517df188642f3a2de5dd5411e816a13"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>canRunApp</b> (uint8_t index)</td></tr>
-<tr class="memdesc:a8517df188642f3a2de5dd5411e816a13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks app state and returns true if this app is allowed to run. <br /></td></tr>
+<tr class="memitem:a8517df188642f3a2de5dd5411e816a13"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a8517df188642f3a2de5dd5411e816a13">canRunApp</a> (uint8_t index)</td></tr>
+<tr class="memdesc:a8517df188642f3a2de5dd5411e816a13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks app state and returns true if this app is allowed to run.  <a href="classMicroapp.html#a8517df188642f3a2de5dd5411e816a13">More...</a><br /></td></tr>
 <tr class="separator:a8517df188642f3a2de5dd5411e816a13"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a649024deff7fb8f75023442e25f3338c"><td class="memItemLeft" align="right" valign="top"><a id="a649024deff7fb8f75023442e25f3338c" name="a649024deff7fb8f75023442e25f3338c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onExcessiveCallDuration</b> (uint8_t appIndex)</td></tr>
-<tr class="memdesc:a649024deff7fb8f75023442e25f3338c"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called when a microapp took too long to yield. <br /></td></tr>
+<tr class="memitem:a649024deff7fb8f75023442e25f3338c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a649024deff7fb8f75023442e25f3338c">onExcessiveCallDuration</a> (uint8_t appIndex)</td></tr>
+<tr class="memdesc:a649024deff7fb8f75023442e25f3338c"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called when a microapp took too long to yield.  <a href="classMicroapp.html#a649024deff7fb8f75023442e25f3338c">More...</a><br /></td></tr>
 <tr class="separator:a649024deff7fb8f75023442e25f3338c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a48b10124829e07c443040a20dbaa935b"><td class="memItemLeft" align="right" valign="top"><a id="a48b10124829e07c443040a20dbaa935b" name="a48b10124829e07c443040a20dbaa935b"></a>
-static <a class="el" href="classMicroapp.html">Microapp</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
+<tr class="memitem:a48b10124829e07c443040a20dbaa935b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classMicroapp.html">Microapp</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a48b10124829e07c443040a20dbaa935b">getInstance</a> ()</td></tr>
 <tr class="separator:a48b10124829e07c443040a20dbaa935b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:abddfb17a6e98f998befbc685433cbeef"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#abddfb17a6e98f998befbc685433cbeef">Microapp</a> ()</td></tr>
+<tr class="memdesc:abddfb17a6e98f998befbc685433cbeef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Singleton, constructor, also copy constructor, is private.  <a href="classMicroapp.html#abddfb17a6e98f998befbc685433cbeef">More...</a><br /></td></tr>
+<tr class="separator:abddfb17a6e98f998befbc685433cbeef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae94e350f6f95b25c1b228bed222dcd57"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#ae94e350f6f95b25c1b228bed222dcd57">Microapp</a> (<a class="el" href="classMicroapp.html">Microapp</a> const &amp;)=delete</td></tr>
+<tr class="separator:ae94e350f6f95b25c1b228bed222dcd57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad00092963a37ef713e264c5a46554f81"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#ad00092963a37ef713e264c5a46554f81">operator=</a> (<a class="el" href="classMicroapp.html">Microapp</a> const &amp;)=delete</td></tr>
+<tr class="separator:ad00092963a37ef713e264c5a46554f81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4be6a37817d034c852e7f92862eb9169"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a4be6a37817d034c852e7f92862eb9169">loadApps</a> ()</td></tr>
+<tr class="separator:a4be6a37817d034c852e7f92862eb9169"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb626f79d056c2f5a9c5bf8fe83c52ef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#acb626f79d056c2f5a9c5bf8fe83c52ef">loadState</a> (uint8_t index)</td></tr>
+<tr class="separator:acb626f79d056c2f5a9c5bf8fe83c52ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86587fcc2a0fca14210c94cd3b557206"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a86587fcc2a0fca14210c94cd3b557206">updateStateFromOperatingData</a> (uint8_t index)</td></tr>
+<tr class="memdesc:a86587fcc2a0fca14210c94cd3b557206"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update state from operating data in IPC.  <a href="classMicroapp.html#a86587fcc2a0fca14210c94cd3b557206">More...</a><br /></td></tr>
+<tr class="separator:a86587fcc2a0fca14210c94cd3b557206"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abaaa32307b02e5f56e00363489815c54"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#abaaa32307b02e5f56e00363489815c54">validateApp</a> (uint8_t index)</td></tr>
+<tr class="memdesc:abaaa32307b02e5f56e00363489815c54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates app: compare checksum.  <a href="classMicroapp.html#abaaa32307b02e5f56e00363489815c54">More...</a><br /></td></tr>
+<tr class="separator:abaaa32307b02e5f56e00363489815c54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91663c8f2fc7a73b08a43ab36569658a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a91663c8f2fc7a73b08a43ab36569658a">enableApp</a> (uint8_t index)</td></tr>
+<tr class="memdesc:a91663c8f2fc7a73b08a43ab36569658a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enables app: checks sdk version.  <a href="classMicroapp.html#a91663c8f2fc7a73b08a43ab36569658a">More...</a><br /></td></tr>
+<tr class="separator:a91663c8f2fc7a73b08a43ab36569658a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81f787cf05bd61eb8db26ed2ad7e0917"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a81f787cf05bd61eb8db26ed2ad7e0917">startApp</a> (uint8_t index)</td></tr>
+<tr class="memdesc:a81f787cf05bd61eb8db26ed2ad7e0917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start app, if it passed all tests according to cached state.  <a href="classMicroapp.html#a81f787cf05bd61eb8db26ed2ad7e0917">More...</a><br /></td></tr>
+<tr class="separator:a81f787cf05bd61eb8db26ed2ad7e0917"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a366afff832cb73dda36809d0589c6b19"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a366afff832cb73dda36809d0589c6b19">resetState</a> (uint8_t index)</td></tr>
+<tr class="memdesc:a366afff832cb73dda36809d0589c6b19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets app state in ram only.  <a href="classMicroapp.html#a366afff832cb73dda36809d0589c6b19">More...</a><br /></td></tr>
+<tr class="separator:a366afff832cb73dda36809d0589c6b19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a198388e34c9b7aa2634735208e19f167"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a198388e34c9b7aa2634735208e19f167">resetTestState</a> (uint8_t index)</td></tr>
+<tr class="memdesc:a198388e34c9b7aa2634735208e19f167"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets app state tests in ram only.  <a href="classMicroapp.html#a198388e34c9b7aa2634735208e19f167">More...</a><br /></td></tr>
+<tr class="separator:a198388e34c9b7aa2634735208e19f167"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ab1f3b619b189552d6457c7b6c4c777"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a5ab1f3b619b189552d6457c7b6c4c777">storeState</a> (uint8_t index)</td></tr>
+<tr class="memdesc:a5ab1f3b619b189552d6457c7b6c4c777"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classStore.html" title="A variable size storage utility for objects of type RecordType with absolute maximum MaxItemCount.">Store</a> app state to flash.  <a href="classMicroapp.html#a5ab1f3b619b189552d6457c7b6c4c777">More...</a><br /></td></tr>
+<tr class="separator:a5ab1f3b619b189552d6457c7b6c4c777"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a764429f1ae1694c80eea066afd439a7b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a764429f1ae1694c80eea066afd439a7b">tick</a> ()</td></tr>
+<tr class="memdesc:a764429f1ae1694c80eea066afd439a7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called every tick.  <a href="classMicroapp.html#a764429f1ae1694c80eea066afd439a7b">More...</a><br /></td></tr>
+<tr class="separator:a764429f1ae1694c80eea066afd439a7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ec45ea935ff598e5aeca0b1056a1d9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a4ec45ea935ff598e5aeca0b1056a1d9c">handleGetInfo</a> (<a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="memdesc:a4ec45ea935ff598e5aeca0b1056a1d9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle control commands.  <a href="classMicroapp.html#a4ec45ea935ff598e5aeca0b1056a1d9c">More...</a><br /></td></tr>
+<tr class="separator:a4ec45ea935ff598e5aeca0b1056a1d9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f2c2826db8e83a21b577e1171c37115"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a9f2c2826db8e83a21b577e1171c37115">handleUpload</a> (<a class="el" href="structmicroapp__upload__internal__t.html">microapp_upload_internal_t</a> *packet)</td></tr>
+<tr class="separator:a9f2c2826db8e83a21b577e1171c37115"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad85823ea998c8c6e7387c610ddd2b90e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#ad85823ea998c8c6e7387c610ddd2b90e">handleValidate</a> (<a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *packet)</td></tr>
+<tr class="separator:ad85823ea998c8c6e7387c610ddd2b90e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a880a0cc3f1ed904aee9d4e36c9c6ee31"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a880a0cc3f1ed904aee9d4e36c9c6ee31">handleRemove</a> (<a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *packet)</td></tr>
+<tr class="separator:a880a0cc3f1ed904aee9d4e36c9c6ee31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a914b64f8f709a9c301ecbabcbbcf543d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a914b64f8f709a9c301ecbabcbbcf543d">handleEnable</a> (<a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *packet)</td></tr>
+<tr class="separator:a914b64f8f709a9c301ecbabcbbcf543d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e9262b3a3dbd4b16a359bf7b532880d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a7e9262b3a3dbd4b16a359bf7b532880d">handleDisable</a> (<a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *packet)</td></tr>
+<tr class="separator:a7e9262b3a3dbd4b16a359bf7b532880d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1e7869f67ae9817b54d79f2630f873c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#aa1e7869f67ae9817b54d79f2630f873c">handleMessage</a> (<a class="el" href="structmicroapp__message__internal__t.html">microapp_message_internal_t</a> *packet, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:aa1e7869f67ae9817b54d79f2630f873c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04971133bce0099d3ac6b82e31a5a15a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a04971133bce0099d3ac6b82e31a5a15a">checkHeader</a> (<a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *packet)</td></tr>
+<tr class="memdesc:a04971133bce0099d3ac6b82e31a5a15a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if control command header is ok.  <a href="classMicroapp.html#a04971133bce0099d3ac6b82e31a5a15a">More...</a><br /></td></tr>
+<tr class="separator:a04971133bce0099d3ac6b82e31a5a15a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab50492f153911ccd52ee98aebd39fcde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#ab50492f153911ccd52ee98aebd39fcde">factoryReset</a> ()</td></tr>
+<tr class="memdesc:ab50492f153911ccd52ee98aebd39fcde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes all microapps and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE.  <a href="classMicroapp.html#ab50492f153911ccd52ee98aebd39fcde">More...</a><br /></td></tr>
+<tr class="separator:ab50492f153911ccd52ee98aebd39fcde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5369a92657cbfed53cbdac4de56fc47e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a5369a92657cbfed53cbdac4de56fc47e">resumeFactoryReset</a> ()</td></tr>
+<tr class="memdesc:a5369a92657cbfed53cbdac4de56fc47e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove next microapp and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE.  <a href="classMicroapp.html#a5369a92657cbfed53cbdac4de56fc47e">More...</a><br /></td></tr>
+<tr class="separator:a5369a92657cbfed53cbdac4de56fc47e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64f533c248d751c69fe39102f44fa860"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a64f533c248d751c69fe39102f44fa860">onStorageEvent</a> (<a class="el" href="structcs__async__result__t.html">cs_async_result_t</a> &amp;event)</td></tr>
+<tr class="memdesc:a64f533c248d751c69fe39102f44fa860"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle microapp storage event.  <a href="classMicroapp.html#a64f533c248d751c69fe39102f44fa860">More...</a><br /></td></tr>
+<tr class="separator:a64f533c248d751c69fe39102f44fa860"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7c2d29c9c1bca10be6cad74c93e4f90"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#ae7c2d29c9c1bca10be6cad74c93e4f90">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
+<tr class="memdesc:ae7c2d29c9c1bca10be6cad74c93e4f90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle incoming events.  <a href="classMicroapp.html#ae7c2d29c9c1bca10be6cad74c93e4f90">More...</a><br /></td></tr>
+<tr class="separator:ae7c2d29c9c1bca10be6cad74c93e4f90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ad2e6eb3cc0e290d2c0990ebb91febbdc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmicroapp__state__t.html">microapp_state_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#ad2e6eb3cc0e290d2c0990ebb91febbdc">_states</a> [g_MICROAPP_COUNT]</td></tr>
+<tr class="memdesc:ad2e6eb3cc0e290d2c0990ebb91febbdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">The state of each microapp.  <a href="classMicroapp.html#ad2e6eb3cc0e290d2c0990ebb91febbdc">More...</a><br /></td></tr>
+<tr class="separator:ad2e6eb3cc0e290d2c0990ebb91febbdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bcc7caba353f936d7566f0322efdccd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a3bcc7caba353f936d7566f0322efdccd">_started</a> [g_MICROAPP_COUNT] = {}</td></tr>
+<tr class="memdesc:a3bcc7caba353f936d7566f0322efdccd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up whether the microapp has been started yet.  <a href="classMicroapp.html#a3bcc7caba353f936d7566f0322efdccd">More...</a><br /></td></tr>
+<tr class="separator:a3bcc7caba353f936d7566f0322efdccd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a5b8e1a93681fb977ffeae6d2daec38"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a3a5b8e1a93681fb977ffeae6d2daec38">_loaded</a> = false</td></tr>
+<tr class="memdesc:a3a5b8e1a93681fb977ffeae6d2daec38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Local flag to indicate that ram section has been loaded.  <a href="classMicroapp.html#a3a5b8e1a93681fb977ffeae6d2daec38">More...</a><br /></td></tr>
+<tr class="separator:a3a5b8e1a93681fb977ffeae6d2daec38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a814b7d46d2d6e3048c4a6dc376b8d773"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#a814b7d46d2d6e3048c4a6dc376b8d773">_currentMicroappIndex</a> = <a class="el" href="cs__MicroappPackets_8h.html#aa1c83101aafac1900519753eb14c49ee">MICROAPP_INDEX_NONE</a></td></tr>
+<tr class="memdesc:a814b7d46d2d6e3048c4a6dc376b8d773"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up which microapp is currently being operated on.  <a href="classMicroapp.html#a814b7d46d2d6e3048c4a6dc376b8d773">More...</a><br /></td></tr>
+<tr class="separator:a814b7d46d2d6e3048c4a6dc376b8d773"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad20fd1fafeda3b91d1ddf15c69da8d6d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroapp.html#ad20fd1fafeda3b91d1ddf15c69da8d6d">_factoryResetMode</a> = false</td></tr>
+<tr class="memdesc:ad20fd1fafeda3b91d1ddf15c69da8d6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether we are in factory reset mode.  <a href="classMicroapp.html#ad20fd1fafeda3b91d1ddf15c69da8d6d">More...</a><br /></td></tr>
+<tr class="separator:ad20fd1fafeda3b91d1ddf15c69da8d6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that enables the feature to run microapps on the firmware. </p>
@@ -167,7 +253,414 @@ static <a class="el" href="classMicroapp.html">Microapp</a> &amp;&#160;</td><td 
 <li>Keeps up the state of microapps.</li>
 <li>Instantiates and uses classes <a class="el" href="classMicroappStorage.html" title="Class to store microapps on flash.">MicroappStorage</a> and MicroappProtocol. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="abddfb17a6e98f998befbc685433cbeef" name="abddfb17a6e98f998befbc685433cbeef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abddfb17a6e98f998befbc685433cbeef">&#9670;&#160;</a></span>Microapp() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMicroapp.html">Microapp::Microapp</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Singleton, constructor, also copy constructor, is private. </p>
+
+</div>
+</div>
+<a id="ae94e350f6f95b25c1b228bed222dcd57" name="ae94e350f6f95b25c1b228bed222dcd57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae94e350f6f95b25c1b228bed222dcd57">&#9670;&#160;</a></span>Microapp() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMicroapp.html">Microapp::Microapp</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMicroapp.html">Microapp</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a8517df188642f3a2de5dd5411e816a13" name="a8517df188642f3a2de5dd5411e816a13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8517df188642f3a2de5dd5411e816a13">&#9670;&#160;</a></span>canRunApp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Microapp::canRunApp </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Checks app state and returns true if this app is allowed to run. </p>
+
+</div>
+</div>
+<a id="a04971133bce0099d3ac6b82e31a5a15a" name="a04971133bce0099d3ac6b82e31a5a15a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04971133bce0099d3ac6b82e31a5a15a">&#9670;&#160;</a></span>checkHeader()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::checkHeader </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Checks if control command header is ok. </p>
+
+</div>
+</div>
+<a id="a91663c8f2fc7a73b08a43ab36569658a" name="a91663c8f2fc7a73b08a43ab36569658a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91663c8f2fc7a73b08a43ab36569658a">&#9670;&#160;</a></span>enableApp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::enableApp </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enables app: checks sdk version. </p>
+<p >App state is updated in this call, make sure to store the state afterwards. </p>
+
+</div>
+</div>
+<a id="ab50492f153911ccd52ee98aebd39fcde" name="ab50492f153911ccd52ee98aebd39fcde"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab50492f153911ccd52ee98aebd39fcde">&#9670;&#160;</a></span>factoryReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::factoryReset </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Removes all microapps and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE. </p>
+
+</div>
+</div>
+<a id="a48b10124829e07c443040a20dbaa935b" name="a48b10124829e07c443040a20dbaa935b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48b10124829e07c443040a20dbaa935b">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classMicroapp.html">Microapp</a> &amp; Microapp::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7e9262b3a3dbd4b16a359bf7b532880d" name="a7e9262b3a3dbd4b16a359bf7b532880d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e9262b3a3dbd4b16a359bf7b532880d">&#9670;&#160;</a></span>handleDisable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::handleDisable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a914b64f8f709a9c301ecbabcbbcf543d" name="a914b64f8f709a9c301ecbabcbbcf543d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a914b64f8f709a9c301ecbabcbbcf543d">&#9670;&#160;</a></span>handleEnable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::handleEnable </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae7c2d29c9c1bca10be6cad74c93e4f90" name="ae7c2d29c9c1bca10be6cad74c93e4f90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7c2d29c9c1bca10be6cad74c93e4f90">&#9670;&#160;</a></span>handleEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::handleEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classevent__t.html">event_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle incoming events. </p>
+
+<p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="a4ec45ea935ff598e5aeca0b1056a1d9c" name="a4ec45ea935ff598e5aeca0b1056a1d9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ec45ea935ff598e5aeca0b1056a1d9c">&#9670;&#160;</a></span>handleGetInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::handleGetInfo </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle control commands. </p>
+
+</div>
+</div>
+<a id="aa1e7869f67ae9817b54d79f2630f873c" name="aa1e7869f67ae9817b54d79f2630f873c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1e7869f67ae9817b54d79f2630f873c">&#9670;&#160;</a></span>handleMessage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::handleMessage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmicroapp__message__internal__t.html">microapp_message_internal_t</a> *&#160;</td>
+          <td class="paramname"><em>packet</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a880a0cc3f1ed904aee9d4e36c9c6ee31" name="a880a0cc3f1ed904aee9d4e36c9c6ee31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a880a0cc3f1ed904aee9d4e36c9c6ee31">&#9670;&#160;</a></span>handleRemove()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::handleRemove </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9f2c2826db8e83a21b577e1171c37115" name="a9f2c2826db8e83a21b577e1171c37115"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f2c2826db8e83a21b577e1171c37115">&#9670;&#160;</a></span>handleUpload()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::handleUpload </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmicroapp__upload__internal__t.html">microapp_upload_internal_t</a> *&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad85823ea998c8c6e7387c610ddd2b90e" name="ad85823ea998c8c6e7387c610ddd2b90e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad85823ea998c8c6e7387c610ddd2b90e">&#9670;&#160;</a></span>handleValidate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::handleValidate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmicroapp__ctrl__header__t.html">microapp_ctrl_header_t</a> *&#160;</td>
+          <td class="paramname"><em>packet</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a3d66deeb5c2acdca66fdde857c1afa37" name="a3d66deeb5c2acdca66fdde857c1afa37"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3d66deeb5c2acdca66fdde857c1afa37">&#9670;&#160;</a></span>init()</h2>
 
@@ -177,7 +670,7 @@ static <a class="el" href="classMicroapp.html">Microapp</a> &amp;&#160;</td><td 
         <tr>
           <td class="memname">void Microapp::init </td>
           <td>(</td>
-          <td class="paramtype">OperationMode&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#a25bbfb7442459b8d546e1f1551835479">OperationMode</a>&#160;</td>
           <td class="paramname"><em>operationMode</em></td><td>)</td>
           <td></td>
         </tr>
@@ -186,6 +679,480 @@ static <a class="el" href="classMicroapp.html">Microapp</a> &amp;&#160;</td><td 
 
 <p>Initialize storage, and load microapps in normal mode. </p>
 <p >Checks operation mode and only actually initializes for some modes. </p>
+
+</div>
+</div>
+<a id="a4be6a37817d034c852e7f92862eb9169" name="a4be6a37817d034c852e7f92862eb9169"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4be6a37817d034c852e7f92862eb9169">&#9670;&#160;</a></span>loadApps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::loadApps </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acb626f79d056c2f5a9c5bf8fe83c52ef" name="acb626f79d056c2f5a9c5bf8fe83c52ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb626f79d056c2f5a9c5bf8fe83c52ef">&#9670;&#160;</a></span>loadState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::loadState </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a649024deff7fb8f75023442e25f3338c" name="a649024deff7fb8f75023442e25f3338c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a649024deff7fb8f75023442e25f3338c">&#9670;&#160;</a></span>onExcessiveCallDuration()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::onExcessiveCallDuration </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>appIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>To be called when a microapp took too long to yield. </p>
+
+</div>
+</div>
+<a id="a64f533c248d751c69fe39102f44fa860" name="a64f533c248d751c69fe39102f44fa860"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64f533c248d751c69fe39102f44fa860">&#9670;&#160;</a></span>onStorageEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::onStorageEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__async__result__t.html">cs_async_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle microapp storage event. </p>
+<p >For now, this just handles CMD_RESOLVE_ASYNC_CONTROL_COMMAND. We should register an event handler instead. </p>
+
+</div>
+</div>
+<a id="ad00092963a37ef713e264c5a46554f81" name="ad00092963a37ef713e264c5a46554f81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad00092963a37ef713e264c5a46554f81">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMicroapp.html">Microapp</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a366afff832cb73dda36809d0589c6b19" name="a366afff832cb73dda36809d0589c6b19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a366afff832cb73dda36809d0589c6b19">&#9670;&#160;</a></span>resetState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::resetState </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Resets app state in ram only. </p>
+
+</div>
+</div>
+<a id="a198388e34c9b7aa2634735208e19f167" name="a198388e34c9b7aa2634735208e19f167"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a198388e34c9b7aa2634735208e19f167">&#9670;&#160;</a></span>resetTestState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::resetTestState </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Resets app state tests in ram only. </p>
+
+</div>
+</div>
+<a id="a5369a92657cbfed53cbdac4de56fc47e" name="a5369a92657cbfed53cbdac4de56fc47e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5369a92657cbfed53cbdac4de56fc47e">&#9670;&#160;</a></span>resumeFactoryReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::resumeFactoryReset </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Remove next microapp and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE. </p>
+
+</div>
+</div>
+<a id="a81f787cf05bd61eb8db26ed2ad7e0917" name="a81f787cf05bd61eb8db26ed2ad7e0917"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81f787cf05bd61eb8db26ed2ad7e0917">&#9670;&#160;</a></span>startApp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::startApp </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Start app, if it passed all tests according to cached state. </p>
+
+</div>
+</div>
+<a id="a5ab1f3b619b189552d6457c7b6c4c777" name="a5ab1f3b619b189552d6457c7b6c4c777"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ab1f3b619b189552d6457c7b6c4c777">&#9670;&#160;</a></span>storeState()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::storeState </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classStore.html" title="A variable size storage utility for objects of type RecordType with absolute maximum MaxItemCount.">Store</a> app state to flash. </p>
+
+</div>
+</div>
+<a id="a764429f1ae1694c80eea066afd439a7b" name="a764429f1ae1694c80eea066afd439a7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a764429f1ae1694c80eea066afd439a7b">&#9670;&#160;</a></span>tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::tick </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>To be called every tick. </p>
+<p >Calls all microapps. </p>
+
+</div>
+</div>
+<a id="a86587fcc2a0fca14210c94cd3b557206" name="a86587fcc2a0fca14210c94cd3b557206"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86587fcc2a0fca14210c94cd3b557206">&#9670;&#160;</a></span>updateStateFromOperatingData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Microapp::updateStateFromOperatingData </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Update state from operating data in IPC. </p>
+<p >For example, when a reboot has happened when a microapp was running, this updates the state accordingly. </p>
+
+</div>
+</div>
+<a id="abaaa32307b02e5f56e00363489815c54" name="abaaa32307b02e5f56e00363489815c54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abaaa32307b02e5f56e00363489815c54">&#9670;&#160;</a></span>validateApp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> Microapp::validateApp </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Validates app: compare checksum. </p>
+<p >App state is updated in this call, make sure to store the state afterwards. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a814b7d46d2d6e3048c4a6dc376b8d773" name="a814b7d46d2d6e3048c4a6dc376b8d773"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a814b7d46d2d6e3048c4a6dc376b8d773">&#9670;&#160;</a></span>_currentMicroappIndex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t Microapp::_currentMicroappIndex = <a class="el" href="cs__MicroappPackets_8h.html#aa1c83101aafac1900519753eb14c49ee">MICROAPP_INDEX_NONE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up which microapp is currently being operated on. </p>
+<p >Used for factory reset. Set to MICROAPP_INDEX_NONE when not operating on anything. </p>
+
+</div>
+</div>
+<a id="ad20fd1fafeda3b91d1ddf15c69da8d6d" name="ad20fd1fafeda3b91d1ddf15c69da8d6d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad20fd1fafeda3b91d1ddf15c69da8d6d">&#9670;&#160;</a></span>_factoryResetMode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Microapp::_factoryResetMode = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether we are in factory reset mode. </p>
+
+</div>
+</div>
+<a id="a3a5b8e1a93681fb977ffeae6d2daec38" name="a3a5b8e1a93681fb977ffeae6d2daec38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a5b8e1a93681fb977ffeae6d2daec38">&#9670;&#160;</a></span>_loaded</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Microapp::_loaded = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Local flag to indicate that ram section has been loaded. </p>
+
+</div>
+</div>
+<a id="a3bcc7caba353f936d7566f0322efdccd" name="a3bcc7caba353f936d7566f0322efdccd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bcc7caba353f936d7566f0322efdccd">&#9670;&#160;</a></span>_started</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Microapp::_started[g_MICROAPP_COUNT] = {}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up whether the microapp has been started yet. </p>
+<p >Init to false (default bool constructor). </p>
+
+</div>
+</div>
+<a id="ad2e6eb3cc0e290d2c0990ebb91febbdc" name="ad2e6eb3cc0e290d2c0990ebb91febbdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2e6eb3cc0e290d2c0990ebb91febbdc">&#9670;&#160;</a></span>_states</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmicroapp__state__t.html">microapp_state_t</a> Microapp::_states[g_MICROAPP_COUNT]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The state of each microapp. </p>
 
 </div>
 </div>

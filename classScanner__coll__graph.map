@@ -1,4 +1,9 @@
 <map id="Scanner" name="Scanner">
-<area shape="rect" id="node1" title="Scanner scans for BLE devices." alt="" coords="23,79,98,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node1" title="Scanner scans for BLE devices." alt="" coords="45,345,119,371"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,257,116,283"/>
+<area shape="rect" id="node3" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="141,257,199,283"/>
+<area shape="rect" id="node4" href="$classBaseClass.html" title=" " alt="" coords="49,162,176,187"/>
+<area shape="rect" id="node5" href="$classfixed__tuple.html" title=" " alt="" coords="201,155,403,195"/>
+<area shape="rect" id="node6" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="255,80,349,105"/>
+<area shape="rect" id="node7" title=" " alt="" coords="237,5,367,31"/>
 </map>

@@ -100,6 +100,7 @@ $(document).ready(function(){initNavTree('classMicroappInterruptHandler.html',''
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="classMicroappInterruptHandler-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">MicroappInterruptHandler Class Reference</div></div>
 </div><!--header-->
@@ -130,44 +131,203 @@ Collaboration diagram for MicroappInterruptHandler:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a57c773fe3892dd719b2e2362183c4b22"><td class="memItemLeft" align="right" valign="top"><a id="a57c773fe3892dd719b2e2362183c4b22" name="a57c773fe3892dd719b2e2362183c4b22"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onBlePeripheralWrite</b> (uint16_t connectionHandle, uint16_t characteristicHandle, <a class="el" href="structcs__data__t.html">cs_data_t</a> value)</td></tr>
+<tr class="memitem:a57c773fe3892dd719b2e2362183c4b22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a57c773fe3892dd719b2e2362183c4b22">onBlePeripheralWrite</a> (uint16_t connectionHandle, uint16_t characteristicHandle, <a class="el" href="structcs__data__t.html">cs_data_t</a> value)</td></tr>
 <tr class="separator:a57c773fe3892dd719b2e2362183c4b22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07c75fd32788109e1eea55ec251ffe21"><td class="memItemLeft" align="right" valign="top"><a id="a07c75fd32788109e1eea55ec251ffe21" name="a07c75fd32788109e1eea55ec251ffe21"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onBlePeripheralSubscription</b> (uint16_t connectionHandle, uint16_t characteristicHandle, bool subscribed)</td></tr>
+<tr class="memitem:a07c75fd32788109e1eea55ec251ffe21"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a07c75fd32788109e1eea55ec251ffe21">onBlePeripheralSubscription</a> (uint16_t connectionHandle, uint16_t characteristicHandle, bool subscribed)</td></tr>
 <tr class="separator:a07c75fd32788109e1eea55ec251ffe21"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7beb6181ca5a160e515823183eaeaa8"><td class="memItemLeft" align="right" valign="top"><a id="aa7beb6181ca5a160e515823183eaeaa8" name="aa7beb6181ca5a160e515823183eaeaa8"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onBlePeripheralNotififyDone</b> (uint16_t connectionHandle, uint16_t characteristicHandle)</td></tr>
+<tr class="memitem:aa7beb6181ca5a160e515823183eaeaa8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#aa7beb6181ca5a160e515823183eaeaa8">onBlePeripheralNotififyDone</a> (uint16_t connectionHandle, uint16_t characteristicHandle)</td></tr>
 <tr class="separator:aa7beb6181ca5a160e515823183eaeaa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36dd075e0ae1e50d549f05271a1a7d05"><td class="memItemLeft" align="right" valign="top"><a id="a36dd075e0ae1e50d549f05271a1a7d05" name="a36dd075e0ae1e50d549f05271a1a7d05"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>onMessage</b> (uint8_t appIndex, const <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;message, <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;resultBuffer, uint16_t &amp;resultSize)</td></tr>
-<tr class="memdesc:a36dd075e0ae1e50d549f05271a1a7d05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a control command message. <br /></td></tr>
+<tr class="memitem:a36dd075e0ae1e50d549f05271a1a7d05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a36dd075e0ae1e50d549f05271a1a7d05">onMessage</a> (uint8_t appIndex, const <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;message, <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;resultBuffer, uint16_t &amp;resultSize)</td></tr>
+<tr class="memdesc:a36dd075e0ae1e50d549f05271a1a7d05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a control command message.  <a href="classMicroappInterruptHandler.html#a36dd075e0ae1e50d549f05271a1a7d05">More...</a><br /></td></tr>
 <tr class="separator:a36dd075e0ae1e50d549f05271a1a7d05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45d1482e1434ccc8139aa13c13880731"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a45d1482e1434ccc8139aa13c13880731">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:a45d1482e1434ccc8139aa13c13880731"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classMicroappInterruptHandler.html#a45d1482e1434ccc8139aa13c13880731">More...</a><br /></td></tr>
 <tr class="separator:a45d1482e1434ccc8139aa13c13880731"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a08774e4eea254e73eecda5d33e8fc1f6"><td class="memItemLeft" align="right" valign="top"><a id="a08774e4eea254e73eecda5d33e8fc1f6" name="a08774e4eea254e73eecda5d33e8fc1f6"></a>
-static <a class="el" href="classMicroappInterruptHandler.html">MicroappInterruptHandler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
+<tr class="memitem:a08774e4eea254e73eecda5d33e8fc1f6"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classMicroappInterruptHandler.html">MicroappInterruptHandler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a08774e4eea254e73eecda5d33e8fc1f6">getInstance</a> ()</td></tr>
 <tr class="separator:a08774e4eea254e73eecda5d33e8fc1f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a54b17bc4b42be11c4e167e24d69e6d02"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a54b17bc4b42be11c4e167e24d69e6d02">MicroappInterruptHandler</a> ()</td></tr>
+<tr class="memdesc:a54b17bc4b42be11c4e167e24d69e6d02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Singleton, constructor, also copy constructor, is private.  <a href="classMicroappInterruptHandler.html#a54b17bc4b42be11c4e167e24d69e6d02">More...</a><br /></td></tr>
+<tr class="separator:a54b17bc4b42be11c4e167e24d69e6d02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4bee0596530d23f6453e1334b23ad95"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#ad4bee0596530d23f6453e1334b23ad95">MicroappInterruptHandler</a> (<a class="el" href="classMicroappInterruptHandler.html">MicroappInterruptHandler</a> const &amp;)</td></tr>
+<tr class="separator:ad4bee0596530d23f6453e1334b23ad95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdbc01c97d11db5c81603a5e0bb73d2f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#acdbc01c97d11db5c81603a5e0bb73d2f">operator=</a> (<a class="el" href="classMicroappInterruptHandler.html">MicroappInterruptHandler</a> const &amp;)</td></tr>
+<tr class="separator:acdbc01c97d11db5c81603a5e0bb73d2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66fc067701680e8f5bf190a611c984b2"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a66fc067701680e8f5bf190a611c984b2">getOutputBuffer</a> (MicroappSdkType type, uint8_t id)</td></tr>
+<tr class="memdesc:a66fc067701680e8f5bf190a611c984b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether an interrupt is allowed to be sent and return the output buffer.  <a href="classMicroappInterruptHandler.html#a66fc067701680e8f5bf190a611c984b2">More...</a><br /></td></tr>
+<tr class="separator:a66fc067701680e8f5bf190a611c984b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af436a0983fb911f2c42db2442a58c4f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#af436a0983fb911f2c42db2442a58c4f5">onGpioUpdate</a> (<a class="el" href="structcs__gpio__update__t.html">cs_gpio_update_t</a> &amp;event)</td></tr>
+<tr class="memdesc:af436a0983fb911f2c42db2442a58c4f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a GPIO event.  <a href="classMicroappInterruptHandler.html#af436a0983fb911f2c42db2442a58c4f5">More...</a><br /></td></tr>
+<tr class="separator:af436a0983fb911f2c42db2442a58c4f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab83897e5854be70c051d5e976207b3d5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#ab83897e5854be70c051d5e976207b3d5">onDeviceScanned</a> (<a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;dev)</td></tr>
+<tr class="memdesc:ab83897e5854be70c051d5e976207b3d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a scanned BLE device.  <a href="classMicroappInterruptHandler.html#ab83897e5854be70c051d5e976207b3d5">More...</a><br /></td></tr>
+<tr class="separator:ab83897e5854be70c051d5e976207b3d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a758c836968e8fe08cb90e771715a60bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a758c836968e8fe08cb90e771715a60bd">onReceivedMeshMessage</a> (<a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;event)</td></tr>
+<tr class="memdesc:a758c836968e8fe08cb90e771715a60bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a received mesh message and determine whether to forward it to the microapp.  <a href="classMicroappInterruptHandler.html#a758c836968e8fe08cb90e771715a60bd">More...</a><br /></td></tr>
+<tr class="separator:a758c836968e8fe08cb90e771715a60bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9e777f78bfacb8d9f14049d539face1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#ac9e777f78bfacb8d9f14049d539face1">onBleCentralConnectResult</a> (<a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> &amp;retCode)</td></tr>
+<tr class="separator:ac9e777f78bfacb8d9f14049d539face1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a663f75d05ff1db03d2df0b703e2eb5c5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a663f75d05ff1db03d2df0b703e2eb5c5">onBleCentralDisconnected</a> ()</td></tr>
+<tr class="separator:a663f75d05ff1db03d2df0b703e2eb5c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82979c401070401992681c03a17dee57"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a82979c401070401992681c03a17dee57">onBleCentralDiscovery</a> (<a class="el" href="structble__central__discovery__t.html">ble_central_discovery_t</a> &amp;event)</td></tr>
+<tr class="separator:a82979c401070401992681c03a17dee57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af396b160292f5d8d44d8d2604c8c7111"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#af396b160292f5d8d44d8d2604c8c7111">onBleCentralDiscoveryResult</a> (<a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> &amp;retCode)</td></tr>
+<tr class="separator:af396b160292f5d8d44d8d2604c8c7111"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a2bf3910af9a4972afce0c5918629cf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a3a2bf3910af9a4972afce0c5918629cf">onBleCentralWriteResult</a> (<a class="el" href="structble__central__write__result__t.html">ble_central_write_result_t</a> &amp;event)</td></tr>
+<tr class="separator:a3a2bf3910af9a4972afce0c5918629cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45c8379a229b132bd6db1ac47899574f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a45c8379a229b132bd6db1ac47899574f">onBleCentralReadResult</a> (<a class="el" href="structble__central__read__result__t.html">ble_central_read_result_t</a> &amp;event)</td></tr>
+<tr class="separator:a45c8379a229b132bd6db1ac47899574f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a1bf6ee649a2ebab6b3dd535c0842bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a2a1bf6ee649a2ebab6b3dd535c0842bc">onBleCentralNotification</a> (<a class="el" href="structble__central__notification__t.html">ble_central_notification_t</a> &amp;event)</td></tr>
+<tr class="separator:a2a1bf6ee649a2ebab6b3dd535c0842bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa31c5af9a914b9926698589bdacc8313"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#aa31c5af9a914b9926698589bdacc8313">onBlePeripheralConnect</a> (<a class="el" href="structble__connected__t.html">ble_connected_t</a> &amp;event)</td></tr>
+<tr class="separator:aa31c5af9a914b9926698589bdacc8313"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e01bde8ac59dae690c853401917733c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#a1e01bde8ac59dae690c853401917733c">onBlePeripheralDisconnect</a> (uint16_t connectionHandle)</td></tr>
+<tr class="separator:a1e01bde8ac59dae690c853401917733c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab70c93ed39f1836590c2d353c501814e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#ab70c93ed39f1836590c2d353c501814e">onAssetAccepted</a> (<a class="el" href="classAssetAcceptedEvent.html">AssetAcceptedEvent</a> &amp;event)</td></tr>
+<tr class="separator:ab70c93ed39f1836590c2d353c501814e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3e9a9ec3b3e5345c48c506c76148269"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMicroappInterruptHandler.html#aa3e9a9ec3b3e5345c48c506c76148269">onBluenetEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
+<tr class="separator:aa3e9a9ec3b3e5345c48c506c76148269"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >The class <a class="el" href="classMicroappRequestHandler.html" title="The class MicroappRequestHandler has functionality to store a second app (and perhaps in the future e...">MicroappRequestHandler</a> has functionality to store a second app (and perhaps in the future even more apps) on another part of the flash memory. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a54b17bc4b42be11c4e167e24d69e6d02" name="a54b17bc4b42be11c4e167e24d69e6d02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54b17bc4b42be11c4e167e24d69e6d02">&#9670;&#160;</a></span>MicroappInterruptHandler() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMicroappInterruptHandler.html">MicroappInterruptHandler::MicroappInterruptHandler</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Singleton, constructor, also copy constructor, is private. </p>
+
+</div>
+</div>
+<a id="ad4bee0596530d23f6453e1334b23ad95" name="ad4bee0596530d23f6453e1334b23ad95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4bee0596530d23f6453e1334b23ad95">&#9670;&#160;</a></span>MicroappInterruptHandler() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMicroappInterruptHandler.html">MicroappInterruptHandler::MicroappInterruptHandler</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMicroappInterruptHandler.html">MicroappInterruptHandler</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a08774e4eea254e73eecda5d33e8fc1f6" name="a08774e4eea254e73eecda5d33e8fc1f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08774e4eea254e73eecda5d33e8fc1f6">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classMicroappInterruptHandler.html">MicroappInterruptHandler</a> &amp; MicroappInterruptHandler::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a66fc067701680e8f5bf190a611c984b2" name="a66fc067701680e8f5bf190a611c984b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66fc067701680e8f5bf190a611c984b2">&#9670;&#160;</a></span>getOutputBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t * MicroappInterruptHandler::getOutputBuffer </td>
+          <td>(</td>
+          <td class="paramtype">MicroappSdkType&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check whether an interrupt is allowed to be sent and return the output buffer. </p>
+<dl class="section return"><dt>Returns</dt><dd>nullptr When no interrupt can be sent. </dd>
+<dd>
+buffer The buffer to fill for the interrupt. </dd></dl>
+
+</div>
+</div>
 <a id="a45d1482e1434ccc8139aa13c13880731" name="a45d1482e1434ccc8139aa13c13880731"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a45d1482e1434ccc8139aa13c13880731">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -195,6 +355,545 @@ static <a class="el" href="classMicroappInterruptHandler.html">MicroappInterrupt
 <p>Handle events. </p>
 
 <p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="ab70c93ed39f1836590c2d353c501814e" name="ab70c93ed39f1836590c2d353c501814e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab70c93ed39f1836590c2d353c501814e">&#9670;&#160;</a></span>onAssetAccepted()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onAssetAccepted </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAssetAcceptedEvent.html">AssetAcceptedEvent</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac9e777f78bfacb8d9f14049d539face1" name="ac9e777f78bfacb8d9f14049d539face1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9e777f78bfacb8d9f14049d539face1">&#9670;&#160;</a></span>onBleCentralConnectResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBleCentralConnectResult </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>retCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a663f75d05ff1db03d2df0b703e2eb5c5" name="a663f75d05ff1db03d2df0b703e2eb5c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a663f75d05ff1db03d2df0b703e2eb5c5">&#9670;&#160;</a></span>onBleCentralDisconnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBleCentralDisconnected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a82979c401070401992681c03a17dee57" name="a82979c401070401992681c03a17dee57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82979c401070401992681c03a17dee57">&#9670;&#160;</a></span>onBleCentralDiscovery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBleCentralDiscovery </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structble__central__discovery__t.html">ble_central_discovery_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af396b160292f5d8d44d8d2604c8c7111" name="af396b160292f5d8d44d8d2604c8c7111"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af396b160292f5d8d44d8d2604c8c7111">&#9670;&#160;</a></span>onBleCentralDiscoveryResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBleCentralDiscoveryResult </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>retCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2a1bf6ee649a2ebab6b3dd535c0842bc" name="a2a1bf6ee649a2ebab6b3dd535c0842bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a1bf6ee649a2ebab6b3dd535c0842bc">&#9670;&#160;</a></span>onBleCentralNotification()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBleCentralNotification </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structble__central__notification__t.html">ble_central_notification_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a45c8379a229b132bd6db1ac47899574f" name="a45c8379a229b132bd6db1ac47899574f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45c8379a229b132bd6db1ac47899574f">&#9670;&#160;</a></span>onBleCentralReadResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBleCentralReadResult </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structble__central__read__result__t.html">ble_central_read_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3a2bf3910af9a4972afce0c5918629cf" name="a3a2bf3910af9a4972afce0c5918629cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a2bf3910af9a4972afce0c5918629cf">&#9670;&#160;</a></span>onBleCentralWriteResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBleCentralWriteResult </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structble__central__write__result__t.html">ble_central_write_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa31c5af9a914b9926698589bdacc8313" name="aa31c5af9a914b9926698589bdacc8313"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa31c5af9a914b9926698589bdacc8313">&#9670;&#160;</a></span>onBlePeripheralConnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBlePeripheralConnect </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structble__connected__t.html">ble_connected_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1e01bde8ac59dae690c853401917733c" name="a1e01bde8ac59dae690c853401917733c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e01bde8ac59dae690c853401917733c">&#9670;&#160;</a></span>onBlePeripheralDisconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBlePeripheralDisconnect </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa7beb6181ca5a160e515823183eaeaa8" name="aa7beb6181ca5a160e515823183eaeaa8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa7beb6181ca5a160e515823183eaeaa8">&#9670;&#160;</a></span>onBlePeripheralNotififyDone()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBlePeripheralNotififyDone </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>characteristicHandle</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a07c75fd32788109e1eea55ec251ffe21" name="a07c75fd32788109e1eea55ec251ffe21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07c75fd32788109e1eea55ec251ffe21">&#9670;&#160;</a></span>onBlePeripheralSubscription()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBlePeripheralSubscription </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>characteristicHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>subscribed</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a57c773fe3892dd719b2e2362183c4b22" name="a57c773fe3892dd719b2e2362183c4b22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57c773fe3892dd719b2e2362183c4b22">&#9670;&#160;</a></span>onBlePeripheralWrite()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBlePeripheralWrite </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>characteristicHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa3e9a9ec3b3e5345c48c506c76148269" name="aa3e9a9ec3b3e5345c48c506c76148269"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3e9a9ec3b3e5345c48c506c76148269">&#9670;&#160;</a></span>onBluenetEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onBluenetEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classevent__t.html">event_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab83897e5854be70c051d5e976207b3d5" name="ab83897e5854be70c051d5e976207b3d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab83897e5854be70c051d5e976207b3d5">&#9670;&#160;</a></span>onDeviceScanned()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onDeviceScanned </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structscanned__device__t.html">scanned_device_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>dev</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle a scanned BLE device. </p>
+
+</div>
+</div>
+<a id="af436a0983fb911f2c42db2442a58c4f5" name="af436a0983fb911f2c42db2442a58c4f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af436a0983fb911f2c42db2442a58c4f5">&#9670;&#160;</a></span>onGpioUpdate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onGpioUpdate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__gpio__update__t.html">cs_gpio_update_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle a GPIO event. </p>
+
+</div>
+</div>
+<a id="a36dd075e0ae1e50d549f05271a1a7d05" name="a36dd075e0ae1e50d549f05271a1a7d05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36dd075e0ae1e50d549f05271a1a7d05">&#9670;&#160;</a></span>onMessage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MicroappInterruptHandler::onMessage </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>appIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>message</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>resultBuffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t &amp;&#160;</td>
+          <td class="paramname"><em>resultSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Handle a control command message. </p>
+
+</div>
+</div>
+<a id="a758c836968e8fe08cb90e771715a60bd" name="a758c836968e8fe08cb90e771715a60bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a758c836968e8fe08cb90e771715a60bd">&#9670;&#160;</a></span>onReceivedMeshMessage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::onReceivedMeshMessage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle a received mesh message and determine whether to forward it to the microapp. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">event</td><td>the EVT_RECV_MESH_MSG event data </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="acdbc01c97d11db5c81603a5e0bb73d2f" name="acdbc01c97d11db5c81603a5e0bb73d2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdbc01c97d11db5c81603a5e0bb73d2f">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MicroappInterruptHandler::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMicroappInterruptHandler.html">MicroappInterruptHandler</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

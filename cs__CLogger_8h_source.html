@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__CLogger_8h_source.html',''); initR
   <div class="headertitle"><div class="title">cs_CLogger.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__CLogger_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Dec 9, 2020</span></div>
@@ -109,7 +109,7 @@ $(document).ready(function(){initNavTree('cs__CLogger_8h_source.html',''); initR
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;drivers/cs_Serial.h&gt;</span>  <span class="comment">// For SERIAL_VERBOSITY.</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Serial_8h.html">drivers/cs_Serial.h</a>&gt;</span>  <span class="comment">// For SERIAL_VERBOSITY.</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#ifdef __cplusplus</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
@@ -129,20 +129,20 @@ $(document).ready(function(){initNavTree('cs__CLogger_8h_source.html',''); initR
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#define CLOGf NRF_LOG_ERROR</span></div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#define _clog(level, addNewLine, fmt, ...) NRF_LOG_DEBUG(fmt, ##__VA_ARGS__)</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#define _clog(level, addNewLine, fmt, ...)       \</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="cs__CLogger_8h.html#a0b006d68bcd2f10882b5656c5e31fb1b">   43</a></span><span class="preprocessor">#define _clog(level, addNewLine, fmt, ...)       \</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">    if (level &lt;= SERIAL_VERBOSITY) {             \</span></div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">        cs_clog(addNewLine, fmt, ##__VA_ARGS__); \</span></div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">    }</span></div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#define CLOGvv(fmt, ...) _clog(SERIAL_VERY_VERBOSE, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define CLOGv(fmt, ...) _clog(SERIAL_VERBOSE, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#define CLOGd(fmt, ...) _clog(SERIAL_DEBUG, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#define CLOGi(fmt, ...) _clog(SERIAL_INFO, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#define CLOGw(fmt, ...) _clog(SERIAL_WARN, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#define CLOGe(fmt, ...) _clog(SERIAL_ERROR, true, fmt, ##__VA_ARGS__)</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#define CLOGf(fmt, ...) _clog(SERIAL_FATAL, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="cs__CLogger_8h.html#ad6331b695c0b5652758e02f353bda1a0">   48</a></span><span class="preprocessor">#define CLOGvv(fmt, ...) _clog(SERIAL_VERY_VERBOSE, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="cs__CLogger_8h.html#a397a7166b82e4edc154822c68528b554">   49</a></span><span class="preprocessor">#define CLOGv(fmt, ...) _clog(SERIAL_VERBOSE, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="cs__CLogger_8h.html#a96fde94a4b2841f5858ee856fb1aa21e">   50</a></span><span class="preprocessor">#define CLOGd(fmt, ...) _clog(SERIAL_DEBUG, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="cs__CLogger_8h.html#a2e4dc922ad47ba022769ed09e10b1e22">   51</a></span><span class="preprocessor">#define CLOGi(fmt, ...) _clog(SERIAL_INFO, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="cs__CLogger_8h.html#a894af91e9588b18c4fbe22c50d90b240">   52</a></span><span class="preprocessor">#define CLOGw(fmt, ...) _clog(SERIAL_WARN, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="cs__CLogger_8h.html#a243b69c80714c0da10e351df937c03eb">   53</a></span><span class="preprocessor">#define CLOGe(fmt, ...) _clog(SERIAL_ERROR, true, fmt, ##__VA_ARGS__)</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="cs__CLogger_8h.html#a00a1658f1de5f284e4007cbdb3efe17d">   54</a></span><span class="preprocessor">#define CLOGf(fmt, ...) _clog(SERIAL_FATAL, true, fmt, ##__VA_ARGS__)</span></div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keywordtype">void</span> cs_clog(<span class="keywordtype">bool</span> addNewLine, <span class="keyword">const</span> <span class="keywordtype">char</span>* fmt, ...);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="cs__CLogger_8h.html#aacb8fa26053f6eb729fa4619034cc05e">   56</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="cs__CLogger_8h.html#aacb8fa26053f6eb729fa4619034cc05e">cs_clog</a>(<span class="keywordtype">bool</span> addNewLine, <span class="keyword">const</span> <span class="keywordtype">char</span>* fmt, ...);</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#ifdef __cplusplus</span></div>
@@ -183,12 +183,14 @@ $(document).ready(function(){initNavTree('cs__CLogger_8h_source.html',''); initR
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#undef CLOGf</span></div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">#define CLOGf(fmt, ...)</span></div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="acs__CLogger_8h_html_aacb8fa26053f6eb729fa4619034cc05e"><div class="ttname"><a href="cs__CLogger_8h.html#aacb8fa26053f6eb729fa4619034cc05e">cs_clog</a></div><div class="ttdeci">void cs_clog(bool addNewLine, const char *fmt,...)</div></div>
+<div class="ttc" id="acs__Serial_8h_html"><div class="ttname"><a href="cs__Serial_8h.html">cs_Serial.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b25cd48746385db9a78c677f87e228d3.html">logging</a></li><li class="navelem"><b>cs_CLogger.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b25cd48746385db9a78c677f87e228d3.html">logging</a></li><li class="navelem"><a class="el" href="cs__CLogger_8h.html">cs_CLogger.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

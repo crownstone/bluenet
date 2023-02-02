@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classKeysAndAccess.html',''); initResi
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classKeysAndAccess-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">KeysAndAccess Class Reference</div></div>
 </div><!--header-->
@@ -112,14 +114,13 @@ $(document).ready(function(){initNavTree('classKeysAndAccess.html',''); initResi
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad0686905657b4c14209e958c718c824c"><td class="memItemLeft" align="right" valign="top"><a id="ad0686905657b4c14209e958c718c824c" name="ad0686905657b4c14209e958c718c824c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="memdesc:ad0686905657b4c14209e958c718c824c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the class: reads from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>. <br /></td></tr>
+<tr class="memitem:ad0686905657b4c14209e958c718c824c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#ad0686905657b4c14209e958c718c824c">init</a> ()</td></tr>
+<tr class="memdesc:ad0686905657b4c14209e958c718c824c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the class: reads from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>.  <a href="classKeysAndAccess.html#ad0686905657b4c14209e958c718c824c">More...</a><br /></td></tr>
 <tr class="separator:ad0686905657b4c14209e958c718c824c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad14bf2de5917ab00ff7e36fe01287d0a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#ad14bf2de5917ab00ff7e36fe01287d0a">allowAccess</a> (EncryptionAccessLevel minimum, EncryptionAccessLevel provided)</td></tr>
+<tr class="memitem:ad14bf2de5917ab00ff7e36fe01287d0a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#ad14bf2de5917ab00ff7e36fe01287d0a">allowAccess</a> (<a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> minimum, <a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> provided)</td></tr>
 <tr class="memdesc:ad14bf2de5917ab00ff7e36fe01287d0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify if the access level provided is sufficient.  <a href="classKeysAndAccess.html#ad14bf2de5917ab00ff7e36fe01287d0a">More...</a><br /></td></tr>
 <tr class="separator:ad14bf2de5917ab00ff7e36fe01287d0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa17c296eb8eec2d20303c4d504ad0a00"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#aa17c296eb8eec2d20303c4d504ad0a00">getKey</a> (EncryptionAccessLevel accessLevel, buffer_ptr_t outBuf, cs_buffer_size_t outBufSize)</td></tr>
+<tr class="memitem:aa17c296eb8eec2d20303c4d504ad0a00"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#aa17c296eb8eec2d20303c4d504ad0a00">getKey</a> (<a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a> accessLevel, <a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> outBuf, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> outBufSize)</td></tr>
 <tr class="memdesc:aa17c296eb8eec2d20303c4d504ad0a00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get key of given access level.  <a href="classKeysAndAccess.html#aa17c296eb8eec2d20303c4d504ad0a00">More...</a><br /></td></tr>
 <tr class="separator:aa17c296eb8eec2d20303c4d504ad0a00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9b84a20b72a2a1dae24e90bb4ba096f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#af9b84a20b72a2a1dae24e90bb4ba096f">getSetupKey</a> ()</td></tr>
@@ -128,20 +129,42 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
 <tr class="memitem:a4b3cf33b4a9b2c800bc00815e48724cf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#a4b3cf33b4a9b2c800bc00815e48724cf">generateSetupKey</a> ()</td></tr>
 <tr class="memdesc:a4b3cf33b4a9b2c800bc00815e48724cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a new setup key.  <a href="classKeysAndAccess.html#a4b3cf33b4a9b2c800bc00815e48724cf">More...</a><br /></td></tr>
 <tr class="separator:a4b3cf33b4a9b2c800bc00815e48724cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac1f8e5f9d65106e43bd465e3073df0a2"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#ac1f8e5f9d65106e43bd465e3073df0a2">setSetupKey</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> data)</td></tr>
+<tr class="memitem:ac1f8e5f9d65106e43bd465e3073df0a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#ac1f8e5f9d65106e43bd465e3073df0a2">setSetupKey</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> data)</td></tr>
 <tr class="memdesc:ac1f8e5f9d65106e43bd465e3073df0a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the setup key.  <a href="classKeysAndAccess.html#ac1f8e5f9d65106e43bd465e3073df0a2">More...</a><br /></td></tr>
 <tr class="separator:ac1f8e5f9d65106e43bd465e3073df0a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5daff72c95be71b64cbf82a6800d3679"><td class="memItemLeft" align="right" valign="top"><a id="a5daff72c95be71b64cbf82a6800d3679" name="a5daff72c95be71b64cbf82a6800d3679"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>invalidateSetupKey</b> ()</td></tr>
-<tr class="memdesc:a5daff72c95be71b64cbf82a6800d3679"><td class="mdescLeft">&#160;</td><td class="mdescRight">Invalidate the setup key. <br /></td></tr>
+<tr class="memitem:a5daff72c95be71b64cbf82a6800d3679"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#a5daff72c95be71b64cbf82a6800d3679">invalidateSetupKey</a> ()</td></tr>
+<tr class="memdesc:a5daff72c95be71b64cbf82a6800d3679"><td class="mdescLeft">&#160;</td><td class="mdescRight">Invalidate the setup key.  <a href="classKeysAndAccess.html#a5daff72c95be71b64cbf82a6800d3679">More...</a><br /></td></tr>
 <tr class="separator:a5daff72c95be71b64cbf82a6800d3679"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a8ab6db34812c3349a436806f2441ad79"><td class="memItemLeft" align="right" valign="top"><a id="a8ab6db34812c3349a436806f2441ad79" name="a8ab6db34812c3349a436806f2441ad79"></a>
-static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:a8ab6db34812c3349a436806f2441ad79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use static variant of singleton, no dynamic memory allocation. <br /></td></tr>
+<tr class="memitem:a8ab6db34812c3349a436806f2441ad79"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#a8ab6db34812c3349a436806f2441ad79">getInstance</a> ()</td></tr>
+<tr class="memdesc:a8ab6db34812c3349a436806f2441ad79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use static variant of singleton, no dynamic memory allocation.  <a href="classKeysAndAccess.html#a8ab6db34812c3349a436806f2441ad79">More...</a><br /></td></tr>
 <tr class="separator:a8ab6db34812c3349a436806f2441ad79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a24ab5808775f9b9ab9836c04c7fd8ee6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#a24ab5808775f9b9ab9836c04c7fd8ee6">KeysAndAccess</a> ()</td></tr>
+<tr class="separator:a24ab5808775f9b9ab9836c04c7fd8ee6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9ca2a35aa71f4acc8eade24fb5b2aa6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#ab9ca2a35aa71f4acc8eade24fb5b2aa6">KeysAndAccess</a> (<a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> const &amp;)</td></tr>
+<tr class="separator:ab9ca2a35aa71f4acc8eade24fb5b2aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b9c37c044f5074a5636a256656ec1f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#a6b9c37c044f5074a5636a256656ec1f5">operator=</a> (<a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> const &amp;)</td></tr>
+<tr class="separator:a6b9c37c044f5074a5636a256656ec1f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a262ce53071e3bce7166a4096236f98bb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Types_8h.html#a25bbfb7442459b8d546e1f1551835479">OperationMode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#a262ce53071e3bce7166a4096236f98bb">_operationMode</a> = OperationMode::OPERATION_MODE_UNINITIALIZED</td></tr>
+<tr class="memdesc:a262ce53071e3bce7166a4096236f98bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cached operation mode.  <a href="classKeysAndAccess.html#a262ce53071e3bce7166a4096236f98bb">More...</a><br /></td></tr>
+<tr class="separator:a262ce53071e3bce7166a4096236f98bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a3eefb776ddf3598d2d60304497b70f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#a6a3eefb776ddf3598d2d60304497b70f">_encryptionEnabled</a> = true</td></tr>
+<tr class="memdesc:a6a3eefb776ddf3598d2d60304497b70f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache of whether encryption is enabled.  <a href="classKeysAndAccess.html#a6a3eefb776ddf3598d2d60304497b70f">More...</a><br /></td></tr>
+<tr class="separator:a6a3eefb776ddf3598d2d60304497b70f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40e08cce98a1a83a86d1cab5e7283a39"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#a40e08cce98a1a83a86d1cab5e7283a39">_setupKey</a> [<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td></tr>
+<tr class="memdesc:a40e08cce98a1a83a86d1cab5e7283a39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current setup key.  <a href="classKeysAndAccess.html#a40e08cce98a1a83a86d1cab5e7283a39">More...</a><br /></td></tr>
+<tr class="separator:a40e08cce98a1a83a86d1cab5e7283a39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f918eb62884e4aa0575e27f8d4c7eb6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKeysAndAccess.html#a7f918eb62884e4aa0575e27f8d4c7eb6">_setupKeyValid</a> = false</td></tr>
+<tr class="memdesc:a7f918eb62884e4aa0575e27f8d4c7eb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the setup key is valid.  <a href="classKeysAndAccess.html#a7f918eb62884e4aa0575e27f8d4c7eb6">More...</a><br /></td></tr>
+<tr class="separator:a7f918eb62884e4aa0575e27f8d4c7eb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class to get keys based on access level, and to check access levels. </p>
@@ -149,7 +172,59 @@ static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp;&#160
 <li>Generates temporary keys.</li>
 <li>Caches state. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a24ab5808775f9b9ab9836c04c7fd8ee6" name="a24ab5808775f9b9ab9836c04c7fd8ee6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24ab5808775f9b9ab9836c04c7fd8ee6">&#9670;&#160;</a></span>KeysAndAccess() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classKeysAndAccess.html">KeysAndAccess::KeysAndAccess</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab9ca2a35aa71f4acc8eade24fb5b2aa6" name="ab9ca2a35aa71f4acc8eade24fb5b2aa6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9ca2a35aa71f4acc8eade24fb5b2aa6">&#9670;&#160;</a></span>KeysAndAccess() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classKeysAndAccess.html">KeysAndAccess::KeysAndAccess</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a id="ad14bf2de5917ab00ff7e36fe01287d0a" name="ad14bf2de5917ab00ff7e36fe01287d0a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad14bf2de5917ab00ff7e36fe01287d0a">&#9670;&#160;</a></span>allowAccess()</h2>
 
@@ -159,13 +234,13 @@ static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp;&#160
         <tr>
           <td class="memname">bool KeysAndAccess::allowAccess </td>
           <td>(</td>
-          <td class="paramtype">EncryptionAccessLevel&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
           <td class="paramname"><em>minimum</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">EncryptionAccessLevel&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
           <td class="paramname"><em>provided</em>&#160;</td>
         </tr>
         <tr>
@@ -208,6 +283,33 @@ static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp;&#160
 
 </div>
 </div>
+<a id="a8ab6db34812c3349a436806f2441ad79" name="a8ab6db34812c3349a436806f2441ad79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ab6db34812c3349a436806f2441ad79">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp; KeysAndAccess::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Use static variant of singleton, no dynamic memory allocation. </p>
+
+</div>
+</div>
 <a id="aa17c296eb8eec2d20303c4d504ad0a00" name="aa17c296eb8eec2d20303c4d504ad0a00"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa17c296eb8eec2d20303c4d504ad0a00">&#9670;&#160;</a></span>getKey()</h2>
 
@@ -217,19 +319,19 @@ static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp;&#160
         <tr>
           <td class="memname">bool KeysAndAccess::getKey </td>
           <td>(</td>
-          <td class="paramtype">EncryptionAccessLevel&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756">EncryptionAccessLevel</a>&#160;</td>
           <td class="paramname"><em>accessLevel</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">buffer_ptr_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&#160;</td>
           <td class="paramname"><em>outBuf</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_buffer_size_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a>&#160;</td>
           <td class="paramname"><em>outBufSize</em>&#160;</td>
         </tr>
         <tr>
@@ -273,6 +375,70 @@ static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp;&#160
 
 </div>
 </div>
+<a id="ad0686905657b4c14209e958c718c824c" name="ad0686905657b4c14209e958c718c824c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0686905657b4c14209e958c718c824c">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void KeysAndAccess::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Init the class: reads from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>. </p>
+
+</div>
+</div>
+<a id="a5daff72c95be71b64cbf82a6800d3679" name="a5daff72c95be71b64cbf82a6800d3679"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5daff72c95be71b64cbf82a6800d3679">&#9670;&#160;</a></span>invalidateSetupKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void KeysAndAccess::invalidateSetupKey </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Invalidate the setup key. </p>
+
+</div>
+</div>
+<a id="a6b9c37c044f5074a5636a256656ec1f5" name="a6b9c37c044f5074a5636a256656ec1f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b9c37c044f5074a5636a256656ec1f5">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void KeysAndAccess::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ac1f8e5f9d65106e43bd465e3073df0a2" name="ac1f8e5f9d65106e43bd465e3073df0a2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac1f8e5f9d65106e43bd465e3073df0a2">&#9670;&#160;</a></span>setSetupKey()</h2>
 
@@ -280,7 +446,7 @@ static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp;&#160
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t KeysAndAccess::setSetupKey </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> KeysAndAccess::setSetupKey </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
           <td class="paramname"><em>data</em></td><td>)</td>
@@ -300,6 +466,103 @@ static <a class="el" href="classKeysAndAccess.html">KeysAndAccess</a> &amp;&#160
 <dl class="section return"><dt>Returns</dt><dd>ERR_WRONG_PAYLOAD_LENGTH When the data is of incorrect size. </dd>
 <dd>
 ERR_SUCCESS When the setup key is set. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a6a3eefb776ddf3598d2d60304497b70f" name="a6a3eefb776ddf3598d2d60304497b70f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a3eefb776ddf3598d2d60304497b70f">&#9670;&#160;</a></span>_encryptionEnabled</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool KeysAndAccess::_encryptionEnabled = true</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache of whether encryption is enabled. </p>
+
+</div>
+</div>
+<a id="a262ce53071e3bce7166a4096236f98bb" name="a262ce53071e3bce7166a4096236f98bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a262ce53071e3bce7166a4096236f98bb">&#9670;&#160;</a></span>_operationMode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Types_8h.html#a25bbfb7442459b8d546e1f1551835479">OperationMode</a> KeysAndAccess::_operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cached operation mode. </p>
+
+</div>
+</div>
+<a id="a40e08cce98a1a83a86d1cab5e7283a39" name="a40e08cce98a1a83a86d1cab5e7283a39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40e08cce98a1a83a86d1cab5e7283a39">&#9670;&#160;</a></span>_setupKey</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t KeysAndAccess::_setupKey[<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current setup key. </p>
+
+</div>
+</div>
+<a id="a7f918eb62884e4aa0575e27f8d4c7eb6" name="a7f918eb62884e4aa0575e27f8d4c7eb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f918eb62884e4aa0575e27f8d4c7eb6">&#9670;&#160;</a></span>_setupKeyValid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool KeysAndAccess::_setupKeyValid = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the setup key is valid. </p>
 
 </div>
 </div>

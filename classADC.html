@@ -100,6 +100,9 @@ $(document).ready(function(){initNavTree('classADC.html',''); initResizable(); }
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classADC-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">ADC Class Reference</div></div>
 </div><!--header-->
@@ -123,50 +126,49 @@ Collaboration diagram for ADC:</div>
 <div class="dyncontent">
 <div class="center"><img src="classADC__coll__graph.png" border="0" usemap="#aADC_coll__map" alt="Collaboration graph"/></div>
 <map name="aADC_coll__map" id="aADC_coll__map">
-<area shape="rect" title="Analog&#45;Digital conversion." alt="" coords="35,79,86,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" title="Analog&#45;Digital conversion." alt="" coords="631,84,681,109"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="299,5,409,31"/>
+<area shape="rect" href="structadc__config__t.html" title="Struct to configure the ADC." alt="" coords="302,55,406,80"/>
+<area shape="rect" href="structadc__channel__config__t.html" title="Struct to configure an ADC channel." alt="" coords="5,55,168,80"/>
+<area shape="rect" href="structadc__channel__config__result__t.html" title="Result struct after configuring an ADC channel." alt="" coords="279,105,429,145"/>
+<area shape="rect" href="classCircularBuffer.html" title=" " alt="" coords="279,169,429,209"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a4ce89830b38140c74fea8fc7587b5580"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a4ce89830b38140c74fea8fc7587b5580">init</a> (const <a class="el" href="structadc__config__t.html">adc_config_t</a> &amp;config)</td></tr>
+<tr class="memitem:a4ce89830b38140c74fea8fc7587b5580"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a4ce89830b38140c74fea8fc7587b5580">init</a> (const <a class="el" href="structadc__config__t.html">adc_config_t</a> &amp;config)</td></tr>
 <tr class="memdesc:a4ce89830b38140c74fea8fc7587b5580"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a>.  <a href="classADC.html#a4ce89830b38140c74fea8fc7587b5580">More...</a><br /></td></tr>
 <tr class="separator:a4ce89830b38140c74fea8fc7587b5580"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77afa039c73f7e50d04fe64e8e79d412"><td class="memItemLeft" align="right" valign="top"><a id="a77afa039c73f7e50d04fe64e8e79d412" name="a77afa039c73f7e50d04fe64e8e79d412"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>start</b> ()</td></tr>
-<tr class="memdesc:a77afa039c73f7e50d04fe64e8e79d412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> sampling. <br /></td></tr>
+<tr class="memitem:a77afa039c73f7e50d04fe64e8e79d412"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a77afa039c73f7e50d04fe64e8e79d412">start</a> ()</td></tr>
+<tr class="memdesc:a77afa039c73f7e50d04fe64e8e79d412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> sampling.  <a href="classADC.html#a77afa039c73f7e50d04fe64e8e79d412">More...</a><br /></td></tr>
 <tr class="separator:a77afa039c73f7e50d04fe64e8e79d412"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af92b34ed7a2ed66b1da7858a58faf140"><td class="memItemLeft" align="right" valign="top"><a id="af92b34ed7a2ed66b1da7858a58faf140" name="af92b34ed7a2ed66b1da7858a58faf140"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> ()</td></tr>
-<tr class="memdesc:af92b34ed7a2ed66b1da7858a58faf140"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> sampling Only to be called from main thread. <br /></td></tr>
+<tr class="memitem:af92b34ed7a2ed66b1da7858a58faf140"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#af92b34ed7a2ed66b1da7858a58faf140">stop</a> ()</td></tr>
+<tr class="memdesc:af92b34ed7a2ed66b1da7858a58faf140"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> sampling Only to be called from main thread.  <a href="classADC.html#af92b34ed7a2ed66b1da7858a58faf140">More...</a><br /></td></tr>
 <tr class="separator:af92b34ed7a2ed66b1da7858a58faf140"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a7f2a9a7bd30cc52ae89857573ebd8be0">setDoneCallback</a> (adc_done_cb_t callback)</td></tr>
+<tr class="memitem:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a7f2a9a7bd30cc52ae89857573ebd8be0">setDoneCallback</a> (<a class="el" href="cs__ADC_8h.html#aa372d606dcd60a8f453bda2315fc8b6e">adc_done_cb_t</a> callback)</td></tr>
 <tr class="memdesc:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback which is called when a buffer is filled.  <a href="classADC.html#a7f2a9a7bd30cc52ae89857573ebd8be0">More...</a><br /></td></tr>
 <tr class="separator:a7f2a9a7bd30cc52ae89857573ebd8be0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5bb4f20e32687098ec4d99b76c473b17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a5bb4f20e32687098ec4d99b76c473b17">setZeroCrossingCallback</a> (adc_zero_crossing_cb_t callback)</td></tr>
+<tr class="memitem:a5bb4f20e32687098ec4d99b76c473b17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a5bb4f20e32687098ec4d99b76c473b17">setZeroCrossingCallback</a> (<a class="el" href="cs__ADC_8h.html#a0a6b343716196a222159a69c7badd740">adc_zero_crossing_cb_t</a> callback)</td></tr>
 <tr class="memdesc:a5bb4f20e32687098ec4d99b76c473b17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the callback which is called on a zero crossing interrupt.  <a href="classADC.html#a5bb4f20e32687098ec4d99b76c473b17">More...</a><br /></td></tr>
 <tr class="separator:a5bb4f20e32687098ec4d99b76c473b17"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a135077bdc3fda908484e90487a94f34b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a135077bdc3fda908484e90487a94f34b">enableZeroCrossingInterrupt</a> (adc_channel_id_t channel, int32_t zeroVal)</td></tr>
+<tr class="memitem:a135077bdc3fda908484e90487a94f34b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a135077bdc3fda908484e90487a94f34b">enableZeroCrossingInterrupt</a> (<a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channel, int32_t zeroVal)</td></tr>
 <tr class="memdesc:a135077bdc3fda908484e90487a94f34b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable zero crossing detection on given channel, generating interrupts.  <a href="classADC.html#a135077bdc3fda908484e90487a94f34b">More...</a><br /></td></tr>
 <tr class="separator:a135077bdc3fda908484e90487a94f34b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1e71c99e67fa8fd4d3f5c3d8ec4785f"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ad1e71c99e67fa8fd4d3f5c3d8ec4785f">changeChannel</a> (adc_channel_id_t channel, <a class="el" href="structadc__channel__config__t.html">adc_channel_config_t</a> &amp;config)</td></tr>
+<tr class="memitem:ad1e71c99e67fa8fd4d3f5c3d8ec4785f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ad1e71c99e67fa8fd4d3f5c3d8ec4785f">changeChannel</a> (<a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channel, <a class="el" href="structadc__channel__config__t.html">adc_channel_config_t</a> &amp;config)</td></tr>
 <tr class="memdesc:ad1e71c99e67fa8fd4d3f5c3d8ec4785f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change channel config.  <a href="classADC.html#ad1e71c99e67fa8fd4d3f5c3d8ec4785f">More...</a><br /></td></tr>
 <tr class="separator:ad1e71c99e67fa8fd4d3f5c3d8ec4785f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a50a38435775eaf8cad5d2496fe12ec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a8a50a38435775eaf8cad5d2496fe12ec">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:a8a50a38435775eaf8cad5d2496fe12ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classADC.html#a8a50a38435775eaf8cad5d2496fe12ec">More...</a><br /></td></tr>
 <tr class="separator:a8a50a38435775eaf8cad5d2496fe12ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4bace8a397f3743075c392ee105b8ca"><td class="memItemLeft" align="right" valign="top"><a id="af4bace8a397f3743075c392ee105b8ca" name="af4bace8a397f3743075c392ee105b8ca"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_restart</b> ()</td></tr>
-<tr class="memdesc:af4bace8a397f3743075c392ee105b8ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restart. <br /></td></tr>
+<tr class="memitem:af4bace8a397f3743075c392ee105b8ca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#af4bace8a397f3743075c392ee105b8ca">_restart</a> ()</td></tr>
+<tr class="memdesc:af4bace8a397f3743075c392ee105b8ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restart.  <a href="classADC.html#af4bace8a397f3743075c392ee105b8ca">More...</a><br /></td></tr>
 <tr class="separator:af4bace8a397f3743075c392ee105b8ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6d394f02a369789ed4e22e8f9a79319"><td class="memItemLeft" align="right" valign="top"><a id="ad6d394f02a369789ed4e22e8f9a79319" name="ad6d394f02a369789ed4e22e8f9a79319"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_handleAdcDone</b> (adc_buffer_id_t bufIndex)</td></tr>
-<tr class="memdesc:ad6d394f02a369789ed4e22e8f9a79319"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle buffer, called in main thread. <br /></td></tr>
+<tr class="memitem:ad6d394f02a369789ed4e22e8f9a79319"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ad6d394f02a369789ed4e22e8f9a79319">_handleAdcDone</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
+<tr class="memdesc:ad6d394f02a369789ed4e22e8f9a79319"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle buffer, called in main thread.  <a href="classADC.html#ad6d394f02a369789ed4e22e8f9a79319">More...</a><br /></td></tr>
 <tr class="separator:ad6d394f02a369789ed4e22e8f9a79319"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3eda91590d8282a90a6717db296d0d5d"><td class="memItemLeft" align="right" valign="top"><a id="a3eda91590d8282a90a6717db296d0d5d" name="a3eda91590d8282a90a6717db296d0d5d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_handleAdcLimitInterrupt</b> (nrf_saadc_limit_t type)</td></tr>
-<tr class="memdesc:a3eda91590d8282a90a6717db296d0d5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when the sampled value is above upper limit, or below lower limit. <br /></td></tr>
+<tr class="memitem:a3eda91590d8282a90a6717db296d0d5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a3eda91590d8282a90a6717db296d0d5d">_handleAdcLimitInterrupt</a> (nrf_saadc_limit_t type)</td></tr>
+<tr class="memdesc:a3eda91590d8282a90a6717db296d0d5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when the sampled value is above upper limit, or below lower limit.  <a href="classADC.html#a3eda91590d8282a90a6717db296d0d5d">More...</a><br /></td></tr>
 <tr class="separator:a3eda91590d8282a90a6717db296d0d5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5b610fa5e44a923612c59d3a1ef92b9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#aa5b610fa5e44a923612c59d3a1ef92b9">_handleAdcInterrupt</a> ()</td></tr>
 <tr class="memdesc:aa5b610fa5e44a923612c59d3a1ef92b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> interrupt.  <a href="classADC.html#aa5b610fa5e44a923612c59d3a1ef92b9">More...</a><br /></td></tr>
@@ -174,10 +176,139 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>_handleAdcLimitInterr
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a8e8785d26544c9dbadac95220ab497af"><td class="memItemLeft" align="right" valign="top"><a id="a8e8785d26544c9dbadac95220ab497af" name="a8e8785d26544c9dbadac95220ab497af"></a>
-static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:a8e8785d26544c9dbadac95220ab497af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use static variant of singleton, no dynamic memory allocation. <br /></td></tr>
+<tr class="memitem:a8e8785d26544c9dbadac95220ab497af"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a8e8785d26544c9dbadac95220ab497af">getInstance</a> ()</td></tr>
+<tr class="memdesc:a8e8785d26544c9dbadac95220ab497af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use static variant of singleton, no dynamic memory allocation.  <a href="classADC.html#a8e8785d26544c9dbadac95220ab497af">More...</a><br /></td></tr>
 <tr class="separator:a8e8785d26544c9dbadac95220ab497af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a60b6e21403b1f30984f63832c0562960"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a60b6e21403b1f30984f63832c0562960">ADC</a> ()</td></tr>
+<tr class="memdesc:a60b6e21403b1f30984f63832c0562960"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classADC.html#a60b6e21403b1f30984f63832c0562960">More...</a><br /></td></tr>
+<tr class="separator:a60b6e21403b1f30984f63832c0562960"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a136b909f6ad346774d741eb0578a469c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a136b909f6ad346774d741eb0578a469c">ADC</a> (<a class="el" href="classADC.html">ADC</a> const &amp;)</td></tr>
+<tr class="separator:a136b909f6ad346774d741eb0578a469c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fe651b0ad90fbccb8d75a56ed24fef1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a9fe651b0ad90fbccb8d75a56ed24fef1">operator=</a> (<a class="el" href="classADC.html">ADC</a> const &amp;)</td></tr>
+<tr class="separator:a9fe651b0ad90fbccb8d75a56ed24fef1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeaae48e665a1db6817c092f4f0880fc9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#aeaae48e665a1db6817c092f4f0880fc9">dataCallbackRegistered</a> ()</td></tr>
+<tr class="separator:aeaae48e665a1db6817c092f4f0880fc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3903c3f9544254b8648e1ae1e13b3562"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a3903c3f9544254b8648e1ae1e13b3562">initSaadc</a> ()</td></tr>
+<tr class="separator:a3903c3f9544254b8648e1ae1e13b3562"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4758d21faada07a8da4a4695b8dbdb05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a4758d21faada07a8da4a4695b8dbdb05">initChannel</a> (<a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channel, <a class="el" href="structadc__channel__config__t.html">adc_channel_config_t</a> &amp;config)</td></tr>
+<tr class="memdesc:a4758d21faada07a8da4a4695b8dbdb05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure a channel.  <a href="classADC.html#a4758d21faada07a8da4a4695b8dbdb05">More...</a><br /></td></tr>
+<tr class="separator:a4758d21faada07a8da4a4695b8dbdb05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b94f4fa760e7504d7510404c35b55ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a5b94f4fa760e7504d7510404c35b55ee">setLimitUp</a> ()</td></tr>
+<tr class="separator:a5b94f4fa760e7504d7510404c35b55ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a25d46e954cc183e7c6fddd9c1b9492"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a6a25d46e954cc183e7c6fddd9c1b9492">setLimitDown</a> ()</td></tr>
+<tr class="separator:a6a25d46e954cc183e7c6fddd9c1b9492"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb8acc2c4b2d5fbcedfeb75f0a2238d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#aeb8acc2c4b2d5fbcedfeb75f0a2238d3">initBufferQueue</a> ()</td></tr>
+<tr class="separator:aeb8acc2c4b2d5fbcedfeb75f0a2238d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61a5e21b5438cb9d8bf07a52d96b98e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a61a5e21b5438cb9d8bf07a52d96b98e9">fillSaadcQueue</a> ()</td></tr>
+<tr class="memdesc:a61a5e21b5438cb9d8bf07a52d96b98e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Try to add all queued buffers to the SAADC queue.  <a href="classADC.html#a61a5e21b5438cb9d8bf07a52d96b98e9">More...</a><br /></td></tr>
+<tr class="separator:a61a5e21b5438cb9d8bf07a52d96b98e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad79e5e1f4c557dda2fae387277116e59"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ad79e5e1f4c557dda2fae387277116e59">_fillSaadcQueue</a> (bool fromInterrupt)</td></tr>
+<tr class="memdesc:ad79e5e1f4c557dda2fae387277116e59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classADC.html#a61a5e21b5438cb9d8bf07a52d96b98e9" title="Try to add all queued buffers to the SAADC queue.">fillSaadcQueue()</a>, but without critical region enter/exit.  <a href="classADC.html#ad79e5e1f4c557dda2fae387277116e59">More...</a><br /></td></tr>
+<tr class="separator:ad79e5e1f4c557dda2fae387277116e59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc76acd8a45bcb581fcac83e01e03528"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#abc76acd8a45bcb581fcac83e01e03528">addBufferToSaadcQueue</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
+<tr class="memdesc:abc76acd8a45bcb581fcac83e01e03528"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts a buffer in the SAADC queue.  <a href="classADC.html#abc76acd8a45bcb581fcac83e01e03528">More...</a><br /></td></tr>
+<tr class="separator:abc76acd8a45bcb581fcac83e01e03528"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a064d3935e06ffb483c1933db75c2a4a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a064d3935e06ffb483c1933db75c2a4a1">_addBufferToSaadcQueue</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
+<tr class="memdesc:a064d3935e06ffb483c1933db75c2a4a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classADC.html#abc76acd8a45bcb581fcac83e01e03528" title="Puts a buffer in the SAADC queue.">addBufferToSaadcQueue()</a>, but without critical region enter/exit.  <a href="classADC.html#a064d3935e06ffb483c1933db75c2a4a1">More...</a><br /></td></tr>
+<tr class="separator:a064d3935e06ffb483c1933db75c2a4a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02d49423fc52a83ea43ff11bf6a9e79a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a02d49423fc52a83ea43ff11bf6a9e79a">enterCriticalRegion</a> ()</td></tr>
+<tr class="memdesc:a02d49423fc52a83ea43ff11bf6a9e79a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enter a region of code where variables are used that are also used in SAADC interrupts.  <a href="classADC.html#a02d49423fc52a83ea43ff11bf6a9e79a">More...</a><br /></td></tr>
+<tr class="separator:a02d49423fc52a83ea43ff11bf6a9e79a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a502c82493eecffc06d954d5095f456c4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a502c82493eecffc06d954d5095f456c4">exitCriticalRegion</a> ()</td></tr>
+<tr class="memdesc:a502c82493eecffc06d954d5095f456c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exit a region of code where variables are used that are also used in SAADC interrupts.  <a href="classADC.html#a502c82493eecffc06d954d5095f456c4">More...</a><br /></td></tr>
+<tr class="separator:a502c82493eecffc06d954d5095f456c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb7a4ce232edd9ba6b240e17a09c1388"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#abb7a4ce232edd9ba6b240e17a09c1388">printQueues</a> ()</td></tr>
+<tr class="separator:abb7a4ce232edd9ba6b240e17a09c1388"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ecc5f40294688c1902b4657f2e0ec03"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a0ecc5f40294688c1902b4657f2e0ec03">applyConfig</a> ()</td></tr>
+<tr class="separator:a0ecc5f40294688c1902b4657f2e0ec03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
+Static Private Member Functions</h2></td></tr>
+<tr class="memitem:aa3ff5ddad7303bb8b7e8d3846de6373f"><td class="memItemLeft" align="right" valign="top">static nrf_saadc_input_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#aa3ff5ddad7303bb8b7e8d3846de6373f">getAdcPin</a> (<a class="el" href="cs__Typedefs_8h.html#a8e07cb7ad92a516f06234ea591305752">adc_pin_id_t</a> pinNum)</td></tr>
+<tr class="separator:aa3ff5ddad7303bb8b7e8d3846de6373f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ac037a885f7482b47498291a52c4310"><td class="memItemLeft" align="right" valign="top">static nrf_ppi_channel_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a4ac037a885f7482b47498291a52c4310">getPpiChannel</a> (uint8_t index)</td></tr>
+<tr class="separator:a4ac037a885f7482b47498291a52c4310"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c89eab445478e351fc36f2fa525601a"><td class="memItemLeft" align="right" valign="top">static nrf_saadc_event_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a9c89eab445478e351fc36f2fa525601a">getLimitLowEvent</a> (<a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channel)</td></tr>
+<tr class="separator:a9c89eab445478e351fc36f2fa525601a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65fdc8ab367d4b55b6a3bd002e271d06"><td class="memItemLeft" align="right" valign="top">static nrf_saadc_event_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a65fdc8ab367d4b55b6a3bd002e271d06">getLimitHighEvent</a> (<a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channel)</td></tr>
+<tr class="separator:a65fdc8ab367d4b55b6a3bd002e271d06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7878be4c23b544cb025683f9ba432dc"><td class="memItemLeft" align="right" valign="top">static nrf_gpiote_tasks_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#af7878be4c23b544cb025683f9ba432dc">getGpioteTaskOut</a> (uint8_t index)</td></tr>
+<tr class="separator:af7878be4c23b544cb025683f9ba432dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a2ad1a5d1ee27d28271cb80b534c9678c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a2ad1a5d1ee27d28271cb80b534c9678c">_changeConfig</a> = false</td></tr>
+<tr class="memdesc:a2ad1a5d1ee27d28271cb80b534c9678c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not the config should be changed.  <a href="classADC.html#a2ad1a5d1ee27d28271cb80b534c9678c">More...</a><br /></td></tr>
+<tr class="separator:a2ad1a5d1ee27d28271cb80b534c9678c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad85105b74cfa8d0c505ce173c6953ab3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structadc__config__t.html">adc_config_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ad85105b74cfa8d0c505ce173c6953ab3">_config</a></td></tr>
+<tr class="memdesc:ad85105b74cfa8d0c505ce173c6953ab3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration of this class.  <a href="classADC.html#ad85105b74cfa8d0c505ce173c6953ab3">More...</a><br /></td></tr>
+<tr class="separator:ad85105b74cfa8d0c505ce173c6953ab3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec9a4fbaa0b8b69ae3abfb6a72b566a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structadc__channel__config__result__t.html">adc_channel_config_result_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#aec9a4fbaa0b8b69ae3abfb6a72b566a8">_channelResultConfigs</a> [<a class="el" href="cs__Config_8h.html#a6b59a7de2956b2f655a029b61ee19194">CS_ADC_NUM_CHANNELS</a>]</td></tr>
+<tr class="memdesc:aec9a4fbaa0b8b69ae3abfb6a72b566a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resulting configuration of this class.  <a href="classADC.html#aec9a4fbaa0b8b69ae3abfb6a72b566a8">More...</a><br /></td></tr>
+<tr class="separator:aec9a4fbaa0b8b69ae3abfb6a72b566a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae751c54c375b1175097c3e8c6b20536d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ae751c54c375b1175097c3e8c6b20536d">_bufSeqNr</a> = 1</td></tr>
+<tr class="memdesc:ae751c54c375b1175097c3e8c6b20536d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Buffer sequence number.  <a href="classADC.html#ae751c54c375b1175097c3e8c6b20536d">More...</a><br /></td></tr>
+<tr class="separator:ae751c54c375b1175097c3e8c6b20536d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec0767cad33556f544e9d1b2c656c69c"><td class="memItemLeft" align="right" valign="top">nrf_ppi_channel_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#aec0767cad33556f544e9d1b2c656c69c">_ppiChannelSample</a></td></tr>
+<tr class="memdesc:aec0767cad33556f544e9d1b2c656c69c"><td class="mdescLeft">&#160;</td><td class="mdescRight">PPI channel to sample each tick, and count these.  <a href="classADC.html#aec0767cad33556f544e9d1b2c656c69c">More...</a><br /></td></tr>
+<tr class="separator:aec0767cad33556f544e9d1b2c656c69c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6630138e579d96a9fe8de55d1d94630"><td class="memItemLeft" align="right" valign="top">nrf_ppi_channel_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#ae6630138e579d96a9fe8de55d1d94630">_ppiChannelStart</a></td></tr>
+<tr class="memdesc:ae6630138e579d96a9fe8de55d1d94630"><td class="mdescLeft">&#160;</td><td class="mdescRight">PPI channel used to start the SAADC on end event.  <a href="classADC.html#ae6630138e579d96a9fe8de55d1d94630">More...</a><br /></td></tr>
+<tr class="separator:ae6630138e579d96a9fe8de55d1d94630"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a639bd2e5e34df0f2b9d80f45e9cfdf36"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; <a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a639bd2e5e34df0f2b9d80f45e9cfdf36">_bufferQueue</a></td></tr>
+<tr class="memdesc:a639bd2e5e34df0f2b9d80f45e9cfdf36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queue of buffers that are free to be added to the SAADC queue.  <a href="classADC.html#a639bd2e5e34df0f2b9d80f45e9cfdf36">More...</a><br /></td></tr>
+<tr class="separator:a639bd2e5e34df0f2b9d80f45e9cfdf36"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6802d10a36da7d5d787b19ed0bcd33ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; <a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a6802d10a36da7d5d787b19ed0bcd33ad">_saadcBufferQueue</a></td></tr>
+<tr class="memdesc:a6802d10a36da7d5d787b19ed0bcd33ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keeps up which buffers that are queued in the SAADC peripheral.  <a href="classADC.html#a6802d10a36da7d5d787b19ed0bcd33ad">More...</a><br /></td></tr>
+<tr class="separator:a6802d10a36da7d5d787b19ed0bcd33ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a151b5f41582f25b56e0e964146a472fa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a151b5f41582f25b56e0e964146a472fa">_firstBuffer</a> = true</td></tr>
+<tr class="separator:a151b5f41582f25b56e0e964146a472fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01e9ff60805fdb90144b17b0255dcb0d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__ADC_8h.html#a2783ab2e29809bf0a50bc66c6fa8d3c6">adc_state_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a01e9ff60805fdb90144b17b0255dcb0d">_state</a> = <a class="el" href="cs__ADC_8h.html#a2783ab2e29809bf0a50bc66c6fa8d3c6a618306d7336575e80aa3d79865a52c2d">ADC_STATE_IDLE</a></td></tr>
+<tr class="separator:a01e9ff60805fdb90144b17b0255dcb0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adefbc549e8141a0419452e9f4a7bf3aa"><td class="memItemLeft" align="right" valign="top">volatile <a class="el" href="cs__ADC_8h.html#a8aa32c5d8d5495205e3534b709e92200">adc_saadc_state_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#adefbc549e8141a0419452e9f4a7bf3aa">_saadcState</a> = <a class="el" href="cs__ADC_8h.html#a8aa32c5d8d5495205e3534b709e92200a49646369d98b48bbe0eadd9ff5a82eb3">ADC_SAADC_STATE_IDLE</a></td></tr>
+<tr class="memdesc:adefbc549e8141a0419452e9f4a7bf3aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sate of the SAADC peripheral.  <a href="classADC.html#adefbc549e8141a0419452e9f4a7bf3aa">More...</a><br /></td></tr>
+<tr class="separator:adefbc549e8141a0419452e9f4a7bf3aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c4038f0b603b12a5abe6ca420d8f382"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__ADC_8h.html#aa372d606dcd60a8f453bda2315fc8b6e">adc_done_cb_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a8c4038f0b603b12a5abe6ca420d8f382">_doneCallback</a> = nullptr</td></tr>
+<tr class="separator:a8c4038f0b603b12a5abe6ca420d8f382"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98e44a8fbbe1f5227e8db72e5698834b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__ADC_8h.html#a0a6b343716196a222159a69c7badd740">adc_zero_crossing_cb_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a98e44a8fbbe1f5227e8db72e5698834b">_zeroCrossingCallback</a> = nullptr</td></tr>
+<tr class="memdesc:a98e44a8fbbe1f5227e8db72e5698834b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The zero crossing callback.  <a href="classADC.html#a98e44a8fbbe1f5227e8db72e5698834b">More...</a><br /></td></tr>
+<tr class="separator:a98e44a8fbbe1f5227e8db72e5698834b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19743d0c378605ea05786a67d56913a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a19743d0c378605ea05786a67d56913a9">_zeroCrossingChannel</a> = 0</td></tr>
+<tr class="memdesc:a19743d0c378605ea05786a67d56913a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">The channel which is checked for zero crossings.  <a href="classADC.html#a19743d0c378605ea05786a67d56913a9">More...</a><br /></td></tr>
+<tr class="separator:a19743d0c378605ea05786a67d56913a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb2c62a7156178bc1cd8e5a9d1568217"><td class="memItemLeft" align="right" valign="top">nrf_saadc_event_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#abb2c62a7156178bc1cd8e5a9d1568217">_eventLimitLow</a></td></tr>
+<tr class="memdesc:abb2c62a7156178bc1cd8e5a9d1568217"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache limit event.  <a href="classADC.html#abb2c62a7156178bc1cd8e5a9d1568217">More...</a><br /></td></tr>
+<tr class="separator:abb2c62a7156178bc1cd8e5a9d1568217"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12ef162a055d40e645514cd43a70b952"><td class="memItemLeft" align="right" valign="top">nrf_saadc_event_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a12ef162a055d40e645514cd43a70b952">_eventLimitHigh</a></td></tr>
+<tr class="memdesc:a12ef162a055d40e645514cd43a70b952"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache limit event.  <a href="classADC.html#a12ef162a055d40e645514cd43a70b952">More...</a><br /></td></tr>
+<tr class="separator:a12ef162a055d40e645514cd43a70b952"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c5f9d367a9a6a9839fbb71fa81f2afb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a8c5f9d367a9a6a9839fbb71fa81f2afb">_zeroCrossingEnabled</a> = false</td></tr>
+<tr class="memdesc:a8c5f9d367a9a6a9839fbb71fa81f2afb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up whether zero crossing is enabled.  <a href="classADC.html#a8c5f9d367a9a6a9839fbb71fa81f2afb">More...</a><br /></td></tr>
+<tr class="separator:a8c5f9d367a9a6a9839fbb71fa81f2afb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d51024c393e5deef0295410627d3bd8"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a8d51024c393e5deef0295410627d3bd8">_lastZeroCrossUpTime</a> = 0</td></tr>
+<tr class="memdesc:a8d51024c393e5deef0295410627d3bd8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classStore.html" title="A variable size storage utility for objects of type RecordType with absolute maximum MaxItemCount.">Store</a> the <a class="el" href="classRTC.html" title="Wrapper class for RTC functions.">RTC</a> timestamp of the last upwards zero crossing.  <a href="classADC.html#a8d51024c393e5deef0295410627d3bd8">More...</a><br /></td></tr>
+<tr class="separator:a8d51024c393e5deef0295410627d3bd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb12a17b9065a03dc606b474624f9606"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#acb12a17b9065a03dc606b474624f9606">_zeroValue</a> = 0</td></tr>
+<tr class="memdesc:acb12a17b9065a03dc606b474624f9606"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classStore.html" title="A variable size storage utility for objects of type RecordType with absolute maximum MaxItemCount.">Store</a> the zero value used to detect zero crossings.  <a href="classADC.html#acb12a17b9065a03dc606b474624f9606">More...</a><br /></td></tr>
+<tr class="separator:acb12a17b9065a03dc606b474624f9606"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bf1907d82f188057d0924e2d1c34129"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classADC.html#a9bf1907d82f188057d0924e2d1c34129">_criticalRegionEntered</a> = 0</td></tr>
+<tr class="memdesc:a9bf1907d82f188057d0924e2d1c34129"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up number of nested critical regions entered.  <a href="classADC.html#a9bf1907d82f188057d0924e2d1c34129">More...</a><br /></td></tr>
+<tr class="separator:a9bf1907d82f188057d0924e2d1c34129"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Analog-Digital conversion. </p>
@@ -200,7 +331,145 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
 <li>CS_ADC_MAX_PINS The maximum number of pins available for <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a>.</li>
 </ul>
 <p >The sequence of events can be found in the uml diagrams under docs. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a60b6e21403b1f30984f63832c0562960" name="a60b6e21403b1f30984f63832c0562960"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60b6e21403b1f30984f63832c0562960">&#9670;&#160;</a></span>ADC() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classADC.html">ADC::ADC</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor. </p>
+
+</div>
+</div>
+<a id="a136b909f6ad346774d741eb0578a469c" name="a136b909f6ad346774d741eb0578a469c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a136b909f6ad346774d741eb0578a469c">&#9670;&#160;</a></span>ADC() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classADC.html">ADC::ADC</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classADC.html">ADC</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a064d3935e06ffb483c1933db75c2a4a1" name="a064d3935e06ffb483c1933db75c2a4a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a064d3935e06ffb483c1933db75c2a4a1">&#9670;&#160;</a></span>_addBufferToSaadcQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ADC::_addBufferToSaadcQueue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Same as <a class="el" href="classADC.html#abc76acd8a45bcb581fcac83e01e03528" title="Puts a buffer in the SAADC queue.">addBufferToSaadcQueue()</a>, but without critical region enter/exit. </p>
+<p >== Called from interrupt! == </p>
+
+</div>
+</div>
+<a id="ad79e5e1f4c557dda2fae387277116e59" name="ad79e5e1f4c557dda2fae387277116e59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad79e5e1f4c557dda2fae387277116e59">&#9670;&#160;</a></span>_fillSaadcQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ADC::_fillSaadcQueue </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>fromInterrupt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Same as <a class="el" href="classADC.html#a61a5e21b5438cb9d8bf07a52d96b98e9" title="Try to add all queued buffers to the SAADC queue.">fillSaadcQueue()</a>, but without critical region enter/exit. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fromInterrupt</td><td>Whether this is called from an interrupt.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>== Called from interrupt! == </p>
+
+</div>
+</div>
+<a id="ad6d394f02a369789ed4e22e8f9a79319" name="ad6d394f02a369789ed4e22e8f9a79319"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6d394f02a369789ed4e22e8f9a79319">&#9670;&#160;</a></span>_handleAdcDone()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::_handleAdcDone </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Handle buffer, called in main thread. </p>
+
+</div>
+</div>
 <a id="aa5b610fa5e44a923612c59d3a1ef92b9" name="aa5b610fa5e44a923612c59d3a1ef92b9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa5b610fa5e44a923612c59d3a1ef92b9">&#9670;&#160;</a></span>_handleAdcInterrupt()</h2>
 
@@ -224,6 +493,105 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
 
 </div>
 </div>
+<a id="a3eda91590d8282a90a6717db296d0d5d" name="a3eda91590d8282a90a6717db296d0d5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3eda91590d8282a90a6717db296d0d5d">&#9670;&#160;</a></span>_handleAdcLimitInterrupt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::_handleAdcLimitInterrupt </td>
+          <td>(</td>
+          <td class="paramtype">nrf_saadc_limit_t&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Called when the sampled value is above upper limit, or below lower limit. </p>
+
+</div>
+</div>
+<a id="af4bace8a397f3743075c392ee105b8ca" name="af4bace8a397f3743075c392ee105b8ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4bace8a397f3743075c392ee105b8ca">&#9670;&#160;</a></span>_restart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::_restart </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Restart. </p>
+
+</div>
+</div>
+<a id="abc76acd8a45bcb581fcac83e01e03528" name="abc76acd8a45bcb581fcac83e01e03528"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc76acd8a45bcb581fcac83e01e03528">&#9670;&#160;</a></span>addBufferToSaadcQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ADC::addBufferToSaadcQueue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Puts a buffer in the SAADC queue. </p>
+<p >Starts the SAADC when it's idle. Waits (blocking) for the SAADC to be started to queue another buffer.</p>
+<dl class="section return"><dt>Returns</dt><dd><ul>
+<li>ERR_SUCCESS when the buffer is queued in the SAADC.</li>
+<li>ERR_NO_SPACE when there are already enough buffers queued in the SAADC, so the given buffer is not queued.</li>
+<li>Other return codes for failures, the given buffer is not queued. </li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+<a id="a0ecc5f40294688c1902b4657f2e0ec03" name="a0ecc5f40294688c1902b4657f2e0ec03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ecc5f40294688c1902b4657f2e0ec03">&#9670;&#160;</a></span>applyConfig()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::applyConfig </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ad1e71c99e67fa8fd4d3f5c3d8ec4785f" name="ad1e71c99e67fa8fd4d3f5c3d8ec4785f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad1e71c99e67fa8fd4d3f5c3d8ec4785f">&#9670;&#160;</a></span>changeChannel()</h2>
 
@@ -231,9 +599,9 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t ADC::changeChannel </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ADC::changeChannel </td>
           <td>(</td>
-          <td class="paramtype">adc_channel_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
           <td class="paramname"><em>channel</em>, </td>
         </tr>
         <tr>
@@ -263,6 +631,31 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
 
 </div>
 </div>
+<a id="aeaae48e665a1db6817c092f4f0880fc9" name="aeaae48e665a1db6817c092f4f0880fc9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeaae48e665a1db6817c092f4f0880fc9">&#9670;&#160;</a></span>dataCallbackRegistered()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ADC::dataCallbackRegistered </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a135077bdc3fda908484e90487a94f34b" name="a135077bdc3fda908484e90487a94f34b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a135077bdc3fda908484e90487a94f34b">&#9670;&#160;</a></span>enableZeroCrossingInterrupt()</h2>
 
@@ -272,7 +665,7 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
         <tr>
           <td class="memname">void ADC::enableZeroCrossingInterrupt </td>
           <td>(</td>
-          <td class="paramtype">adc_channel_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
           <td class="paramname"><em>channel</em>, </td>
         </tr>
         <tr>
@@ -297,6 +690,253 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a02d49423fc52a83ea43ff11bf6a9e79a" name="a02d49423fc52a83ea43ff11bf6a9e79a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02d49423fc52a83ea43ff11bf6a9e79a">&#9670;&#160;</a></span>enterCriticalRegion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::enterCriticalRegion </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enter a region of code where variables are used that are also used in SAADC interrupts. </p>
+<p >Make sure you exit once for each time you call enter. </p>
+
+</div>
+</div>
+<a id="a502c82493eecffc06d954d5095f456c4" name="a502c82493eecffc06d954d5095f456c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a502c82493eecffc06d954d5095f456c4">&#9670;&#160;</a></span>exitCriticalRegion()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::exitCriticalRegion </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Exit a region of code where variables are used that are also used in SAADC interrupts. </p>
+
+</div>
+</div>
+<a id="a61a5e21b5438cb9d8bf07a52d96b98e9" name="a61a5e21b5438cb9d8bf07a52d96b98e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61a5e21b5438cb9d8bf07a52d96b98e9">&#9670;&#160;</a></span>fillSaadcQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ADC::fillSaadcQueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Try to add all queued buffers to the SAADC queue. </p>
+<p >If the SAADC queue is now filled, stop the timeout timer.</p>
+<dl class="section return"><dt>Returns</dt><dd>ERR_SUCCESS when SAADC queue is full, and timeout timer has been stopped. </dd>
+<dd>
+ERR_WRONG_STATE when SAADC queue is not filled, and timeout timer has been stopped. </dd>
+<dd>
+ERR_NOT_FOUND when the SAADC queue is not full, and timeout timer has not been stopped. </dd>
+<dd>
+Other return codes on failure. </dd></dl>
+
+</div>
+</div>
+<a id="aa3ff5ddad7303bb8b7e8d3846de6373f" name="aa3ff5ddad7303bb8b7e8d3846de6373f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3ff5ddad7303bb8b7e8d3846de6373f">&#9670;&#160;</a></span>getAdcPin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static nrf_saadc_input_t ADC::getAdcPin </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e07cb7ad92a516f06234ea591305752">adc_pin_id_t</a>&#160;</td>
+          <td class="paramname"><em>pinNum</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af7878be4c23b544cb025683f9ba432dc" name="af7878be4c23b544cb025683f9ba432dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7878be4c23b544cb025683f9ba432dc">&#9670;&#160;</a></span>getGpioteTaskOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static nrf_gpiote_tasks_t ADC::getGpioteTaskOut </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8e8785d26544c9dbadac95220ab497af" name="a8e8785d26544c9dbadac95220ab497af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e8785d26544c9dbadac95220ab497af">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classADC.html">ADC</a> &amp; ADC::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Use static variant of singleton, no dynamic memory allocation. </p>
+
+</div>
+</div>
+<a id="a65fdc8ab367d4b55b6a3bd002e271d06" name="a65fdc8ab367d4b55b6a3bd002e271d06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65fdc8ab367d4b55b6a3bd002e271d06">&#9670;&#160;</a></span>getLimitHighEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static nrf_saadc_event_t ADC::getLimitHighEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
+          <td class="paramname"><em>channel</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9c89eab445478e351fc36f2fa525601a" name="a9c89eab445478e351fc36f2fa525601a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c89eab445478e351fc36f2fa525601a">&#9670;&#160;</a></span>getLimitLowEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static nrf_saadc_event_t ADC::getLimitLowEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
+          <td class="paramname"><em>channel</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4ac037a885f7482b47498291a52c4310" name="a4ac037a885f7482b47498291a52c4310"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ac037a885f7482b47498291a52c4310">&#9670;&#160;</a></span>getPpiChannel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static nrf_ppi_channel_t ADC::getPpiChannel </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -338,7 +978,7 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t ADC::init </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ADC::init </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structadc__config__t.html">adc_config_t</a> &amp;&#160;</td>
           <td class="paramname"><em>config</em></td><td>)</td>
@@ -358,6 +998,153 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
 
 </div>
 </div>
+<a id="aeb8acc2c4b2d5fbcedfeb75f0a2238d3" name="aeb8acc2c4b2d5fbcedfeb75f0a2238d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb8acc2c4b2d5fbcedfeb75f0a2238d3">&#9670;&#160;</a></span>initBufferQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ADC::initBufferQueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4758d21faada07a8da4a4695b8dbdb05" name="a4758d21faada07a8da4a4695b8dbdb05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4758d21faada07a8da4a4695b8dbdb05">&#9670;&#160;</a></span>initChannel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ADC::initChannel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
+          <td class="paramname"><em>channel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structadc__channel__config__t.html">adc_channel_config_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>config</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Configure a channel. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">channel</td><td>Channel number. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>The channel config. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Return code. </dd></dl>
+
+</div>
+</div>
+<a id="a3903c3f9544254b8648e1ae1e13b3562" name="a3903c3f9544254b8648e1ae1e13b3562"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3903c3f9544254b8648e1ae1e13b3562">&#9670;&#160;</a></span>initSaadc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> ADC::initSaadc </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9fe651b0ad90fbccb8d75a56ed24fef1" name="a9fe651b0ad90fbccb8d75a56ed24fef1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fe651b0ad90fbccb8d75a56ed24fef1">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classADC.html">ADC</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abb7a4ce232edd9ba6b240e17a09c1388" name="abb7a4ce232edd9ba6b240e17a09c1388"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb7a4ce232edd9ba6b240e17a09c1388">&#9670;&#160;</a></span>printQueues()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::printQueues </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a7f2a9a7bd30cc52ae89857573ebd8be0" name="a7f2a9a7bd30cc52ae89857573ebd8be0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7f2a9a7bd30cc52ae89857573ebd8be0">&#9670;&#160;</a></span>setDoneCallback()</h2>
 
@@ -367,7 +1154,7 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
         <tr>
           <td class="memname">void ADC::setDoneCallback </td>
           <td>(</td>
-          <td class="paramtype">adc_done_cb_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__ADC_8h.html#aa372d606dcd60a8f453bda2315fc8b6e">adc_done_cb_t</a>&#160;</td>
           <td class="paramname"><em>callback</em></td><td>)</td>
           <td></td>
         </tr>
@@ -384,6 +1171,56 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
 
 </div>
 </div>
+<a id="a6a25d46e954cc183e7c6fddd9c1b9492" name="a6a25d46e954cc183e7c6fddd9c1b9492"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a25d46e954cc183e7c6fddd9c1b9492">&#9670;&#160;</a></span>setLimitDown()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::setLimitDown </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5b94f4fa760e7504d7510404c35b55ee" name="a5b94f4fa760e7504d7510404c35b55ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b94f4fa760e7504d7510404c35b55ee">&#9670;&#160;</a></span>setLimitUp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::setLimitUp </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a5bb4f20e32687098ec4d99b76c473b17" name="a5bb4f20e32687098ec4d99b76c473b17"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5bb4f20e32687098ec4d99b76c473b17">&#9670;&#160;</a></span>setZeroCrossingCallback()</h2>
 
@@ -393,7 +1230,7 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
         <tr>
           <td class="memname">void ADC::setZeroCrossingCallback </td>
           <td>(</td>
-          <td class="paramtype">adc_zero_crossing_cb_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__ADC_8h.html#a0a6b343716196a222159a69c7badd740">adc_zero_crossing_cb_t</a>&#160;</td>
           <td class="paramname"><em>callback</em></td><td>)</td>
           <td></td>
         </tr>
@@ -408,6 +1245,536 @@ static <a class="el" href="classADC.html">ADC</a> &amp;&#160;</td><td class="mem
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a77afa039c73f7e50d04fe64e8e79d412" name="a77afa039c73f7e50d04fe64e8e79d412"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77afa039c73f7e50d04fe64e8e79d412">&#9670;&#160;</a></span>start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::start </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Start the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> sampling. </p>
+
+</div>
+</div>
+<a id="af92b34ed7a2ed66b1da7858a58faf140" name="af92b34ed7a2ed66b1da7858a58faf140"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af92b34ed7a2ed66b1da7858a58faf140">&#9670;&#160;</a></span>stop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ADC::stop </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Stop the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> sampling Only to be called from main thread. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a639bd2e5e34df0f2b9d80f45e9cfdf36" name="a639bd2e5e34df0f2b9d80f45e9cfdf36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a639bd2e5e34df0f2b9d80f45e9cfdf36">&#9670;&#160;</a></span>_bufferQueue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt;<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&gt; ADC::_bufferQueue</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Queue of buffers that are free to be added to the SAADC queue. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="ae751c54c375b1175097c3e8c6b20536d" name="ae751c54c375b1175097c3e8c6b20536d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae751c54c375b1175097c3e8c6b20536d">&#9670;&#160;</a></span>_bufSeqNr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a> ADC::_bufSeqNr = 1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Buffer sequence number. </p>
+<p >Increased each time a buffer is fully sampled. </p>
+
+</div>
+</div>
+<a id="a2ad1a5d1ee27d28271cb80b534c9678c" name="a2ad1a5d1ee27d28271cb80b534c9678c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ad1a5d1ee27d28271cb80b534c9678c">&#9670;&#160;</a></span>_changeConfig</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ADC::_changeConfig = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether or not the config should be changed. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="aec9a4fbaa0b8b69ae3abfb6a72b566a8" name="aec9a4fbaa0b8b69ae3abfb6a72b566a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec9a4fbaa0b8b69ae3abfb6a72b566a8">&#9670;&#160;</a></span>_channelResultConfigs</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structadc__channel__config__result__t.html">adc_channel_config_result_t</a> ADC::_channelResultConfigs[<a class="el" href="cs__Config_8h.html#a6b59a7de2956b2f655a029b61ee19194">CS_ADC_NUM_CHANNELS</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Resulting configuration of this class. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="ad85105b74cfa8d0c505ce173c6953ab3" name="ad85105b74cfa8d0c505ce173c6953ab3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad85105b74cfa8d0c505ce173c6953ab3">&#9670;&#160;</a></span>_config</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structadc__config__t.html">adc_config_t</a> ADC::_config</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Configuration of this class. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="a9bf1907d82f188057d0924e2d1c34129" name="a9bf1907d82f188057d0924e2d1c34129"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9bf1907d82f188057d0924e2d1c34129">&#9670;&#160;</a></span>_criticalRegionEntered</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ADC::_criticalRegionEntered = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up number of nested critical regions entered. </p>
+
+</div>
+</div>
+<a id="a8c4038f0b603b12a5abe6ca420d8f382" name="a8c4038f0b603b12a5abe6ca420d8f382"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c4038f0b603b12a5abe6ca420d8f382">&#9670;&#160;</a></span>_doneCallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__ADC_8h.html#aa372d606dcd60a8f453bda2315fc8b6e">adc_done_cb_t</a> ADC::_doneCallback = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a12ef162a055d40e645514cd43a70b952" name="a12ef162a055d40e645514cd43a70b952"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12ef162a055d40e645514cd43a70b952">&#9670;&#160;</a></span>_eventLimitHigh</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">nrf_saadc_event_t ADC::_eventLimitHigh</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache limit event. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="abb2c62a7156178bc1cd8e5a9d1568217" name="abb2c62a7156178bc1cd8e5a9d1568217"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb2c62a7156178bc1cd8e5a9d1568217">&#9670;&#160;</a></span>_eventLimitLow</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">nrf_saadc_event_t ADC::_eventLimitLow</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Cache limit event. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="a151b5f41582f25b56e0e964146a472fa" name="a151b5f41582f25b56e0e964146a472fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a151b5f41582f25b56e0e964146a472fa">&#9670;&#160;</a></span>_firstBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ADC::_firstBuffer = true</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8d51024c393e5deef0295410627d3bd8" name="a8d51024c393e5deef0295410627d3bd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d51024c393e5deef0295410627d3bd8">&#9670;&#160;</a></span>_lastZeroCrossUpTime</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ADC::_lastZeroCrossUpTime = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classStore.html" title="A variable size storage utility for objects of type RecordType with absolute maximum MaxItemCount.">Store</a> the <a class="el" href="classRTC.html" title="Wrapper class for RTC functions.">RTC</a> timestamp of the last upwards zero crossing. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="aec0767cad33556f544e9d1b2c656c69c" name="aec0767cad33556f544e9d1b2c656c69c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec0767cad33556f544e9d1b2c656c69c">&#9670;&#160;</a></span>_ppiChannelSample</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">nrf_ppi_channel_t ADC::_ppiChannelSample</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>PPI channel to sample each tick, and count these. </p>
+<p >Sample timer event COMPARE -&gt; SAADC task SAMPLE -&gt; Toggle sample test pin </p>
+
+</div>
+</div>
+<a id="ae6630138e579d96a9fe8de55d1d94630" name="ae6630138e579d96a9fe8de55d1d94630"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6630138e579d96a9fe8de55d1d94630">&#9670;&#160;</a></span>_ppiChannelStart</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">nrf_ppi_channel_t ADC::_ppiChannelStart</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>PPI channel used to start the SAADC on end event. </p>
+<p >SAADC event END -&gt; SAADC task START </p>
+
+</div>
+</div>
+<a id="a6802d10a36da7d5d787b19ed0bcd33ad" name="a6802d10a36da7d5d787b19ed0bcd33ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6802d10a36da7d5d787b19ed0bcd33ad">&#9670;&#160;</a></span>_saadcBufferQueue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt;<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&gt; ADC::_saadcBufferQueue</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keeps up which buffers that are queued in the SAADC peripheral. </p>
+<p >First buffer in queue is the one currently being (or going to be) filled with samples.</p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="adefbc549e8141a0419452e9f4a7bf3aa" name="adefbc549e8141a0419452e9f4a7bf3aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adefbc549e8141a0419452e9f4a7bf3aa">&#9670;&#160;</a></span>_saadcState</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">volatile <a class="el" href="cs__ADC_8h.html#a8aa32c5d8d5495205e3534b709e92200">adc_saadc_state_t</a> ADC::_saadcState = <a class="el" href="cs__ADC_8h.html#a8aa32c5d8d5495205e3534b709e92200a49646369d98b48bbe0eadd9ff5a82eb3">ADC_SAADC_STATE_IDLE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Sate of the SAADC peripheral. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="a01e9ff60805fdb90144b17b0255dcb0d" name="a01e9ff60805fdb90144b17b0255dcb0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01e9ff60805fdb90144b17b0255dcb0d">&#9670;&#160;</a></span>_state</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__ADC_8h.html#a2783ab2e29809bf0a50bc66c6fa8d3c6">adc_state_t</a> ADC::_state = <a class="el" href="cs__ADC_8h.html#a2783ab2e29809bf0a50bc66c6fa8d3c6a618306d7336575e80aa3d79865a52c2d">ADC_STATE_IDLE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a98e44a8fbbe1f5227e8db72e5698834b" name="a98e44a8fbbe1f5227e8db72e5698834b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98e44a8fbbe1f5227e8db72e5698834b">&#9670;&#160;</a></span>_zeroCrossingCallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__ADC_8h.html#a0a6b343716196a222159a69c7badd740">adc_zero_crossing_cb_t</a> ADC::_zeroCrossingCallback = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The zero crossing callback. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="a19743d0c378605ea05786a67d56913a9" name="a19743d0c378605ea05786a67d56913a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19743d0c378605ea05786a67d56913a9">&#9670;&#160;</a></span>_zeroCrossingChannel</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> ADC::_zeroCrossingChannel = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The channel which is checked for zero crossings. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="a8c5f9d367a9a6a9839fbb71fa81f2afb" name="a8c5f9d367a9a6a9839fbb71fa81f2afb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c5f9d367a9a6a9839fbb71fa81f2afb">&#9670;&#160;</a></span>_zeroCrossingEnabled</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ADC::_zeroCrossingEnabled = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up whether zero crossing is enabled. </p>
+<p >== Used in interrupt! == </p>
+
+</div>
+</div>
+<a id="acb12a17b9065a03dc606b474624f9606" name="acb12a17b9065a03dc606b474624f9606"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb12a17b9065a03dc606b474624f9606">&#9670;&#160;</a></span>_zeroValue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t ADC::_zeroValue = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classStore.html" title="A variable size storage utility for objects of type RecordType with absolute maximum MaxItemCount.">Store</a> the zero value used to detect zero crossings. </p>
+<p >== Used in interrupt! == </p>
 
 </div>
 </div>

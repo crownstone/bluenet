@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['csutils_0',['CsUtils',['../namespaceCsUtils.html',1,'']]]
+  ['csmath_0',['CsMath',['../namespaceCsMath.html',1,'']]],
+  ['csutils_1',['CsUtils',['../namespaceCsUtils.html',1,'']]]
 ];

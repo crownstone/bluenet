@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['basic_0',['BASIC',['../cs__Packets_8h.html#a02ea136d6e51f1919a88288b758c8756a13c45196813cb44e6e81e9c48a5ec1b4',1,'cs_Packets.h']]],
+  ['bg_5fadv_5fflag_5fignore_5ffor_5fpresence_1',['BG_ADV_FLAG_IGNORE_FOR_PRESENCE',['../cs__Packets_8h.html#afd318316a175efd2ae449e3997665ddca51b246f2e43c60560c3b59efab7129ab',1,'cs_Packets.h']]],
+  ['bg_5fadv_5fflag_5freserved_2',['BG_ADV_FLAG_RESERVED',['../cs__Packets_8h.html#afd318316a175efd2ae449e3997665ddca668ddc66f5dba603937d38a9c43ef0df',1,'cs_Packets.h']]],
+  ['bg_5fadv_5fflag_5ftap_5fto_5ftoggle_5fenabled_3',['BG_ADV_FLAG_TAP_TO_TOGGLE_ENABLED',['../cs__Packets_8h.html#afd318316a175efd2ae449e3997665ddca4bf88ffff26fceda9fd64ee5b3b767dd',1,'cs_Packets.h']]],
+  ['bit_5fpos_5faccess_5flevel_4',['BIT_POS_ACCESS_LEVEL',['../cs__TrackedDevice_8h.html#aae14a8c47157c206a471c90cbb26d500a51aceb5a3920afa91f7b23c49e2c03cf',1,'cs_TrackedDevice.h']]],
+  ['bit_5fpos_5fdevice_5ftoken_5',['BIT_POS_DEVICE_TOKEN',['../cs__TrackedDevice_8h.html#aae14a8c47157c206a471c90cbb26d500a4d6c9d03fd6bca71158f15c4089b2b4b',1,'cs_TrackedDevice.h']]],
+  ['bit_5fpos_5fflags_6',['BIT_POS_FLAGS',['../cs__TrackedDevice_8h.html#aae14a8c47157c206a471c90cbb26d500aaad572bbd8b3038cdbe9f93686b484fd',1,'cs_TrackedDevice.h']]],
+  ['bit_5fpos_5flocation_7',['BIT_POS_LOCATION',['../cs__TrackedDevice_8h.html#aae14a8c47157c206a471c90cbb26d500a8977a65fece8f74b77b4d46df03916de',1,'cs_TrackedDevice.h']]],
+  ['bit_5fpos_5fprofile_8',['BIT_POS_PROFILE',['../cs__TrackedDevice_8h.html#aae14a8c47157c206a471c90cbb26d500a4ab4d51c6ebccc306df280a541dfa847',1,'cs_TrackedDevice.h']]],
+  ['bit_5fpos_5frssi_5foffset_9',['BIT_POS_RSSI_OFFSET',['../cs__TrackedDevice_8h.html#aae14a8c47157c206a471c90cbb26d500a886cdf98d6f1388b9b405323c8f8e477',1,'cs_TrackedDevice.h']]],
+  ['bit_5fpos_5fttl_10',['BIT_POS_TTL',['../cs__TrackedDevice_8h.html#aae14a8c47157c206a471c90cbb26d500a524a2417898ee2c752238fde5d5e2dff',1,'cs_TrackedDevice.h']]],
+  ['button0_11',['BUTTON0',['../cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aaca434a9ffaf13a68c3f80598545c267974',1,'cs_Boards.h']]],
+  ['button1_12',['BUTTON1',['../cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aacaa9b981eb5c922bb8a465ed598570326e',1,'cs_Boards.h']]],
+  ['button2_13',['BUTTON2',['../cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aacab4847e21b0ec42aa5494cfca68e0fd7d',1,'cs_Boards.h']]],
+  ['button3_14',['BUTTON3',['../cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aacab54d1da4e24832ef82c095b0a77b5cb9',1,'cs_Boards.h']]],
+  ['button_5fcount_15',['BUTTON_COUNT',['../cs__Boards_8h.html#a2a5fd61108d6b9e3b6eac1aa53dd3aaca5eced1b61300568bf3ad61ebe3d7b3d8',1,'cs_Boards.h']]]
+];

@@ -111,17 +111,44 @@ $(document).ready(function(){initNavTree('structibeacon__config__id__packet__t.h
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a2a35cab6b2ea66aef83370d9593996aa"><td class="memItemLeft" align="right" valign="top"><a id="a2a35cab6b2ea66aef83370d9593996aa" name="a2a35cab6b2ea66aef83370d9593996aa"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>timestamp</b> = 0</td></tr>
+<tr class="memitem:a2a35cab6b2ea66aef83370d9593996aa"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structibeacon__config__id__packet__t.html#a2a35cab6b2ea66aef83370d9593996aa">timestamp</a> = 0</td></tr>
 <tr class="separator:a2a35cab6b2ea66aef83370d9593996aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a533b8af43b08a8bb91df14c10f785f30"><td class="memItemLeft" align="right" valign="top"><a id="a533b8af43b08a8bb91df14c10f785f30" name="a533b8af43b08a8bb91df14c10f785f30"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>interval</b> = 0</td></tr>
+<tr class="memitem:a533b8af43b08a8bb91df14c10f785f30"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structibeacon__config__id__packet__t.html#a533b8af43b08a8bb91df14c10f785f30">interval</a> = 0</td></tr>
 <tr class="separator:a533b8af43b08a8bb91df14c10f785f30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Packet to change ibeacon config ID. </p>
 <p >Timestamp: when to set the ID for the first time. Interval: set ID every N seconds after timestamp. Set interval = 0 to execute only once. Set timestamp = 0, and interval = 0 to execute now. A stored entry with timestamp = 0 and interval = 0, will be considered empty. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a533b8af43b08a8bb91df14c10f785f30" name="a533b8af43b08a8bb91df14c10f785f30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a533b8af43b08a8bb91df14c10f785f30">&#9670;&#160;</a></span>interval</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t ibeacon_config_id_packet_t::interval = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2a35cab6b2ea66aef83370d9593996aa" name="a2a35cab6b2ea66aef83370d9593996aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a35cab6b2ea66aef83370d9593996aa">&#9670;&#160;</a></span>timestamp</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t ibeacon_config_id_packet_t::timestamp = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>source/include/protocol/<a class="el" href="cs__Packets_8h_source.html">cs_Packets.h</a></li>
 </ul>
 </div><!-- contents -->

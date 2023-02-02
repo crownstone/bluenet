@@ -100,10 +100,14 @@ $(document).ready(function(){initNavTree('classFactoryReset.html',''); initResiz
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classFactoryReset-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">FactoryReset Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__FactoryReset_8h_source.html">cs_FactoryReset.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for FactoryReset:</div>
 <div class="dyncontent">
@@ -125,51 +129,184 @@ Collaboration diagram for FactoryReset:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a2289a098443c0c84c71e731e9406c92c"><td class="memItemLeft" align="right" valign="top"><a id="a2289a098443c0c84c71e731e9406c92c" name="a2289a098443c0c84c71e731e9406c92c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
+<tr class="memitem:a2289a098443c0c84c71e731e9406c92c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a2289a098443c0c84c71e731e9406c92c">init</a> ()</td></tr>
 <tr class="separator:a2289a098443c0c84c71e731e9406c92c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d0ee728b4b8f222986d3c1c55edb6e7"><td class="memItemLeft" align="right" valign="top"><a id="a8d0ee728b4b8f222986d3c1c55edb6e7" name="a8d0ee728b4b8f222986d3c1c55edb6e7"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>recover</b> (uint32_t resetCode)</td></tr>
+<tr class="memitem:a8d0ee728b4b8f222986d3c1c55edb6e7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a8d0ee728b4b8f222986d3c1c55edb6e7">recover</a> (uint32_t resetCode)</td></tr>
 <tr class="separator:a8d0ee728b4b8f222986d3c1c55edb6e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aacb26d083a87c5e4c2b2444f7cdd3c11"><td class="memItemLeft" align="right" valign="top"><a id="aacb26d083a87c5e4c2b2444f7cdd3c11" name="aacb26d083a87c5e4c2b2444f7cdd3c11"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>factoryReset</b> (uint32_t resetCode)</td></tr>
+<tr class="memitem:aacb26d083a87c5e4c2b2444f7cdd3c11"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#aacb26d083a87c5e4c2b2444f7cdd3c11">factoryReset</a> (uint32_t resetCode)</td></tr>
 <tr class="separator:aacb26d083a87c5e4c2b2444f7cdd3c11"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af05a5403958ca0c2e70ca25207e9b41c"><td class="memItemLeft" align="right" valign="top"><a id="af05a5403958ca0c2e70ca25207e9b41c" name="af05a5403958ca0c2e70ca25207e9b41c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>finishFactoryReset</b> (uint8_t deviceType)</td></tr>
+<tr class="memitem:af05a5403958ca0c2e70ca25207e9b41c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#af05a5403958ca0c2e70ca25207e9b41c">finishFactoryReset</a> (uint8_t deviceType)</td></tr>
 <tr class="separator:af05a5403958ca0c2e70ca25207e9b41c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a810d56ee255c55c8497064f355c1c5b8"><td class="memItemLeft" align="right" valign="top"><a id="a810d56ee255c55c8497064f355c1c5b8" name="a810d56ee255c55c8497064f355c1c5b8"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>enableRecovery</b> (bool enable)</td></tr>
+<tr class="memitem:a810d56ee255c55c8497064f355c1c5b8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a810d56ee255c55c8497064f355c1c5b8">enableRecovery</a> (bool enable)</td></tr>
 <tr class="separator:a810d56ee255c55c8497064f355c1c5b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e9b6a015fb3a12c91eba2fcec4d6520"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a5e9b6a015fb3a12c91eba2fcec4d6520">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:a5e9b6a015fb3a12c91eba2fcec4d6520"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classFactoryReset.html#a5e9b6a015fb3a12c91eba2fcec4d6520">More...</a><br /></td></tr>
 <tr class="separator:a5e9b6a015fb3a12c91eba2fcec4d6520"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aedd47654ae5d10e4926b56894205ddf2"><td class="memItemLeft" align="right" valign="top"><a id="aedd47654ae5d10e4926b56894205ddf2" name="aedd47654ae5d10e4926b56894205ddf2"></a>
-static <a class="el" href="classFactoryReset.html">FactoryReset</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:aedd47654ae5d10e4926b56894205ddf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) <br /></td></tr>
+<tr class="memitem:aedd47654ae5d10e4926b56894205ddf2"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classFactoryReset.html">FactoryReset</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#aedd47654ae5d10e4926b56894205ddf2">getInstance</a> ()</td></tr>
+<tr class="memdesc:aedd47654ae5d10e4926b56894205ddf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation)  <a href="classFactoryReset.html#aedd47654ae5d10e4926b56894205ddf2">More...</a><br /></td></tr>
 <tr class="separator:aedd47654ae5d10e4926b56894205ddf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9199eabe308692a434e5a10473db488d"><td class="memItemLeft" align="right" valign="top"><a id="a9199eabe308692a434e5a10473db488d" name="a9199eabe308692a434e5a10473db488d"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticTimeout</b> (<a class="el" href="classFactoryReset.html">FactoryReset</a> *ptr)</td></tr>
+<tr class="memitem:a9199eabe308692a434e5a10473db488d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a9199eabe308692a434e5a10473db488d">staticTimeout</a> (<a class="el" href="classFactoryReset.html">FactoryReset</a> *ptr)</td></tr>
 <tr class="separator:a9199eabe308692a434e5a10473db488d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf2784991600873fea9d662b27290db4"><td class="memItemLeft" align="right" valign="top"><a id="adf2784991600873fea9d662b27290db4" name="adf2784991600873fea9d662b27290db4"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticProcess</b> (<a class="el" href="classFactoryReset.html">FactoryReset</a> *ptr)</td></tr>
+<tr class="memitem:adf2784991600873fea9d662b27290db4"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#adf2784991600873fea9d662b27290db4">staticProcess</a> (<a class="el" href="classFactoryReset.html">FactoryReset</a> *ptr)</td></tr>
 <tr class="separator:adf2784991600873fea9d662b27290db4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ab534ad13fc2024ce5dcb4d47b8993c2b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#ab534ad13fc2024ce5dcb4d47b8993c2b">FactoryReset</a> ()</td></tr>
+<tr class="separator:ab534ad13fc2024ce5dcb4d47b8993c2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81fd58d27b97397974221db3812e697a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a81fd58d27b97397974221db3812e697a">validateResetCode</a> (uint32_t resetCode)</td></tr>
+<tr class="separator:a81fd58d27b97397974221db3812e697a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af91b2d15dc406a49d986acf7ad8e5d41"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#af91b2d15dc406a49d986acf7ad8e5d41">performFactoryReset</a> ()</td></tr>
+<tr class="separator:af91b2d15dc406a49d986acf7ad8e5d41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30f7fde121fdb8522257555db299c708"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a30f7fde121fdb8522257555db299c708">resetTimeout</a> ()</td></tr>
+<tr class="separator:a30f7fde121fdb8522257555db299c708"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addd5fea5ceb803edb06861931411da6e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#addd5fea5ceb803edb06861931411da6e">timeout</a> ()</td></tr>
+<tr class="separator:addd5fea5ceb803edb06861931411da6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b529497e8ca04f03524fbc068a43bc8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a7b529497e8ca04f03524fbc068a43bc8">process</a> ()</td></tr>
+<tr class="separator:a7b529497e8ca04f03524fbc068a43bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37943bbf77a12c16364242d8f91a58f2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a37943bbf77a12c16364242d8f91a58f2">onClassFactoryResetDone</a> (const <a class="el" href="cs__FactoryReset_8h.html#a68b2551a9dd1d23470c83c353180d364">FactoryResetClassBit</a> bit)</td></tr>
+<tr class="separator:a37943bbf77a12c16364242d8f91a58f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a50edfbe4dbb8208b657b4bbccb961a7e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a50edfbe4dbb8208b657b4bbccb961a7e">_recoveryEnabled</a></td></tr>
+<tr class="separator:a50edfbe4dbb8208b657b4bbccb961a7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63d395719a9c7ea830e537450f0e1c58"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a63d395719a9c7ea830e537450f0e1c58">_rtcStartTime</a></td></tr>
+<tr class="separator:a63d395719a9c7ea830e537450f0e1c58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c4e7eccde030f46f295af6df6f3b2e8"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a6c4e7eccde030f46f295af6df6f3b2e8">_successfullyFactoryResetBitmask</a> = 0</td></tr>
+<tr class="separator:a6c4e7eccde030f46f295af6df6f3b2e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96d8d82e0853fa66e0b204e390275158"><td class="memItemLeft" align="right" valign="top">app_timer_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a96d8d82e0853fa66e0b204e390275158">_recoveryDisableTimerData</a></td></tr>
+<tr class="separator:a96d8d82e0853fa66e0b204e390275158"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6e636a05466a61ab70c4023315cc199"><td class="memItemLeft" align="right" valign="top">app_timer_id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#ad6e636a05466a61ab70c4023315cc199">_recoveryDisableTimerId</a></td></tr>
+<tr class="separator:ad6e636a05466a61ab70c4023315cc199"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae31fc8f83a1e038dbee24d87ec9e4888"><td class="memItemLeft" align="right" valign="top">app_timer_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#ae31fc8f83a1e038dbee24d87ec9e4888">_recoveryProcessTimerData</a></td></tr>
+<tr class="separator:ae31fc8f83a1e038dbee24d87ec9e4888"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a629f320561c736f524c6b33e46ac3847"><td class="memItemLeft" align="right" valign="top">app_timer_id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFactoryReset.html#a629f320561c736f524c6b33e46ac3847">_recoveryProcessTimerId</a></td></tr>
+<tr class="separator:a629f320561c736f524c6b33e46ac3847"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ab534ad13fc2024ce5dcb4d47b8993c2b" name="ab534ad13fc2024ce5dcb4d47b8993c2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab534ad13fc2024ce5dcb4d47b8993c2b">&#9670;&#160;</a></span>FactoryReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classFactoryReset.html">FactoryReset::FactoryReset</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a810d56ee255c55c8497064f355c1c5b8" name="a810d56ee255c55c8497064f355c1c5b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a810d56ee255c55c8497064f355c1c5b8">&#9670;&#160;</a></span>enableRecovery()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FactoryReset::enableRecovery </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>enable</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aacb26d083a87c5e4c2b2444f7cdd3c11" name="aacb26d083a87c5e4c2b2444f7cdd3c11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aacb26d083a87c5e4c2b2444f7cdd3c11">&#9670;&#160;</a></span>factoryReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool FactoryReset::factoryReset </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>resetCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af05a5403958ca0c2e70ca25207e9b41c" name="af05a5403958ca0c2e70ca25207e9b41c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af05a5403958ca0c2e70ca25207e9b41c">&#9670;&#160;</a></span>finishFactoryReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FactoryReset::finishFactoryReset </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>deviceType</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aedd47654ae5d10e4926b56894205ddf2" name="aedd47654ae5d10e4926b56894205ddf2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedd47654ae5d10e4926b56894205ddf2">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classFactoryReset.html">FactoryReset</a> &amp; FactoryReset::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets a static singleton (no dynamic memory allocation) </p>
+
+</div>
+</div>
 <a id="a5e9b6a015fb3a12c91eba2fcec4d6520" name="a5e9b6a015fb3a12c91eba2fcec4d6520"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5e9b6a015fb3a12c91eba2fcec4d6520">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -197,6 +334,400 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticProcess<
 <p>Handle events. </p>
 
 <p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="a2289a098443c0c84c71e731e9406c92c" name="a2289a098443c0c84c71e731e9406c92c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2289a098443c0c84c71e731e9406c92c">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FactoryReset::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a37943bbf77a12c16364242d8f91a58f2" name="a37943bbf77a12c16364242d8f91a58f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37943bbf77a12c16364242d8f91a58f2">&#9670;&#160;</a></span>onClassFactoryResetDone()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FactoryReset::onClassFactoryResetDone </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="cs__FactoryReset_8h.html#a68b2551a9dd1d23470c83c353180d364">FactoryResetClassBit</a>&#160;</td>
+          <td class="paramname"><em>bit</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af91b2d15dc406a49d986acf7ad8e5d41" name="af91b2d15dc406a49d986acf7ad8e5d41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af91b2d15dc406a49d986acf7ad8e5d41">&#9670;&#160;</a></span>performFactoryReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool FactoryReset::performFactoryReset </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7b529497e8ca04f03524fbc068a43bc8" name="a7b529497e8ca04f03524fbc068a43bc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b529497e8ca04f03524fbc068a43bc8">&#9670;&#160;</a></span>process()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FactoryReset::process </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8d0ee728b4b8f222986d3c1c55edb6e7" name="a8d0ee728b4b8f222986d3c1c55edb6e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8d0ee728b4b8f222986d3c1c55edb6e7">&#9670;&#160;</a></span>recover()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool FactoryReset::recover </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>resetCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a30f7fde121fdb8522257555db299c708" name="a30f7fde121fdb8522257555db299c708"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30f7fde121fdb8522257555db299c708">&#9670;&#160;</a></span>resetTimeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FactoryReset::resetTimeout </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adf2784991600873fea9d662b27290db4" name="adf2784991600873fea9d662b27290db4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf2784991600873fea9d662b27290db4">&#9670;&#160;</a></span>staticProcess()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void FactoryReset::staticProcess </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classFactoryReset.html">FactoryReset</a> *&#160;</td>
+          <td class="paramname"><em>ptr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9199eabe308692a434e5a10473db488d" name="a9199eabe308692a434e5a10473db488d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9199eabe308692a434e5a10473db488d">&#9670;&#160;</a></span>staticTimeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void FactoryReset::staticTimeout </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classFactoryReset.html">FactoryReset</a> *&#160;</td>
+          <td class="paramname"><em>ptr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="addd5fea5ceb803edb06861931411da6e" name="addd5fea5ceb803edb06861931411da6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addd5fea5ceb803edb06861931411da6e">&#9670;&#160;</a></span>timeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void FactoryReset::timeout </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a81fd58d27b97397974221db3812e697a" name="a81fd58d27b97397974221db3812e697a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81fd58d27b97397974221db3812e697a">&#9670;&#160;</a></span>validateResetCode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool FactoryReset::validateResetCode </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>resetCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a96d8d82e0853fa66e0b204e390275158" name="a96d8d82e0853fa66e0b204e390275158"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96d8d82e0853fa66e0b204e390275158">&#9670;&#160;</a></span>_recoveryDisableTimerData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_t FactoryReset::_recoveryDisableTimerData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad6e636a05466a61ab70c4023315cc199" name="ad6e636a05466a61ab70c4023315cc199"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6e636a05466a61ab70c4023315cc199">&#9670;&#160;</a></span>_recoveryDisableTimerId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_id_t FactoryReset::_recoveryDisableTimerId</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a50edfbe4dbb8208b657b4bbccb961a7e" name="a50edfbe4dbb8208b657b4bbccb961a7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50edfbe4dbb8208b657b4bbccb961a7e">&#9670;&#160;</a></span>_recoveryEnabled</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool FactoryReset::_recoveryEnabled</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae31fc8f83a1e038dbee24d87ec9e4888" name="ae31fc8f83a1e038dbee24d87ec9e4888"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae31fc8f83a1e038dbee24d87ec9e4888">&#9670;&#160;</a></span>_recoveryProcessTimerData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_t FactoryReset::_recoveryProcessTimerData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a629f320561c736f524c6b33e46ac3847" name="a629f320561c736f524c6b33e46ac3847"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a629f320561c736f524c6b33e46ac3847">&#9670;&#160;</a></span>_recoveryProcessTimerId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_id_t FactoryReset::_recoveryProcessTimerId</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a63d395719a9c7ea830e537450f0e1c58" name="a63d395719a9c7ea830e537450f0e1c58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63d395719a9c7ea830e537450f0e1c58">&#9670;&#160;</a></span>_rtcStartTime</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t FactoryReset::_rtcStartTime</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6c4e7eccde030f46f295af6df6f3b2e8" name="a6c4e7eccde030f46f295af6df6f3b2e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c4e7eccde030f46f295af6df6f3b2e8">&#9670;&#160;</a></span>_successfullyFactoryResetBitmask</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t FactoryReset::_successfullyFactoryResetBitmask = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

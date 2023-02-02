@@ -1,16 +1,16 @@
 <map id="source/include/ble/cs_Stack.h" name="source/include/ble/cs_Stack.h">
 <area shape="rect" id="node1" title="Manufacturing data." alt="" coords="2892,5,3032,45"/>
-<area shape="rect" id="node2" href="$cs__Nordic_8h_source.html" title=" " alt="" coords="2169,240,2291,265"/>
+<area shape="rect" id="node2" href="$cs__Nordic_8h.html" title=" " alt="" coords="2169,240,2291,265"/>
 <area shape="rect" id="node39" href="$cs__Service_8h.html" title="BLE service." alt="" coords="2899,93,3025,119"/>
-<area shape="rect" id="node41" href="$cs__Types_8h_source.html" title=" " alt="" coords="3477,240,3631,265"/>
-<area shape="rect" id="node42" href="$cs__Config_8h_source.html" title=" " alt="" coords="4207,313,4328,339"/>
-<area shape="rect" id="node43" href="$function_8h_source.html" title=" " alt="" coords="3109,240,3255,265"/>
-<area shape="rect" id="node44" href="$cs__Strings_8h_source.html" title=" " alt="" coords="2735,167,2859,192"/>
-<area shape="rect" id="node45" href="$cs__BaseClass_8h_source.html" title=" " alt="" coords="3108,167,3291,192"/>
-<area shape="rect" id="node46" href="$cs__Tuple_8h_source.html" title=" " alt="" coords="3315,167,3465,192"/>
-<area shape="rect" id="node47" href="$cs__Timer_8h_source.html" title=" " alt="" coords="2569,167,2710,192"/>
-<area shape="rect" id="node48" href="$cs__BleError_8h_source.html" title=" " alt="" coords="2412,167,2544,192"/>
-<area shape="rect" id="node49" href="$cs__UUID_8h_source.html" title=" " alt="" coords="2223,93,2336,119"/>
+<area shape="rect" id="node41" href="$cs__Types_8h.html" title=" " alt="" coords="3477,240,3631,265"/>
+<area shape="rect" id="node42" href="$cs__Config_8h.html" title=" " alt="" coords="4207,313,4328,339"/>
+<area shape="rect" id="node43" href="$function_8h.html" title=" " alt="" coords="3109,240,3255,265"/>
+<area shape="rect" id="node44" href="$cs__Strings_8h.html" title=" " alt="" coords="2735,167,2859,192"/>
+<area shape="rect" id="node45" href="$cs__BaseClass_8h.html" title=" " alt="" coords="3108,167,3291,192"/>
+<area shape="rect" id="node46" href="$cs__Tuple_8h.html" title=" " alt="" coords="3315,167,3465,192"/>
+<area shape="rect" id="node47" href="$cs__Timer_8h.html" title=" " alt="" coords="2569,167,2710,192"/>
+<area shape="rect" id="node48" href="$cs__BleError_8h.html" title=" " alt="" coords="2412,167,2544,192"/>
+<area shape="rect" id="node49" href="$cs__UUID_8h.html" title=" " alt="" coords="2223,93,2336,119"/>
 <area shape="rect" id="node50" title=" " alt="" coords="3591,93,3650,119"/>
 <area shape="rect" id="node3" title=" " alt="" coords="3830,313,3979,339"/>
 <area shape="rect" id="node4" title=" " alt="" coords="4054,313,4182,339"/>

@@ -100,6 +100,9 @@ $(document).ready(function(){initNavTree('classScanner.html',''); initResizable(
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-types">Private Types</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classScanner-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Scanner Class Reference</div></div>
 </div><!--header-->
@@ -123,46 +126,41 @@ Collaboration diagram for Scanner:</div>
 <div class="dyncontent">
 <div class="center"><img src="classScanner__coll__graph.png" border="0" usemap="#aScanner_coll__map" alt="Collaboration graph"/></div>
 <map name="aScanner_coll__map" id="aScanner_coll__map">
-<area shape="rect" title="Scanner scans for BLE devices." alt="" coords="23,79,98,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" title="Scanner scans for BLE devices." alt="" coords="45,345,119,371"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,257,116,283"/>
+<area shape="rect" href="classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="141,257,199,283"/>
+<area shape="rect" href="classBaseClass.html" title=" " alt="" coords="49,162,176,187"/>
+<area shape="rect" href="classfixed__tuple.html" title=" " alt="" coords="201,155,403,195"/>
+<area shape="rect" href="classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="255,80,349,105"/>
+<area shape="rect" title=" " alt="" coords="237,5,367,31"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a588606b3ca111368e5e9b0d8aef9e02b"><td class="memItemLeft" align="right" valign="top"><a id="a588606b3ca111368e5e9b0d8aef9e02b" name="a588606b3ca111368e5e9b0d8aef9e02b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setStack</b> (<a class="el" href="classStack.html">Stack</a> *stack)</td></tr>
+<tr class="memitem:a588606b3ca111368e5e9b0d8aef9e02b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a588606b3ca111368e5e9b0d8aef9e02b">setStack</a> (<a class="el" href="classStack.html">Stack</a> *stack)</td></tr>
 <tr class="separator:a588606b3ca111368e5e9b0d8aef9e02b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c058458644b291bbb7d160725c16df5"><td class="memItemLeft" align="right" valign="top"><a id="a7c058458644b291bbb7d160725c16df5" name="a7c058458644b291bbb7d160725c16df5"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onBleEvent</b> (ble_evt_t *p_ble_evt)</td></tr>
+<tr class="memitem:a7c058458644b291bbb7d160725c16df5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a7c058458644b291bbb7d160725c16df5">onBleEvent</a> (ble_evt_t *p_ble_evt)</td></tr>
 <tr class="separator:a7c058458644b291bbb7d160725c16df5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb2c8a1dbf28d0e794bf7e50be909414"><td class="memItemLeft" align="right" valign="top"><a id="abb2c8a1dbf28d0e794bf7e50be909414" name="abb2c8a1dbf28d0e794bf7e50be909414"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>manualStartScan</b> ()</td></tr>
+<tr class="memitem:abb2c8a1dbf28d0e794bf7e50be909414"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#abb2c8a1dbf28d0e794bf7e50be909414">manualStartScan</a> ()</td></tr>
 <tr class="separator:abb2c8a1dbf28d0e794bf7e50be909414"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e3c379b208adf4d56e10292de4a8133"><td class="memItemLeft" align="right" valign="top"><a id="a8e3c379b208adf4d56e10292de4a8133" name="a8e3c379b208adf4d56e10292de4a8133"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>manualStopScan</b> ()</td></tr>
+<tr class="memitem:a8e3c379b208adf4d56e10292de4a8133"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a8e3c379b208adf4d56e10292de4a8133">manualStopScan</a> ()</td></tr>
 <tr class="separator:a8e3c379b208adf4d56e10292de4a8133"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a875746c08e4340e2b1772a2d8d9c6d99"><td class="memItemLeft" align="right" valign="top"><a id="a875746c08e4340e2b1772a2d8d9c6d99" name="a875746c08e4340e2b1772a2d8d9c6d99"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isScanning</b> ()</td></tr>
+<tr class="memitem:a875746c08e4340e2b1772a2d8d9c6d99"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a875746c08e4340e2b1772a2d8d9c6d99">isScanning</a> ()</td></tr>
 <tr class="separator:a875746c08e4340e2b1772a2d8d9c6d99"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad9283647e2902a382586218bc065781"><td class="memItemLeft" align="right" valign="top"><a id="aad9283647e2902a382586218bc065781" name="aad9283647e2902a382586218bc065781"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
+<tr class="memitem:aad9283647e2902a382586218bc065781"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#aad9283647e2902a382586218bc065781">init</a> ()</td></tr>
 <tr class="separator:aad9283647e2902a382586218bc065781"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff9e1648fd86ac833651fff8e4c115db"><td class="memItemLeft" align="right" valign="top"><a id="aff9e1648fd86ac833651fff8e4c115db" name="aff9e1648fd86ac833651fff8e4c115db"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>start</b> ()</td></tr>
-<tr class="memdesc:aff9e1648fd86ac833651fff8e4c115db"><td class="mdescLeft">&#160;</td><td class="mdescRight">start immediately <br /></td></tr>
+<tr class="memitem:aff9e1648fd86ac833651fff8e4c115db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#aff9e1648fd86ac833651fff8e4c115db">start</a> ()</td></tr>
+<tr class="memdesc:aff9e1648fd86ac833651fff8e4c115db"><td class="mdescLeft">&#160;</td><td class="mdescRight">start immediately  <a href="classScanner.html#aff9e1648fd86ac833651fff8e4c115db">More...</a><br /></td></tr>
 <tr class="separator:aff9e1648fd86ac833651fff8e4c115db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2df7d23cb7f5343901bfe02cde1e0d64"><td class="memItemLeft" align="right" valign="top"><a id="a2df7d23cb7f5343901bfe02cde1e0d64" name="a2df7d23cb7f5343901bfe02cde1e0d64"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>delayedStart</b> (uint16_t delay)</td></tr>
-<tr class="memdesc:a2df7d23cb7f5343901bfe02cde1e0d64"><td class="mdescLeft">&#160;</td><td class="mdescRight">delay start by delay ms <br /></td></tr>
+<tr class="memitem:a2df7d23cb7f5343901bfe02cde1e0d64"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a2df7d23cb7f5343901bfe02cde1e0d64">delayedStart</a> (uint16_t delay)</td></tr>
+<tr class="memdesc:a2df7d23cb7f5343901bfe02cde1e0d64"><td class="mdescLeft">&#160;</td><td class="mdescRight">delay start by delay ms  <a href="classScanner.html#a2df7d23cb7f5343901bfe02cde1e0d64">More...</a><br /></td></tr>
 <tr class="separator:a2df7d23cb7f5343901bfe02cde1e0d64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03ea3486fae4833c601c3cad6cc56229"><td class="memItemLeft" align="right" valign="top"><a id="a03ea3486fae4833c601c3cad6cc56229" name="a03ea3486fae4833c601c3cad6cc56229"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>delayedStart</b> ()</td></tr>
-<tr class="memdesc:a03ea3486fae4833c601c3cad6cc56229"><td class="mdescLeft">&#160;</td><td class="mdescRight">delay start by _scanBreakDuration ms <br /></td></tr>
+<tr class="memitem:a03ea3486fae4833c601c3cad6cc56229"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a03ea3486fae4833c601c3cad6cc56229">delayedStart</a> ()</td></tr>
+<tr class="memdesc:a03ea3486fae4833c601c3cad6cc56229"><td class="mdescLeft">&#160;</td><td class="mdescRight">delay start by _scanBreakDuration ms  <a href="classScanner.html#a03ea3486fae4833c601c3cad6cc56229">More...</a><br /></td></tr>
 <tr class="separator:a03ea3486fae4833c601c3cad6cc56229"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31af9fbf8f40ab46ce25051e15ab5809"><td class="memItemLeft" align="right" valign="top"><a id="a31af9fbf8f40ab46ce25051e15ab5809" name="a31af9fbf8f40ab46ce25051e15ab5809"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> ()</td></tr>
-<tr class="memdesc:a31af9fbf8f40ab46ce25051e15ab5809"><td class="mdescLeft">&#160;</td><td class="mdescRight">stop scan immediately (no results will be sent) <br /></td></tr>
+<tr class="memitem:a31af9fbf8f40ab46ce25051e15ab5809"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a31af9fbf8f40ab46ce25051e15ab5809">stop</a> ()</td></tr>
+<tr class="memdesc:a31af9fbf8f40ab46ce25051e15ab5809"><td class="mdescLeft">&#160;</td><td class="mdescRight">stop scan immediately (no results will be sent)  <a href="classScanner.html#a31af9fbf8f40ab46ce25051e15ab5809">More...</a><br /></td></tr>
 <tr class="separator:a31af9fbf8f40ab46ce25051e15ab5809"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0b66381e43a905a3c2745cbfc4e2966"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#ac0b66381e43a905a3c2745cbfc4e2966">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:ac0b66381e43a905a3c2745cbfc4e2966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classScanner.html#ac0b66381e43a905a3c2745cbfc4e2966">More...</a><br /></td></tr>
@@ -170,17 +168,210 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>stop</b> ()</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ae163778054401048e64cc4a2caaa886d"><td class="memItemLeft" align="right" valign="top"><a id="ae163778054401048e64cc4a2caaa886d" name="ae163778054401048e64cc4a2caaa886d"></a>
-static <a class="el" href="classScanner.html">Scanner</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:ae163778054401048e64cc4a2caaa886d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) <br /></td></tr>
+<tr class="memitem:ae163778054401048e64cc4a2caaa886d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classScanner.html">Scanner</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#ae163778054401048e64cc4a2caaa886d">getInstance</a> ()</td></tr>
+<tr class="memdesc:ae163778054401048e64cc4a2caaa886d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation)  <a href="classScanner.html#ae163778054401048e64cc4a2caaa886d">More...</a><br /></td></tr>
 <tr class="separator:ae163778054401048e64cc4a2caaa886d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aafe07d351456c7bd636057ba9bf70e0e"><td class="memItemLeft" align="right" valign="top"><a id="aafe07d351456c7bd636057ba9bf70e0e" name="aafe07d351456c7bd636057ba9bf70e0e"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticTick</b> (<a class="el" href="classScanner.html">Scanner</a> *ptr)</td></tr>
+<tr class="memitem:aafe07d351456c7bd636057ba9bf70e0e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#aafe07d351456c7bd636057ba9bf70e0e">staticTick</a> (<a class="el" href="classScanner.html">Scanner</a> *ptr)</td></tr>
 <tr class="separator:aafe07d351456c7bd636057ba9bf70e0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
+Private Types</h2></td></tr>
+<tr class="memitem:ac5a89767976619c5d3fc5fa258617b1b"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#ac5a89767976619c5d3fc5fa258617b1b">SCAN_OP_CODE</a> { <a class="el" href="classScanner.html#ac5a89767976619c5d3fc5fa258617b1baab8aa0e5b1bd1df50b00dbc3cd403aa4">SCAN_START</a>
+, <a class="el" href="classScanner.html#ac5a89767976619c5d3fc5fa258617b1ba883712af27fa29e153fec4506da066ba">SCAN_STOP</a>
+ }</td></tr>
+<tr class="separator:ac5a89767976619c5d3fc5fa258617b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:acc66679413a46a143b241cca91d8fc03"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#acc66679413a46a143b241cca91d8fc03">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a9658286e83cc3127307c483f1e5ea6cc">CONFIG_SCAN_DURATION</a>) _scanDuration</td></tr>
+<tr class="memdesc:acc66679413a46a143b241cca91d8fc03"><td class="mdescLeft">&#160;</td><td class="mdescRight">scan for ... ms  <a href="classScanner.html#acc66679413a46a143b241cca91d8fc03">More...</a><br /></td></tr>
+<tr class="separator:acc66679413a46a143b241cca91d8fc03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0b4cecc89b4cae983c0a2cd341fa3e0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#af0b4cecc89b4cae983c0a2cd341fa3e0">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1abb0cabbdc51361ff2b0f19befb2249c2">CONFIG_SCAN_BREAK_DURATION</a>) _scanBreakDuration</td></tr>
+<tr class="memdesc:af0b4cecc89b4cae983c0a2cd341fa3e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">wait ... ms before starting the next scan  <a href="classScanner.html#af0b4cecc89b4cae983c0a2cd341fa3e0">More...</a><br /></td></tr>
+<tr class="separator:af0b4cecc89b4cae983c0a2cd341fa3e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc995a4b67a10d2652ce00afed14f497"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#acc995a4b67a10d2652ce00afed14f497">Scanner</a> ()</td></tr>
+<tr class="separator:acc995a4b67a10d2652ce00afed14f497"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a315d63d4b87a36980762ad3fede7da67"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a315d63d4b87a36980762ad3fede7da67">executeScan</a> ()</td></tr>
+<tr class="separator:a315d63d4b87a36980762ad3fede7da67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81b176ab37656ec9bb4005c16bd69722"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a81b176ab37656ec9bb4005c16bd69722">onAdvertisement</a> (ble_gap_evt_adv_report_t *p_adv_report)</td></tr>
+<tr class="separator:a81b176ab37656ec9bb4005c16bd69722"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a7cab5ffcfb23f6d6b46638637704d777"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classScanner.html#ac5a89767976619c5d3fc5fa258617b1b">SCAN_OP_CODE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a7cab5ffcfb23f6d6b46638637704d777">_opCode</a></td></tr>
+<tr class="separator:a7cab5ffcfb23f6d6b46638637704d777"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea0b37da71372183a1a08b90831df4e6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#aea0b37da71372183a1a08b90831df4e6">_scanning</a></td></tr>
+<tr class="separator:aea0b37da71372183a1a08b90831df4e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54b4eb9af676df5ab206f562c739d7aa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a54b4eb9af676df5ab206f562c739d7aa">_running</a></td></tr>
+<tr class="separator:a54b4eb9af676df5ab206f562c739d7aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add007021d6c7475a7e818bbe1fdbb403"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#add007021d6c7475a7e818bbe1fdbb403">_scanCount</a></td></tr>
+<tr class="separator:add007021d6c7475a7e818bbe1fdbb403"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f5393c9dfb170c4db8d26287389949c"><td class="memItemLeft" align="right" valign="top">app_timer_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a7f5393c9dfb170c4db8d26287389949c">_appTimerData</a></td></tr>
+<tr class="separator:a7f5393c9dfb170c4db8d26287389949c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43f97eaffa0c2a71a16624f43ba7064c"><td class="memItemLeft" align="right" valign="top">app_timer_id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a43f97eaffa0c2a71a16624f43ba7064c">_appTimerId</a></td></tr>
+<tr class="separator:a43f97eaffa0c2a71a16624f43ba7064c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a142385b2d56835355aa71ff3f7c25b8b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classStack.html">Stack</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScanner.html#a142385b2d56835355aa71ff3f7c25b8b">_stack</a></td></tr>
+<tr class="separator:a142385b2d56835355aa71ff3f7c25b8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p ><a class="el" href="classScanner.html" title="Scanner scans for BLE devices.">Scanner</a> scans for BLE devices. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="ac5a89767976619c5d3fc5fa258617b1b" name="ac5a89767976619c5d3fc5fa258617b1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5a89767976619c5d3fc5fa258617b1b">&#9670;&#160;</a></span>SCAN_OP_CODE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classScanner.html#ac5a89767976619c5d3fc5fa258617b1b">Scanner::SCAN_OP_CODE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ac5a89767976619c5d3fc5fa258617b1baab8aa0e5b1bd1df50b00dbc3cd403aa4" name="ac5a89767976619c5d3fc5fa258617b1baab8aa0e5b1bd1df50b00dbc3cd403aa4"></a>SCAN_START&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="ac5a89767976619c5d3fc5fa258617b1ba883712af27fa29e153fec4506da066ba" name="ac5a89767976619c5d3fc5fa258617b1ba883712af27fa29e153fec4506da066ba"></a>SCAN_STOP&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="acc995a4b67a10d2652ce00afed14f497" name="acc995a4b67a10d2652ce00afed14f497"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc995a4b67a10d2652ce00afed14f497">&#9670;&#160;</a></span>Scanner()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classScanner.html">Scanner::Scanner</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a03ea3486fae4833c601c3cad6cc56229" name="a03ea3486fae4833c601c3cad6cc56229"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03ea3486fae4833c601c3cad6cc56229">&#9670;&#160;</a></span>delayedStart() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::delayedStart </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>delay start by _scanBreakDuration ms </p>
+
+</div>
+</div>
+<a id="a2df7d23cb7f5343901bfe02cde1e0d64" name="a2df7d23cb7f5343901bfe02cde1e0d64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2df7d23cb7f5343901bfe02cde1e0d64">&#9670;&#160;</a></span>delayedStart() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::delayedStart </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>delay</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>delay start by delay ms </p>
+
+</div>
+</div>
+<a id="a315d63d4b87a36980762ad3fede7da67" name="a315d63d4b87a36980762ad3fede7da67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a315d63d4b87a36980762ad3fede7da67">&#9670;&#160;</a></span>executeScan()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::executeScan </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae163778054401048e64cc4a2caaa886d" name="ae163778054401048e64cc4a2caaa886d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae163778054401048e64cc4a2caaa886d">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classScanner.html">Scanner</a> &amp; Scanner::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets a static singleton (no dynamic memory allocation) </p>
+
+</div>
+</div>
 <a id="ac0b66381e43a905a3c2745cbfc4e2966" name="ac0b66381e43a905a3c2745cbfc4e2966"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac0b66381e43a905a3c2745cbfc4e2966">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -209,6 +400,411 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>staticTick</b>
 <p >This method is overloaded by all classes that derive from <a class="el" href="classEventListener.html" title="Event listener.">EventListener</a>. They can receive an <a class="el" href="classevent__t.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 9,...">event_t</a> struct and act upon it. These events are dispatched by the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. </p>
 
 <p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="aad9283647e2902a382586218bc065781" name="aad9283647e2902a382586218bc065781"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad9283647e2902a382586218bc065781">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a875746c08e4340e2b1772a2d8d9c6d99" name="a875746c08e4340e2b1772a2d8d9c6d99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a875746c08e4340e2b1772a2d8d9c6d99">&#9670;&#160;</a></span>isScanning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Scanner::isScanning </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abb2c8a1dbf28d0e794bf7e50be909414" name="abb2c8a1dbf28d0e794bf7e50be909414"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb2c8a1dbf28d0e794bf7e50be909414">&#9670;&#160;</a></span>manualStartScan()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::manualStartScan </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8e3c379b208adf4d56e10292de4a8133" name="a8e3c379b208adf4d56e10292de4a8133"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e3c379b208adf4d56e10292de4a8133">&#9670;&#160;</a></span>manualStopScan()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::manualStopScan </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a81b176ab37656ec9bb4005c16bd69722" name="a81b176ab37656ec9bb4005c16bd69722"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81b176ab37656ec9bb4005c16bd69722">&#9670;&#160;</a></span>onAdvertisement()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::onAdvertisement </td>
+          <td>(</td>
+          <td class="paramtype">ble_gap_evt_adv_report_t *&#160;</td>
+          <td class="paramname"><em>p_adv_report</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7c058458644b291bbb7d160725c16df5" name="a7c058458644b291bbb7d160725c16df5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c058458644b291bbb7d160725c16df5">&#9670;&#160;</a></span>onBleEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::onBleEvent </td>
+          <td>(</td>
+          <td class="paramtype">ble_evt_t *&#160;</td>
+          <td class="paramname"><em>p_ble_evt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a588606b3ca111368e5e9b0d8aef9e02b" name="a588606b3ca111368e5e9b0d8aef9e02b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a588606b3ca111368e5e9b0d8aef9e02b">&#9670;&#160;</a></span>setStack()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::setStack </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classStack.html">Stack</a> *&#160;</td>
+          <td class="paramname"><em>stack</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aff9e1648fd86ac833651fff8e4c115db" name="aff9e1648fd86ac833651fff8e4c115db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff9e1648fd86ac833651fff8e4c115db">&#9670;&#160;</a></span>start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::start </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>start immediately </p>
+
+</div>
+</div>
+<a id="aafe07d351456c7bd636057ba9bf70e0e" name="aafe07d351456c7bd636057ba9bf70e0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aafe07d351456c7bd636057ba9bf70e0e">&#9670;&#160;</a></span>staticTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void Scanner::staticTick </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classScanner.html">Scanner</a> *&#160;</td>
+          <td class="paramname"><em>ptr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a31af9fbf8f40ab46ce25051e15ab5809" name="a31af9fbf8f40ab46ce25051e15ab5809"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31af9fbf8f40ab46ce25051e15ab5809">&#9670;&#160;</a></span>stop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Scanner::stop </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>stop scan immediately (no results will be sent) </p>
+
+</div>
+</div>
+<a id="af0b4cecc89b4cae983c0a2cd341fa3e0" name="af0b4cecc89b4cae983c0a2cd341fa3e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0b4cecc89b4cae983c0a2cd341fa3e0">&#9670;&#160;</a></span>TYPIFY() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Scanner::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1abb0cabbdc51361ff2b0f19befb2249c2">CONFIG_SCAN_BREAK_DURATION</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>wait ... ms before starting the next scan </p>
+
+</div>
+</div>
+<a id="acc66679413a46a143b241cca91d8fc03" name="acc66679413a46a143b241cca91d8fc03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc66679413a46a143b241cca91d8fc03">&#9670;&#160;</a></span>TYPIFY() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Scanner::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a9658286e83cc3127307c483f1e5ea6cc">CONFIG_SCAN_DURATION</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>scan for ... ms </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a7f5393c9dfb170c4db8d26287389949c" name="a7f5393c9dfb170c4db8d26287389949c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f5393c9dfb170c4db8d26287389949c">&#9670;&#160;</a></span>_appTimerData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_t Scanner::_appTimerData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a43f97eaffa0c2a71a16624f43ba7064c" name="a43f97eaffa0c2a71a16624f43ba7064c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43f97eaffa0c2a71a16624f43ba7064c">&#9670;&#160;</a></span>_appTimerId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_id_t Scanner::_appTimerId</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7cab5ffcfb23f6d6b46638637704d777" name="a7cab5ffcfb23f6d6b46638637704d777"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7cab5ffcfb23f6d6b46638637704d777">&#9670;&#160;</a></span>_opCode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classScanner.html#ac5a89767976619c5d3fc5fa258617b1b">SCAN_OP_CODE</a> Scanner::_opCode</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a54b4eb9af676df5ab206f562c739d7aa" name="a54b4eb9af676df5ab206f562c739d7aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54b4eb9af676df5ab206f562c739d7aa">&#9670;&#160;</a></span>_running</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Scanner::_running</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="add007021d6c7475a7e818bbe1fdbb403" name="add007021d6c7475a7e818bbe1fdbb403"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add007021d6c7475a7e818bbe1fdbb403">&#9670;&#160;</a></span>_scanCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t Scanner::_scanCount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aea0b37da71372183a1a08b90831df4e6" name="aea0b37da71372183a1a08b90831df4e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea0b37da71372183a1a08b90831df4e6">&#9670;&#160;</a></span>_scanning</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Scanner::_scanning</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a142385b2d56835355aa71ff3f7c25b8b" name="a142385b2d56835355aa71ff3f7c25b8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a142385b2d56835355aa71ff3f7c25b8b">&#9670;&#160;</a></span>_stack</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStack.html">Stack</a>* Scanner::_stack</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

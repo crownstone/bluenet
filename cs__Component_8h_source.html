@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__Component_8h_source.html',''); ini
   <div class="headertitle"><div class="title">cs_Component.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__Component_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Aug 18, 2021</span></div>
@@ -109,9 +109,9 @@ $(document).ready(function(){initNavTree('cs__Component_8h_source.html',''); ini
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;logging/cs_Logger.h&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;protocol/cs_ErrorCodes.h&gt;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;protocol/cs_Typedefs.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Logger_8h.html">logging/cs_Logger.h</a>&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;<a class="code" href="cs__ErrorCodes_8h.html">protocol/cs_ErrorCodes.h</a>&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Typedefs_8h.html">protocol/cs_Typedefs.h</a>&gt;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
@@ -122,13 +122,13 @@ $(document).ready(function(){initNavTree('cs__Component_8h_source.html',''); ini
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="comment">// ============== life cycle events ===============</span></div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">   70</a></span>    <span class="keyword">virtual</span> cs_ret_code_t <a class="code hl_function" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a>() { <span class="keywordflow">return</span> ERR_SUCCESS; }</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">   70</a></span>    <span class="keyword">virtual</span> <a class="code hl_typedef" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> <a class="code hl_function" href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">init</a>() { <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="cs__ErrorCodes_8h.html#a0bdb1ae130b033ac39505d498e4b6364a6d4f18a9728f434ff2d1a64043ebe6e8">ERR_SUCCESS</a>; }</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">   76</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">parentAllChildren</a>();</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="comment">// ================== Con-/destructors ==================</span></div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classComponent.html">~Component</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classComponent.html#ad82d7393e339c1b19cc17a0d55b5674d">   80</a></span>    <span class="keyword">virtual</span> <a class="code hl_function" href="classComponent.html#ad82d7393e339c1b19cc17a0d55b5674d">~Component</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="keyword">protected</span>:</div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="comment">// ================== Getters ==================</span></div>
@@ -137,13 +137,13 @@ $(document).ready(function(){initNavTree('cs__Component_8h_source.html',''); ini
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="comment">// ============== parenting ==============</span></div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">  103</a></span>    cs_ret_code_t <a class="code hl_function" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a>();</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">  103</a></span>    <a class="code hl_typedef" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> <a class="code hl_function" href="classComponent.html#a15dfa6d3ca6bfe46e46a53811235fdde">initChildren</a>();</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">  109</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classComponent.html#a40f9568b0e447fb079e16dee8428e9f1">setParent</a>(<a class="code hl_class" href="classComponent.html">Component</a>* p);</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <a class="code hl_class" href="classComponent.html">Component</a>* _parent = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="classComponent.html#adeed903d66f519f567b29d0de130d0a2">  113</a></span>    <a class="code hl_class" href="classComponent.html">Component</a>* <a class="code hl_variable" href="classComponent.html#adeed903d66f519f567b29d0de130d0a2">_parent</a> = <span class="keyword">nullptr</span>;</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>};</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="comment">// -------------------- Template implementation details -------------------</span></div>
@@ -152,10 +152,10 @@ $(document).ready(function(){initNavTree('cs__Component_8h_source.html',''); ini
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno"><a class="line" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">  119</a></span>T* <a class="code hl_function" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">Component::getComponent</a>(<a class="code hl_class" href="classComponent.html">Component</a>* requester) {</div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="comment">// jump up in hierarchy to parent.</span></div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordflow">if</span> (requester == <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <span class="keywordflow">if</span> (_parent != <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="classComponent.html#adeed903d66f519f567b29d0de130d0a2">_parent</a> != <span class="keyword">nullptr</span>) {</div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>            <span class="comment">// request from the parent to find a sibling.</span></div>
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>            <span class="comment">// keeping track of the original requester.</span></div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>            <span class="keywordflow">return</span> _parent-&gt;<a class="code hl_function" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">getComponent</a>&lt;T&gt;(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="classComponent.html#adeed903d66f519f567b29d0de130d0a2">_parent</a>-&gt;<a class="code hl_function" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">getComponent</a>&lt;T&gt;(<span class="keyword">this</span>);</div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        }</div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>            <span class="comment">// no parent means no siblings.</span></div>
@@ -178,8 +178,8 @@ $(document).ready(function(){initNavTree('cs__Component_8h_source.html',''); ini
 <div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    }</div>
 <div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
 <div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <span class="comment">// jump up in hierarchy one stack frame deeper</span></div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordflow">if</span> (_parent != <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keywordflow">return</span> _parent-&gt;<a class="code hl_function" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">getComponent</a>&lt;T&gt;(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classComponent.html#adeed903d66f519f567b29d0de130d0a2">_parent</a> != <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classComponent.html#adeed903d66f519f567b29d0de130d0a2">_parent</a>-&gt;<a class="code hl_function" href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">getComponent</a>&lt;T&gt;(<span class="keyword">this</span>);</div>
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    }</div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
 <div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
@@ -191,12 +191,19 @@ $(document).ready(function(){initNavTree('cs__Component_8h_source.html',''); ini
 <div class="ttc" id="aclassComponent_html_a9cd21445768610fd3db1b15a9c851416"><div class="ttname"><a href="classComponent.html#a9cd21445768610fd3db1b15a9c851416">Component::parentAllChildren</a></div><div class="ttdeci">void parentAllChildren()</div><div class="ttdoc">utility that loops over all elements of getChildren() and setParent on the non-nullptr ones.</div></div>
 <div class="ttc" id="aclassComponent_html_aa51b4a1259d0c5f2c022d8afbb44f0bb"><div class="ttname"><a href="classComponent.html#aa51b4a1259d0c5f2c022d8afbb44f0bb">Component::init</a></div><div class="ttdeci">virtual cs_ret_code_t init()</div><div class="ttdoc">Components can implement this if they need to get references to sibling or if they need to do specifi...</div><div class="ttdef"><b>Definition:</b> cs_Component.h:70</div></div>
 <div class="ttc" id="aclassComponent_html_ab7c92af073ee6d4e4b7e8eeb71a8c4d8"><div class="ttname"><a href="classComponent.html#ab7c92af073ee6d4e4b7e8eeb71a8c4d8">Component::getComponent</a></div><div class="ttdeci">T * getComponent(Component *requester=nullptr)</div><div class="ttdoc">Returns a component of type T* from _parent-&gt;children(), If not found try again with ancestors: _pare...</div><div class="ttdef"><b>Definition:</b> cs_Component.h:119</div></div>
+<div class="ttc" id="aclassComponent_html_ad82d7393e339c1b19cc17a0d55b5674d"><div class="ttname"><a href="classComponent.html#ad82d7393e339c1b19cc17a0d55b5674d">Component::~Component</a></div><div class="ttdeci">virtual ~Component()=default</div></div>
+<div class="ttc" id="aclassComponent_html_adeed903d66f519f567b29d0de130d0a2"><div class="ttname"><a href="classComponent.html#adeed903d66f519f567b29d0de130d0a2">Component::_parent</a></div><div class="ttdeci">Component * _parent</div><div class="ttdef"><b>Definition:</b> cs_Component.h:113</div></div>
+<div class="ttc" id="acs__ErrorCodes_8h_html"><div class="ttname"><a href="cs__ErrorCodes_8h.html">cs_ErrorCodes.h</a></div></div>
+<div class="ttc" id="acs__ErrorCodes_8h_html_a0bdb1ae130b033ac39505d498e4b6364a6d4f18a9728f434ff2d1a64043ebe6e8"><div class="ttname"><a href="cs__ErrorCodes_8h.html#a0bdb1ae130b033ac39505d498e4b6364a6d4f18a9728f434ff2d1a64043ebe6e8">ERR_SUCCESS</a></div><div class="ttdeci">@ ERR_SUCCESS</div><div class="ttdef"><b>Definition:</b> cs_ErrorCodes.h:10</div></div>
+<div class="ttc" id="acs__Logger_8h_html"><div class="ttname"><a href="cs__Logger_8h.html">cs_Logger.h</a></div></div>
+<div class="ttc" id="acs__Typedefs_8h_html"><div class="ttname"><a href="cs__Typedefs_8h.html">cs_Typedefs.h</a></div></div>
+<div class="ttc" id="acs__Typedefs_8h_html_ab09e5fe247ba3ab46e9e728c8499ecaf"><div class="ttname"><a href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a></div><div class="ttdeci">uint16_t cs_ret_code_t</div><div class="ttdef"><b>Definition:</b> cs_Typedefs.h:21</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_da1881d35f6a8b44b459c1d12548f084.html">common</a></li><li class="navelem"><b>cs_Component.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_da1881d35f6a8b44b459c1d12548f084.html">common</a></li><li class="navelem"><a class="el" href="cs__Component_8h.html">cs_Component.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__BaseClass_8h_source.html',''); ini
   <div class="headertitle"><div class="title">cs_BaseClass.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__BaseClass_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Apr 23, 2015</span></div>
@@ -114,28 +114,33 @@ $(document).ready(function(){initNavTree('cs__BaseClass_8h_source.html',''); ini
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>8_t N = 1&gt;</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="classBaseClass.html">   15</a></span><span class="keyword">class </span><a class="code hl_class" href="classBaseClass.html">BaseClass</a> {</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <a class="code hl_class" href="classBaseClass.html">BaseClass</a>() {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="classBaseClass.html#aa8b0502f9dd06a726a07526f4a344354">   17</a></span>    <a class="code hl_function" href="classBaseClass.html#aa8b0502f9dd06a726a07526f4a344354">BaseClass</a>() {</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        <span class="keywordflow">for</span> (uint8_t i = 0; i &lt; N; ++i) {</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>            _initialized[i] = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>            <a class="code hl_variable" href="classBaseClass.html#aa845e014314e808d396946d11ce3b9bf">_initialized</a>[i] = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        }</div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    }</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">inline</span> <span class="keywordtype">bool</span> isInitialized(uint8_t i = 0) { <span class="keywordflow">return</span> _initialized[i]; }</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classBaseClass.html#a9e2337c2676bf9fbcca00ab7750bbf14">   23</a></span>    <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="classBaseClass.html#a9e2337c2676bf9fbcca00ab7750bbf14">isInitialized</a>(uint8_t i = 0) { <span class="keywordflow">return</span> <a class="code hl_variable" href="classBaseClass.html#aa845e014314e808d396946d11ce3b9bf">_initialized</a>[i]; }</div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> setInitialized(uint8_t i = 0) { _initialized[i] = <span class="keyword">true</span>; }</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classBaseClass.html#a0290904b966a159231f848cfb5fd97a4">   25</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classBaseClass.html#a0290904b966a159231f848cfb5fd97a4">setInitialized</a>(uint8_t i = 0) { <a class="code hl_variable" href="classBaseClass.html#aa845e014314e808d396946d11ce3b9bf">_initialized</a>[i] = <span class="keyword">true</span>; }</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> setUninitialized(uint8_t i = 0) { _initialized[i] = <span class="keyword">false</span>; }</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classBaseClass.html#a4391d2f80e021fc4420fb48278a314ae">   27</a></span>    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classBaseClass.html#a4391d2f80e021fc4420fb48278a314ae">setUninitialized</a>(uint8_t i = 0) { <a class="code hl_variable" href="classBaseClass.html#aa845e014314e808d396946d11ce3b9bf">_initialized</a>[i] = <span class="keyword">false</span>; }</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordtype">bool</span> _initialized[N];</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classBaseClass.html#aa845e014314e808d396946d11ce3b9bf">   30</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="classBaseClass.html#aa845e014314e808d396946d11ce3b9bf">_initialized</a>[N];</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>};</div>
 <div class="ttc" id="aclassBaseClass_html"><div class="ttname"><a href="classBaseClass.html">BaseClass</a></div><div class="ttdoc">BaseClass.</div><div class="ttdef"><b>Definition:</b> cs_BaseClass.h:15</div></div>
+<div class="ttc" id="aclassBaseClass_html_a0290904b966a159231f848cfb5fd97a4"><div class="ttname"><a href="classBaseClass.html#a0290904b966a159231f848cfb5fd97a4">BaseClass::setInitialized</a></div><div class="ttdeci">void setInitialized(uint8_t i=0)</div><div class="ttdef"><b>Definition:</b> cs_BaseClass.h:25</div></div>
+<div class="ttc" id="aclassBaseClass_html_a4391d2f80e021fc4420fb48278a314ae"><div class="ttname"><a href="classBaseClass.html#a4391d2f80e021fc4420fb48278a314ae">BaseClass::setUninitialized</a></div><div class="ttdeci">void setUninitialized(uint8_t i=0)</div><div class="ttdef"><b>Definition:</b> cs_BaseClass.h:27</div></div>
+<div class="ttc" id="aclassBaseClass_html_a9e2337c2676bf9fbcca00ab7750bbf14"><div class="ttname"><a href="classBaseClass.html#a9e2337c2676bf9fbcca00ab7750bbf14">BaseClass::isInitialized</a></div><div class="ttdeci">bool isInitialized(uint8_t i=0)</div><div class="ttdef"><b>Definition:</b> cs_BaseClass.h:23</div></div>
+<div class="ttc" id="aclassBaseClass_html_aa845e014314e808d396946d11ce3b9bf"><div class="ttname"><a href="classBaseClass.html#aa845e014314e808d396946d11ce3b9bf">BaseClass::_initialized</a></div><div class="ttdeci">bool _initialized[N]</div><div class="ttdef"><b>Definition:</b> cs_BaseClass.h:30</div></div>
+<div class="ttc" id="aclassBaseClass_html_aa8b0502f9dd06a726a07526f4a344354"><div class="ttname"><a href="classBaseClass.html#aa8b0502f9dd06a726a07526f4a344354">BaseClass::BaseClass</a></div><div class="ttdeci">BaseClass()</div><div class="ttdef"><b>Definition:</b> cs_BaseClass.h:17</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_da1881d35f6a8b44b459c1d12548f084.html">common</a></li><li class="navelem"><b>cs_BaseClass.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_da1881d35f6a8b44b459c1d12548f084.html">common</a></li><li class="navelem"><a class="el" href="cs__BaseClass_8h.html">cs_BaseClass.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

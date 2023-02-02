@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classAES.html',''); initResizable(); }
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classAES-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">AES Class Reference</div></div>
 </div><!--header-->
@@ -112,26 +114,42 @@ $(document).ready(function(){initNavTree('classAES.html',''); initResizable(); }
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:adc0a272143b991657708c6f2e6e7546e"><td class="memItemLeft" align="right" valign="top"><a id="adc0a272143b991657708c6f2e6e7546e" name="adc0a272143b991657708c6f2e6e7546e"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="memdesc:adc0a272143b991657708c6f2e6e7546e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the class, reads from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>. <br /></td></tr>
+<tr class="memitem:adc0a272143b991657708c6f2e6e7546e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#adc0a272143b991657708c6f2e6e7546e">init</a> ()</td></tr>
+<tr class="memdesc:adc0a272143b991657708c6f2e6e7546e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the class, reads from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>.  <a href="classAES.html#adc0a272143b991657708c6f2e6e7546e">More...</a><br /></td></tr>
 <tr class="separator:adc0a272143b991657708c6f2e6e7546e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4851b32a0d137b4c319489e0d0343a9"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#ad4851b32a0d137b4c319489e0d0343a9">encryptEcb</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> key, <a class="el" href="structcs__data__t.html">cs_data_t</a> prefix, <a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, cs_buffer_size_t &amp;writtenSize)</td></tr>
+<tr class="memitem:ad4851b32a0d137b4c319489e0d0343a9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#ad4851b32a0d137b4c319489e0d0343a9">encryptEcb</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> key, <a class="el" href="structcs__data__t.html">cs_data_t</a> prefix, <a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;writtenSize)</td></tr>
 <tr class="memdesc:ad4851b32a0d137b4c319489e0d0343a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt data with given key in ECB mode.  <a href="classAES.html#ad4851b32a0d137b4c319489e0d0343a9">More...</a><br /></td></tr>
 <tr class="separator:ad4851b32a0d137b4c319489e0d0343a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a437cff69366f812fab2d8e9bb7346f81"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#a437cff69366f812fab2d8e9bb7346f81">encryptCtr</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> key, <a class="el" href="structcs__data__t.html">cs_data_t</a> nonce, <a class="el" href="structcs__data__t.html">cs_data_t</a> prefix, <a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, cs_buffer_size_t &amp;writtenSize, uint8_t blockCtr=0)</td></tr>
+<tr class="memitem:a437cff69366f812fab2d8e9bb7346f81"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#a437cff69366f812fab2d8e9bb7346f81">encryptCtr</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> key, <a class="el" href="structcs__data__t.html">cs_data_t</a> nonce, <a class="el" href="structcs__data__t.html">cs_data_t</a> prefix, <a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;writtenSize, uint8_t blockCtr=0)</td></tr>
 <tr class="memdesc:a437cff69366f812fab2d8e9bb7346f81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt data with given key in CTR mode.  <a href="classAES.html#a437cff69366f812fab2d8e9bb7346f81">More...</a><br /></td></tr>
 <tr class="separator:a437cff69366f812fab2d8e9bb7346f81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7363334b8de67991a90d43978e281610"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#a7363334b8de67991a90d43978e281610">decryptCtr</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> key, <a class="el" href="structcs__data__t.html">cs_data_t</a> nonce, <a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> prefix, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, cs_buffer_size_t &amp;writtenSize, uint8_t blockCtr=0)</td></tr>
+<tr class="memitem:a7363334b8de67991a90d43978e281610"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#a7363334b8de67991a90d43978e281610">decryptCtr</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> key, <a class="el" href="structcs__data__t.html">cs_data_t</a> nonce, <a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> prefix, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;writtenSize, uint8_t blockCtr=0)</td></tr>
 <tr class="memdesc:a7363334b8de67991a90d43978e281610"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decrypt data with given key in CTR mode.  <a href="classAES.html#a7363334b8de67991a90d43978e281610">More...</a><br /></td></tr>
 <tr class="separator:a7363334b8de67991a90d43978e281610"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ae82279cf37bfe333e4eda296fb503a7a"><td class="memItemLeft" align="right" valign="top"><a id="ae82279cf37bfe333e4eda296fb503a7a" name="ae82279cf37bfe333e4eda296fb503a7a"></a>
-static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:ae82279cf37bfe333e4eda296fb503a7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use static variant of singleton, no dynamic memory allocation. <br /></td></tr>
+<tr class="memitem:ae82279cf37bfe333e4eda296fb503a7a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#ae82279cf37bfe333e4eda296fb503a7a">getInstance</a> ()</td></tr>
+<tr class="memdesc:ae82279cf37bfe333e4eda296fb503a7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use static variant of singleton, no dynamic memory allocation.  <a href="classAES.html#ae82279cf37bfe333e4eda296fb503a7a">More...</a><br /></td></tr>
 <tr class="separator:ae82279cf37bfe333e4eda296fb503a7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:aead4c030c140418b2d2330d646f3d87f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#aead4c030c140418b2d2330d646f3d87f">AES</a> ()</td></tr>
+<tr class="separator:aead4c030c140418b2d2330d646f3d87f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f515165fef14550f3c49cdaf8313107"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#a0f515165fef14550f3c49cdaf8313107">AES</a> (<a class="el" href="classAES.html">AES</a> const &amp;)</td></tr>
+<tr class="separator:a0f515165fef14550f3c49cdaf8313107"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0428fee3cdeae959fe0a03aeb9f5467d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#a0428fee3cdeae959fe0a03aeb9f5467d">operator=</a> (<a class="el" href="classAES.html">AES</a> const &amp;)</td></tr>
+<tr class="separator:a0428fee3cdeae959fe0a03aeb9f5467d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f59f071e5c9842f9e989c0898724553"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#a4f59f071e5c9842f9e989c0898724553">ctr</a> (<a class="el" href="structcs__data__t.html">cs_data_t</a> key, <a class="el" href="structcs__data__t.html">cs_data_t</a> nonce, <a class="el" href="structcs__data__t.html">cs_data_t</a> inputPrefix, <a class="el" href="structcs__data__t.html">cs_data_t</a> input, <a class="el" href="structcs__data__t.html">cs_data_t</a> outputPrefix, <a class="el" href="structcs__data__t.html">cs_data_t</a> output, <a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;writtenSize, uint8_t blockCtr=0)</td></tr>
+<tr class="memdesc:a4f59f071e5c9842f9e989c0898724553"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encrypt or decrypt data with given key in CTR mode.  <a href="classAES.html#a4f59f071e5c9842f9e989c0898724553">More...</a><br /></td></tr>
+<tr class="separator:a4f59f071e5c9842f9e989c0898724553"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a00a2c90326924b58019c96f806e4e090"><td class="memItemLeft" align="right" valign="top">nrf_ecb_hal_data_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAES.html#a00a2c90326924b58019c96f806e4e090">_block</a></td></tr>
+<tr class="memdesc:a00a2c90326924b58019c96f806e4e090"><td class="mdescLeft">&#160;</td><td class="mdescRight">Struct with key, and single block of encrypted and decypted data.  <a href="classAES.html#a00a2c90326924b58019c96f806e4e090">More...</a><br /></td></tr>
+<tr class="separator:a00a2c90326924b58019c96f806e4e090"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that implements <a class="el" href="classAES.html" title="Class that implements AES encryption.">AES</a> encryption. </p>
@@ -140,7 +158,147 @@ static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="mem
 <li>ECB mode has no decrypt method, as that's not hardware accelerated.</li>
 <li>CTR mode has both encrypt and decrypt methods. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="aead4c030c140418b2d2330d646f3d87f" name="aead4c030c140418b2d2330d646f3d87f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aead4c030c140418b2d2330d646f3d87f">&#9670;&#160;</a></span>AES() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAES.html">AES::AES</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0f515165fef14550f3c49cdaf8313107" name="a0f515165fef14550f3c49cdaf8313107"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f515165fef14550f3c49cdaf8313107">&#9670;&#160;</a></span>AES() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAES.html">AES::AES</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAES.html">AES</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4f59f071e5c9842f9e989c0898724553" name="a4f59f071e5c9842f9e989c0898724553"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f59f071e5c9842f9e989c0898724553">&#9670;&#160;</a></span>ctr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AES::ctr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>nonce</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>inputPrefix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>outputPrefix</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>writtenSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>blockCtr</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Encrypt or decrypt data with given key in CTR mode. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>Key to encrypt with. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nonce</td><td>Nonce to use for encryption. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inputPrefix</td><td>Extra data to put before the input data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input data to be encrypted. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">outputPrefix</td><td>Extra data to be written to before writing to the output buffer. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Buffer to encrypt to. Can be the same as input, as long as: output pointer + output prefix size &gt;= input pointer + input prefix size. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">writtenSize</td><td>How many bytes are written to output. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">blockCtr</td><td>Optional initial block counter. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Return code. </dd></dl>
+
+</div>
+</div>
 <a id="a7363334b8de67991a90d43978e281610" name="a7363334b8de67991a90d43978e281610"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7363334b8de67991a90d43978e281610">&#9670;&#160;</a></span>decryptCtr()</h2>
 
@@ -148,7 +306,7 @@ static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="mem
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t AES::decryptCtr </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AES::decryptCtr </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
@@ -180,7 +338,7 @@ static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="mem
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_buffer_size_t &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;&#160;</td>
           <td class="paramname"><em>writtenSize</em>, </td>
         </tr>
         <tr>
@@ -222,7 +380,7 @@ static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="mem
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t AES::encryptCtr </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AES::encryptCtr </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
@@ -254,7 +412,7 @@ static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="mem
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_buffer_size_t &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;&#160;</td>
           <td class="paramname"><em>writtenSize</em>, </td>
         </tr>
         <tr>
@@ -296,7 +454,7 @@ static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="mem
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t AES::encryptEcb </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AES::encryptEcb </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__data__t.html">cs_data_t</a>&#160;</td>
           <td class="paramname"><em>key</em>, </td>
@@ -322,7 +480,7 @@ static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="mem
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_buffer_size_t &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5129e442718741ad8f75fa5bbae67a6b">cs_buffer_size_t</a> &amp;&#160;</td>
           <td class="paramname"><em>writtenSize</em>&#160;</td>
         </tr>
         <tr>
@@ -346,6 +504,103 @@ static <a class="el" href="classAES.html">AES</a> &amp;&#160;</td><td class="mem
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Return code. </dd></dl>
+
+</div>
+</div>
+<a id="ae82279cf37bfe333e4eda296fb503a7a" name="ae82279cf37bfe333e4eda296fb503a7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae82279cf37bfe333e4eda296fb503a7a">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classAES.html">AES</a> &amp; AES::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Use static variant of singleton, no dynamic memory allocation. </p>
+
+</div>
+</div>
+<a id="adc0a272143b991657708c6f2e6e7546e" name="adc0a272143b991657708c6f2e6e7546e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc0a272143b991657708c6f2e6e7546e">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AES::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize the class, reads from <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a>. </p>
+
+</div>
+</div>
+<a id="a0428fee3cdeae959fe0a03aeb9f5467d" name="a0428fee3cdeae959fe0a03aeb9f5467d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0428fee3cdeae959fe0a03aeb9f5467d">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AES::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAES.html">AES</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a00a2c90326924b58019c96f806e4e090" name="a00a2c90326924b58019c96f806e4e090"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00a2c90326924b58019c96f806e4e090">&#9670;&#160;</a></span>_block</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">nrf_ecb_hal_data_t AES::_block</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Struct with key, and single block of encrypted and decypted data. </p>
 
 </div>
 </div>

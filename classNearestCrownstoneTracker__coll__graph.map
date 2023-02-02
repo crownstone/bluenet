@@ -1,5 +1,11 @@
 <map id="NearestCrownstoneTracker" name="NearestCrownstoneTracker">
-<area shape="rect" id="node1" title="This class implements the in&#45;mesh computation of which crownstone is nearest to a &#39;trackable&#39; device." alt="" coords="26,79,223,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
-<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
+<area shape="rect" id="node1" title="This class implements the in&#45;mesh computation of which crownstone is nearest to a &#39;trackable&#39; device." alt="" coords="135,401,333,427"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="204,189,315,214"/>
+<area shape="rect" id="node4" href="$classAssetStore.html" title=" " alt="" coords="272,313,364,339"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="5,189,103,214"/>
+<area shape="rect" id="node5" href="$classStore.html" title=" " alt="" coords="486,181,643,221"/>
+<area shape="rect" id="node6" href="$structasset__record__t.html" title=" " alt="" coords="506,93,623,119"/>
+<area shape="rect" id="node7" href="$structasset__id__t.html" title=" " alt="" coords="450,5,538,31"/>
+<area shape="rect" id="node8" href="$structrssi__and__channel__t.html" title=" " alt="" coords="562,5,709,31"/>
+<area shape="rect" id="node9" href="$classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick&#45;event or tick count and execute..." alt="" coords="339,189,425,214"/>
 </map>

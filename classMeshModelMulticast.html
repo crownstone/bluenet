@@ -101,6 +101,9 @@ $(document).ready(function(){initNavTree('classMeshModelMulticast.html',''); ini
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classMeshModelMulticast-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">MeshModelMulticast Class Reference</div></div>
 </div><!--header-->
@@ -110,42 +113,86 @@ $(document).ready(function(){initNavTree('classMeshModelMulticast.html',''); ini
  <a href="classMeshModelMulticast.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cs__MeshModelMulticast_8h_source.html">cs_MeshModelMulticast.h</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for MeshModelMulticast:</div>
+<div class="dyncontent">
+<div class="center"><img src="classMeshModelMulticast__coll__graph.png" border="0" usemap="#aMeshModelMulticast_coll__map" alt="Collaboration graph"/></div>
+<map name="aMeshModelMulticast_coll__map" id="aMeshModelMulticast_coll__map">
+<area shape="rect" title="Class that:" alt="" coords="123,225,281,251"/>
+<area shape="rect" title=" " alt="" coords="5,115,228,155"/>
+<area shape="rect" href="structMeshModelMulticast_1_1cs__multicast__queue__item__t.html" title=" " alt="" coords="252,108,411,163"/>
+<area shape="rect" href="structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html" title="Data needed in each model queue." alt="" coords="235,5,427,45"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMeshModelMulticast_1_1cs__multicast__queue__item__t.html">cs_multicast_queue_item_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a3fdfa2839e2b49aae927f41fb94f92ac"><td class="memItemLeft" align="right" valign="top"><a id="a3fdfa2839e2b49aae927f41fb94f92ac" name="a3fdfa2839e2b49aae927f41fb94f92ac"></a>
-typedef function&lt; void(<a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;msg)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>callback_msg_t</b></td></tr>
-<tr class="memdesc:a3fdfa2839e2b49aae927f41fb94f92ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function definition. <br /></td></tr>
+<tr class="memitem:a3fdfa2839e2b49aae927f41fb94f92ac"><td class="memItemLeft" align="right" valign="top">typedef function&lt; void(<a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;msg)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a3fdfa2839e2b49aae927f41fb94f92ac">callback_msg_t</a></td></tr>
+<tr class="memdesc:a3fdfa2839e2b49aae927f41fb94f92ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function definition.  <a href="classMeshModelMulticast.html#a3fdfa2839e2b49aae927f41fb94f92ac">More...</a><br /></td></tr>
 <tr class="separator:a3fdfa2839e2b49aae927f41fb94f92ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a03c69eff4dbbccd392a9f4b9e7f66331"><td class="memItemLeft" align="right" valign="top"><a id="a03c69eff4dbbccd392a9f4b9e7f66331" name="a03c69eff4dbbccd392a9f4b9e7f66331"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>registerMsgHandler</b> (const <a class="el" href="classMeshModelMulticast.html#a3fdfa2839e2b49aae927f41fb94f92ac">callback_msg_t</a> &amp;closure)</td></tr>
-<tr class="memdesc:a03c69eff4dbbccd392a9f4b9e7f66331"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback function that's called when a message from the mesh is received. <br /></td></tr>
+<tr class="memitem:a03c69eff4dbbccd392a9f4b9e7f66331"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a03c69eff4dbbccd392a9f4b9e7f66331">registerMsgHandler</a> (const <a class="el" href="classMeshModelMulticast.html#a3fdfa2839e2b49aae927f41fb94f92ac">callback_msg_t</a> &amp;closure)</td></tr>
+<tr class="memdesc:a03c69eff4dbbccd392a9f4b9e7f66331"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback function that's called when a message from the mesh is received.  <a href="classMeshModelMulticast.html#a03c69eff4dbbccd392a9f4b9e7f66331">More...</a><br /></td></tr>
 <tr class="separator:a03c69eff4dbbccd392a9f4b9e7f66331"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30894becda07f5a91e3fb6f154ffeace"><td class="memItemLeft" align="right" valign="top"><a id="a30894becda07f5a91e3fb6f154ffeace" name="a30894becda07f5a91e3fb6f154ffeace"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (uint16_t modelId)</td></tr>
-<tr class="memdesc:a30894becda07f5a91e3fb6f154ffeace"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the model. <br /></td></tr>
+<tr class="memitem:a30894becda07f5a91e3fb6f154ffeace"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a30894becda07f5a91e3fb6f154ffeace">init</a> (uint16_t modelId)</td></tr>
+<tr class="memdesc:a30894becda07f5a91e3fb6f154ffeace"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the model.  <a href="classMeshModelMulticast.html#a30894becda07f5a91e3fb6f154ffeace">More...</a><br /></td></tr>
 <tr class="separator:a30894becda07f5a91e3fb6f154ffeace"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77ec20a7fd2974f9bd993f005b70038f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a77ec20a7fd2974f9bd993f005b70038f">configureSelf</a> (dsm_handle_t appkeyHandle)</td></tr>
 <tr class="memdesc:a77ec20a7fd2974f9bd993f005b70038f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the model.  <a href="classMeshModelMulticast.html#a77ec20a7fd2974f9bd993f005b70038f">More...</a><br /></td></tr>
 <tr class="separator:a77ec20a7fd2974f9bd993f005b70038f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a602f80554631ab588b4b0dc5fb20360d"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a602f80554631ab588b4b0dc5fb20360d">addToQueue</a> (<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;item)</td></tr>
+<tr class="memitem:a602f80554631ab588b4b0dc5fb20360d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a602f80554631ab588b4b0dc5fb20360d">addToQueue</a> (<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;item)</td></tr>
 <tr class="memdesc:a602f80554631ab588b4b0dc5fb20360d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a msg to an empty spot in the queue (transmissions == 0).  <a href="classMeshModelMulticast.html#a602f80554631ab588b4b0dc5fb20360d">More...</a><br /></td></tr>
 <tr class="separator:a602f80554631ab588b4b0dc5fb20360d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad10af86f630faade6a7991e916972c8b"><td class="memItemLeft" align="right" valign="top"><a id="ad10af86f630faade6a7991e916972c8b" name="ad10af86f630faade6a7991e916972c8b"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>remFromQueue</b> (cs_mesh_model_msg_type_t type, uint16_t id)</td></tr>
-<tr class="memdesc:ad10af86f630faade6a7991e916972c8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a msg from the queue. <br /></td></tr>
+<tr class="memitem:ad10af86f630faade6a7991e916972c8b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#ad10af86f630faade6a7991e916972c8b">remFromQueue</a> (<a class="el" href="cs__MeshModelPackets_8h.html#a9d8840842c6e1c415a9d890758288b57">cs_mesh_model_msg_type_t</a> type, uint16_t id)</td></tr>
+<tr class="memdesc:ad10af86f630faade6a7991e916972c8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a msg from the queue.  <a href="classMeshModelMulticast.html#ad10af86f630faade6a7991e916972c8b">More...</a><br /></td></tr>
 <tr class="separator:ad10af86f630faade6a7991e916972c8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4d9c1f46dfa941797e34d14452aa84b"><td class="memItemLeft" align="right" valign="top"><a id="af4d9c1f46dfa941797e34d14452aa84b" name="af4d9c1f46dfa941797e34d14452aa84b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>tick</b> (uint32_t tickCount)</td></tr>
-<tr class="memdesc:af4d9c1f46dfa941797e34d14452aa84b"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called at a regular interval. <br /></td></tr>
+<tr class="memitem:af4d9c1f46dfa941797e34d14452aa84b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#af4d9c1f46dfa941797e34d14452aa84b">tick</a> (uint32_t tickCount)</td></tr>
+<tr class="memdesc:af4d9c1f46dfa941797e34d14452aa84b"><td class="mdescLeft">&#160;</td><td class="mdescRight">To be called at a regular interval.  <a href="classMeshModelMulticast.html#af4d9c1f46dfa941797e34d14452aa84b">More...</a><br /></td></tr>
 <tr class="separator:af4d9c1f46dfa941797e34d14452aa84b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a539a222b88f030a68cde3d0a013f5e39"><td class="memItemLeft" align="right" valign="top"><a id="a539a222b88f030a68cde3d0a013f5e39" name="a539a222b88f030a68cde3d0a013f5e39"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>handleMsg</b> (const access_message_rx_t *accessMsg)</td></tr>
-<tr class="memdesc:a539a222b88f030a68cde3d0a013f5e39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage. <br /></td></tr>
+<tr class="memitem:a539a222b88f030a68cde3d0a013f5e39"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a539a222b88f030a68cde3d0a013f5e39">handleMsg</a> (const access_message_rx_t *accessMsg)</td></tr>
+<tr class="memdesc:a539a222b88f030a68cde3d0a013f5e39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classMeshModelMulticast.html#a539a222b88f030a68cde3d0a013f5e39">More...</a><br /></td></tr>
 <tr class="separator:a539a222b88f030a68cde3d0a013f5e39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ae17187e9d45bdce302380fc11e13601f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#ae17187e9d45bdce302380fc11e13601f">processQueue</a> ()</td></tr>
+<tr class="memdesc:ae17187e9d45bdce302380fc11e13601f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send messages from queue.  <a href="classMeshModelMulticast.html#ae17187e9d45bdce302380fc11e13601f">More...</a><br /></td></tr>
+<tr class="separator:ae17187e9d45bdce302380fc11e13601f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dcbf185b9f66a3b9151b2c5eb98f37b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a8dcbf185b9f66a3b9151b2c5eb98f37b">getNextItemInQueue</a> (bool priority)</td></tr>
+<tr class="memdesc:a8dcbf185b9f66a3b9151b2c5eb98f37b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if there is a msg in queue with more than 0 transmissions.  <a href="classMeshModelMulticast.html#a8dcbf185b9f66a3b9151b2c5eb98f37b">More...</a><br /></td></tr>
+<tr class="separator:a8dcbf185b9f66a3b9151b2c5eb98f37b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac36734acbdfa59515f2c240cb6e4d1ae"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#ac36734acbdfa59515f2c240cb6e4d1ae">sendMsgFromQueue</a> ()</td></tr>
+<tr class="memdesc:ac36734acbdfa59515f2c240cb6e4d1ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a msg from the queue, and send it.  <a href="classMeshModelMulticast.html#ac36734acbdfa59515f2c240cb6e4d1ae">More...</a><br /></td></tr>
+<tr class="separator:ac36734acbdfa59515f2c240cb6e4d1ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82e52d541646cebc251e4ab08428fdd3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a82e52d541646cebc251e4ab08428fdd3">sendMsg</a> (const uint8_t *data, uint16_t len)</td></tr>
+<tr class="memdesc:a82e52d541646cebc251e4ab08428fdd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a message over the mesh via publish, without reply.  <a href="classMeshModelMulticast.html#a82e52d541646cebc251e4ab08428fdd3">More...</a><br /></td></tr>
+<tr class="separator:a82e52d541646cebc251e4ab08428fdd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ad682c7dc4812727065b02480306eac79"><td class="memItemLeft" align="right" valign="top">access_model_handle_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#ad682c7dc4812727065b02480306eac79">_accessModelHandle</a> = ACCESS_HANDLE_INVALID</td></tr>
+<tr class="separator:ad682c7dc4812727065b02480306eac79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad17fab5188fdb1c20217da891868c660"><td class="memItemLeft" align="right" valign="top">dsm_handle_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#ad17fab5188fdb1c20217da891868c660">_groupAddressHandle</a> = DSM_HANDLE_INVALID</td></tr>
+<tr class="separator:ad17fab5188fdb1c20217da891868c660"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13d5159929f1b908c9ef337cb6fbdd4f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshModelMulticast.html#a3fdfa2839e2b49aae927f41fb94f92ac">callback_msg_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a13d5159929f1b908c9ef337cb6fbdd4f">_msgCallback</a> = nullptr</td></tr>
+<tr class="separator:a13d5159929f1b908c9ef337cb6fbdd4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b8456a9213c4d79ad7138c92d72a3c9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structMeshModelMulticast_1_1cs__multicast__queue__item__t.html">cs_multicast_queue_item_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a6b8456a9213c4d79ad7138c92d72a3c9">_queue</a> [<a class="el" href="classMeshModelMulticast.html#abaad679ce4bcaab8c7b17eb5b7f8afe9">_queueSize</a>]</td></tr>
+<tr class="separator:a6b8456a9213c4d79ad7138c92d72a3c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2df5bb1f68a26efda4e1402c8d16aafc"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#a2df5bb1f68a26efda4e1402c8d16aafc">_queueIndexNext</a> = 0</td></tr>
+<tr class="memdesc:a2df5bb1f68a26efda4e1402c8d16aafc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Next index in queue to send.  <a href="classMeshModelMulticast.html#a2df5bb1f68a26efda4e1402c8d16aafc">More...</a><br /></td></tr>
+<tr class="separator:a2df5bb1f68a26efda4e1402c8d16aafc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:abaad679ce4bcaab8c7b17eb5b7f8afe9"><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshModelMulticast.html#abaad679ce4bcaab8c7b17eb5b7f8afe9">_queueSize</a> = 20</td></tr>
+<tr class="separator:abaad679ce4bcaab8c7b17eb5b7f8afe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that: </p>
@@ -154,7 +201,24 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>handleMsg</b> (const 
 <li>Queues messages to be sent.</li>
 <li>Interleaves sending queued messages. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="a3fdfa2839e2b49aae927f41fb94f92ac" name="a3fdfa2839e2b49aae927f41fb94f92ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fdfa2839e2b49aae927f41fb94f92ac">&#9670;&#160;</a></span>callback_msg_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef function&lt;void(<a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a>&amp; msg)&gt; <a class="el" href="classMeshModelMulticast.html#a3fdfa2839e2b49aae927f41fb94f92ac">MeshModelMulticast::callback_msg_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Callback function definition. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a id="a602f80554631ab588b4b0dc5fb20360d" name="a602f80554631ab588b4b0dc5fb20360d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a602f80554631ab588b4b0dc5fb20360d">&#9670;&#160;</a></span>addToQueue()</h2>
 
@@ -162,7 +226,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>handleMsg</b> (const 
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t MeshModelMulticast::addToQueue </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshModelMulticast::addToQueue </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html">MeshUtil::cs_mesh_queue_item_t</a> &amp;&#160;</td>
           <td class="paramname"><em>item</em></td><td>)</td>
@@ -194,6 +258,373 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>handleMsg</b> (const 
 
 <p>Configure the model. </p>
 <p >Subscribes, and sets publish address. </p>
+
+</div>
+</div>
+<a id="a8dcbf185b9f66a3b9151b2c5eb98f37b" name="a8dcbf185b9f66a3b9151b2c5eb98f37b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dcbf185b9f66a3b9151b2c5eb98f37b">&#9670;&#160;</a></span>getNextItemInQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int MeshModelMulticast::getNextItemInQueue </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>priority</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if there is a msg in queue with more than 0 transmissions. </p>
+<p >If so, return that index. Start looking at index SendIndex as that item should be sent first. Returns -1 if none found. </p>
+
+</div>
+</div>
+<a id="a539a222b88f030a68cde3d0a013f5e39" name="a539a222b88f030a68cde3d0a013f5e39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a539a222b88f030a68cde3d0a013f5e39">&#9670;&#160;</a></span>handleMsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshModelMulticast::handleMsg </td>
+          <td>(</td>
+          <td class="paramtype">const access_message_rx_t *&#160;</td>
+          <td class="paramname"><em>accessMsg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Internal usage. </p>
+
+</div>
+</div>
+<a id="a30894becda07f5a91e3fb6f154ffeace" name="a30894becda07f5a91e3fb6f154ffeace"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30894becda07f5a91e3fb6f154ffeace">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshModelMulticast::init </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>modelId</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Init the model. </p>
+
+</div>
+</div>
+<a id="ae17187e9d45bdce302380fc11e13601f" name="ae17187e9d45bdce302380fc11e13601f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae17187e9d45bdce302380fc11e13601f">&#9670;&#160;</a></span>processQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshModelMulticast::processQueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send messages from queue. </p>
+
+</div>
+</div>
+<a id="a03c69eff4dbbccd392a9f4b9e7f66331" name="a03c69eff4dbbccd392a9f4b9e7f66331"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03c69eff4dbbccd392a9f4b9e7f66331">&#9670;&#160;</a></span>registerMsgHandler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshModelMulticast::registerMsgHandler </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classMeshModelMulticast.html#a3fdfa2839e2b49aae927f41fb94f92ac">callback_msg_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>closure</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register a callback function that's called when a message from the mesh is received. </p>
+
+</div>
+</div>
+<a id="ad10af86f630faade6a7991e916972c8b" name="ad10af86f630faade6a7991e916972c8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad10af86f630faade6a7991e916972c8b">&#9670;&#160;</a></span>remFromQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshModelMulticast::remFromQueue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__MeshModelPackets_8h.html#a9d8840842c6e1c415a9d890758288b57">cs_mesh_model_msg_type_t</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove a msg from the queue. </p>
+
+</div>
+</div>
+<a id="a82e52d541646cebc251e4ab08428fdd3" name="a82e52d541646cebc251e4ab08428fdd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82e52d541646cebc251e4ab08428fdd3">&#9670;&#160;</a></span>sendMsg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshModelMulticast::sendMsg </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>len</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Send a message over the mesh via publish, without reply. </p>
+
+</div>
+</div>
+<a id="ac36734acbdfa59515f2c240cb6e4d1ae" name="ac36734acbdfa59515f2c240cb6e4d1ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac36734acbdfa59515f2c240cb6e4d1ae">&#9670;&#160;</a></span>sendMsgFromQueue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MeshModelMulticast::sendMsgFromQueue </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a msg from the queue, and send it. </p>
+<p >Returns true when message was sent, false when no more messages to be sent. </p>
+
+</div>
+</div>
+<a id="af4d9c1f46dfa941797e34d14452aa84b" name="af4d9c1f46dfa941797e34d14452aa84b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4d9c1f46dfa941797e34d14452aa84b">&#9670;&#160;</a></span>tick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshModelMulticast::tick </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>tickCount</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>To be called at a regular interval. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad682c7dc4812727065b02480306eac79" name="ad682c7dc4812727065b02480306eac79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad682c7dc4812727065b02480306eac79">&#9670;&#160;</a></span>_accessModelHandle</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">access_model_handle_t MeshModelMulticast::_accessModelHandle = ACCESS_HANDLE_INVALID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad17fab5188fdb1c20217da891868c660" name="ad17fab5188fdb1c20217da891868c660"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad17fab5188fdb1c20217da891868c660">&#9670;&#160;</a></span>_groupAddressHandle</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">dsm_handle_t MeshModelMulticast::_groupAddressHandle = DSM_HANDLE_INVALID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a13d5159929f1b908c9ef337cb6fbdd4f" name="a13d5159929f1b908c9ef337cb6fbdd4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13d5159929f1b908c9ef337cb6fbdd4f">&#9670;&#160;</a></span>_msgCallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshModelMulticast.html#a3fdfa2839e2b49aae927f41fb94f92ac">callback_msg_t</a> MeshModelMulticast::_msgCallback = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6b8456a9213c4d79ad7138c92d72a3c9" name="a6b8456a9213c4d79ad7138c92d72a3c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b8456a9213c4d79ad7138c92d72a3c9">&#9670;&#160;</a></span>_queue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structMeshModelMulticast_1_1cs__multicast__queue__item__t.html">cs_multicast_queue_item_t</a> MeshModelMulticast::_queue[<a class="el" href="classMeshModelMulticast.html#abaad679ce4bcaab8c7b17eb5b7f8afe9">_queueSize</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2df5bb1f68a26efda4e1402c8d16aafc" name="a2df5bb1f68a26efda4e1402c8d16aafc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2df5bb1f68a26efda4e1402c8d16aafc">&#9670;&#160;</a></span>_queueIndexNext</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t MeshModelMulticast::_queueIndexNext = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Next index in queue to send. </p>
+
+</div>
+</div>
+<a id="abaad679ce4bcaab8c7b17eb5b7f8afe9" name="abaad679ce4bcaab8c7b17eb5b7f8afe9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abaad679ce4bcaab8c7b17eb5b7f8afe9">&#9670;&#160;</a></span>_queueSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t MeshModelMulticast::_queueSize = 20</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

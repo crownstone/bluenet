@@ -103,6 +103,8 @@ $(document).ready(function(){initNavTree('structsetup__data__t.html',''); initRe
   <div class="headertitle"><div class="title">setup_data_t Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__Packets_8h_source.html">cs_Packets.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for setup_data_t:</div>
 <div class="dyncontent">
@@ -115,46 +117,216 @@ Collaboration diagram for setup_data_t:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a28812cb7c3da78de7b75b3e0f006f534"><td class="memItemLeft" align="right" valign="top"><a id="a28812cb7c3da78de7b75b3e0f006f534" name="a28812cb7c3da78de7b75b3e0f006f534"></a>
-stone_id_t&#160;</td><td class="memItemRight" valign="bottom"><b>stoneId</b></td></tr>
+<tr class="memitem:a28812cb7c3da78de7b75b3e0f006f534"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#a28812cb7c3da78de7b75b3e0f006f534">stoneId</a></td></tr>
 <tr class="separator:a28812cb7c3da78de7b75b3e0f006f534"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07601ac6b9194f247b9f7bbc7848a864"><td class="memItemLeft" align="right" valign="top"><a id="a07601ac6b9194f247b9f7bbc7848a864" name="a07601ac6b9194f247b9f7bbc7848a864"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>sphereId</b></td></tr>
+<tr class="memitem:a07601ac6b9194f247b9f7bbc7848a864"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#a07601ac6b9194f247b9f7bbc7848a864">sphereId</a></td></tr>
 <tr class="separator:a07601ac6b9194f247b9f7bbc7848a864"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee52dccb544504f6f90901d37a738e5d"><td class="memItemLeft" align="right" valign="top"><a id="aee52dccb544504f6f90901d37a738e5d" name="aee52dccb544504f6f90901d37a738e5d"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>adminKey</b> [ENCRYPTION_KEY_LENGTH]</td></tr>
+<tr class="memitem:aee52dccb544504f6f90901d37a738e5d"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#aee52dccb544504f6f90901d37a738e5d">adminKey</a> [<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td></tr>
 <tr class="separator:aee52dccb544504f6f90901d37a738e5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95fc07d88e78267f0d832960043668c7"><td class="memItemLeft" align="right" valign="top"><a id="a95fc07d88e78267f0d832960043668c7" name="a95fc07d88e78267f0d832960043668c7"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>memberKey</b> [ENCRYPTION_KEY_LENGTH]</td></tr>
+<tr class="memitem:a95fc07d88e78267f0d832960043668c7"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#a95fc07d88e78267f0d832960043668c7">memberKey</a> [<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td></tr>
 <tr class="separator:a95fc07d88e78267f0d832960043668c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab15c1764d07c9141215aea76734bbaff"><td class="memItemLeft" align="right" valign="top"><a id="ab15c1764d07c9141215aea76734bbaff" name="ab15c1764d07c9141215aea76734bbaff"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>basicKey</b> [ENCRYPTION_KEY_LENGTH]</td></tr>
+<tr class="memitem:ab15c1764d07c9141215aea76734bbaff"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#ab15c1764d07c9141215aea76734bbaff">basicKey</a> [<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td></tr>
 <tr class="separator:ab15c1764d07c9141215aea76734bbaff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ae23eb725f97df8aaa60b4e71eda27c"><td class="memItemLeft" align="right" valign="top"><a id="a3ae23eb725f97df8aaa60b4e71eda27c" name="a3ae23eb725f97df8aaa60b4e71eda27c"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>serviceDataKey</b> [ENCRYPTION_KEY_LENGTH]</td></tr>
+<tr class="memitem:a3ae23eb725f97df8aaa60b4e71eda27c"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#a3ae23eb725f97df8aaa60b4e71eda27c">serviceDataKey</a> [<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td></tr>
 <tr class="separator:a3ae23eb725f97df8aaa60b4e71eda27c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa79092ddf661b6ee22660e01233bfd0b"><td class="memItemLeft" align="right" valign="top"><a id="aa79092ddf661b6ee22660e01233bfd0b" name="aa79092ddf661b6ee22660e01233bfd0b"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>localizationKey</b> [ENCRYPTION_KEY_LENGTH]</td></tr>
+<tr class="memitem:aa79092ddf661b6ee22660e01233bfd0b"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#aa79092ddf661b6ee22660e01233bfd0b">localizationKey</a> [<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td></tr>
 <tr class="separator:aa79092ddf661b6ee22660e01233bfd0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55f8dde8b9dac15cc84eedbc0082b191"><td class="memItemLeft" align="right" valign="top"><a id="a55f8dde8b9dac15cc84eedbc0082b191" name="a55f8dde8b9dac15cc84eedbc0082b191"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>meshDeviceKey</b> [ENCRYPTION_KEY_LENGTH]</td></tr>
+<tr class="memitem:a55f8dde8b9dac15cc84eedbc0082b191"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#a55f8dde8b9dac15cc84eedbc0082b191">meshDeviceKey</a> [<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td></tr>
 <tr class="separator:a55f8dde8b9dac15cc84eedbc0082b191"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4483fe818191c6ea0f51ea5e814c102b"><td class="memItemLeft" align="right" valign="top"><a id="a4483fe818191c6ea0f51ea5e814c102b" name="a4483fe818191c6ea0f51ea5e814c102b"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>meshAppKey</b> [ENCRYPTION_KEY_LENGTH]</td></tr>
+<tr class="memitem:a4483fe818191c6ea0f51ea5e814c102b"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#a4483fe818191c6ea0f51ea5e814c102b">meshAppKey</a> [<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td></tr>
 <tr class="separator:a4483fe818191c6ea0f51ea5e814c102b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb36d9b2eacb65a3edeb553660a5ed5b"><td class="memItemLeft" align="right" valign="top"><a id="aeb36d9b2eacb65a3edeb553660a5ed5b" name="aeb36d9b2eacb65a3edeb553660a5ed5b"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>meshNetKey</b> [ENCRYPTION_KEY_LENGTH]</td></tr>
+<tr class="memitem:aeb36d9b2eacb65a3edeb553660a5ed5b"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#aeb36d9b2eacb65a3edeb553660a5ed5b">meshNetKey</a> [<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td></tr>
 <tr class="separator:aeb36d9b2eacb65a3edeb553660a5ed5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44e73aa6b5b9ec8ef6c6fa874e722df0"><td class="memItemLeft" align="right" valign="top"><a id="a44e73aa6b5b9ec8ef6c6fa874e722df0" name="a44e73aa6b5b9ec8ef6c6fa874e722df0"></a>
-<a class="el" href="structcs__uuid128__t.html">cs_uuid128_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ibeaconUuid</b></td></tr>
+<tr class="memitem:a44e73aa6b5b9ec8ef6c6fa874e722df0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcs__uuid128__t.html">cs_uuid128_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#a44e73aa6b5b9ec8ef6c6fa874e722df0">ibeaconUuid</a></td></tr>
 <tr class="separator:a44e73aa6b5b9ec8ef6c6fa874e722df0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ac6bcc8d3fd60ddd3800a3671e264d9"><td class="memItemLeft" align="right" valign="top"><a id="a5ac6bcc8d3fd60ddd3800a3671e264d9" name="a5ac6bcc8d3fd60ddd3800a3671e264d9"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>ibeaconMajor</b></td></tr>
+<tr class="memitem:a5ac6bcc8d3fd60ddd3800a3671e264d9"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#a5ac6bcc8d3fd60ddd3800a3671e264d9">ibeaconMajor</a></td></tr>
 <tr class="separator:a5ac6bcc8d3fd60ddd3800a3671e264d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b2d193ab20fe92bd7d70f618eeb4a93"><td class="memItemLeft" align="right" valign="top"><a id="a4b2d193ab20fe92bd7d70f618eeb4a93" name="a4b2d193ab20fe92bd7d70f618eeb4a93"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>ibeaconMinor</b></td></tr>
+<tr class="memitem:a4b2d193ab20fe92bd7d70f618eeb4a93"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsetup__data__t.html#a4b2d193ab20fe92bd7d70f618eeb4a93">ibeaconMinor</a></td></tr>
 <tr class="separator:a4b2d193ab20fe92bd7d70f618eeb4a93"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="aee52dccb544504f6f90901d37a738e5d" name="aee52dccb544504f6f90901d37a738e5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee52dccb544504f6f90901d37a738e5d">&#9670;&#160;</a></span>adminKey</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t setup_data_t::adminKey[<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab15c1764d07c9141215aea76734bbaff" name="ab15c1764d07c9141215aea76734bbaff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab15c1764d07c9141215aea76734bbaff">&#9670;&#160;</a></span>basicKey</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t setup_data_t::basicKey[<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5ac6bcc8d3fd60ddd3800a3671e264d9" name="a5ac6bcc8d3fd60ddd3800a3671e264d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ac6bcc8d3fd60ddd3800a3671e264d9">&#9670;&#160;</a></span>ibeaconMajor</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t setup_data_t::ibeaconMajor</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4b2d193ab20fe92bd7d70f618eeb4a93" name="a4b2d193ab20fe92bd7d70f618eeb4a93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b2d193ab20fe92bd7d70f618eeb4a93">&#9670;&#160;</a></span>ibeaconMinor</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t setup_data_t::ibeaconMinor</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a44e73aa6b5b9ec8ef6c6fa874e722df0" name="a44e73aa6b5b9ec8ef6c6fa874e722df0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44e73aa6b5b9ec8ef6c6fa874e722df0">&#9670;&#160;</a></span>ibeaconUuid</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcs__uuid128__t.html">cs_uuid128_t</a> setup_data_t::ibeaconUuid</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa79092ddf661b6ee22660e01233bfd0b" name="aa79092ddf661b6ee22660e01233bfd0b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa79092ddf661b6ee22660e01233bfd0b">&#9670;&#160;</a></span>localizationKey</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t setup_data_t::localizationKey[<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a95fc07d88e78267f0d832960043668c7" name="a95fc07d88e78267f0d832960043668c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95fc07d88e78267f0d832960043668c7">&#9670;&#160;</a></span>memberKey</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t setup_data_t::memberKey[<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4483fe818191c6ea0f51ea5e814c102b" name="a4483fe818191c6ea0f51ea5e814c102b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4483fe818191c6ea0f51ea5e814c102b">&#9670;&#160;</a></span>meshAppKey</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t setup_data_t::meshAppKey[<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a55f8dde8b9dac15cc84eedbc0082b191" name="a55f8dde8b9dac15cc84eedbc0082b191"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55f8dde8b9dac15cc84eedbc0082b191">&#9670;&#160;</a></span>meshDeviceKey</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t setup_data_t::meshDeviceKey[<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aeb36d9b2eacb65a3edeb553660a5ed5b" name="aeb36d9b2eacb65a3edeb553660a5ed5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb36d9b2eacb65a3edeb553660a5ed5b">&#9670;&#160;</a></span>meshNetKey</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t setup_data_t::meshNetKey[<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3ae23eb725f97df8aaa60b4e71eda27c" name="a3ae23eb725f97df8aaa60b4e71eda27c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ae23eb725f97df8aaa60b4e71eda27c">&#9670;&#160;</a></span>serviceDataKey</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t setup_data_t::serviceDataKey[<a class="el" href="cs__Config_8h.html#a6a74800bea93978f72c721cedb7e28d9">ENCRYPTION_KEY_LENGTH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a07601ac6b9194f247b9f7bbc7848a864" name="a07601ac6b9194f247b9f7bbc7848a864"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07601ac6b9194f247b9f7bbc7848a864">&#9670;&#160;</a></span>sphereId</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t setup_data_t::sphereId</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a28812cb7c3da78de7b75b3e0f006f534" name="a28812cb7c3da78de7b75b3e0f006f534"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28812cb7c3da78de7b75b3e0f006f534">&#9670;&#160;</a></span>stoneId</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> setup_data_t::stoneId</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>source/include/protocol/<a class="el" href="cs__Packets_8h_source.html">cs_Packets.h</a></li>
 </ul>

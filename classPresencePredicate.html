@@ -105,6 +105,8 @@ $(document).ready(function(){initNavTree('classPresencePredicate.html',''); init
   <div class="headertitle"><div class="title">PresencePredicate Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__PresencePredicate_8h_source.html">cs_PresencePredicate.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for PresencePredicate:</div>
 <div class="dyncontent">
@@ -117,53 +119,259 @@ Collaboration diagram for PresencePredicate:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:aa2a9f25959685833e0618208eaa87a71"><td class="memItemLeft" align="right" valign="top"><a id="aa2a9f25959685833e0618208eaa87a71" name="aa2a9f25959685833e0618208eaa87a71"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>Condition</b> : uint8_t { <br />
-&#160;&#160;<b>VacuouslyTrue</b> = 0
-, <b>AnyoneInSelectedRooms</b> = 1
-, <b>NooneInSelectedRooms</b> = 2
-, <b>AnyoneInSphere</b> = 3
+<tr class="memitem:aa2a9f25959685833e0618208eaa87a71"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71">Condition</a> : uint8_t { <br />
+&#160;&#160;<a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71a8ad4395d8e1ded5cbad5384fe0debfc4">VacuouslyTrue</a> = 0
+, <a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71a93d23e79c82044dae7e2830cef8b1426">AnyoneInSelectedRooms</a> = 1
+, <a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71a2eb7508cb504dda630b085499d590de0">NooneInSelectedRooms</a> = 2
+, <a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71ad15f333463a4257be302e45e8a3f9b67">AnyoneInSphere</a> = 3
 , <br />
-&#160;&#160;<b>NooneInSphere</b> = 4
+&#160;&#160;<a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71a61f96ebc9619a830456eceb247382c89">NooneInSphere</a> = 4
 <br />
  }</td></tr>
 <tr class="separator:aa2a9f25959685833e0618208eaa87a71"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8dfd61f76de8c68aa9aa5e6f0b8b55a"><td class="memItemLeft" align="right" valign="top"><a id="ac8dfd61f76de8c68aa9aa5e6f0b8b55a" name="ac8dfd61f76de8c68aa9aa5e6f0b8b55a"></a>
-typedef std::array&lt; uint8_t, 9 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>SerializedDataType</b></td></tr>
+<tr class="memitem:ac8dfd61f76de8c68aa9aa5e6f0b8b55a"><td class="memItemLeft" align="right" valign="top">typedef std::array&lt; uint8_t, 9 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#ac8dfd61f76de8c68aa9aa5e6f0b8b55a">SerializedDataType</a></td></tr>
 <tr class="separator:ac8dfd61f76de8c68aa9aa5e6f0b8b55a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a59a35ff58e1630848ae3fedbe4743734"><td class="memItemLeft" align="right" valign="top"><a id="a59a35ff58e1630848ae3fedbe4743734" name="a59a35ff58e1630848ae3fedbe4743734"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>PresencePredicate</b> (Condition c, <a class="el" href="classPresenceStateDescription.html">PresenceStateDescription</a> presence)</td></tr>
+<tr class="memitem:a59a35ff58e1630848ae3fedbe4743734"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#a59a35ff58e1630848ae3fedbe4743734">PresencePredicate</a> (<a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71">Condition</a> c, <a class="el" href="classPresenceStateDescription.html">PresenceStateDescription</a> presence)</td></tr>
 <tr class="separator:a59a35ff58e1630848ae3fedbe4743734"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63c385a62d4fb1656416441344370238"><td class="memItemLeft" align="right" valign="top"><a id="a63c385a62d4fb1656416441344370238" name="a63c385a62d4fb1656416441344370238"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>PresencePredicate</b> (SerializedDataType arr)</td></tr>
+<tr class="memitem:a63c385a62d4fb1656416441344370238"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#a63c385a62d4fb1656416441344370238">PresencePredicate</a> (<a class="el" href="classPresencePredicate.html#ac8dfd61f76de8c68aa9aa5e6f0b8b55a">SerializedDataType</a> arr)</td></tr>
 <tr class="separator:a63c385a62d4fb1656416441344370238"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acadbc0da07e04b06a23be43f3b7bedce"><td class="memItemLeft" align="right" valign="top"><a id="acadbc0da07e04b06a23be43f3b7bedce" name="acadbc0da07e04b06a23be43f3b7bedce"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>requiresPresence</b> () const</td></tr>
+<tr class="memitem:acadbc0da07e04b06a23be43f3b7bedce"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#acadbc0da07e04b06a23be43f3b7bedce">requiresPresence</a> () const</td></tr>
 <tr class="separator:acadbc0da07e04b06a23be43f3b7bedce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7470234d9d824854ced6c249e29240a4"><td class="memItemLeft" align="right" valign="top"><a id="a7470234d9d824854ced6c249e29240a4" name="a7470234d9d824854ced6c249e29240a4"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>requiresAbsence</b> () const</td></tr>
+<tr class="memitem:a7470234d9d824854ced6c249e29240a4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#a7470234d9d824854ced6c249e29240a4">requiresAbsence</a> () const</td></tr>
 <tr class="separator:a7470234d9d824854ced6c249e29240a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0abe77c5af9d1bdaa42adc82ef49e4e"><td class="memItemLeft" align="right" valign="top"><a id="af0abe77c5af9d1bdaa42adc82ef49e4e" name="af0abe77c5af9d1bdaa42adc82ef49e4e"></a>
-SerializedDataType&#160;</td><td class="memItemRight" valign="bottom"><b>serialize</b> ()</td></tr>
+<tr class="memitem:af0abe77c5af9d1bdaa42adc82ef49e4e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classPresencePredicate.html#ac8dfd61f76de8c68aa9aa5e6f0b8b55a">SerializedDataType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#af0abe77c5af9d1bdaa42adc82ef49e4e">serialize</a> ()</td></tr>
 <tr class="separator:af0abe77c5af9d1bdaa42adc82ef49e4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ad324b6bce619a8477b167789855572"><td class="memItemLeft" align="right" valign="top"><a id="a9ad324b6bce619a8477b167789855572" name="a9ad324b6bce619a8477b167789855572"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isTrue</b> (<a class="el" href="classPresenceStateDescription.html">PresenceStateDescription</a> presence)</td></tr>
+<tr class="memitem:a9ad324b6bce619a8477b167789855572"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#a9ad324b6bce619a8477b167789855572">isTrue</a> (<a class="el" href="classPresenceStateDescription.html">PresenceStateDescription</a> presence)</td></tr>
 <tr class="separator:a9ad324b6bce619a8477b167789855572"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b96448b1f4ca1d3592c702608188d1a"><td class="memItemLeft" align="right" valign="top"><a id="a4b96448b1f4ca1d3592c702608188d1a" name="a4b96448b1f4ca1d3592c702608188d1a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>print</b> ()</td></tr>
+<tr class="memitem:a4b96448b1f4ca1d3592c702608188d1a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#a4b96448b1f4ca1d3592c702608188d1a">print</a> ()</td></tr>
 <tr class="separator:a4b96448b1f4ca1d3592c702608188d1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a151550cfa4db0eda546786fd6f461cbb"><td class="memItemLeft" align="right" valign="top"><a id="a151550cfa4db0eda546786fd6f461cbb" name="a151550cfa4db0eda546786fd6f461cbb"></a>
-Condition&#160;</td><td class="memItemRight" valign="bottom"><b>_condition</b></td></tr>
+<tr class="memitem:a151550cfa4db0eda546786fd6f461cbb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71">Condition</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#a151550cfa4db0eda546786fd6f461cbb">_condition</a></td></tr>
 <tr class="separator:a151550cfa4db0eda546786fd6f461cbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a533d87cce0d4a397f6e879c2e88f42dd"><td class="memItemLeft" align="right" valign="top"><a id="a533d87cce0d4a397f6e879c2e88f42dd" name="a533d87cce0d4a397f6e879c2e88f42dd"></a>
-<a class="el" href="classPresenceStateDescription.html">PresenceStateDescription</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_presence</b></td></tr>
+<tr class="memitem:a533d87cce0d4a397f6e879c2e88f42dd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classPresenceStateDescription.html">PresenceStateDescription</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresencePredicate.html#a533d87cce0d4a397f6e879c2e88f42dd">_presence</a></td></tr>
 <tr class="separator:a533d87cce0d4a397f6e879c2e88f42dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="ac8dfd61f76de8c68aa9aa5e6f0b8b55a" name="ac8dfd61f76de8c68aa9aa5e6f0b8b55a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8dfd61f76de8c68aa9aa5e6f0b8b55a">&#9670;&#160;</a></span>SerializedDataType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::array&lt;uint8_t, 9&gt; <a class="el" href="classPresencePredicate.html#ac8dfd61f76de8c68aa9aa5e6f0b8b55a">PresencePredicate::SerializedDataType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="aa2a9f25959685833e0618208eaa87a71" name="aa2a9f25959685833e0618208eaa87a71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2a9f25959685833e0618208eaa87a71">&#9670;&#160;</a></span>Condition</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71">PresencePredicate::Condition</a> : uint8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aa2a9f25959685833e0618208eaa87a71a8ad4395d8e1ded5cbad5384fe0debfc4" name="aa2a9f25959685833e0618208eaa87a71a8ad4395d8e1ded5cbad5384fe0debfc4"></a>VacuouslyTrue&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa2a9f25959685833e0618208eaa87a71a93d23e79c82044dae7e2830cef8b1426" name="aa2a9f25959685833e0618208eaa87a71a93d23e79c82044dae7e2830cef8b1426"></a>AnyoneInSelectedRooms&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa2a9f25959685833e0618208eaa87a71a2eb7508cb504dda630b085499d590de0" name="aa2a9f25959685833e0618208eaa87a71a2eb7508cb504dda630b085499d590de0"></a>NooneInSelectedRooms&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa2a9f25959685833e0618208eaa87a71ad15f333463a4257be302e45e8a3f9b67" name="aa2a9f25959685833e0618208eaa87a71ad15f333463a4257be302e45e8a3f9b67"></a>AnyoneInSphere&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aa2a9f25959685833e0618208eaa87a71a61f96ebc9619a830456eceb247382c89" name="aa2a9f25959685833e0618208eaa87a71a61f96ebc9619a830456eceb247382c89"></a>NooneInSphere&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a59a35ff58e1630848ae3fedbe4743734" name="a59a35ff58e1630848ae3fedbe4743734"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59a35ff58e1630848ae3fedbe4743734">&#9670;&#160;</a></span>PresencePredicate() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classPresencePredicate.html">PresencePredicate::PresencePredicate</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71">Condition</a>&#160;</td>
+          <td class="paramname"><em>c</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classPresenceStateDescription.html">PresenceStateDescription</a>&#160;</td>
+          <td class="paramname"><em>presence</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a63c385a62d4fb1656416441344370238" name="a63c385a62d4fb1656416441344370238"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63c385a62d4fb1656416441344370238">&#9670;&#160;</a></span>PresencePredicate() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classPresencePredicate.html">PresencePredicate::PresencePredicate</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPresencePredicate.html#ac8dfd61f76de8c68aa9aa5e6f0b8b55a">SerializedDataType</a>&#160;</td>
+          <td class="paramname"><em>arr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a9ad324b6bce619a8477b167789855572" name="a9ad324b6bce619a8477b167789855572"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ad324b6bce619a8477b167789855572">&#9670;&#160;</a></span>isTrue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PresencePredicate::isTrue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPresenceStateDescription.html">PresenceStateDescription</a>&#160;</td>
+          <td class="paramname"><em>presence</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4b96448b1f4ca1d3592c702608188d1a" name="a4b96448b1f4ca1d3592c702608188d1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b96448b1f4ca1d3592c702608188d1a">&#9670;&#160;</a></span>print()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PresencePredicate::print </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7470234d9d824854ced6c249e29240a4" name="a7470234d9d824854ced6c249e29240a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7470234d9d824854ced6c249e29240a4">&#9670;&#160;</a></span>requiresAbsence()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PresencePredicate::requiresAbsence </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acadbc0da07e04b06a23be43f3b7bedce" name="acadbc0da07e04b06a23be43f3b7bedce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acadbc0da07e04b06a23be43f3b7bedce">&#9670;&#160;</a></span>requiresPresence()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PresencePredicate::requiresPresence </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af0abe77c5af9d1bdaa42adc82ef49e4e" name="af0abe77c5af9d1bdaa42adc82ef49e4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0abe77c5af9d1bdaa42adc82ef49e4e">&#9670;&#160;</a></span>serialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classPresencePredicate.html#ac8dfd61f76de8c68aa9aa5e6f0b8b55a">SerializedDataType</a> PresencePredicate::serialize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a151550cfa4db0eda546786fd6f461cbb" name="a151550cfa4db0eda546786fd6f461cbb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a151550cfa4db0eda546786fd6f461cbb">&#9670;&#160;</a></span>_condition</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classPresencePredicate.html#aa2a9f25959685833e0618208eaa87a71">Condition</a> PresencePredicate::_condition</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a533d87cce0d4a397f6e879c2e88f42dd" name="a533d87cce0d4a397f6e879c2e88f42dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a533d87cce0d4a397f6e879c2e88f42dd">&#9670;&#160;</a></span>_presence</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classPresenceStateDescription.html">PresenceStateDescription</a> PresencePredicate::_presence</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>source/include/presence/<a class="el" href="cs__PresencePredicate_8h_source.html">cs_PresencePredicate.h</a></li>
 </ul>

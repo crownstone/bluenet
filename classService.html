@@ -100,6 +100,7 @@ $(document).ready(function(){initNavTree('classService.html',''); initResizable(
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classService-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Service Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
 </div><!--header-->
@@ -127,79 +128,125 @@ Collaboration diagram for Service:</div>
 <div class="dyncontent">
 <div class="center"><img src="classService__coll__graph.png" border="0" usemap="#aService_coll__map" alt="Collaboration graph"/></div>
 <map name="aService_coll__map" id="aService_coll__map">
-<area shape="rect" title="Base class for a BLE service." alt="" coords="33,79,104,104"/>
-<area shape="rect" href="classBaseClass.html" title=" " alt="" coords="5,5,132,31"/>
+<area shape="rect" title="Base class for a BLE service." alt="" coords="1016,80,1087,105"/>
+<area shape="rect" href="classBaseClass.html" title=" " alt="" coords="689,5,815,31"/>
+<area shape="rect" href="classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,55,781,80"/>
+<area shape="rect" href="classBaseClass.html" title=" " alt="" coords="365,15,491,40"/>
+<area shape="rect" href="classfixed__tuple.html" title=" " alt="" coords="327,65,529,105"/>
+<area shape="rect" href="classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="184,72,277,97"/>
+<area shape="rect" title=" " alt="" coords="5,72,135,97"/>
+<area shape="rect" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,104,780,129"/>
+<area shape="rect" href="classtuple.html" title=" " alt="" coords="643,153,861,179"/>
+<area shape="rect" title=" " alt="" coords="330,146,526,186"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a62dd812bad9d002a6f4af7302c4e3433"><td class="memItemLeft" align="right" valign="top"><a id="a62dd812bad9d002a6f4af7302c4e3433" name="a62dd812bad9d002a6f4af7302c4e3433"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>condition_t</b> { <b>C_SERVICE_INITIALIZED</b>
+<tr class="memitem:a62dd812bad9d002a6f4af7302c4e3433"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a62dd812bad9d002a6f4af7302c4e3433">condition_t</a> { <a class="el" href="classService.html#a62dd812bad9d002a6f4af7302c4e3433aaea14d176f2e0ad82435e87a8db71696">C_SERVICE_INITIALIZED</a>
  }</td></tr>
 <tr class="separator:a62dd812bad9d002a6f4af7302c4e3433"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:acc246c9f7ed3c51e2d91d10fe257513f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#acc246c9f7ed3c51e2d91d10fe257513f">Service</a> ()</td></tr>
+<tr class="separator:acc246c9f7ed3c51e2d91d10fe257513f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa173db92a095e3198256fcd6b9b47d9d"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#aa173db92a095e3198256fcd6b9b47d9d">~Service</a> ()</td></tr>
 <tr class="memdesc:aa173db92a095e3198256fcd6b9b47d9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default empty destructor.  <a href="classService.html#aa173db92a095e3198256fcd6b9b47d9d">More...</a><br /></td></tr>
 <tr class="separator:aa173db92a095e3198256fcd6b9b47d9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2bcd00d2f73bfc69c4365d6874ca91b2"><td class="memItemLeft" align="right" valign="top"><a id="a2bcd00d2f73bfc69c4365d6874ca91b2" name="a2bcd00d2f73bfc69c4365d6874ca91b2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> (<a class="el" href="classStack.html">Stack</a> *stack)</td></tr>
-<tr class="memdesc:a2bcd00d2f73bfc69c4365d6874ca91b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the service: register it at the softdevice. <br /></td></tr>
+<tr class="memitem:a2bcd00d2f73bfc69c4365d6874ca91b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a2bcd00d2f73bfc69c4365d6874ca91b2">init</a> (<a class="el" href="classStack.html">Stack</a> *stack)</td></tr>
+<tr class="memdesc:a2bcd00d2f73bfc69c4365d6874ca91b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the service: register it at the softdevice.  <a href="classService.html#a2bcd00d2f73bfc69c4365d6874ca91b2">More...</a><br /></td></tr>
 <tr class="separator:a2bcd00d2f73bfc69c4365d6874ca91b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42a824c4b2fee024c423e376b9dd907f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a42a824c4b2fee024c423e376b9dd907f">setUUID</a> (const <a class="el" href="classUUID.html">UUID</a> &amp;uuid)</td></tr>
 <tr class="memdesc:a42a824c4b2fee024c423e376b9dd907f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>.  <a href="classService.html#a42a824c4b2fee024c423e376b9dd907f">More...</a><br /></td></tr>
 <tr class="separator:a42a824c4b2fee024c423e376b9dd907f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab64dd9a0e966d2e45323d4c543eb4679"><td class="memItemLeft" align="right" valign="top"><a id="ab64dd9a0e966d2e45323d4c543eb4679" name="ab64dd9a0e966d2e45323d4c543eb4679"></a>
-<a class="el" href="classStack.html">Stack</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getStack</b> ()</td></tr>
+<tr class="memitem:ab64dd9a0e966d2e45323d4c543eb4679"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classStack.html">Stack</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#ab64dd9a0e966d2e45323d4c543eb4679">getStack</a> ()</td></tr>
 <tr class="separator:ab64dd9a0e966d2e45323d4c543eb4679"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42381afad04053df2d33815bdf5fd574"><td class="memItemLeft" align="right" valign="top"><a id="a42381afad04053df2d33815bdf5fd574" name="a42381afad04053df2d33815bdf5fd574"></a>
-const <a class="el" href="classUUID.html">UUID</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getUUID</b> () const</td></tr>
+<tr class="memitem:a42381afad04053df2d33815bdf5fd574"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classUUID.html">UUID</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a42381afad04053df2d33815bdf5fd574">getUUID</a> () const</td></tr>
 <tr class="separator:a42381afad04053df2d33815bdf5fd574"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aacf6d1a130e17d476a34fe7e9e6c4220"><td class="memItemLeft" align="right" valign="top"><a id="aacf6d1a130e17d476a34fe7e9e6c4220" name="aacf6d1a130e17d476a34fe7e9e6c4220"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getHandle</b> ()</td></tr>
+<tr class="memitem:aacf6d1a130e17d476a34fe7e9e6c4220"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#aacf6d1a130e17d476a34fe7e9e6c4220">getHandle</a> ()</td></tr>
 <tr class="separator:aacf6d1a130e17d476a34fe7e9e6c4220"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae76b07e4d8846d3d7cff688898ffda32"><td class="memItemLeft" align="right" valign="top"><a id="ae76b07e4d8846d3d7cff688898ffda32" name="ae76b07e4d8846d3d7cff688898ffda32"></a>
-<a class="el" href="classtuple.html">tuple</a>&lt; <a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>getCharacteristics</b> ()</td></tr>
+<tr class="memitem:ae76b07e4d8846d3d7cff688898ffda32"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtuple.html">tuple</a>&lt; <a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#ae76b07e4d8846d3d7cff688898ffda32">getCharacteristics</a> ()</td></tr>
 <tr class="separator:ae76b07e4d8846d3d7cff688898ffda32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3cb5e053a509b8602dc59f47ed5db25"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#ac3cb5e053a509b8602dc59f47ed5db25">createCharacteristics</a> ()=0</td></tr>
 <tr class="separator:ac3cb5e053a509b8602dc59f47ed5db25"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9e14e23368ee5dd420bd40c9df21d651"><td class="memItemLeft" align="right" valign="top"><a id="a9e14e23368ee5dd420bd40c9df21d651" name="a9e14e23368ee5dd420bd40c9df21d651"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onBleEvent</b> (const ble_evt_t *event)</td></tr>
+<tr class="memitem:a9e14e23368ee5dd420bd40c9df21d651"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a9e14e23368ee5dd420bd40c9df21d651">onBleEvent</a> (const ble_evt_t *event)</td></tr>
 <tr class="separator:a9e14e23368ee5dd420bd40c9df21d651"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9815068f73b1ef098dee0ecae37b10a3"><td class="memItemLeft" align="right" valign="top"><a id="a9815068f73b1ef098dee0ecae37b10a3" name="a9815068f73b1ef098dee0ecae37b10a3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onConnect</b> (uint16_t connectionHandle, const ble_gap_evt_connected_t &amp;event)</td></tr>
+<tr class="memitem:a9815068f73b1ef098dee0ecae37b10a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a9815068f73b1ef098dee0ecae37b10a3">onConnect</a> (uint16_t connectionHandle, const ble_gap_evt_connected_t &amp;event)</td></tr>
 <tr class="separator:a9815068f73b1ef098dee0ecae37b10a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a951105dc48fe3938e7297d1398f60fe0"><td class="memItemLeft" align="right" valign="top"><a id="a951105dc48fe3938e7297d1398f60fe0" name="a951105dc48fe3938e7297d1398f60fe0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onDisconnect</b> (uint16_t connectionHandle, const ble_gap_evt_disconnected_t &amp;event)</td></tr>
+<tr class="memitem:a951105dc48fe3938e7297d1398f60fe0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a951105dc48fe3938e7297d1398f60fe0">onDisconnect</a> (uint16_t connectionHandle, const ble_gap_evt_disconnected_t &amp;event)</td></tr>
 <tr class="separator:a951105dc48fe3938e7297d1398f60fe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab5509a2177e844778dbbc95b2cddce8"><td class="memItemLeft" align="right" valign="top"><a id="aab5509a2177e844778dbbc95b2cddce8" name="aab5509a2177e844778dbbc95b2cddce8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>onWrite</b> (const ble_gatts_evt_write_t &amp;event, uint16_t gattHandle)</td></tr>
+<tr class="memitem:aab5509a2177e844778dbbc95b2cddce8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#aab5509a2177e844778dbbc95b2cddce8">onWrite</a> (const ble_gatts_evt_write_t &amp;event, uint16_t gattHandle)</td></tr>
 <tr class="separator:aab5509a2177e844778dbbc95b2cddce8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a540f63c5f0b29ff59176679675bcaa09"><td class="memItemLeft" align="right" valign="top"><a id="a540f63c5f0b29ff59176679675bcaa09" name="a540f63c5f0b29ff59176679675bcaa09"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onTxComplete</b> (const ble_common_evt_t *event)</td></tr>
+<tr class="memitem:a540f63c5f0b29ff59176679675bcaa09"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a540f63c5f0b29ff59176679675bcaa09">onTxComplete</a> (const ble_common_evt_t *event)</td></tr>
 <tr class="separator:a540f63c5f0b29ff59176679675bcaa09"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8065ead60cae0193d46bcecb4d6769d9"><td class="memItemLeft" align="right" valign="top"><a id="a8065ead60cae0193d46bcecb4d6769d9" name="a8065ead60cae0193d46bcecb4d6769d9"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addCharacteristic</b> (<a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> *characteristic)</td></tr>
-<tr class="memdesc:a8065ead60cae0193d46bcecb4d6769d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a single characteristic to the list @characteristic <a class="el" href="classCharacteristic.html" title="Characteristic of generic type T.">Characteristic</a> to add. <br /></td></tr>
+<tr class="memitem:a8065ead60cae0193d46bcecb4d6769d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a8065ead60cae0193d46bcecb4d6769d9">addCharacteristic</a> (<a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> *characteristic)</td></tr>
+<tr class="memdesc:a8065ead60cae0193d46bcecb4d6769d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a single characteristic to the list @characteristic <a class="el" href="classCharacteristic.html" title="Characteristic of generic type T.">Characteristic</a> to add.  <a href="classService.html#a8065ead60cae0193d46bcecb4d6769d9">More...</a><br /></td></tr>
 <tr class="separator:a8065ead60cae0193d46bcecb4d6769d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54f52ec43877f997d134e5234919d3c3"><td class="memItemLeft" align="right" valign="top"><a id="a54f52ec43877f997d134e5234919d3c3" name="a54f52ec43877f997d134e5234919d3c3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>updatedCharacteristics</b> ()</td></tr>
+<tr class="memitem:a54f52ec43877f997d134e5234919d3c3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a54f52ec43877f997d134e5234919d3c3">updatedCharacteristics</a> ()</td></tr>
 <tr class="separator:a54f52ec43877f997d134e5234919d3c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classBaseClass"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classBaseClass')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classBaseClass.html">BaseClass&lt; 1 &gt;</a></td></tr>
-<tr class="memitem:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a9e2337c2676bf9fbcca00ab7750bbf14" name="a9e2337c2676bf9fbcca00ab7750bbf14"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:aa8b0502f9dd06a726a07526f4a344354 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#aa8b0502f9dd06a726a07526f4a344354">BaseClass</a> ()</td></tr>
+<tr class="separator:aa8b0502f9dd06a726a07526f4a344354 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a9e2337c2676bf9fbcca00ab7750bbf14">isInitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a0290904b966a159231f848cfb5fd97a4" name="a0290904b966a159231f848cfb5fd97a4"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setInitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a0290904b966a159231f848cfb5fd97a4">setInitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a4391d2f80e021fc4420fb48278a314ae" name="a4391d2f80e021fc4420fb48278a314ae"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setUninitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a4391d2f80e021fc4420fb48278a314ae">setUninitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a320d620508a2168d441356acfdb9ea33"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classStack.html">Stack</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a320d620508a2168d441356acfdb9ea33">_stack</a> = nullptr</td></tr>
+<tr class="memdesc:a320d620508a2168d441356acfdb9ea33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Back reference to the stack.  <a href="classService.html#a320d620508a2168d441356acfdb9ea33">More...</a><br /></td></tr>
+<tr class="separator:a320d620508a2168d441356acfdb9ea33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5194907897fc76b00970983d9ff95ae5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classUUID.html">UUID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a5194907897fc76b00970983d9ff95ae5">_uuid</a></td></tr>
+<tr class="separator:a5194907897fc76b00970983d9ff95ae5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42359e81eca7bc36a44896666167fb4c"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a42359e81eca7bc36a44896666167fb4c">_handle</a> = BLE_CONN_HANDLE_INVALID</td></tr>
+<tr class="memdesc:a42359e81eca7bc36a44896666167fb4c"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classService.html" title="Base class for a BLE service.">Service</a> handle will be obtained from SoftDevice.  <a href="classService.html#a42359e81eca7bc36a44896666167fb4c">More...</a><br /></td></tr>
+<tr class="separator:a42359e81eca7bc36a44896666167fb4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3119fd5950f162432f620d5eaf84a407"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classtuple.html">tuple</a>&lt; <a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classService.html#a3119fd5950f162432f620d5eaf84a407">_characteristics</a></td></tr>
+<tr class="memdesc:a3119fd5950f162432f620d5eaf84a407"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of characteristics.  <a href="classService.html#a3119fd5950f162432f620d5eaf84a407">More...</a><br /></td></tr>
+<tr class="separator:a3119fd5950f162432f620d5eaf84a407"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Base class for a BLE service. </p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a62dd812bad9d002a6f4af7302c4e3433" name="a62dd812bad9d002a6f4af7302c4e3433"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62dd812bad9d002a6f4af7302c4e3433">&#9670;&#160;</a></span>condition_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classService.html#a62dd812bad9d002a6f4af7302c4e3433">Service::condition_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a62dd812bad9d002a6f4af7302c4e3433aaea14d176f2e0ad82435e87a8db71696" name="a62dd812bad9d002a6f4af7302c4e3433aaea14d176f2e0ad82435e87a8db71696"></a>C_SERVICE_INITIALIZED&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="acc246c9f7ed3c51e2d91d10fe257513f" name="acc246c9f7ed3c51e2d91d10fe257513f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc246c9f7ed3c51e2d91d10fe257513f">&#9670;&#160;</a></span>Service()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classService.html">Service::Service</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="aa173db92a095e3198256fcd6b9b47d9d" name="aa173db92a095e3198256fcd6b9b47d9d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa173db92a095e3198256fcd6b9b47d9d">&#9670;&#160;</a></span>~Service()</h2>
 
@@ -229,6 +276,26 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setUninitialized</b> 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a8065ead60cae0193d46bcecb4d6769d9" name="a8065ead60cae0193d46bcecb4d6769d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8065ead60cae0193d46bcecb4d6769d9">&#9670;&#160;</a></span>addCharacteristic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Service::addCharacteristic </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> *&#160;</td>
+          <td class="paramname"><em>characteristic</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add a single characteristic to the list @characteristic <a class="el" href="classCharacteristic.html" title="Characteristic of generic type T.">Characteristic</a> to add. </p>
+
+</div>
+</div>
 <a id="ac3cb5e053a509b8602dc59f47ed5db25" name="ac3cb5e053a509b8602dc59f47ed5db25"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac3cb5e053a509b8602dc59f47ed5db25">&#9670;&#160;</a></span>createCharacteristics()</h2>
 
@@ -252,7 +319,247 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setUninitialized</b> 
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="classCrownstoneService.html#ad4061ade78a2b0cda2d48b6a4af143ce">CrownstoneService</a>, <a class="el" href="classDeviceInformationService.html#a53d2ec2f3f6dc5c54ecd52ad120edc08">DeviceInformationService</a>, and <a class="el" href="classSetupService.html#af4515e2f76c0bac5e1bcb230bf07cd17">SetupService</a>.</p>
+<p>Implemented in <a class="el" href="classCrownstoneService.html#ad4061ade78a2b0cda2d48b6a4af143ce">CrownstoneService</a>, <a class="el" href="classDeviceInformationService.html#a53d2ec2f3f6dc5c54ecd52ad120edc08">DeviceInformationService</a>, <a class="el" href="classMicroappService.html#a059c2fef4c09717573d82a802ae9938d">MicroappService</a>, and <a class="el" href="classSetupService.html#af4515e2f76c0bac5e1bcb230bf07cd17">SetupService</a>.</p>
+
+</div>
+</div>
+<a id="ae76b07e4d8846d3d7cff688898ffda32" name="ae76b07e4d8846d3d7cff688898ffda32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae76b07e4d8846d3d7cff688898ffda32">&#9670;&#160;</a></span>getCharacteristics()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classtuple.html">tuple</a>&lt; <a class="el" href="classCharacteristicBase.html">CharacteristicBase</a> * &gt; Service::getCharacteristics </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aacf6d1a130e17d476a34fe7e9e6c4220" name="aacf6d1a130e17d476a34fe7e9e6c4220"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aacf6d1a130e17d476a34fe7e9e6c4220">&#9670;&#160;</a></span>getHandle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t Service::getHandle </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab64dd9a0e966d2e45323d4c543eb4679" name="ab64dd9a0e966d2e45323d4c543eb4679"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab64dd9a0e966d2e45323d4c543eb4679">&#9670;&#160;</a></span>getStack()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStack.html">Stack</a> * Service::getStack </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a42381afad04053df2d33815bdf5fd574" name="a42381afad04053df2d33815bdf5fd574"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42381afad04053df2d33815bdf5fd574">&#9670;&#160;</a></span>getUUID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="classUUID.html">UUID</a> &amp; Service::getUUID </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2bcd00d2f73bfc69c4365d6874ca91b2" name="a2bcd00d2f73bfc69c4365d6874ca91b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bcd00d2f73bfc69c4365d6874ca91b2">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Service::init </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classStack.html">Stack</a> *&#160;</td>
+          <td class="paramname"><em>stack</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize the service: register it at the softdevice. </p>
+
+</div>
+</div>
+<a id="a9e14e23368ee5dd420bd40c9df21d651" name="a9e14e23368ee5dd420bd40c9df21d651"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e14e23368ee5dd420bd40c9df21d651">&#9670;&#160;</a></span>onBleEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Service::onBleEvent </td>
+          <td>(</td>
+          <td class="paramtype">const ble_evt_t *&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9815068f73b1ef098dee0ecae37b10a3" name="a9815068f73b1ef098dee0ecae37b10a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9815068f73b1ef098dee0ecae37b10a3">&#9670;&#160;</a></span>onConnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Service::onConnect </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ble_gap_evt_connected_t &amp;&#160;</td>
+          <td class="paramname"><em>event</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a951105dc48fe3938e7297d1398f60fe0" name="a951105dc48fe3938e7297d1398f60fe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a951105dc48fe3938e7297d1398f60fe0">&#9670;&#160;</a></span>onDisconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Service::onDisconnect </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ble_gap_evt_disconnected_t &amp;&#160;</td>
+          <td class="paramname"><em>event</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a540f63c5f0b29ff59176679675bcaa09" name="a540f63c5f0b29ff59176679675bcaa09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a540f63c5f0b29ff59176679675bcaa09">&#9670;&#160;</a></span>onTxComplete()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Service::onTxComplete </td>
+          <td>(</td>
+          <td class="paramtype">const ble_common_evt_t *&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aab5509a2177e844778dbbc95b2cddce8" name="aab5509a2177e844778dbbc95b2cddce8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab5509a2177e844778dbbc95b2cddce8">&#9670;&#160;</a></span>onWrite()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Service::onWrite </td>
+          <td>(</td>
+          <td class="paramtype">const ble_gatts_evt_write_t &amp;&#160;</td>
+          <td class="paramname"><em>event</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>gattHandle</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -274,6 +581,126 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setUninitialized</b> 
 
 <p>Set the <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a>. </p>
 <p >The <a class="el" href="classUUID.html" title="Class that enables the use of 128 bit service UUIDs.">UUID</a> cannot be set anymore after the service has been initialized. </p>
+
+</div>
+</div>
+<a id="a54f52ec43877f997d134e5234919d3c3" name="a54f52ec43877f997d134e5234919d3c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54f52ec43877f997d134e5234919d3c3">&#9670;&#160;</a></span>updatedCharacteristics()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Service::updatedCharacteristics </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a3119fd5950f162432f620d5eaf84a407" name="a3119fd5950f162432f620d5eaf84a407"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3119fd5950f162432f620d5eaf84a407">&#9670;&#160;</a></span>_characteristics</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classtuple.html">tuple</a>&lt;<a class="el" href="classCharacteristicBase.html">CharacteristicBase</a>*&gt; Service::_characteristics</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>List of characteristics. </p>
+
+</div>
+</div>
+<a id="a42359e81eca7bc36a44896666167fb4c" name="a42359e81eca7bc36a44896666167fb4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42359e81eca7bc36a44896666167fb4c">&#9670;&#160;</a></span>_handle</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t Service::_handle = BLE_CONN_HANDLE_INVALID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classService.html" title="Base class for a BLE service.">Service</a> handle will be obtained from SoftDevice. </p>
+
+</div>
+</div>
+<a id="a320d620508a2168d441356acfdb9ea33" name="a320d620508a2168d441356acfdb9ea33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a320d620508a2168d441356acfdb9ea33">&#9670;&#160;</a></span>_stack</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStack.html">Stack</a>* Service::_stack = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Back reference to the stack. </p>
+
+</div>
+</div>
+<a id="a5194907897fc76b00970983d9ff95ae5" name="a5194907897fc76b00970983d9ff95ae5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5194907897fc76b00970983d9ff95ae5">&#9670;&#160;</a></span>_uuid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classUUID.html">UUID</a> Service::_uuid</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

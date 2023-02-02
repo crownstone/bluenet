@@ -120,22 +120,75 @@ Collaboration diagram for stack_params_t:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a1bf260bd36dd60c96b93fc9c268de874"><td class="memItemLeft" align="right" valign="top"><a id="a1bf260bd36dd60c96b93fc9c268de874" name="a1bf260bd36dd60c96b93fc9c268de874"></a>
-<a class="el" href="structcoroutine__t.html">coroutine_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>coroutine</b></td></tr>
+<tr class="memitem:a1bf260bd36dd60c96b93fc9c268de874"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcoroutine__t.html">coroutine_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstack__params__t.html#a1bf260bd36dd60c96b93fc9c268de874">coroutine</a></td></tr>
 <tr class="separator:a1bf260bd36dd60c96b93fc9c268de874"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e2deff087172e24ec8ca597eff76a51"><td class="memItemLeft" align="right" valign="top"><a id="a3e2deff087172e24ec8ca597eff76a51" name="a3e2deff087172e24ec8ca597eff76a51"></a>
-coroutine_function_t&#160;</td><td class="memItemRight" valign="bottom"><b>coroutineFunction</b></td></tr>
+<tr class="memitem:a3e2deff087172e24ec8ca597eff76a51"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__DoubleStackCoroutine_8h.html#a36c32dcd3c1f3e41be2c326675283e5e">coroutine_function_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstack__params__t.html#a3e2deff087172e24ec8ca597eff76a51">coroutineFunction</a></td></tr>
 <tr class="separator:a3e2deff087172e24ec8ca597eff76a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6bb1f7b62b450073373e2cf7293c94f3"><td class="memItemLeft" align="right" valign="top"><a id="a6bb1f7b62b450073373e2cf7293c94f3" name="a6bb1f7b62b450073373e2cf7293c94f3"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>coroutineArgumentBuffer</b> [DOUBLE_STACK_COROUTINE_ARGUMENTS_BUFFER_SIZE]</td></tr>
+<tr class="memitem:a6bb1f7b62b450073373e2cf7293c94f3"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstack__params__t.html#a6bb1f7b62b450073373e2cf7293c94f3">coroutineArgumentBuffer</a> [<a class="el" href="cs__DoubleStackCoroutine_8h.html#a8baa6f92c833b44345fe43f9a5a653e9">DOUBLE_STACK_COROUTINE_ARGUMENTS_BUFFER_SIZE</a>]</td></tr>
 <tr class="separator:a6bb1f7b62b450073373e2cf7293c94f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a835b87a6ef34d97bf393b56e4a2f0ab5"><td class="memItemLeft" align="right" valign="top"><a id="a835b87a6ef34d97bf393b56e4a2f0ab5" name="a835b87a6ef34d97bf393b56e4a2f0ab5"></a>
-void *&#160;</td><td class="memItemRight" valign="bottom"><b>oldStackPointer</b></td></tr>
+<tr class="memitem:a835b87a6ef34d97bf393b56e4a2f0ab5"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstack__params__t.html#a835b87a6ef34d97bf393b56e4a2f0ab5">oldStackPointer</a></td></tr>
 <tr class="separator:a835b87a6ef34d97bf393b56e4a2f0ab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Struct with all the state we need for a coroutine. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a1bf260bd36dd60c96b93fc9c268de874" name="a1bf260bd36dd60c96b93fc9c268de874"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bf260bd36dd60c96b93fc9c268de874">&#9670;&#160;</a></span>coroutine</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcoroutine__t.html">coroutine_t</a> stack_params_t::coroutine</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6bb1f7b62b450073373e2cf7293c94f3" name="a6bb1f7b62b450073373e2cf7293c94f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bb1f7b62b450073373e2cf7293c94f3">&#9670;&#160;</a></span>coroutineArgumentBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t stack_params_t::coroutineArgumentBuffer[<a class="el" href="cs__DoubleStackCoroutine_8h.html#a8baa6f92c833b44345fe43f9a5a653e9">DOUBLE_STACK_COROUTINE_ARGUMENTS_BUFFER_SIZE</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3e2deff087172e24ec8ca597eff76a51" name="a3e2deff087172e24ec8ca597eff76a51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e2deff087172e24ec8ca597eff76a51">&#9670;&#160;</a></span>coroutineFunction</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__DoubleStackCoroutine_8h.html#a36c32dcd3c1f3e41be2c326675283e5e">coroutine_function_t</a> stack_params_t::coroutineFunction</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a835b87a6ef34d97bf393b56e4a2f0ab5" name="a835b87a6ef34d97bf393b56e4a2f0ab5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a835b87a6ef34d97bf393b56e4a2f0ab5">&#9670;&#160;</a></span>oldStackPointer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void* stack_params_t::oldStackPointer</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>source/include/util/<a class="el" href="cs__DoubleStackCoroutine_8h_source.html">cs_DoubleStackCoroutine.h</a></li>
 </ul>
 </div><!-- contents -->

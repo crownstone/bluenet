@@ -1,4 +1,16 @@
 <map id="MeshMsgSender" name="MeshMsgSender">
-<area shape="rect" id="node1" title="Class that:" alt="" coords="5,79,135,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="15,5,125,31"/>
+<area shape="rect" id="node1" title="Class that:" alt="" coords="1469,145,1599,171"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="1227,121,1337,147"/>
+<area shape="rect" id="node3" href="$classMeshModelSelector.html" title="Class that selects which model to use to send a message." alt="" coords="1207,171,1357,196"/>
+<area shape="rect" id="node4" href="$classMeshModelMulticast.html" title="Class that:" alt="" coords="778,96,935,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="319,157,541,197"/>
+<area shape="rect" id="node8" href="$classMeshModelMulticastAcked.html" title="Class that:" alt="" coords="759,285,955,311"/>
+<area shape="rect" id="node11" href="$classMeshModelMulticastNeighbours.html" title="Class that:" alt="" coords="741,195,972,220"/>
+<area shape="rect" id="node13" href="$classMeshModelUnicast.html" title="Class that:" alt="" coords="783,145,930,171"/>
+<area shape="rect" id="node6" href="$structMeshModelMulticast_1_1cs__multicast__queue__item__t.html" title=" " alt="" coords="351,5,509,60"/>
+<area shape="rect" id="node7" href="$structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html" title="Data needed in each model queue." alt="" coords="5,182,197,222"/>
+<area shape="rect" id="node9" href="$structMeshModelMulticastAcked_1_1cs__multicast__acked__queue__item__t.html" title=" " alt="" coords="328,367,532,421"/>
+<area shape="rect" id="node12" href="$structMeshModelMulticastNeighbours_1_1cs__multicast__queue__item__t.html" title=" " alt="" coords="315,231,545,271"/>
+<area shape="rect" id="node14" href="$structMeshModelUnicast_1_1cs__unicast__queue__item__t.html" title=" " alt="" coords="344,87,516,127"/>
+<area shape="rect" id="node10" href="$classBitmaskVarSize.html" title="Class that holds a bitmask of variable size." alt="" coords="367,317,493,343"/>
 </map>

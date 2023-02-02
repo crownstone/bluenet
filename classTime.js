@@ -1,4 +1,10 @@
 var classTime =
 [
-    [ "dayOfWeek", "classTime.html#a0e666e26d1eefb81181a725bc522b67c", null ]
+    [ "Time", "classTime.html#a64ef71f30616f968569ea03662eb5966", null ],
+    [ "Time", "classTime.html#ae3206314a8372f178f45776178752920", null ],
+    [ "dayOfWeek", "classTime.html#a0e666e26d1eefb81181a725bc522b67c", null ],
+    [ "isValid", "classTime.html#a36b218f71e5d2df35930748d89791c17", null ],
+    [ "timeOfDay", "classTime.html#a32b627d07d023f9e914ec092f8fb8190", null ],
+    [ "timestamp", "classTime.html#acd695026fd7f36f0d5d7bcfd751bd7d9", null ],
+    [ "posixTimeStamp", "classTime.html#a6009508a0444cd7dd7d2ccc70d4bd15d", null ]
 ];

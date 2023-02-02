@@ -1,4 +1,5 @@
 <map id="CrownstoneCentral" name="CrownstoneCentral">
-<area shape="rect" id="node1" title="Class to connect to another crownstone, and write control commands." alt="" coords="5,79,152,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="23,5,134,31"/>
+<area shape="rect" id="node1" title="Class to connect to another crownstone, and write control commands." alt="" coords="41,93,187,119"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node3" href="$classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="141,5,197,31"/>
 </map>

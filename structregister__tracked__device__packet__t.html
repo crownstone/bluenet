@@ -103,48 +103,207 @@ $(document).ready(function(){initNavTree('structregister__tracked__device__packe
   <div class="headertitle"><div class="title">register_tracked_device_packet_t Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__Packets_8h_source.html">cs_Packets.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a228f184e368dc529b50baa038e203c5e"><td class="memItemLeft" align="right" valign="top"><a id="a228f184e368dc529b50baa038e203c5e" name="a228f184e368dc529b50baa038e203c5e"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>deviceId</b></td></tr>
+<tr class="memitem:a228f184e368dc529b50baa038e203c5e"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structregister__tracked__device__packet__t.html#a228f184e368dc529b50baa038e203c5e">deviceId</a></td></tr>
 <tr class="separator:a228f184e368dc529b50baa038e203c5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa06fb82ef78340df41a587e9a294e8c1"><td class="memItemLeft" align="right" valign="top"><a id="aa06fb82ef78340df41a587e9a294e8c1" name="aa06fb82ef78340df41a587e9a294e8c1"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>locationId</b> = 0</td></tr>
+<tr class="memitem:aa06fb82ef78340df41a587e9a294e8c1"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structregister__tracked__device__packet__t.html#aa06fb82ef78340df41a587e9a294e8c1">locationId</a> = 0</td></tr>
 <tr class="separator:aa06fb82ef78340df41a587e9a294e8c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aafcc363a660287d0e3be914dc814898a"><td class="memItemLeft" align="right" valign="top"><a id="aafcc363a660287d0e3be914dc814898a" name="aafcc363a660287d0e3be914dc814898a"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>profileId</b></td></tr>
+<tr class="memitem:aafcc363a660287d0e3be914dc814898a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structregister__tracked__device__packet__t.html#aafcc363a660287d0e3be914dc814898a">profileId</a></td></tr>
 <tr class="separator:aafcc363a660287d0e3be914dc814898a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8cc92b5ec8cee10b3073203916b43c05"><td class="memItemLeft" align="right" valign="top"><a id="a8cc92b5ec8cee10b3073203916b43c05" name="a8cc92b5ec8cee10b3073203916b43c05"></a>
-int8_t&#160;</td><td class="memItemRight" valign="bottom"><b>rssiOffset</b> = 0</td></tr>
+<tr class="memitem:a8cc92b5ec8cee10b3073203916b43c05"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structregister__tracked__device__packet__t.html#a8cc92b5ec8cee10b3073203916b43c05">rssiOffset</a> = 0</td></tr>
 <tr class="separator:a8cc92b5ec8cee10b3073203916b43c05"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a37605b29661c3db13bdc7a1848fad202"><td class="memItemLeft" ><a id="a37605b29661c3db13bdc7a1848fad202" name="a37605b29661c3db13bdc7a1848fad202"></a>
-union {</td></tr>
-<tr class="memitem:a41c3c1d0990e86fa84cfdc0d803316ed"><td class="memItemLeft" >
-&#160;&#160;&#160;struct {</td></tr>
-<tr class="memitem:ac38621458a0fc6162c86827cb1133db8"><td class="memItemLeft" >
-&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<b>reserved</b>: 1</td></tr>
+<tr class="memitem:a37605b29661c3db13bdc7a1848fad202"><td class="memItemLeft" >union {</td></tr>
+<tr class="memitem:a41c3c1d0990e86fa84cfdc0d803316ed"><td class="memItemLeft" >&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:ac38621458a0fc6162c86827cb1133db8"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="structregister__tracked__device__packet__t.html#a750c45ce2dcf9593e199a77d3f5f0320">reserved</a>: 1</td></tr>
 <tr class="separator:ac38621458a0fc6162c86827cb1133db8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41cba571f30d2fb39e696da27bdf2519"><td class="memItemLeft" >
-&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<b>ignoreForBehaviour</b>: 1</td></tr>
+<tr class="memitem:a41cba571f30d2fb39e696da27bdf2519"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="structregister__tracked__device__packet__t.html#a26e601b3f92f612f03072ca93f044abe">ignoreForBehaviour</a>: 1</td></tr>
 <tr class="separator:a41cba571f30d2fb39e696da27bdf2519"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5a6ce79c043f9d60299dfdb51d42663"><td class="memItemLeft" >
-&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<b>tapToToggle</b>: 1</td></tr>
+<tr class="memitem:ac5a6ce79c043f9d60299dfdb51d42663"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="structregister__tracked__device__packet__t.html#ad6510f9485df11a478b108c38cea4b5e">tapToToggle</a>: 1</td></tr>
 <tr class="separator:ac5a6ce79c043f9d60299dfdb51d42663"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41c3c1d0990e86fa84cfdc0d803316ed"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;&#160;&#160;<b>flags</b></td></tr>
+<tr class="memitem:a41c3c1d0990e86fa84cfdc0d803316ed"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;&#160;&#160;<a class="el" href="structregister__tracked__device__packet__t.html#a234791114a2a98c161e8dbdb60866116">flags</a></td></tr>
 <tr class="separator:a41c3c1d0990e86fa84cfdc0d803316ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2163010b42775e75b2bec496c9f3fb1d"><td class="memItemLeft" >
-&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<b>asInt</b></td></tr>
+<tr class="memitem:a2163010b42775e75b2bec496c9f3fb1d"><td class="memItemLeft" >&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<a class="el" href="structregister__tracked__device__packet__t.html#a2f0125f6e3e00172d54bbfb49d28d2c6">asInt</a></td></tr>
 <tr class="separator:a2163010b42775e75b2bec496c9f3fb1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a37605b29661c3db13bdc7a1848fad202"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><b>flags</b></td></tr>
+<tr class="memitem:a37605b29661c3db13bdc7a1848fad202"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structregister__tracked__device__packet__t.html#a37605b29661c3db13bdc7a1848fad202">flags</a></td></tr>
 <tr class="separator:a37605b29661c3db13bdc7a1848fad202"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a61b34d7d71c2ea10ab4682d6771a7515"><td class="memItemLeft" align="right" valign="top"><a id="a61b34d7d71c2ea10ab4682d6771a7515" name="a61b34d7d71c2ea10ab4682d6771a7515"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>deviceToken</b> [TRACKED_DEVICE_TOKEN_SIZE]</td></tr>
+<tr class="memitem:a61b34d7d71c2ea10ab4682d6771a7515"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structregister__tracked__device__packet__t.html#a61b34d7d71c2ea10ab4682d6771a7515">deviceToken</a> [<a class="el" href="cs__Typedefs_8h.html#aa23406b8444bc0cb8c7289860cfb85d8">TRACKED_DEVICE_TOKEN_SIZE</a>]</td></tr>
 <tr class="separator:a61b34d7d71c2ea10ab4682d6771a7515"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abecfdce73333585481fc8dfbb36e6234"><td class="memItemLeft" align="right" valign="top"><a id="abecfdce73333585481fc8dfbb36e6234" name="abecfdce73333585481fc8dfbb36e6234"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>timeToLiveMinutes</b> = 0</td></tr>
+<tr class="memitem:abecfdce73333585481fc8dfbb36e6234"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structregister__tracked__device__packet__t.html#abecfdce73333585481fc8dfbb36e6234">timeToLiveMinutes</a> = 0</td></tr>
 <tr class="separator:abecfdce73333585481fc8dfbb36e6234"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a2f0125f6e3e00172d54bbfb49d28d2c6" name="a2f0125f6e3e00172d54bbfb49d28d2c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f0125f6e3e00172d54bbfb49d28d2c6">&#9670;&#160;</a></span>asInt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t register_tracked_device_packet_t::asInt</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a228f184e368dc529b50baa038e203c5e" name="a228f184e368dc529b50baa038e203c5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a228f184e368dc529b50baa038e203c5e">&#9670;&#160;</a></span>deviceId</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t register_tracked_device_packet_t::deviceId</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a61b34d7d71c2ea10ab4682d6771a7515" name="a61b34d7d71c2ea10ab4682d6771a7515"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61b34d7d71c2ea10ab4682d6771a7515">&#9670;&#160;</a></span>deviceToken</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t register_tracked_device_packet_t::deviceToken[<a class="el" href="cs__Typedefs_8h.html#aa23406b8444bc0cb8c7289860cfb85d8">TRACKED_DEVICE_TOKEN_SIZE</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a234791114a2a98c161e8dbdb60866116" name="a234791114a2a98c161e8dbdb60866116"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a234791114a2a98c161e8dbdb60866116">&#9670;&#160;</a></span> <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct  { ... }  register_tracked_device_packet_t::flags</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a37605b29661c3db13bdc7a1848fad202" name="a37605b29661c3db13bdc7a1848fad202"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37605b29661c3db13bdc7a1848fad202">&#9670;&#160;</a></span> <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">union  { ... }  register_tracked_device_packet_t::flags</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a26e601b3f92f612f03072ca93f044abe" name="a26e601b3f92f612f03072ca93f044abe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26e601b3f92f612f03072ca93f044abe">&#9670;&#160;</a></span>ignoreForBehaviour</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool register_tracked_device_packet_t::ignoreForBehaviour</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa06fb82ef78340df41a587e9a294e8c1" name="aa06fb82ef78340df41a587e9a294e8c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa06fb82ef78340df41a587e9a294e8c1">&#9670;&#160;</a></span>locationId</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t register_tracked_device_packet_t::locationId = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aafcc363a660287d0e3be914dc814898a" name="aafcc363a660287d0e3be914dc814898a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aafcc363a660287d0e3be914dc814898a">&#9670;&#160;</a></span>profileId</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t register_tracked_device_packet_t::profileId</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a750c45ce2dcf9593e199a77d3f5f0320" name="a750c45ce2dcf9593e199a77d3f5f0320"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a750c45ce2dcf9593e199a77d3f5f0320">&#9670;&#160;</a></span>reserved</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool register_tracked_device_packet_t::reserved</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8cc92b5ec8cee10b3073203916b43c05" name="a8cc92b5ec8cee10b3073203916b43c05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8cc92b5ec8cee10b3073203916b43c05">&#9670;&#160;</a></span>rssiOffset</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int8_t register_tracked_device_packet_t::rssiOffset = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad6510f9485df11a478b108c38cea4b5e" name="ad6510f9485df11a478b108c38cea4b5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6510f9485df11a478b108c38cea4b5e">&#9670;&#160;</a></span>tapToToggle</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool register_tracked_device_packet_t::tapToToggle</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abecfdce73333585481fc8dfbb36e6234" name="abecfdce73333585481fc8dfbb36e6234"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abecfdce73333585481fc8dfbb36e6234">&#9670;&#160;</a></span>timeToLiveMinutes</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t register_tracked_device_packet_t::timeToLiveMinutes = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>source/include/protocol/<a class="el" href="cs__Packets_8h_source.html">cs_Packets.h</a></li>
 </ul>

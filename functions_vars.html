@@ -100,205 +100,484 @@ $(document).ready(function(){initNavTree('functions_vars.html',''); initResizabl
 &#160;
 
 <h3><a id="index__5F" name="index__5F"></a>- _ -</h3><ul>
-<li>_bitmask&#160;:&#160;<a class="el" href="classBitmaskVarSize.html#abf3db9bf0d64c28b3d687962cbf7bc67">BitmaskVarSize</a></li>
-<li>_buffer&#160;:&#160;<a class="el" href="classControlPacketAccessor.html#a879621a226aa28a7ad6a32a46aef363f">ControlPacketAccessor&lt; PAYLOAD_SIZE &gt;</a>, <a class="el" href="classIBeacon.html#a03b2b7f8f45def1c2e1cbd276b592748">IBeacon</a>, <a class="el" href="classResultPacketAccessor.html#a6b4b5a105e8574ce1386ca5837c8d3f8">ResultPacketAccessor&lt; PAYLOAD_SIZE &gt;</a></li>
+<li>_accessModelHandle&#160;:&#160;<a class="el" href="classMeshModelMulticast.html#ad682c7dc4812727065b02480306eac79">MeshModelMulticast</a>, <a class="el" href="classMeshModelMulticastAcked.html#a49b3c65d255eb569ba93ca5712daeabc">MeshModelMulticastAcked</a>, <a class="el" href="classMeshModelMulticastNeighbours.html#a0d3b51a58c8d04ca0e15a0fe651778f2">MeshModelMulticastNeighbours</a>, <a class="el" href="classMeshModelUnicast.html#a2a5b53a6bdc1108cb506f5b80169d37d">MeshModelUnicast</a></li>
+<li>_accessReliableMsg&#160;:&#160;<a class="el" href="classMeshModelUnicast.html#ae16eb290b31aef12fc897f2f9e1099bb">MeshModelUnicast</a></li>
+<li>_ackedStonesBitmask&#160;:&#160;<a class="el" href="classMeshModelMulticastAcked.html#a114def73eacb46d93a198f1fd16139b6">MeshModelMulticastAcked</a></li>
+<li>_adc&#160;:&#160;<a class="el" href="classPowerSampling.html#a45fcfece2784997fdad59afbe26ca33b">PowerSampling</a></li>
+<li>_adcChannelSwaps&#160;:&#160;<a class="el" href="classPowerSampling.html#a59fb9da4bf0e76e8d4ebb94e0a739829">PowerSampling</a></li>
+<li>_adcConfig&#160;:&#160;<a class="el" href="classPowerSampling.html#aabc5eb96483d56a747286a70468a6280">PowerSampling</a></li>
+<li>_adcRestarts&#160;:&#160;<a class="el" href="classPowerSampling.html#ae2bc677cadcb58c417a0459ad11f0928">PowerSampling</a></li>
+<li>_address&#160;:&#160;<a class="el" href="classBleCentral.html#a97e9347650aca7f8b5be075043e1d829">BleCentral</a></li>
+<li>_adjustedMaxTickVal&#160;:&#160;<a class="el" href="classPWM.html#a7d848eb3b58ef2b9845cbe786fea98fc">PWM</a></li>
+<li>_advData&#160;:&#160;<a class="el" href="classAdvertiser.html#a0b34569114b9ade8f6c8de2127c988a4">Advertiser</a></li>
+<li>_advertisementDataBufferCount&#160;:&#160;<a class="el" href="classAdvertiser.html#abe8e8f120aa0372fd1b998a82c1a6061">Advertiser</a></li>
+<li>_advertisementDataBuffers&#160;:&#160;<a class="el" href="classAdvertiser.html#aa22826af311ff8c87a8e6c883a1632ac">Advertiser</a></li>
+<li>_advertisementDataBuffersInUse&#160;:&#160;<a class="el" href="classAdvertiser.html#ad797ae7ce066fe95c91ec193e867021f">Advertiser</a></li>
+<li>_advertisementDataBufferSize&#160;:&#160;<a class="el" href="classAdvertiser.html#a9cc48781115e6b8f78efe357bc8d84cf">Advertiser</a></li>
+<li>_advertiser&#160;:&#160;<a class="el" href="classCrownstone.html#ae626acb4531f2b28d7afdfd040366e4e">Crownstone</a>, <a class="el" href="classMesh.html#aef16b3b18b8f24d2262b72ae8ac0d09e">Mesh</a>, <a class="el" href="classMeshAdvertiser.html#a9eec6c647e13b6db98c704afd30059c2">MeshAdvertiser</a></li>
+<li>_advertising&#160;:&#160;<a class="el" href="classAdvertiser.html#aee8e9dfa140ea852f8a5d30886f58603">Advertiser</a></li>
+<li>_advertisingInterval&#160;:&#160;<a class="el" href="classAdvertiser.html#a7cc4ae07a6b3af51ca327c10885bfa4f">Advertiser</a></li>
+<li>_advHandle&#160;:&#160;<a class="el" href="classAdvertiser.html#a05cd31f2e966b086384dc518e0affa14">Advertiser</a></li>
+<li>_advPacket&#160;:&#160;<a class="el" href="classMeshAdvertiser.html#a44a740c5d24cf2391c07ce53abf6ef43">MeshAdvertiser</a></li>
+<li>_advParams&#160;:&#160;<a class="el" href="classAdvertiser.html#a4afd6b934dc7e1f9b9d1211c2004dfcd">Advertiser</a></li>
+<li>_advParamsChanged&#160;:&#160;<a class="el" href="classAdvertiser.html#ab765f6a541fc8df0833aeac371471bf6">Advertiser</a></li>
+<li>_aggregatedState&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a39efd6656baafd08900f8489e62f1610">SwitchAggregator</a></li>
+<li>_allocated&#160;:&#160;<a class="el" href="classAdcBuffer.html#ab0ea85fb683f790108ab30163dec51d5">AdcBuffer</a></li>
+<li>_allocatedSelf&#160;:&#160;<a class="el" href="classCircularBuffer.html#a5f41f0b1a3f582eca74065d99bb86281">CircularBuffer&lt; T &gt;</a>, <a class="el" href="classDifferentialBuffer.html#a6bb63fe0998e49352001e8d0b2b04ce4">DifferentialBuffer&lt; T &gt;</a>, <a class="el" href="classStackBuffer.html#af391275b52606119b7e334cd8fc15026">StackBuffer&lt; T &gt;</a></li>
+<li>_allowSwitchingOverride&#160;:&#160;<a class="el" href="classSmartSwitch.html#a4ad26fb3c06f6954162f20bde3769074">SmartSwitch</a></li>
+<li>_appkey&#160;:&#160;<a class="el" href="classMeshCore.html#a4b766be7726aa501d17ee8395b49386b">MeshCore</a></li>
+<li>_appkeyHandle&#160;:&#160;<a class="el" href="classMeshCore.html#a2892f61d0ab73838c86f3d18f4191c88">MeshCore</a></li>
+<li>_appTimerData&#160;:&#160;<a class="el" href="classScanner.html#a7f5393c9dfb170c4db8d26287389949c">Scanner</a>, <a class="el" href="classTemperatureGuard.html#a7a932195692996957e8d5aea6f423b5d">TemperatureGuard</a></li>
+<li>_appTimerId&#160;:&#160;<a class="el" href="classScanner.html#a43f97eaffa0c2a71a16624f43ba7064c">Scanner</a>, <a class="el" href="classTemperatureGuard.html#a9c11fd2f1564eb420cdb1a07463b400b">TemperatureGuard</a></li>
+<li>_array&#160;:&#160;<a class="el" href="classCircularBuffer.html#af7f480a267107c63cdfa389ff7f97f8e">CircularBuffer&lt; T &gt;</a>, <a class="el" href="classCircularDifferentialBuffer.html#acf7abb9b2b259c90c8c1b3af469258f5">CircularDifferentialBuffer&lt; T &gt;</a></li>
+<li>_asset&#160;:&#160;<a class="el" href="classAssetAcceptedEvent.html#a49e279e605052c9752287339c823483f">AssetAcceptedEvent</a></li>
+<li>_assetFilterIndex&#160;:&#160;<a class="el" href="classMemUsageTest.html#a236fafdf17848aace863ce8811bd6a47">MemUsageTest</a></li>
+<li>_assetFiltering&#160;:&#160;<a class="el" href="classCrownstone.html#a38215978234e228a42ee1ffcab41370d">Crownstone</a></li>
+<li>_assetForwarder&#160;:&#160;<a class="el" href="classAssetFiltering.html#a77eb1648a19168d7e6581c8625f86fc8">AssetFiltering</a></li>
+<li>_assetStore&#160;:&#160;<a class="el" href="classAssetFiltering.html#ad1cafe7f576b95baf8130adbfe26a7fa">AssetFiltering</a>, <a class="el" href="classNearestCrownstoneTracker.html#a59ec1ac1de30b7bec89d0be153cfbfa1">NearestCrownstoneTracker</a></li>
+<li>_avgCurrentRmsMilliAmp&#160;:&#160;<a class="el" href="classPowerSampling.html#ae17892a6d0f1b7a081bf7563736932f2">PowerSampling</a></li>
+<li>_avgPowerDiscount&#160;:&#160;<a class="el" href="classPowerSampling.html#ad7154f30a7603638f3a65d8af796cbe9">PowerSampling</a></li>
+<li>_avgPowerMilliWatt&#160;:&#160;<a class="el" href="classPowerSampling.html#a3670bbc8bbca1d7aa73bfab35355f8e7">PowerSampling</a></li>
+<li>_avgVoltageRmsMilliVolt&#160;:&#160;<a class="el" href="classPowerSampling.html#ad89d4ccef3bba1997b0860c426864fee">PowerSampling</a></li>
+<li>_avgZeroCurrent&#160;:&#160;<a class="el" href="classPowerSampling.html#a3e2d870f94dcb81c23629bafb2edd346">PowerSampling</a></li>
+<li>_avgZeroCurrentDiscount&#160;:&#160;<a class="el" href="classPowerSampling.html#ac2f3b8b10355609584c81d5d182053c9">PowerSampling</a></li>
+<li>_avgZeroVoltage&#160;:&#160;<a class="el" href="classPowerSampling.html#a445fad0b0165a55481797e626b60c038">PowerSampling</a></li>
+<li>_avgZeroVoltageDiscount&#160;:&#160;<a class="el" href="classPowerSampling.html#ace659ee2b33a5985aeb66be7357c1456">PowerSampling</a></li>
+<li>_awaitingCommandResult&#160;:&#160;<a class="el" href="classCommandHandler.html#ac03ac839c44cb370fe07d6dfd1fd803c">CommandHandler</a></li>
+<li>_behaviourHandler&#160;:&#160;<a class="el" href="classSwitchAggregator.html#adc1f3eaa8e517cebca6a813d86673dc6">SwitchAggregator</a></li>
+<li>_behaviourIndex&#160;:&#160;<a class="el" href="classMemUsageTest.html#a9d6104db1b4e4b78d31ebb1db168f721">MemUsageTest</a></li>
+<li>_behaviourSettingsSynced&#160;:&#160;<a class="el" href="classBehaviourHandler.html#abdf137fb4efa1ff18ba0bd2250cee385">BehaviourHandler</a></li>
+<li>_behaviourState&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a4a54174a89d101655e1abd2272070504">SwitchAggregator</a></li>
+<li>_behaviourStore&#160;:&#160;<a class="el" href="classBehaviourHandler.html#afa178155719f148ed97b4900fdb3b427">BehaviourHandler</a>, <a class="el" href="classCrownstone.html#ad0d7825fe1e7bb1440456c4af57ba0f0">Crownstone</a>, <a class="el" href="classSwitchAggregator.html#a7935cefb8be7c2afa6153015dedfaa18">SwitchAggregator</a>, <a class="el" href="classTwilightHandler.html#a197e5f8ba37ab6bc1bff54d2ce65c953">TwilightHandler</a></li>
+<li>_bitmask&#160;:&#160;<a class="el" href="classBitmaskVarSize.html#abf3db9bf0d64c28b3d687962cbf7bc67">BitmaskVarSize</a>, <a class="el" href="classPresenceStateDescription.html#a85fea838a5e48c7d6843602e5d495510">PresenceStateDescription</a></li>
+<li>_bleCentral&#160;:&#160;<a class="el" href="classCrownstone.html#a7c5dabd0e22ed32c877702cf96b889a0">Crownstone</a></li>
+<li>_block&#160;:&#160;<a class="el" href="classAES.html#a00a2c90326924b58019c96f806e4e090">AES</a></li>
+<li>_boardConfig&#160;:&#160;<a class="el" href="classCommandHandler.html#a10f5a3fb639cc4d39d85b298b54f7a6a">CommandHandler</a>, <a class="el" href="classGpio.html#a26d03b4b475c00a2faf58107cf2d46d3">Gpio</a>, <a class="el" href="classMemUsageTest.html#af7cfaabc5713c0058ec8707a93029667">MemUsageTest</a>, <a class="el" href="classPowerSampling.html#aab4ea7990f24b77ff8087dd6b2fd8dec">PowerSampling</a></li>
+<li>_boardPowerZero&#160;:&#160;<a class="el" href="classPowerSampling.html#a575fe5e55425ec3722993a3f864c3611">PowerSampling</a></li>
+<li>_boardsConfig&#160;:&#160;<a class="el" href="classCrownstone.html#acf3392aa48fae71cbbf70b6999be995d">Crownstone</a>, <a class="el" href="classState.html#ac2dfa6cb4c5c30e3d3e17a6ccd078849">State</a></li>
+<li>_broadcastIndex&#160;:&#160;<a class="el" href="classExternalStates.html#aac35d3af75661dd91f2dc728e16ec8d1">ExternalStates</a></li>
+<li>_buf&#160;:&#160;<a class="el" href="classAdcBuffer.html#abaeda303ddd3bef731a693ef29c7281e">AdcBuffer</a>, <a class="el" href="classBleCentral.html#ae6e90311288ea9d609af4ab37f9e4363">BleCentral</a></li>
+<li>_bufDataSize&#160;:&#160;<a class="el" href="classBleCentral.html#a98604d0b535b54356ce58f40bf4c2ea9">BleCentral</a></li>
+<li>_buffer&#160;:&#160;<a class="el" href="classCharacteristicBase.html#af4e37c520aeaf6d79ea6da9806162ad7">CharacteristicBase</a>, <a class="el" href="classCharacteristicBuffer.html#a65f2c5a7d415a070523d0a8181e26c26">CharacteristicBuffer</a>, <a class="el" href="classControlPacketAccessor.html#a879621a226aa28a7ad6a32a46aef363f">ControlPacketAccessor&lt; PAYLOAD_SIZE &gt;</a>, <a class="el" href="classCrownstoneManufacturer.html#a71238895ca18a549634441c390678b9c">CrownstoneManufacturer</a>, <a class="el" href="classDifferentialBuffer.html#acf76cd80ffa18baad7ecc7b1be3cb8d6">DifferentialBuffer&lt; T &gt;</a>, <a class="el" href="classIBeacon.html#a03b2b7f8f45def1c2e1cbd276b592748">IBeacon</a>, <a class="el" href="classMeshAdvertiser.html#a90b7fc08c65a1d3c7febe804adab558e">MeshAdvertiser</a>, <a class="el" href="classResultPacketAccessor.html#a6b4b5a105e8574ce1386ca5837c8d3f8">ResultPacketAccessor&lt; PAYLOAD_SIZE &gt;</a>, <a class="el" href="classStackBuffer.html#a0065d27bd1be4d8f554645f17fc2a9be">StackBuffer&lt; T &gt;</a></li>
+<li>_bufferQueue&#160;:&#160;<a class="el" href="classADC.html#a639bd2e5e34df0f2b9d80f45e9cfdf36">ADC</a>, <a class="el" href="classPowerSampling.html#a9fe8f2bfde4fdb65fd798e358687f2c1">PowerSampling</a></li>
+<li>_bufSeqNr&#160;:&#160;<a class="el" href="classADC.html#ae751c54c375b1175097c3e8c6b20536d">ADC</a></li>
+<li>_bufSkipCount&#160;:&#160;<a class="el" href="classPowerSampling.html#a1a51074d4be0b1e9218ab8ac5685c351">PowerSampling</a></li>
+<li>_busyRecordKeys&#160;:&#160;<a class="el" href="classStorage.html#a4fe2a4ffae863f1e37b875270aab78fe">Storage</a></li>
+<li>_calibratePowerZeroCountDown&#160;:&#160;<a class="el" href="classPowerSampling.html#ae80e426df3ac2bb1b93a2d44777213d8">PowerSampling</a></li>
+<li>_callback&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a934de241c726bc1b9479d9d4f274f059">CharacteristicBase</a>, <a class="el" href="classCOMP.html#adb39665cbb9c49da66baf0bccb45ba7a">COMP</a></li>
+<li>_callbackOnIntensityChange&#160;:&#160;<a class="el" href="classSmartSwitch.html#abf5532d22c92872148198a02bbeae09e">SmartSwitch</a></li>
+<li>_capacity&#160;:&#160;<a class="el" href="classCircularBuffer.html#a7780131f6160a21873914b89a387c6d9">CircularBuffer&lt; T &gt;</a>, <a class="el" href="classCircularDifferentialBuffer.html#a23ea93598d46290b6e2ca3c9e74f219b">CircularDifferentialBuffer&lt; T &gt;</a>, <a class="el" href="classDifferentialBuffer.html#a710f5939e08d5d2ab6791fde350e7851">DifferentialBuffer&lt; T &gt;</a>, <a class="el" href="classStackBuffer.html#aa75b63f3b140a87e95543e060e9ec38a">StackBuffer&lt; T &gt;</a></li>
+<li>_changeConfig&#160;:&#160;<a class="el" href="classADC.html#a2ad1a5d1ee27d28271cb80b534c9678c">ADC</a></li>
+<li>_channel&#160;:&#160;<a class="el" href="classrssi__and__channel__float__t.html#a3a1226c5e3afa9a83c7de1a478fa1c47">rssi_and_channel_float_t</a></li>
+<li>_channelId&#160;:&#160;<a class="el" href="classWatchdog.html#ad0989e3207fac08c01851220fd597675">Watchdog</a></li>
+<li>_channelResultConfigs&#160;:&#160;<a class="el" href="classADC.html#aec9a4fbaa0b8b69ae3abfb6a72b566a8">ADC</a></li>
+<li>_characteristics&#160;:&#160;<a class="el" href="classService.html#a3119fd5950f162432f620d5eaf84a407">Service</a></li>
+<li>_chunkData&#160;:&#160;<a class="el" href="classMicroappStorage.html#a7a3d964d7c5ed8fc925ee033815c6b81">MicroappStorage</a></li>
+<li>_chunkFlashAddress&#160;:&#160;<a class="el" href="classMicroappStorage.html#ab9682478ac99f666c1347ade0b3cba3a">MicroappStorage</a></li>
+<li>_chunkSize&#160;:&#160;<a class="el" href="classMicroappStorage.html#a69b348eaa0911d1d2e179fd4180216ee">MicroappStorage</a></li>
+<li>_chunkWritten&#160;:&#160;<a class="el" href="classMicroappStorage.html#a9607cb30ef8f50ad4c0c0dedd87fcf07">MicroappStorage</a></li>
+<li>_claims&#160;:&#160;<a class="el" href="classCommandAdvHandler.html#a862b4f5deb8a4b42977c97c12da9ecb1">CommandAdvHandler</a></li>
+<li>_clearedGpRegRetCount&#160;:&#160;<a class="el" href="classCrownstone.html#a5077c0cb9713a7b1b6aae12a256a8baf">Crownstone</a></li>
+<li>_clockSource&#160;:&#160;<a class="el" href="classStack.html#a63dbcef73e104f8f808d7f7696c5bdb3">Stack</a></li>
+<li>_collectingGarbage&#160;:&#160;<a class="el" href="classStorage.html#a40c5ef14f528551ab8fd1fbece868023">Storage</a></li>
+<li>_commandAdvHandler&#160;:&#160;<a class="el" href="classCrownstone.html#a5df3caca78bae44983e5f36d2daf423f">Crownstone</a></li>
+<li>_commandHandler&#160;:&#160;<a class="el" href="classCrownstone.html#aedbff174ad16079f796724dfd5d4d515">Crownstone</a>, <a class="el" href="classUartHandler.html#a7e0b2d6a6d35901f5fad36ed67ee1222">UartHandler</a></li>
+<li>_comp&#160;:&#160;<a class="el" href="classTemperatureGuard.html#a085b9d1ad552ca06f4dfb6f7420f3e99">TemperatureGuard</a></li>
+<li>_condition&#160;:&#160;<a class="el" href="classPresencePredicate.html#a151550cfa4db0eda546786fd6f461cbb">PresencePredicate</a></li>
+<li>_config&#160;:&#160;<a class="el" href="classADC.html#ad85105b74cfa8d0c505ce173c6953ab3">ADC</a>, <a class="el" href="classCharacteristicBase.html#acae729bc2ddc10f3d1cfaee53d5c1b30">CharacteristicBase</a>, <a class="el" href="classPWM.html#aaf8b5af8f7988db8a545e534d709a9aa">PWM</a>, <a class="el" href="classTwi.html#acf33bc8d6fc2f19bba437a6061d40808">Twi</a></li>
+<li>_configAdvertisementData&#160;:&#160;<a class="el" href="classAdvertiser.html#ae801cfe0e710dc8670c781846ecdf294">Advertiser</a></li>
+<li>_configScanResponse&#160;:&#160;<a class="el" href="classAdvertiser.html#a716a8ef190cb60744225133b6cd9eb37">Advertiser</a></li>
+<li>_connectionHandle&#160;:&#160;<a class="el" href="classBleCentral.html#a23cb2b77a79d4a0780a39be1db49b1ab">BleCentral</a>, <a class="el" href="classStack.html#a6a68dcfb3f6744deb28c75fc7e0606a2">Stack</a></li>
+<li>_connectionIsOutgoing&#160;:&#160;<a class="el" href="classStack.html#a7fd57a3b304d3cf8e46d2e4d920bee45">Stack</a></li>
+<li>_connectionParams&#160;:&#160;<a class="el" href="classStack.html#af70a8ae6667d03bb80b4aed70da4606b">Stack</a></li>
+<li>_connectionTimeoutCountdown&#160;:&#160;<a class="el" href="classUartConnection.html#a5ea73d78a232e2b83ef3dfeedac48f3e">UartConnection</a></li>
+<li>_connectionWatchdogRunning&#160;:&#160;<a class="el" href="classStack.html#a2fa585ccde3756149b447a365cdbda1c">Stack</a></li>
+<li>_connectionWatchdogTimerData&#160;:&#160;<a class="el" href="classStack.html#a6abc0197ff9613b1c0be8d88c4d2ca67">Stack</a></li>
+<li>_connectionWatchdogTimerId&#160;:&#160;<a class="el" href="classStack.html#a0125bfc7466d0ac32d2e9ac6a56eb7e4">Stack</a></li>
+<li>_consecutiveDimmerOvercurrent&#160;:&#160;<a class="el" href="classPowerSampling.html#a4720c06519f4285feeda0cd20926b90b">PowerSampling</a></li>
+<li>_consecutiveMicroappCallCounter&#160;:&#160;<a class="el" href="classMicroappController.html#ac4db7135496ee166f211473725f0f3d2">MicroappController</a></li>
+<li>_consecutiveOvercurrent&#160;:&#160;<a class="el" href="classPowerSampling.html#a026052b37a6e50e2eb5cd6b35fa8bfd3">PowerSampling</a></li>
+<li>_contentSize&#160;:&#160;<a class="el" href="classCircularDifferentialBuffer.html#a0e7544565a7fa2a6ca7b53ca3cc96e81">CircularDifferentialBuffer&lt; T &gt;</a></li>
+<li>_contentsSize&#160;:&#160;<a class="el" href="classCircularBuffer.html#ac3dbd427ae9695bbf67b2cac9572d11b">CircularBuffer&lt; T &gt;</a></li>
+<li>_controlCharacteristic&#160;:&#160;<a class="el" href="classCrownstoneService.html#ab810df03733d4510edea17ec4e91d86f">CrownstoneService</a></li>
+<li>_controlHandle&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#abfa443967f7eefc1e624ec64a572dd31">CrownstoneCentral</a>, <a class="el" href="classTestCentral.html#ac9c33169c41b461689ffb360dc178bf8">TestCentral</a></li>
+<li>_controlPacketAccessor&#160;:&#160;<a class="el" href="classCrownstoneService.html#ab787692161eba45e6d0a3435183f95a3">CrownstoneService</a></li>
+<li>_core&#160;:&#160;<a class="el" href="classMesh.html#ae63c91adc3955c7171cf7c30a4127b51">Mesh</a></li>
+<li>_crc&#160;:&#160;<a class="el" href="classUartHandler.html#a343d87a05af8b142482b9ddb58229779">UartHandler</a></li>
+<li>_criticalRegionEntered&#160;:&#160;<a class="el" href="classADC.html#a9bf1907d82f188057d0924e2d1c34129">ADC</a></li>
+<li>_crownstoneCentral&#160;:&#160;<a class="el" href="classCrownstone.html#ad6d6ec62a7480773a6bcd69da8198335">Crownstone</a></li>
+<li>_crownstoneId&#160;:&#160;<a class="el" href="classServiceData.html#af222d0fa30ee2a39b2df82ed3fb19106">ServiceData</a></li>
+<li>_crownstoneService&#160;:&#160;<a class="el" href="classCrownstone.html#a5c298d76117b075ee5c6cf1b8d185814">Crownstone</a></li>
+<li>_crownstoneServiceData&#160;:&#160;<a class="el" href="classAdvertiser.html#a3b8a3c66e4887a3cafc4dfa5db25b0fe">Advertiser</a></li>
+<li>_currentHandle&#160;:&#160;<a class="el" href="classBleCentral.html#af662ae21f77da228f9a87c677897ecb8">BleCentral</a></li>
+<li>_currentIntendedState&#160;:&#160;<a class="el" href="classTwilightHandler.html#a4d50f779c2007ccc689d0a6b958b5a6e">TwilightHandler</a></li>
+<li>_currentMicroappIndex&#160;:&#160;<a class="el" href="classMicroapp.html#a814b7d46d2d6e3048c4a6dc376b8d773">Microapp</a></li>
+<li>_currentMilliAmpThresholdDimmer&#160;:&#160;<a class="el" href="classPowerSampling.html#ac1395e1c3d8666e337834c72cbf0d4df">PowerSampling</a></li>
+<li>_currentOperation&#160;:&#160;<a class="el" href="classBleCentral.html#a8f929ade8aeded0bee87d38c13b6538b">BleCentral</a>, <a class="el" href="classCrownstoneCentral.html#ac52e2e0a81d6f26a326fa18fb061d10f">CrownstoneCentral</a></li>
+<li>_currentRmsMilliAmpHist&#160;:&#160;<a class="el" href="classPowerSampling.html#a6725cec99671f4bd56e2854f33564e24">PowerSampling</a></li>
+<li>_currentSearchType&#160;:&#160;<a class="el" href="classStorage.html#a003d3da89d49c7b847a1d2ccc6d75b17">Storage</a></li>
+<li>_currentSize&#160;:&#160;<a class="el" href="classStore.html#a6bc603121a25c733cbfc93dd4177e083">Store&lt; RecordType, MaxItemCount &gt;</a></li>
+<li>_currentStep&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#a5931b6b471a9900880b74cf37e34f7c9">CrownstoneCentral</a></li>
+<li>_data&#160;:&#160;<a class="el" href="classAssetFilter.html#aeba862452cb343e3edcd3918298a33c9">AssetFilter</a>, <a class="el" href="classAssetFilterData.html#acb39308775d9643782aab1813792b6d0">AssetFilterData</a>, <a class="el" href="classAssetFilterInput.html#ab379e6c0e0e94d4dd9efea75e878d5a1">AssetFilterInput</a>, <a class="el" href="classAssetFilterMetadata.html#ac98930f9f12530012d990fdab6051235">AssetFilterMetadata</a>, <a class="el" href="classAssetFilterOutput.html#a9d724f46ec27abc9aaa8c26a6448b95e">AssetFilterOutput</a>, <a class="el" href="classCuckooFilter.html#a237c1e546c82fb0dd7eca76898dd0b08">CuckooFilter</a>, <a class="el" href="classExactMatchFilter.html#a5df3074db703ae7a124cdc0e5b0bb213">ExactMatchFilter</a></li>
+<li>_deviceInformationService&#160;:&#160;<a class="el" href="classCrownstone.html#af130ab253855698e57604837b9bb9853">Crownstone</a></li>
+<li>_deviceListIsSynced&#160;:&#160;<a class="el" href="classTrackedDevices.html#afa288cd63aedbd26432a907ea5f8cad4">TrackedDevices</a></li>
+<li>_deviceName&#160;:&#160;<a class="el" href="classAdvertiser.html#aa79bac0ee40bdd31996477a986da5617">Advertiser</a></li>
+<li>_devkey&#160;:&#160;<a class="el" href="classMeshCore.html#a39d7be6b550abd6f4c5098b833f27544">MeshCore</a></li>
+<li>_devkeyHandle&#160;:&#160;<a class="el" href="classMeshCore.html#afb86b224179173da35510987a7fb79c3">MeshCore</a></li>
+<li>_dimmerFailureDetectionStarted&#160;:&#160;<a class="el" href="classPowerSampling.html#a0c14935181a92043a70aab726035c6be">PowerSampling</a></li>
+<li>_dimmerTempInverted&#160;:&#160;<a class="el" href="classTemperatureGuard.html#a0f551c91a906f4c283fcdd959679af1c">TemperatureGuard</a></li>
+<li>_disconnectingInProgress&#160;:&#160;<a class="el" href="classStack.html#a3a5772f96f8ca4d5491823fe11b4e12c">Stack</a></li>
+<li>_discoveryModule&#160;:&#160;<a class="el" href="classBleCentral.html#afd69bd70b7f989310432b963af80dea1">BleCentral</a></li>
+<li>_doneCallback&#160;:&#160;<a class="el" href="classADC.html#a8c4038f0b603b12a5abe6ca420d8f382">ADC</a></li>
+<li>_emptySoftInterruptSlots&#160;:&#160;<a class="el" href="classMicroappController.html#a2ace7a7df88086718a29c10a1e48fc03">MicroappController</a></li>
+<li>_enabled&#160;:&#160;<a class="el" href="classDimmer.html#a20dec623b9cc00dd8a7d7f2fe5570744">Dimmer</a>, <a class="el" href="classMesh.html#ad74cf10fb2479018ef9df4a4da07e980">Mesh</a></li>
+<li>_encryptedBuffer&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a320374e650b8ceec562e4223bf1397af">CharacteristicBase</a></li>
+<li>_encryptedValueLength&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a6a9f2507fd1335bf85897050db338158">CharacteristicBase</a></li>
+<li>_encryptionBlocksWritten&#160;:&#160;<a class="el" href="classUartHandler.html#a6cb22b1da3e31ef635ad797a4e278d90">UartHandler</a></li>
+<li>_encryptionBuffer&#160;:&#160;<a class="el" href="classUartHandler.html#aa9be713e79c150a913a5ccd3dd1e7957">UartHandler</a></li>
+<li>_encryptionBufferWritten&#160;:&#160;<a class="el" href="classUartHandler.html#a2f238ae8422f7b712bea658071e56fc5">UartHandler</a></li>
+<li>_encryptionEnabled&#160;:&#160;<a class="el" href="classKeysAndAccess.html#a6a3eefb776ddf3598d2d60304497b70f">KeysAndAccess</a></li>
+<li>_energyUsed&#160;:&#160;<a class="el" href="classServiceData.html#a21efed6849fa5e6276d2de769cf8ec2a">ServiceData</a></li>
+<li>_energyUsedmicroJoule&#160;:&#160;<a class="el" href="classPowerSampling.html#a7ae70432b9740c4a7a495d142adc0636">PowerSampling</a></li>
+<li>_eraseDoneEvent&#160;:&#160;<a class="el" href="classStorage.html#aa7aeb14368452568637ac89b66c7c616">Storage</a></li>
+<li>_eraseEndPage&#160;:&#160;<a class="el" href="classStorage.html#a2382aea1c50652cedbf5216fb8ea9482">Storage</a></li>
+<li>_erasePage&#160;:&#160;<a class="el" href="classStorage.html#a47ff3755eb1b869f698c7422b00f5e2e">Storage</a></li>
+<li>_errorCallback&#160;:&#160;<a class="el" href="classStorage.html#a152bd6aab2db8ac8dc2fa5e7414b18fe">Storage</a></li>
+<li>_escapeNextByte&#160;:&#160;<a class="el" href="classUartHandler.html#a4f9a28f1f95ffd136152eb1aa9f9425c">UartHandler</a></li>
+<li>_eventError&#160;:&#160;<a class="el" href="classTwi.html#a5fb43b3ee70e571821bf717fb4c9983a">Twi</a></li>
+<li>_eventInterruptRegistrations&#160;:&#160;<a class="el" href="classMicroappController.html#a4cc059375856e8e25e069f56edab5f4b">MicroappController</a></li>
+<li>_eventLimitHigh&#160;:&#160;<a class="el" href="classADC.html#a12ef162a055d40e645514cd43a70b952">ADC</a></li>
+<li>_eventLimitLow&#160;:&#160;<a class="el" href="classADC.html#abb2c62a7156178bc1cd8e5a9d1568217">ADC</a></li>
+<li>_eventRead&#160;:&#160;<a class="el" href="classTwi.html#a35cf566d14c283a03842cb94e44c2758">Twi</a></li>
+<li>_expectedDeviceListSize&#160;:&#160;<a class="el" href="classTrackedDevices.html#a231a3b452bd095d1c43dfd78cfa4b86b">TrackedDevices</a></li>
+<li>_externalStates&#160;:&#160;<a class="el" href="classServiceData.html#a545a8207d3fceae2e915cf1e3975df11">ServiceData</a></li>
+<li>_extraFlags&#160;:&#160;<a class="el" href="classServiceData.html#a57ae8a4700828cf11cb41848bc12236b">ServiceData</a></li>
+<li>_factoryReset&#160;:&#160;<a class="el" href="classCrownstone.html#a1fdf46a0a4fa7b11e769cff326df1069">Crownstone</a></li>
+<li>_factoryResetCharacteristic&#160;:&#160;<a class="el" href="classCrownstoneService.html#a2356fa3724cda3036b924f1cb22aa79b">CrownstoneService</a></li>
+<li>_factoryResetMode&#160;:&#160;<a class="el" href="classMicroapp.html#ad20fd1fafeda3b91d1ddf15c69da8d6d">Microapp</a></li>
+<li>_fastIntervalCountdown&#160;:&#160;<a class="el" href="classMeshTopology.html#a468fb4980d7a2b3e9436dfbe2bef2ad3">MeshTopology</a></li>
+<li>_filteredCurrentRmsHistMA&#160;:&#160;<a class="el" href="classPowerSampling.html#a0ede562a461892f48196123186256a4d">PowerSampling</a></li>
+<li>_filterIdsToRemove&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#aeea04d58500d1893e3f43ffbe5bc16d6">AssetFilterSyncer</a></li>
+<li>_filterIdsToUpload&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#a64157f22827325d1cb1d665ed4f3bc67">AssetFilterSyncer</a></li>
+<li>_filterParams&#160;:&#160;<a class="el" href="classPowerSampling.html#a78be371818ad252e67bf8e992858d7ee">PowerSampling</a></li>
+<li>_filterRemoveCount&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#a771d66372405cdaa95657736cdbb303a">AssetFilterSyncer</a></li>
+<li>_filters&#160;:&#160;<a class="el" href="classAssetFilterStore.html#adc73d1cb4122c53a647c4f8568c238ec">AssetFilterStore</a></li>
+<li>_filtersCount&#160;:&#160;<a class="el" href="classAssetFilterStore.html#a377f4cfe89cc83699d2e747cd84cb7d2">AssetFilterStore</a></li>
+<li>_filterStore&#160;:&#160;<a class="el" href="classAssetFiltering.html#ae6f6692bb5fa46b464750a418ce64941">AssetFiltering</a></li>
+<li>_filterSyncer&#160;:&#160;<a class="el" href="classAssetFiltering.html#a41ac3eb286c41b141c30b9e74b24d023">AssetFiltering</a></li>
+<li>_filterUploadCount&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#aaff4db7603a9b979e28c40127ab5e09c">AssetFilterSyncer</a></li>
+<li>_findToken&#160;:&#160;<a class="el" href="classStorage.html#a66d63466f5550d9b71459a1d0a4c2487">Storage</a></li>
+<li>_firmwareRevisionCharacteristic&#160;:&#160;<a class="el" href="classDeviceInformationService.html#a466a8ceb4bf99929108e3fbe31b07968">DeviceInformationService</a></li>
+<li>_firstBuffer&#160;:&#160;<a class="el" href="classADC.html#a151b5f41582f25b56e0e964146a472fa">ADC</a></li>
+<li>_firstErrorTimestamp&#160;:&#160;<a class="el" href="classServiceData.html#a71ba33b059e4760ced5d8f3194d4119b">ServiceData</a></li>
+<li>_firstVal&#160;:&#160;<a class="el" href="classCircularDifferentialBuffer.html#a5af95178031d493b9f60f3cee44d04ab">CircularDifferentialBuffer&lt; T &gt;</a></li>
+<li>_flags&#160;:&#160;<a class="el" href="classServiceData.html#af01f9122ce1c93ebb8e7ed5ebacc5c26">ServiceData</a></li>
+<li>_fwVersionHandle&#160;:&#160;<a class="el" href="classTestCentral.html#ae4adcb27ea9891390ae41c8f55262550">TestCentral</a></li>
+<li>_gpioteInitStatesOff&#160;:&#160;<a class="el" href="classPWM.html#a9bb11142aaf5880864da3e9fbfbc8987">PWM</a></li>
+<li>_gpioteInitStatesOn&#160;:&#160;<a class="el" href="classPWM.html#af7ae54d79d42e00cf29ab29118a9c918">PWM</a></li>
+<li>_gpregret&#160;:&#160;<a class="el" href="classCrownstone.html#ab886792bf433eaed4573fc09596fea84">Crownstone</a></li>
+<li>_groupAddressHandle&#160;:&#160;<a class="el" href="classMeshModelMulticast.html#ad17fab5188fdb1c20217da891868c660">MeshModelMulticast</a>, <a class="el" href="classMeshModelMulticastAcked.html#a0195f682ced78e72749741fcf6b98f7b">MeshModelMulticastAcked</a>, <a class="el" href="classMeshModelMulticastNeighbours.html#a2c2f9091e3b50dd2075b353caf4ba5c4">MeshModelMulticastNeighbours</a></li>
+<li>_handle&#160;:&#160;<a class="el" href="classService.html#a42359e81eca7bc36a44896666167fb4c">Service</a></li>
+<li>_handles&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a045bd9e5d4ea809300abfc55ff0c3d7c">CharacteristicBase</a></li>
+<li>_hardwareBoard&#160;:&#160;<a class="el" href="classDimmer.html#a59633251642370fe832fe1fa8cbd8fe3">Dimmer</a></li>
+<li>_hardwareRevisionCharacteristic&#160;:&#160;<a class="el" href="classDeviceInformationService.html#af09fb90155d6f7e95f369beba8d426d3">DeviceInformationService</a></li>
+<li>_hasDimmer&#160;:&#160;<a class="el" href="classDimmer.html#ac4bc151d321fbd36e4bd1583ec9d7816">Dimmer</a></li>
+<li>_hasRelay&#160;:&#160;<a class="el" href="classRelay.html#a6d3cc60326f6adbfda619f5e3ba06ded">Relay</a></li>
+<li>_head&#160;:&#160;<a class="el" href="classCircularBuffer.html#a945dc95ad363d9b0c1cddf0331e909ac">CircularBuffer&lt; T &gt;</a>, <a class="el" href="classCircularDifferentialBuffer.html#a5188f178df05fe669b5e297880a53720">CircularDifferentialBuffer&lt; T &gt;</a></li>
+<li>_histCopy&#160;:&#160;<a class="el" href="classPowerSampling.html#ae8e9382c11d5dd61e042ba5ef83feae4">PowerSampling</a></li>
+<li>_ibeaconConfigId&#160;:&#160;<a class="el" href="classMeshAdvertiser.html#af6519073d624113afadc0ce31d9a0941">MeshAdvertiser</a></li>
+<li>_ibeaconInterval&#160;:&#160;<a class="el" href="classMeshAdvertiser.html#a213afdafdc6d314b0922d38bb499af1b">MeshAdvertiser</a></li>
+<li>_ibeaconManufData&#160;:&#160;<a class="el" href="classAdvertiser.html#ab01033c86ebd6ef633971fe1d549d2f8">Advertiser</a></li>
 <li>_idsCache&#160;:&#160;<a class="el" href="classState.html#a4e1581cd425e1be9b0480579a05e9b63">State</a></li>
-<li>_params&#160;:&#160;<a class="el" href="classIBeacon.html#abc127de98257f453fd51de5ccd9738d2">IBeacon</a></li>
+<li>_includeAdvertisementData&#160;:&#160;<a class="el" href="classAdvertiser.html#a108709922eddaba7a72d2e00ff45454c">Advertiser</a></li>
+<li>_includeScanResponseData&#160;:&#160;<a class="el" href="classAdvertiser.html#a9f21de5a50a8203d8318a8f8be3fdcd6">Advertiser</a></li>
+<li>_index&#160;:&#160;<a class="el" href="classBehaviourMutation.html#a9fe33df4063dfc1b6cb1c7037633ac8d">BehaviourMutation</a></li>
+<li>_initialized&#160;:&#160;<a class="el" href="classBaseClass.html#aa845e014314e808d396946d11ce3b9bf">BaseClass&lt; N &gt;</a>, <a class="el" href="classCharacteristicBase.html#adc4b017a0aa5c10a60456d2dd1b66f56">CharacteristicBase</a>, <a class="el" href="classDimmer.html#a92324ba9b9b7573295d45286474acb02">Dimmer</a>, <a class="el" href="classGpio.html#ac8d7e1f4c3fb55220e0d742a65d3f6f5">Gpio</a>, <a class="el" href="classPWM.html#a1a6094874d041f35398c1423f5e24a23">PWM</a>, <a class="el" href="classRelay.html#ab46fac3e86ce75e5c0db0a58c36a5082">Relay</a>, <a class="el" href="classStorage.html#a28de511a64b2222e667bc409ac55717e">Storage</a>, <a class="el" href="classTwi.html#a9f7f8545582e56ae42842c9f278b2479">Twi</a>, <a class="el" href="classUartHandler.html#a71292935d354993dc60de2fc7fd8814d">UartHandler</a></li>
+<li>_initializedBus&#160;:&#160;<a class="el" href="classTwi.html#ab9c248e447d554af1d559d94ce7f713b">Twi</a></li>
+<li>_initState&#160;:&#160;<a class="el" href="classAssetFiltering.html#a2f7fc6e6507fffc38aaf97f74c1853e0">AssetFiltering</a></li>
+<li>_inputSamples&#160;:&#160;<a class="el" href="classPowerSampling.html#a449fcadc9e1eb0f78ea3f3587bdebac3">PowerSampling</a></li>
+<li>_intendedState&#160;:&#160;<a class="el" href="classSmartSwitch.html#ac4af19f11316a37e78a7ffaf0211af83">SmartSwitch</a></li>
+<li>_ipcData&#160;:&#160;<a class="el" href="classIpcRamBluenet.html#aa1cd52cc429720a06df6bc514e2cbb47">IpcRamBluenet</a></li>
+<li>_isActive&#160;:&#160;<a class="el" href="classBehaviourHandler.html#afa0c0c1b3c0743206e30c336e695e199">BehaviourHandler</a>, <a class="el" href="classTwilightHandler.html#a50fc9be9face2b81917233d14275567e">TwilightHandler</a></li>
+<li>_isConnectable&#160;:&#160;<a class="el" href="classAdvertiser.html#ac97e7096aaba44b74a1849628eb08dc4">Advertiser</a></li>
+<li>_isConnectionAlive&#160;:&#160;<a class="el" href="classUartConnection.html#a8d777b20a0257fdc944257713d2e73bf">UartConnection</a></li>
+<li>_isConnectionEncrypted&#160;:&#160;<a class="el" href="classUartConnection.html#a4b6ea8b84181f6b2aa6d4bf366a99ab7">UartConnection</a></li>
+<li>_isInitialized&#160;:&#160;<a class="el" href="classAdvertiser.html#acbe053591f7bdc3d53e59fc2377c5bd4">Advertiser</a>, <a class="el" href="classPowerSampling.html#a512bc52b2d12a6766642e68ec40b0e81">PowerSampling</a></li>
+<li>_isProvisioned&#160;:&#160;<a class="el" href="classMeshCore.html#a2589e2b9dfa5b225225b678c3037bcbc">MeshCore</a></li>
+<li>_isPwmEnabled&#160;:&#160;<a class="el" href="classPWM.html#a8f832ef8fe3f708cbc7de8ec4cd71c9e">PWM</a></li>
+<li>_isValidOnBoot&#160;:&#160;<a class="el" href="classIpcRamBluenet.html#ad0a2be843f271ea81ee706d27aecc296">IpcRamBluenet</a></li>
+<li>_keyBuffer&#160;:&#160;<a class="el" href="classSetupService.html#a1da569fe464d28e7e7450416dc9e2b50">SetupService</a></li>
+<li>_keySessionDataBuffer&#160;:&#160;<a class="el" href="classCrownstoneService.html#a6dd34836029519c9db0a55cce30c45b8">CrownstoneService</a></li>
+<li>_lastAlmostDetection&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#a27ad44f6b21b09aea327c9318697971a">RecognizeSwitch</a></li>
+<li>_lastAlmostDetectionSamples&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#a5dc7450bd0dd42ed057ae48be36ded18">RecognizeSwitch</a></li>
+<li>_lastBitmask&#160;:&#160;<a class="el" href="classBackgroundAdvertisementHandler.html#a457f29d34c631aa4efbf2a9bfc950a42">BackgroundAdvertisementHandler</a></li>
+<li>_lastBufIndex&#160;:&#160;<a class="el" href="classPowerSampling.html#a5e18ce1fe383717b99a112d8b2c86ca8">PowerSampling</a></li>
+<li>_lastBufSeqNr&#160;:&#160;<a class="el" href="classPowerSampling.html#abe3b1e9d2bc8f697eab91c94c4360e7c">PowerSampling</a></li>
+<li>_lastChipTempEvent&#160;:&#160;<a class="el" href="classTemperatureGuard.html#aad04d5602c6cb63e14ba3d14f0ea7236">TemperatureGuard</a></li>
+<li>_lastDetection&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#a45458726d0668a21a81389a8fc4de2e7">RecognizeSwitch</a></li>
+<li>_lastDetectionSamples&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#a7c5371387839b71916a99d7796124010">RecognizeSwitch</a></li>
+<li>_lastFilteredBufIndex&#160;:&#160;<a class="el" href="classPowerSampling.html#a0877c8b83422ac1a1871b356bca62e00">PowerSampling</a></li>
+<li>_lastMacAddress&#160;:&#160;<a class="el" href="classBackgroundAdvertisementHandler.html#ab3946964ca171020a7f589c5e793f2b0">BackgroundAdvertisementHandler</a></li>
+<li>_lastPwmTempEvent&#160;:&#160;<a class="el" href="classTemperatureGuard.html#ae3736104a95dbaeba4b0d10a2f463161">TemperatureGuard</a></li>
+<li>_lastReceivedState&#160;:&#160;<a class="el" href="classMeshMsgHandler.html#a2082cce71b76aeb01878398e7d42abf5">MeshMsgHandler</a></li>
+<li>_lastSoftfuse&#160;:&#160;<a class="el" href="classPowerSampling.html#a83c9d7e31b553d84076bb7af76b285c4">PowerSampling</a></li>
+<li>_lastSoftfuseSamples&#160;:&#160;<a class="el" href="classPowerSampling.html#a762fb6db01be318df47d835ac415c3a5">PowerSampling</a></li>
+<li>_lastSwitchcraftOnValue&#160;:&#160;<a class="el" href="classSwitchAggregator.html#aca5ab07a82bb0b4659e419af1dddc983">SwitchAggregator</a></li>
+<li>_lastSwitchOffTicks&#160;:&#160;<a class="el" href="classPowerSampling.html#a54f0956f5be6394337c8e908e73a2ca9">PowerSampling</a></li>
+<li>_lastSwitchOffTicksValid&#160;:&#160;<a class="el" href="classPowerSampling.html#a189a86f6c0f6d4d4923eefbc667071ed">PowerSampling</a></li>
+<li>_lastSwitchSamples&#160;:&#160;<a class="el" href="classPowerSampling.html#af32ea824f2e6f91b378232ac44138371">PowerSampling</a></li>
+<li>_lastSwitchSamplesHeader&#160;:&#160;<a class="el" href="classPowerSampling.html#aca2ba4ee2493dc823a50a85ed1718510">PowerSampling</a></li>
+<li>_lastSwitchState&#160;:&#160;<a class="el" href="classPowerSampling.html#a34e80bc4badedcf58402f7f39e35d504">PowerSampling</a></li>
+<li>_lastTimestamp&#160;:&#160;<a class="el" href="classMeshAdvertiser.html#a96a3445762926475e531ed61aad77313">MeshAdvertiser</a>, <a class="el" href="classSwitchAggregator.html#a02ea9826e90387d6d90cb22e513b41bc">SwitchAggregator</a></li>
+<li>_lastVal&#160;:&#160;<a class="el" href="classCircularDifferentialBuffer.html#a4246b77b8232dbd7a6d966f92bad9e70">CircularDifferentialBuffer&lt; T &gt;</a></li>
+<li>_lastZeroCrossUpTime&#160;:&#160;<a class="el" href="classADC.html#a8d51024c393e5deef0295410627d3bd8">ADC</a></li>
+<li>_ledInverted&#160;:&#160;<a class="el" href="classRelay.html#a83f936655068c15fa5d718a12f40b145">Relay</a></li>
+<li>_listenerCount&#160;:&#160;<a class="el" href="classEventDispatcher.html#a3c5f2bc3bd3642986d735d3eef4231e2">EventDispatcher</a></li>
+<li>_listeners&#160;:&#160;<a class="el" href="classEventDispatcher.html#a4c155de9622d59584fd30fb9eb99c6e5">EventDispatcher</a></li>
+<li>_loaded&#160;:&#160;<a class="el" href="classMicroapp.html#a3a5b8e1a93681fb977ffeae6d2daec38">Microapp</a></li>
+<li>_locked&#160;:&#160;<a class="el" href="classCharacteristicBuffer.html#a4ffd788ba7b4fd2aceac465a73cdf4a6">CharacteristicBuffer</a></li>
+<li>_logsEnabled&#160;:&#160;<a class="el" href="classPowerSampling.html#a89c75e1c49204dc24a3b7d14269b0d24">PowerSampling</a></li>
+<li>_macAddressCharacteristic&#160;:&#160;<a class="el" href="classSetupService.html#a0ea5c0c69cf05bc9c9edc0e4cc80528e">SetupService</a></li>
+<li>_mainTimerData&#160;:&#160;<a class="el" href="classCrownstone.html#a2c13d9dd8b8646e1b5243232ea2de17b">Crownstone</a></li>
+<li>_mainTimerId&#160;:&#160;<a class="el" href="classCrownstone.html#a9add2afff62fb7813c76b46df60c9908">Crownstone</a></li>
+<li>_masterCrc&#160;:&#160;<a class="el" href="classAssetFilterStore.html#a26c5ff32b2dd99ffbc959c0be53e4cee">AssetFilterStore</a></li>
+<li>_masterVersion&#160;:&#160;<a class="el" href="classAssetFilterStore.html#a3a949732ec908ee8608af68f660b3ccb">AssetFilterStore</a></li>
+<li>_maxSwitchHistoryItems&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a47b0176002904cdb93eb0b4b0e6e104a">SwitchAggregator</a></li>
+<li>_maxTickVal&#160;:&#160;<a class="el" href="classPWM.html#a44ab5e48b28ac5cb597a87df0ed0fdc3">PWM</a></li>
+<li>_maxValue&#160;:&#160;<a class="el" href="classPWM.html#ab5d2f19a7820707047b76ee1e4401ecc">PWM</a></li>
+<li>_meshTopology&#160;:&#160;<a class="el" href="classCrownstone.html#a7f55060737391e343d461513b1705b75">Crownstone</a></li>
+<li>_microappServiceData&#160;:&#160;<a class="el" href="classServiceData.html#a135d30d44ddac2832a0e72cc7421d0d3">ServiceData</a></li>
+<li>_microappServiceDataSet&#160;:&#160;<a class="el" href="classServiceData.html#a283a51873be1732939bc277e81013ba3">ServiceData</a></li>
+<li>_modelConfigureCallback&#160;:&#160;<a class="el" href="classMeshCore.html#a6f8155583dda8819dc4cd57ccc57995a">MeshCore</a></li>
+<li>_modelInitCallback&#160;:&#160;<a class="el" href="classMeshCore.html#adb69383d31b8916949624a2a37412737">MeshCore</a></li>
+<li>_modelMulticast&#160;:&#160;<a class="el" href="classMesh.html#ac436a90ce17331d63db6668283fb3cd2">Mesh</a></li>
+<li>_modelMulticastAcked&#160;:&#160;<a class="el" href="classMesh.html#aee53d5c789c7b50faebba7ba9c81b328">Mesh</a></li>
+<li>_modelMulticastNeighbours&#160;:&#160;<a class="el" href="classMesh.html#aaf9fb2ba0a27a0432f36b9d5500b66a6">Mesh</a></li>
+<li>_modelSelector&#160;:&#160;<a class="el" href="classMesh.html#aeabe295d46840799a8c4c121fad9d65a">Mesh</a></li>
+<li>_modelUnicast&#160;:&#160;<a class="el" href="classMesh.html#a43c3d01ffeb8983ad5d02975cdde0a22">Mesh</a></li>
+<li>_modificationInProgressCountdown&#160;:&#160;<a class="el" href="classAssetFilterStore.html#aea92eba8a4ca1d60dfe0ce75f8a879db">AssetFilterStore</a></li>
+<li>_msgCallback&#160;:&#160;<a class="el" href="classMeshModelMulticast.html#a13d5159929f1b908c9ef337cb6fbdd4f">MeshModelMulticast</a>, <a class="el" href="classMeshModelMulticastAcked.html#aac9af5f5fbadf0dd236948e93e6cd25c">MeshModelMulticastAcked</a>, <a class="el" href="classMeshModelMulticastNeighbours.html#ab52cf5a71dfd6b2386bc84ef561f7308">MeshModelMulticastNeighbours</a>, <a class="el" href="classMeshModelUnicast.html#ad7da0d6a69b44df773bc687f7b2ebd64">MeshModelUnicast</a></li>
+<li>_msgCount&#160;:&#160;<a class="el" href="classMeshTopology.html#a97aa455a4af5cf8de82486a7f06112fb">MeshTopology</a></li>
+<li>_msgHandler&#160;:&#160;<a class="el" href="classMesh.html#a072e726e0fc296562b49537ede366aae">Mesh</a></li>
+<li>_msgSender&#160;:&#160;<a class="el" href="classMesh.html#a64c1a48935aead6f413b90b09376fc73">Mesh</a></li>
+<li>_mtu&#160;:&#160;<a class="el" href="classBleCentral.html#a4742079e3e3da433f9efbc72b108fa17">BleCentral</a></li>
+<li>_multicastAckedModel&#160;:&#160;<a class="el" href="classMeshModelSelector.html#a1bce51a5e58bc3f435791749a3a9dad6">MeshModelSelector</a></li>
+<li>_multicastModel&#160;:&#160;<a class="el" href="classMeshModelSelector.html#aa695441c7220139c76ca157e6dc05d14">MeshModelSelector</a></li>
+<li>_multicastNeighboursModel&#160;:&#160;<a class="el" href="classMeshModelSelector.html#ac29e3f150ca1c8639818a4f83661a54b">MeshModelSelector</a></li>
+<li>_multiSwitchHandler&#160;:&#160;<a class="el" href="classCrownstone.html#aa5c851ce03dd0200183ed11b4c896b51">Crownstone</a></li>
+<li>_mutation&#160;:&#160;<a class="el" href="classBehaviourMutation.html#a4b69f4a2f9bd583e523be4c2558db199">BehaviourMutation</a></li>
+<li>_myAddr&#160;:&#160;<a class="el" href="classSetupService.html#af853e2560d7db695ff0cc09f5612a2f6">SetupService</a></li>
+<li>_myId&#160;:&#160;<a class="el" href="classMeshTopology.html#a81718e0e0cb1f04984c756e3516bd35f">MeshTopology</a></li>
+<li>_myStoneId&#160;:&#160;<a class="el" href="classAssetForwarder.html#a7dca9eaea7148a221fe526fd7993b4c1">AssetForwarder</a>, <a class="el" href="classNearestCrownstoneTracker.html#a4ab97c643ce3ff47b9b9cb9f6c9daaf0">NearestCrownstoneTracker</a></li>
+<li>_name&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a0be9dd689642e1279115f87fc4fb545b">CharacteristicBase</a></li>
+<li>_negativePowerThresholdMilliWatt&#160;:&#160;<a class="el" href="classPowerSampling.html#a968fed3a8c3809b2e057a37396df08f8">PowerSampling</a></li>
+<li>_neighbourCount&#160;:&#160;<a class="el" href="classMeshTopology.html#ae96db39fbee9563f64bb4a18e9687849">MeshTopology</a></li>
+<li>_neighbours&#160;:&#160;<a class="el" href="classMeshTopology.html#a4a2c8753d34c68ecaeede751d1ebeb5f">MeshTopology</a></li>
+<li>_netkey&#160;:&#160;<a class="el" href="classMeshCore.html#a7ae8dff005f1d915476382bc9329d8f3">MeshCore</a></li>
+<li>_netkeyHandle&#160;:&#160;<a class="el" href="classMeshCore.html#aa80c44be93bdce26a205944f5bdc53d5">MeshCore</a></li>
+<li>_nextChunkIndex&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#a0ce315d55f1c965944bc8ef16703b804">AssetFilterSyncer</a></li>
+<li>_nextFilterIndex&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#a8cc455879e8dadd11b2e4e5d27c33d06">AssetFilterSyncer</a></li>
+<li>_nextSendIndex&#160;:&#160;<a class="el" href="classMeshTopology.html#ac6592bf9204cf15a411f6e65d141fda7">MeshTopology</a></li>
+<li>_nonce&#160;:&#160;<a class="el" href="classConnectionEncryption.html#a535d007b239bcb57b45d1f1a52626baa">ConnectionEncryption</a></li>
+<li>_notificationMergedDataSize&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#ab48ce269b69770aee8cce2e48be9fde6">CrownstoneCentral</a></li>
+<li>_notificationNextIndex&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#a990d2c7e30a6892988e02731ec895899">CrownstoneCentral</a></li>
+<li>_notificationOffset&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a77612b023cae5cea7275d64229455743">CharacteristicBase</a></li>
+<li>_notificationPending&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a43c141bf3bfb20e0ba596d356bb6e21a">CharacteristicBase</a></li>
+<li>_numBits&#160;:&#160;<a class="el" href="classBitmaskVarSize.html#a9c3c4d6b5cc977fdbdbabc4ded3e462c">BitmaskVarSize</a></li>
+<li>_numBuffersRequired&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#a6ba8f3390999ad6eb22c883782a17819">RecognizeSwitch</a></li>
+<li>_numStoredBuffers&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#a7ae8a0d2dc8fa41d16f7d83d7135c01f">RecognizeSwitch</a></li>
+<li>_oldOperationMode&#160;:&#160;<a class="el" href="classCrownstone.html#a404f60774cf1c67598d8287fc45303e1">Crownstone</a></li>
+<li>_opCode&#160;:&#160;<a class="el" href="classScanner.html#a7cab5ffcfb23f6d6b46638637704d777">Scanner</a></li>
+<li>_operationMode&#160;:&#160;<a class="el" href="classCrownstone.html#a2c6c947c8cbcbd66bdd97242bfdd0997">Crownstone</a>, <a class="el" href="classKeysAndAccess.html#a262ce53071e3bce7166a4096236f98bb">KeysAndAccess</a>, <a class="el" href="classPowerSampling.html#a7d2b6ce7d681e469acae708caa1be5b9">PowerSampling</a>, <a class="el" href="classServiceData.html#ab49f859fdb33859ed323cd3056f49c60">ServiceData</a></li>
+<li>_opMode&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#a103be5843607190c6a719b8617338d83">CrownstoneCentral</a></li>
+<li>_outbox&#160;:&#160;<a class="el" href="classAssetForwarder.html#a74f57da189e32e3414e22c8f4491b170">AssetForwarder</a></li>
+<li>_outputSamples&#160;:&#160;<a class="el" href="classPowerSampling.html#ad49a1186dfa55b637b9999dfd895c6c1">PowerSampling</a></li>
+<li>_overrideState&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a2b91707a8cf8468e002d7cce54193a5c">SwitchAggregator</a></li>
+<li>_ownAddress&#160;:&#160;<a class="el" href="classMeshCore.html#ac91fee8a00e47099c4cb8a02bfaebc6f">MeshCore</a></li>
+<li>_ownerTimeoutCountdown&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a8d9a725228daf5c348af5b78adb71baa">SwitchAggregator</a></li>
+<li>_ownId&#160;:&#160;<a class="el" href="classMultiSwitchHandler.html#a7dbca8e36546adf20e7be32a0621cae9">MultiSwitchHandler</a></li>
+<li>_params&#160;:&#160;<a class="el" href="classCrownstoneManufacturer.html#a7a31f06de6c77deeebe0264df58618e8">CrownstoneManufacturer</a>, <a class="el" href="classIBeacon.html#abc127de98257f453fd51de5ccd9738d2">IBeacon</a></li>
+<li>_parent&#160;:&#160;<a class="el" href="classComponent.html#adeed903d66f519f567b29d0de130d0a2">Component</a></li>
+<li>_performingFactoryReset&#160;:&#160;<a class="el" href="classMeshCore.html#acba08d8df8a59f8c13ea613602660aa5">MeshCore</a>, <a class="el" href="classState.html#ae0d227f295a560980c01cf0723f45da2">State</a>, <a class="el" href="classStorage.html#acfcd196b1da58bdcd740659763f65114">Storage</a></li>
+<li>_pinEnableDimmer&#160;:&#160;<a class="el" href="classDimmer.html#abdffd9500618646ee0f6da7d691b8ba2">Dimmer</a></li>
+<li>_pinRelayDebug&#160;:&#160;<a class="el" href="classRelay.html#a4d06a8b1d682e63e653832b5a091c888">Relay</a></li>
+<li>_pinRelayOff&#160;:&#160;<a class="el" href="classRelay.html#a6b3ee5753371f66e787ef37856d51ad0">Relay</a></li>
+<li>_pinRelayOn&#160;:&#160;<a class="el" href="classRelay.html#a4c604d78e6b407b1e7772a72cba2a9e5">Relay</a></li>
+<li>_pins&#160;:&#160;<a class="el" href="classGpio.html#ac5a341c76d1040b7a126f2ffd52d4f9f">Gpio</a></li>
+<li>_powerDiffThresholdMinMilliWatt&#160;:&#160;<a class="el" href="classPowerSampling.html#a31fa462d3b677cea621213952d1f129c">PowerSampling</a></li>
+<li>_powerDiffThresholdPart&#160;:&#160;<a class="el" href="classPowerSampling.html#a79e8e44d79e689c89c7f1d7b9a472a6a">PowerSampling</a></li>
+<li>_powerFactor&#160;:&#160;<a class="el" href="classServiceData.html#a568b7f640e14e15ddab69032acdb061b">ServiceData</a></li>
+<li>_powerMilliWattHist&#160;:&#160;<a class="el" href="classPowerSampling.html#ad7251a37829c83a01511fc87ea1db8d7">PowerSampling</a></li>
+<li>_powerSampler&#160;:&#160;<a class="el" href="classCrownstone.html#a2808dba33428ddc7a79b49edb1f7c86e">Crownstone</a></li>
+<li>_powerUsageReal&#160;:&#160;<a class="el" href="classServiceData.html#a1c0524575e3e93bfa290332ea2993c1e">ServiceData</a></li>
+<li>_ppiChannelSample&#160;:&#160;<a class="el" href="classADC.html#aec0767cad33556f544e9d1b2c656c69c">ADC</a></li>
+<li>_ppiChannelsOff&#160;:&#160;<a class="el" href="classPWM.html#a8e0a6296b29bd2f49e320cc7e66dcccf">PWM</a></li>
+<li>_ppiChannelsOn&#160;:&#160;<a class="el" href="classPWM.html#aca68b4f102a6b9cff9f1b547e81a2760">PWM</a></li>
+<li>_ppiChannelStart&#160;:&#160;<a class="el" href="classADC.html#ae6630138e579d96a9fe8de55d1d94630">ADC</a></li>
+<li>_ppiTransitionChannel&#160;:&#160;<a class="el" href="classPWM.html#aa7045e6b7cd276197cf54bad615480a6">PWM</a></li>
+<li>_presence&#160;:&#160;<a class="el" href="classPresencePredicate.html#a533d87cce0d4a397f6e879c2e88f42dd">PresencePredicate</a></li>
+<li>_presenceHandler&#160;:&#160;<a class="el" href="classBehaviourHandler.html#aeeedccfe7f4012eef4a675d2285a3a52">BehaviourHandler</a>, <a class="el" href="classCrownstone.html#a85c396b42c71a38b5ac53e2aab7ab74a">Crownstone</a></li>
+<li>_presenceLocationId&#160;:&#160;<a class="el" href="classMemUsageTest.html#a8906c91bbbadf6c4820acce3feebcf25">MemUsageTest</a></li>
+<li>_presenceProfileId&#160;:&#160;<a class="el" href="classMemUsageTest.html#a8b3c05ad18e7024ebb451f2ab472f32f">MemUsageTest</a></li>
+<li>_primaryFilter&#160;:&#160;<a class="el" href="classAssetAcceptedEvent.html#aa856cbf51f8189936526b13621ce665f">AssetAcceptedEvent</a></li>
+<li>_processCallsLeft&#160;:&#160;<a class="el" href="classMeshModelMulticastAcked.html#ae1e4d4ed7683f5456d01419131786270">MeshModelMulticastAcked</a></li>
+<li>_publishAddressHandle&#160;:&#160;<a class="el" href="classMeshModelUnicast.html#a131d5df3173b84db2b9720a7dc1db0e4">MeshModelUnicast</a></li>
+<li>_queue&#160;:&#160;<a class="el" href="classMeshModelMulticast.html#a6b8456a9213c4d79ad7138c92d72a3c9">MeshModelMulticast</a>, <a class="el" href="classMeshModelMulticastAcked.html#a6c4ae9ce6126148583710b43dcef3d79">MeshModelMulticastAcked</a>, <a class="el" href="classMeshModelMulticastNeighbours.html#a668f1b32439329d793589422e48552e9">MeshModelMulticastNeighbours</a>, <a class="el" href="classMeshModelUnicast.html#abb5be542f13633ea5ab9b72da749b2d4">MeshModelUnicast</a></li>
+<li>_queueIndexInProgress&#160;:&#160;<a class="el" href="classMeshModelMulticastAcked.html#aff9c1de9d66684a37e2f47cd6186cc0f">MeshModelMulticastAcked</a>, <a class="el" href="classMeshModelUnicast.html#af3be1bb12124f624134a7e06fa93be10">MeshModelUnicast</a></li>
+<li>_queueIndexNext&#160;:&#160;<a class="el" href="classMeshModelMulticast.html#a2df5bb1f68a26efda4e1402c8d16aafc">MeshModelMulticast</a>, <a class="el" href="classMeshModelMulticastAcked.html#a76afa94dbecabb325882fe1dd759c16a">MeshModelMulticastAcked</a>, <a class="el" href="classMeshModelMulticastNeighbours.html#aad064ea14bd45a67f63a462579d16438">MeshModelMulticastNeighbours</a>, <a class="el" href="classMeshModelUnicast.html#aa9d77eab38349ec8ae4c87aca7b368a6">MeshModelUnicast</a></li>
+<li>_queueSize&#160;:&#160;<a class="el" href="classMeshModelMulticast.html#abaad679ce4bcaab8c7b17eb5b7f8afe9">MeshModelMulticast</a>, <a class="el" href="classMeshModelMulticastNeighbours.html#af30072bda30d4779c69241ab4627a945">MeshModelMulticastNeighbours</a></li>
 <li>_ram_data_register&#160;:&#160;<a class="el" href="classState.html#acd3db77197d3244fbc3deefdac38ac2d">State</a></li>
+<li>_ramStats&#160;:&#160;<a class="el" href="classCrownstone.html#ab81e1b729fada60dd67f070be53a31be">Crownstone</a></li>
+<li>_randomBytes&#160;:&#160;<a class="el" href="classRNG.html#af64fc897d26c86cc33f8787aba090b34">RNG</a></li>
+<li>_readBuffer&#160;:&#160;<a class="el" href="classUartHandler.html#a2b83c3f6956fe152230045e2ef3c4bf9">UartHandler</a></li>
+<li>_readBufferIdx&#160;:&#160;<a class="el" href="classUartHandler.html#a1bae4699f3d87bcab200c602d6b86059">UartHandler</a></li>
+<li>_readBusy&#160;:&#160;<a class="el" href="classUartHandler.html#aa354b008877f3ade9ab97f975a7e0b26">UartHandler</a></li>
+<li>_readIdx&#160;:&#160;<a class="el" href="classCircularDifferentialBuffer.html#a3b433275823a645e24dc5c26257c267f">CircularDifferentialBuffer&lt; T &gt;</a></li>
+<li>_recalibrateZeroCurrent&#160;:&#160;<a class="el" href="classPowerSampling.html#abdcebf436007a9063cc148e0f3813932">PowerSampling</a></li>
+<li>_recalibrateZeroVoltage&#160;:&#160;<a class="el" href="classPowerSampling.html#a765fd6d9b4c20aad0bf0e31a5b5cbf00">PowerSampling</a></li>
+<li>_receivedBehaviourSettings&#160;:&#160;<a class="el" href="classBehaviourHandler.html#aef351b3c04574fd2cbc2bfeb3501fda1">BehaviourHandler</a></li>
+<li>_records&#160;:&#160;<a class="el" href="classStore.html#a960d31c52ff462af4b05940bf92415ab">Store&lt; RecordType, MaxItemCount &gt;</a></li>
+<li>_recoveryDisableTimerData&#160;:&#160;<a class="el" href="classFactoryReset.html#a96d8d82e0853fa66e0b204e390275158">FactoryReset</a></li>
+<li>_recoveryDisableTimerId&#160;:&#160;<a class="el" href="classFactoryReset.html#ad6e636a05466a61ab70c4023315cc199">FactoryReset</a></li>
+<li>_recoveryEnabled&#160;:&#160;<a class="el" href="classFactoryReset.html#a50edfbe4dbb8208b657b4bbccb961a7e">FactoryReset</a></li>
+<li>_recoveryProcessTimerData&#160;:&#160;<a class="el" href="classFactoryReset.html#ae31fc8f83a1e038dbee24d87ec9e4888">FactoryReset</a></li>
+<li>_recoveryProcessTimerId&#160;:&#160;<a class="el" href="classFactoryReset.html#a629f320561c736f524c6b33e46ac3847">FactoryReset</a></li>
+<li>_registeredFds&#160;:&#160;<a class="el" href="classStorage.html#ac61fc0fd7c48c8547095d3ed89c0dfd6">Storage</a></li>
+<li>_reliableStatus&#160;:&#160;<a class="el" href="classMeshModelUnicast.html#a0b5f1b90212732835226c49238b98e2f">MeshModelUnicast</a></li>
+<li>_removingFile&#160;:&#160;<a class="el" href="classStorage.html#a435a004372693ad121420a867fe634fa">Storage</a></li>
+<li>_replyReceived&#160;:&#160;<a class="el" href="classMeshModelUnicast.html#adfd2bcafefa2ef2cf14319af0308691d">MeshModelUnicast</a></li>
+<li>_resetReason&#160;:&#160;<a class="el" href="classCrownstone.html#afb47d222b1c7322a3e5803982c4e3847">Crownstone</a></li>
+<li>_resetTimerData&#160;:&#160;<a class="el" href="classCommandHandler.html#a006d5d48fa6fc7e660f6d0c0c65c9ee3">CommandHandler</a></li>
+<li>_resetTimerId&#160;:&#160;<a class="el" href="classCommandHandler.html#adc54cf2ff2b74c396c52dd5668928dc2">CommandHandler</a></li>
+<li>_resultCccdHandle&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#a619bf0475ad80f43ab824dcc43003f25">CrownstoneCentral</a></li>
+<li>_resultCharacteristic&#160;:&#160;<a class="el" href="classCrownstoneService.html#a10b14df747e6c94d1a503cd642fc9984">CrownstoneService</a></li>
+<li>_resultHandle&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#ae13d3efacc7a99e8de5749a085048438">CrownstoneCentral</a></li>
+<li>_resultPacketAccessor&#160;:&#160;<a class="el" href="classCrownstoneService.html#a44a7e2c6882ba3738f16099a53c6ffa9">CrownstoneService</a></li>
+<li>_rssi&#160;:&#160;<a class="el" href="classrssi__and__channel__float__t.html#a6654ae7d8318a2c3d1c29d6e193a4c34">rssi_and_channel_float_t</a></li>
+<li>_rssiDataStoneId&#160;:&#160;<a class="el" href="classMemUsageTest.html#a0a784d5d70fa732d94fcd1459a8feb00">MemUsageTest</a></li>
+<li>_rtcStartTime&#160;:&#160;<a class="el" href="classFactoryReset.html#a63d395719a9c7ea830e537450f0e1c58">FactoryReset</a></li>
+<li>_running&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#a9d37c4d66746f6726c9529e83f7fdaaf">RecognizeSwitch</a>, <a class="el" href="classScanner.html#a54b4eb9af676df5ab206f562c739d7aa">Scanner</a></li>
+<li>_saadcBufferQueue&#160;:&#160;<a class="el" href="classADC.html#a6802d10a36da7d5d787b19ed0bcd33ad">ADC</a></li>
+<li>_saadcState&#160;:&#160;<a class="el" href="classADC.html#adefbc549e8141a0419452e9f4a7bf3aa">ADC</a></li>
+<li>_safeSwitch&#160;:&#160;<a class="el" href="classSmartSwitch.html#af0b95f0a6ea96075cbf22ebf39c77ce6">SmartSwitch</a></li>
+<li>_scanBuffer&#160;:&#160;<a class="el" href="classStack.html#a6261f80a46d0ba8efeae473edcb247bd">Stack</a></li>
+<li>_scanBufferStruct&#160;:&#160;<a class="el" href="classStack.html#a9fb88992956e21d541cf722f50ec8fb4">Stack</a></li>
+<li>_scanCallback&#160;:&#160;<a class="el" href="classMeshCore.html#a8c2bbad5f439be81ab2e1e244e3bd209">MeshCore</a></li>
+<li>_scanCount&#160;:&#160;<a class="el" href="classScanner.html#add007021d6c7475a7e818bbe1fdbb403">Scanner</a></li>
+<li>_scanFilter&#160;:&#160;<a class="el" href="classMicroappController.html#a534e5461611f2251317b0b5d279b998c">MicroappController</a></li>
+<li>_scanner&#160;:&#160;<a class="el" href="classCrownstone.html#a3dcc4a91b93d7c6ce9ba10ca1ec89bad">Crownstone</a>, <a class="el" href="classMesh.html#a74217ca58d9fe68c8c0265db49504110">Mesh</a></li>
+<li>_scanning&#160;:&#160;<a class="el" href="classScanner.html#aea0b37da71372183a1a08b90831df4e6">Scanner</a>, <a class="el" href="classStack.html#ab61bf2193d0d24e7c58beedc154886a8">Stack</a></li>
+<li>_selector&#160;:&#160;<a class="el" href="classMeshMsgSender.html#a1cdfd128a211d934235129f73c2dc272">MeshMsgSender</a></li>
+<li>_sendCountdown&#160;:&#160;<a class="el" href="classMeshTopology.html#a2d2602cbee59d5ff51b8f57e448517fc">MeshTopology</a></li>
+<li>_sendNoopCountdown&#160;:&#160;<a class="el" href="classMeshTopology.html#a57e30daa03a88e3f72b108ceca869e43">MeshTopology</a></li>
+<li>_sendStateCountdown&#160;:&#160;<a class="el" href="classServiceData.html#abbf2e429e71f04b56c094206dcff0650">ServiceData</a></li>
+<li>_sendVersionAtLowIntervalCountdown&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#a2848800a98d688be9826429959af3852">AssetFilterSyncer</a></li>
+<li>_sendVersionCountdown&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#ad7f7970cd53867c5794ee75f2b808380">AssetFilterSyncer</a></li>
+<li>_service&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a5656184f753d9c86d8a63fa12bf4e24f">CharacteristicBase</a></li>
+<li>_serviceData&#160;:&#160;<a class="el" href="classAdvertiser.html#a06b15d0d615494f731703c4aaec15f97">Advertiser</a>, <a class="el" href="classCrownstone.html#a0dde29331b05684b2010c7429245317c">Crownstone</a>, <a class="el" href="classServiceData.html#ad1e316d2a6e1ae1420d2571fd6d0e132">ServiceData</a></li>
+<li>_services&#160;:&#160;<a class="el" href="classStack.html#a109b6e1f98d623594bff3e4092ea7aa4">Stack</a></li>
+<li>_serviceUuids&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#a452e4a976f693ab8eb7d089216be870a">CrownstoneCentral</a></li>
+<li>_sessionData&#160;:&#160;<a class="el" href="classConnectionEncryption.html#ab980989082c792d65e35004d6c2614f7">ConnectionEncryption</a></li>
+<li>_sessionDataCharacteristic&#160;:&#160;<a class="el" href="classCrownstoneService.html#a782ecb896536a19d1442a5e7569dc142">CrownstoneService</a></li>
+<li>_sessionDataHandle&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#afe03a35e2a8e590713d71b257ba26d45">CrownstoneCentral</a></li>
+<li>_sessionDataUnencryptedCharacteristic&#160;:&#160;<a class="el" href="classCrownstoneService.html#a0d74c30498d746d4e4ec6bfa34e011b5">CrownstoneService</a></li>
+<li>_sessionKeyHandle&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#a3e66d28e796352ba9ce8b88dd6c1f8d8">CrownstoneCentral</a></li>
+<li>_sessionNonceRx&#160;:&#160;<a class="el" href="classUartConnection.html#a9e22b834ab47febe810e6132ca428749">UartConnection</a></li>
+<li>_sessionNonceTimeoutCountdown&#160;:&#160;<a class="el" href="classUartConnection.html#a6aa7ff1a2102a3b5f7c1e1a13bf614ac">UartConnection</a></li>
+<li>_sessionNonceTx&#160;:&#160;<a class="el" href="classUartConnection.html#a59d1ee9211b8f40d13bcbcc7cab6d09b">UartConnection</a></li>
+<li>_sessionNonceValid&#160;:&#160;<a class="el" href="classUartConnection.html#a57ae0b06de7c4ddab9ef95d5584ce44a">UartConnection</a></li>
+<li>_setStateValuesAfterStorageRecover&#160;:&#160;<a class="el" href="classCrownstone.html#a595e2935dac86585459edef8415d456d">Crownstone</a></li>
+<li>_setupKey&#160;:&#160;<a class="el" href="classKeysAndAccess.html#a40e08cce98a1a83a86d1cab5e7283a39">KeysAndAccess</a></li>
+<li>_setupKeyCharacteristic&#160;:&#160;<a class="el" href="classSetupService.html#a4d4fd80b6358598d88766bb27d8f4904">SetupService</a></li>
+<li>_setupKeyValid&#160;:&#160;<a class="el" href="classKeysAndAccess.html#a7f918eb62884e4aa0575e27f8d4c7eb6">KeysAndAccess</a></li>
+<li>_setupService&#160;:&#160;<a class="el" href="classCrownstone.html#a1440455d2fb52c3b988bb9bb02ab1b25">Crownstone</a></li>
+<li>_size&#160;:&#160;<a class="el" href="classCharacteristicBuffer.html#a62445b55aa445076c2dbeffb6a89dbd9">CharacteristicBuffer</a></li>
+<li>_sizeToRead&#160;:&#160;<a class="el" href="classUartHandler.html#a0b499bbe51e5f41b42ce675c2ad5a881">UartHandler</a></li>
+<li>_skipSwitchDetectionTriggers&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#ace5610c713e144b1853d5f8d76987b3a">RecognizeSwitch</a></li>
+<li>_slowAvgPowerCount&#160;:&#160;<a class="el" href="classPowerSampling.html#a12aeac8a8b48d39ec9985c162e28bcb4">PowerSampling</a></li>
+<li>_slowAvgPowerDiscount&#160;:&#160;<a class="el" href="classPowerSampling.html#ab28dcc662579401fc8ac80c4c794b0a9">PowerSampling</a></li>
+<li>_slowAvgPowerMilliWatt&#160;:&#160;<a class="el" href="classPowerSampling.html#a6167d2555705d7c8ebe1765452a70498">PowerSampling</a></li>
+<li>_smartSwitch&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a5d008e09cb42b605e06e9de820102ed4">SwitchAggregator</a></li>
+<li>_softInterruptRegistrations&#160;:&#160;<a class="el" href="classMicroappController.html#a0768c4ebf18e2e9a209dba0bcfc3e57d">MicroappController</a></li>
+<li>_softwareRevisionCharacteristic&#160;:&#160;<a class="el" href="classDeviceInformationService.html#a91e462a43d105aacc33624bd88eb8e77">DeviceInformationService</a></li>
+<li>_source&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a15da1b9963d7617fbf4b4b961956c283">SwitchAggregator</a></li>
+<li>_stack&#160;:&#160;<a class="el" href="classAdvertiser.html#a73378780026790c6af390409bb6d042a">Advertiser</a>, <a class="el" href="classCrownstone.html#a719e336e3a996857b659808a194fb80c">Crownstone</a>, <a class="el" href="classScanner.html#a142385b2d56835355aa71ff3f7c25b8b">Scanner</a>, <a class="el" href="classService.html#a320d620508a2168d441356acfdb9ea33">Service</a></li>
+<li>_started&#160;:&#160;<a class="el" href="classDimmer.html#ae94496328350ee96d10dc3660da2a206">Dimmer</a>, <a class="el" href="classMemUsageTest.html#a678cd279b5c0923d1726a3e1c4420c0c">MemUsageTest</a>, <a class="el" href="classMicroapp.html#a3bcc7caba353f936d7566f0322efdccd">Microapp</a>, <a class="el" href="classPWM.html#a92508b887a36eedb4cc9286cec0d2a70">PWM</a></li>
+<li>_startedReading&#160;:&#160;<a class="el" href="classUartHandler.html#a329c7fd6f5baee5489b92232e70c754d">UartHandler</a></li>
+<li>_startedWritingToFlash&#160;:&#160;<a class="el" href="classState.html#a5b98363e46586ae96d74e8215625524e">State</a></li>
+<li>_startOnNextTick&#160;:&#160;<a class="el" href="classAdvertiser.html#affb3240b780d02e642cfb44eef07759f">Advertiser</a></li>
+<li>_startOnZeroCrossing&#160;:&#160;<a class="el" href="classPWM.html#afe82dcbb6b24c49e4b54379fe1b9ba60">PWM</a></li>
+<li>_state&#160;:&#160;<a class="el" href="classADC.html#a01e9ff60805fdb90144b17b0255dcb0d">ADC</a>, <a class="el" href="classCrownstone.html#aa3e9f56c8709c1bc7c01ae1927708f4f">Crownstone</a>, <a class="el" href="classRandomGenerator.html#ac2087ef5cc66cd05ffe675a12acdceaa">RandomGenerator</a></li>
+<li>_states&#160;:&#160;<a class="el" href="classExternalStates.html#aeaa65b14d7d92828db1eed8ff8ccd8ed">ExternalStates</a>, <a class="el" href="classMicroapp.html#ad2e6eb3cc0e290d2c0990ebb91febbdc">Microapp</a></li>
+<li>_stateType&#160;:&#160;<a class="el" href="classMemUsageTest.html#ac38679718346ef6bb5b25c33e7ff27df">MemUsageTest</a></li>
+<li>_status&#160;:&#160;<a class="el" href="classUartConnection.html#a31debb57c2f1a777b7f1f3a44f84d3ee">UartConnection</a></li>
+<li>_step&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#ad25230c3593378629217e0c5d70653c4">AssetFilterSyncer</a></li>
+<li>_stepSize&#160;:&#160;<a class="el" href="classPWM.html#a1f992465d8deaf270dae87902fbdcd9b">PWM</a></li>
+<li>_stoneId&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#a42b9e3f0d6df6ea545a8b20584261413">CrownstoneCentral</a></li>
+<li>_storage&#160;:&#160;<a class="el" href="classCrownstone.html#a7534fee1efab6377032df8535df17099">Crownstone</a>, <a class="el" href="classState.html#ad5bdf8d949dd7daa6fd6e9404c9369a8">State</a></li>
+<li>_store&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#a709431985ce400696c80b7adbc29e88f">AssetFilterSyncer</a>, <a class="el" href="classAssetStore.html#a2996aa9167c4cbde68e20e53d5ce711c">AssetStore</a>, <a class="el" href="classPresenceHandler.html#a75bc4196da28b3d5157eac97d262a7dd">PresenceHandler</a>, <a class="el" href="classTrackedDevices.html#aab806f01025d4acf04e172862f8d8ac0">TrackedDevices</a></li>
 <li>_store_queue&#160;:&#160;<a class="el" href="classState.html#afbb96b8b8c16890d48aef2a69baea700">State</a></li>
-<li>_value&#160;:&#160;<a class="el" href="classCharacteristic.html#ab0ca33a8f142ab5f573762e8c8b499a8">Characteristic&lt; T &gt;</a></li>
-</ul>
-
-
-<h3><a id="index_a" name="index_a"></a>- a -</h3><ul>
-<li>acked&#160;:&#160;<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html#a7039877e2949699b5e4e1f91afa0fadb">MeshUtil::cs_mesh_queue_item_t</a></li>
-<li>address&#160;:&#160;<a class="el" href="structble__connected__t.html#aea726383ff7b5b3c4be056bf6cb159cd">ble_connected_t</a></li>
-<li>adv_indicator&#160;:&#160;<a class="el" href="classIBeacon.html#a1e891c83fb2dacef1d496094c098dbc8">IBeacon</a></li>
-<li>advertisementBuffer&#160;:&#160;<a class="el" href="structble__connected__t.html#a1561225840a999cf460a304487211a20">ble_connected_t</a></li>
-<li>advertisementHandle&#160;:&#160;<a class="el" href="structble__connected__t.html#aa783e1c902b80989d3418425ae7a1f96">ble_connected_t</a></li>
-<li>array&#160;:&#160;<a class="el" href="structdifferential__buffer__fixed__t.html#aef2ee8967e05e50f88810db8ae1046da">differential_buffer_fixed_t&lt; T, S &gt;</a>, <a class="el" href="structdifferential__buffer__t.html#a8d8b3877a1c262902a2549955d974444">differential_buffer_t&lt; T &gt;</a></li>
-<li>assetId&#160;:&#160;<a class="el" href="structasset__record__t.html#a32d1d4abf129d596846486489f73033b">asset_record_t</a></li>
-<li>autoNotify&#160;:&#160;<a class="el" href="structcharacteristic__config__t.html#ad2daee69e5e3345d2071acecdafc5505">characteristic_config_t</a></li>
-</ul>
-
-
-<h3><a id="index_b" name="index_b"></a>- b -</h3><ul>
-<li>broadcast&#160;:&#160;<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html#a7a63fc25972be3dc67599119c6b52d1c">MeshUtil::cs_mesh_queue_item_t</a></li>
-<li>buf&#160;:&#160;<a class="el" href="structcs__result__t.html#abf1bd43e2e0035f782c8731f0bae5d21">cs_result_t</a>, <a class="el" href="structmesh__reply__t.html#aac056d309da58df33d89f0354afb8277">mesh_reply_t</a></li>
-</ul>
-
-
-<h3><a id="index_c" name="index_c"></a>- c -</h3><ul>
-<li>cccdHandle&#160;:&#160;<a class="el" href="structble__central__discovery__t.html#a09f5552aff272299ce70305953bde0c0">ble_central_discovery_t</a></li>
-<li>channel&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#aeb1d49239dfa31a2d277c79fc01c5b0b">MeshMsgEvent</a></li>
-<li>config&#160;:&#160;<a class="el" href="structadc__buffer__t.html#ae19e6a05970919407a78ee75ca24e1db">adc_buffer_t</a></li>
-<li>controlCommand&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#a02417bff86d4cb33ddcc8b62053e6945">MeshMsgEvent</a>, <a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html#a6be43e76145ae75bd8673cc31fc50b0f">MeshUtil::cs_mesh_queue_item_t</a></li>
-<li>counter&#160;:&#160;<a class="el" href="structmicroapp__soft__interrupt__registration__t.html#a89495c2f58a65fc9289ce58dde0ad38c">microapp_soft_interrupt_registration_t</a></li>
-<li>crc&#160;:&#160;<a class="el" href="structasset__filter__runtime__data__t.html#a6982c95d648842228358cd3ecc2c0325">asset_filter_runtime_data_t</a></li>
-<li>currentAdcRangeMilliVolt&#160;:&#160;<a class="el" href="structboards__config__t.html#a7958850699db213f01a5920964ca05da">boards_config_t</a></li>
-<li>currentMultiplier&#160;:&#160;<a class="el" href="structboards__config__t.html#ad18ca5f7b81b85dd3ea2bfc3d9e54cb7">boards_config_t</a></li>
-<li>currentOffset&#160;:&#160;<a class="el" href="structboards__config__t.html#a0e4711623fd12ed742411c0b37736670">boards_config_t</a></li>
-</ul>
-
-
-<h3><a id="index_d" name="index_d"></a>- d -</h3><ul>
-<li>dataSize&#160;:&#160;<a class="el" href="structcs__result__t.html#a9675deb246871a1b1fe89513b9b26810">cs_result_t</a>, <a class="el" href="structmesh__reply__t.html#abe4a7a6db8533ea485ce97bf43ad834a">mesh_reply_t</a></li>
-<li>deviceType&#160;:&#160;<a class="el" href="structboards__config__t.html#ab610d00cffa3e905a1b614124b8ba373">boards_config_t</a></li>
-<li>dimmerInverted&#160;:&#160;<a class="el" href="structboards__config__t.html#ab06cf8d64003efe44ef6d782a20bce26">boards_config_t</a></li>
-<li>dimmerTempInverted&#160;:&#160;<a class="el" href="structboards__config__t.html#abbd20d110bdcb261ba424ed18a5ea996">boards_config_t</a></li>
-<li>doNotRelay&#160;:&#160;<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html#ac14902d8c951e4b11e00c2d9b77ee6fa">MeshUtil::cs_mesh_queue_item_meta_data_t</a>, <a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html#a1a6bb84e817854712f6550f7f5945810">MeshUtil::cs_mesh_queue_item_t</a></li>
-</ul>
-
-
-<h3><a id="index_e" name="index_e"></a>- e -</h3><ul>
-<li>encrypted&#160;:&#160;<a class="el" href="structcharacteristic__config__t.html#a79046c277530e9cd60c4fe6b63cca9c8">characteristic_config_t</a></li>
-<li>encryptionType&#160;:&#160;<a class="el" href="structcharacteristic__config__t.html#af90e4215d91fb1fe72f1e14bfff3b771">characteristic_config_t</a></li>
-</ul>
-
-
-<h3><a id="index_f" name="index_f"></a>- f -</h3><ul>
-<li>FAST_INTERVAL_TIMEOUT_SECONDS&#160;:&#160;<a class="el" href="classMeshTopology.html#a0d3b79e54b156a72b13a929533f8a88d">MeshTopology</a></li>
-<li>FILTER_BUFFER_SIZE&#160;:&#160;<a class="el" href="classAssetFilterStore.html#ab3aff9d4d6dd3bb036775c4d971f9124">AssetFilterStore</a></li>
-<li>filterDataSize&#160;:&#160;<a class="el" href="structasset__filter__runtime__data__t.html#a1502bca05f8472cdbc5fbf395675746a">asset_filter_runtime_data_t</a></li>
-<li>filterId&#160;:&#160;<a class="el" href="structasset__filter__runtime__data__t.html#a5c88648611aaba9b6113734d2db01b85">asset_filter_runtime_data_t</a></li>
-<li>firstVal&#160;:&#160;<a class="el" href="structdifferential__buffer__fixed__t.html#a3dafa4ec10992ad90a136001206ef078">differential_buffer_fixed_t&lt; T, S &gt;</a>, <a class="el" href="structdifferential__buffer__t.html#a803dc4d68be91ee095688a602aa795eb">differential_buffer_t&lt; T &gt;</a></li>
-<li>flags&#160;:&#160;<a class="el" href="structboards__config__t.html#a17a55ef948d2854bd42db36454b7c477">boards_config_t</a></li>
-</ul>
-
-
-<h3><a id="index_h" name="index_h"></a>- h -</h3><ul>
-<li>HEARTBEAT_TTL_MINUTES_MAX&#160;:&#160;<a class="el" href="classTrackedDevices.html#a8b0e884f9b34a0b723613fdc1a2fa1cc">TrackedDevices</a></li>
-</ul>
-
-
-<h3><a id="index_i" name="index_i"></a>- i -</h3><ul>
-<li>id&#160;:&#160;<a class="el" href="structcs__mesh__model__msg__sync__request__t.html#ace52aa0ab163cef52e20a1b44b1f701b">cs_mesh_model_msg_sync_request_t</a>, <a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html#ab8912aae256d5cf356a5c768442b4a81">MeshUtil::cs_mesh_queue_item_meta_data_t</a>, <a class="el" href="structmicroapp__soft__interrupt__registration__t.html#a6b13981af336bc622a65acb0767675af">microapp_soft_interrupt_registration_t</a></li>
-<li>isMaybeRelayed&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#a2a306ea3339f0c0e6fe3f138c001c68e">MeshMsgEvent</a></li>
-<li>isReply&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#a07ba373109913a9cda9e4c5a3a3ad166">MeshMsgEvent</a></li>
-<li>isScanning&#160;:&#160;<a class="el" href="structmicroapp__data__t.html#a01ff26a7f47306b236ae9d4e3c799b9a">microapp_data_t</a></li>
-</ul>
-
-
-<h3><a id="index_l" name="index_l"></a>- l -</h3><ul>
-<li>LAST_RECEIVED_COUNTER_PERIOD_MS&#160;:&#160;<a class="el" href="classAssetStore.html#af888584c0035115932d6a002dfdab15e">AssetStore</a></li>
-<li>LAST_RECEIVED_TIMEOUT_THRESHOLD_S&#160;:&#160;<a class="el" href="classAssetStore.html#ae36a7a52661c3007d844c33f4a4a503e">AssetStore</a></li>
-<li>lastReceivedCounter&#160;:&#160;<a class="el" href="structasset__record__t.html#a53604718957438ce19962502fc4f5932">asset_record_t</a></li>
-<li>lastVal&#160;:&#160;<a class="el" href="structdifferential__buffer__fixed__t.html#a76f698aace8607ea6527dddf06b2f3ea">differential_buffer_fixed_t&lt; T, S &gt;</a>, <a class="el" href="structdifferential__buffer__t.html#adba68b3162618b6cd00416be8b8d210b">differential_buffer_t&lt; T &gt;</a></li>
-<li>ledInverted&#160;:&#160;<a class="el" href="structboards__config__t.html#a41414ea9e9b7e9090a3535b6df2e91ae">boards_config_t</a></li>
-<li>len&#160;:&#160;<a class="el" href="structcs__const__data__t.html#a93204993a2bde7fe92dc864b1e5b87d7">cs_const_data_t</a>, <a class="el" href="structcs__data__t.html#a44f41d40e15e584bc4189245de3a4d8a">cs_data_t</a></li>
-<li>length&#160;:&#160;<a class="el" href="structdifferential__buffer__fixed__t.html#a831b0fb6c63a044590e71b42167d7c54">differential_buffer_fixed_t&lt; T, S &gt;</a>, <a class="el" href="structdifferential__buffer__t.html#a751e3acd7bae6de2e256af973bb18861">differential_buffer_t&lt; T &gt;</a></li>
-<li>LOCATION_ID_TTL_MINUTES&#160;:&#160;<a class="el" href="classTrackedDevices.html#af11cd02043a933bf483395bfada1baa8">TrackedDevices</a></li>
-</ul>
-
-
-<h3><a id="index_m" name="index_m"></a>- m -</h3><ul>
-<li>macAddress&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#a0f445c0f2bc7df39b264fbf2d3edab05">MeshMsgEvent</a></li>
-<li>macAddressValid&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#a9020d194edb56e45aab10f1cc31288dc">MeshMsgEvent</a></li>
-<li>major&#160;:&#160;<a class="el" href="classIBeacon.html#a615e08bf44b4d0d946d1245cbf4339f0">IBeacon</a></li>
-<li>MAX_FILTER_IDS&#160;:&#160;<a class="el" href="classAssetFilterStore.html#a973cf2699418841ede35a043c39e4550">AssetFilterStore</a></li>
-<li>MAX_NEIGHBOURS&#160;:&#160;<a class="el" href="classMeshTopology.html#ab8cce32f596e81d7931904b4a047e1ba">MeshTopology</a></li>
-<li>MAX_SERVICE_COUNT&#160;:&#160;<a class="el" href="classStack.html#ac472f79d0221f4e7b892dc5cfe846829">Stack</a></li>
-<li>MAX_TRACKED_DEVICES&#160;:&#160;<a class="el" href="classTrackedDevices.html#acbd8967ebddb691198948581a5d26771">TrackedDevices</a></li>
-<li>maxSampleValue&#160;:&#160;<a class="el" href="structadc__channel__config__result__t.html#a5790ab9d603179da1288e6c3ffb653d3">adc_channel_config_result_t</a></li>
-<li>maxValueMilliVolt&#160;:&#160;<a class="el" href="structadc__channel__config__result__t.html#a18cf4ab5dc6ad68a1841a3ff336bb354">adc_channel_config_result_t</a></li>
-<li>metaData&#160;:&#160;<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html#af2d7980e61d9335cdc81d7af5dce8ee1">MeshUtil::cs_mesh_queue_item_t</a></li>
-<li>microappData&#160;:&#160;<a class="el" href="classMicroappController.html#a15c7787be80f2f05abdd3a32000458a1">MicroappController</a></li>
-<li>MIN_SCHEDULER_FREE&#160;:&#160;<a class="el" href="classMeshScanner.html#a94b5a52befceb45084ebcbf80d47d00c">MeshScanner</a></li>
-<li>minAccessLevel&#160;:&#160;<a class="el" href="structcharacteristic__config__t.html#ae408356bc2b1dd92734bdda1d509547c">characteristic_config_t</a></li>
-<li>minor&#160;:&#160;<a class="el" href="classIBeacon.html#aa5f782308bd7fe44ed58c97c7ae3652a">IBeacon</a></li>
-<li>minSampleValue&#160;:&#160;<a class="el" href="structadc__channel__config__result__t.html#a81264fbbd492aa414f63ef48deedc189">adc_channel_config_result_t</a></li>
-<li>minTxPower&#160;:&#160;<a class="el" href="structboards__config__t.html#a0bacc3ea9705ea972e7795f7296293ba">boards_config_t</a></li>
-<li>minValueMilliVolt&#160;:&#160;<a class="el" href="structadc__channel__config__result__t.html#ad5b55e34696626f19c2dd3e963de29c1">adc_channel_config_result_t</a></li>
-<li>MODIFICATION_IN_PROGRESS_TIMEOUT_SECONDS&#160;:&#160;<a class="el" href="classAssetFilterStore.html#ae76ecd891911f23baec46c60f34a806c">AssetFilterStore</a></li>
-<li>msg&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#ac17eac649903079d1ff9bcbff7275389">MeshMsgEvent</a></li>
-<li>msgPayload&#160;:&#160;<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html#a4e2185c9483ac402e976b5541b1c7386">MeshUtil::cs_mesh_queue_item_t</a></li>
-<li>myRssi&#160;:&#160;<a class="el" href="structasset__record__t.html#a3e3ec3ef589dee99b1aea57e49aff510">asset_record_t</a></li>
-</ul>
-
-
-<h3><a id="index_n" name="index_n"></a>- n -</h3><ul>
-<li>notificationChunker&#160;:&#160;<a class="el" href="structcharacteristic__config__t.html#a7a55f46b15ee6b7473b4fe6c6d69788a">characteristic_config_t</a></li>
-<li>notify&#160;:&#160;<a class="el" href="structcharacteristic__config__t.html#af51f62fb7ce528c81674ea2470cd3c4e">characteristic_config_t</a></li>
-<li>numStoneIds&#160;:&#160;<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html#ade1091d68dcbd29d7ded1bec4c875a92">MeshUtil::cs_mesh_queue_item_t</a></li>
-</ul>
-
-
-<h3><a id="index_o" name="index_o"></a>- o -</h3><ul>
-<li>opCode&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#adca4c78520b4dd407d587c685029e81f">MeshMsgEvent</a></li>
-</ul>
-
-
-<h3><a id="index_p" name="index_p"></a>- p -</h3><ul>
-<li>pin&#160;:&#160;<a class="el" href="structadc__channel__config__result__t.html#a8ac783b5ae83199bb9c2d7882fc7a7a4">adc_channel_config_result_t</a></li>
-<li>powerOffsetMilliWatt&#160;:&#160;<a class="el" href="structboards__config__t.html#a08e172da8ab6ba3ff0104c19c17f4317">boards_config_t</a></li>
-<li>priority&#160;:&#160;<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html#a9c7e75abf41809269e276b7a62e1f59a">MeshUtil::cs_mesh_queue_item_meta_data_t</a></li>
-<li>pwmTempVoltageThreshold&#160;:&#160;<a class="el" href="structboards__config__t.html#aca7741ed42538545936863444e57ca03">boards_config_t</a></li>
-<li>pwmTempVoltageThresholdDown&#160;:&#160;<a class="el" href="structboards__config__t.html#a70bd38475536196ca64bb85f0535bb8b">boards_config_t</a></li>
-</ul>
-
-
-<h3><a id="index_r" name="index_r"></a>- r -</h3><ul>
-<li>read&#160;:&#160;<a class="el" href="structcharacteristic__config__t.html#a252a7b5f3d92ac1ec191d8a024122019">characteristic_config_t</a></li>
-<li>referencePin&#160;:&#160;<a class="el" href="structadc__channel__config__result__t.html#a2db7dab76df742b8f7f2dbb412e6d12c">adc_channel_config_result_t</a></li>
-<li>reply&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#a8ba3100c7d8a388765542267a7afe203">MeshMsgEvent</a></li>
-<li>result&#160;:&#160;<a class="el" href="classevent__t.html#a291a4428d1373b46b5492dbbb25fc3a3">event_t</a></li>
-<li>returnCode&#160;:&#160;<a class="el" href="structcs__result__t.html#a52f630a0d50321d1bc35b6228659b507">cs_result_t</a></li>
-<li>rssi&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#a4b39015ee3a5a66045460c1890977806">MeshMsgEvent</a>, <a class="el" href="structrssi__data__t.html#ad030d2ba4dd819425ee4b4bcee6e3835">rssi_data_t</a></li>
-</ul>
-
-
-<h3><a id="index_s" name="index_s"></a>- s -</h3><ul>
-<li>sampleCount&#160;:&#160;<a class="el" href="structrssi__data__t.html#a3ae1947624127b23c090decbbcb1d681">rssi_data_t</a></li>
-<li>samples&#160;:&#160;<a class="el" href="structadc__buffer__t.html#aed83786f07546b28b7962a53344d49a4">adc_buffer_t</a></li>
-<li>samplingIntervalUs&#160;:&#160;<a class="el" href="structadc__channel__config__result__t.html#af5b3fe2f11cf13c03cebc890001d3b47">adc_channel_config_result_t</a></li>
-<li>scanIntervalUs&#160;:&#160;<a class="el" href="structboards__config__t.html#a44f8ea01d745ec24aca763adf8ad2e32">boards_config_t</a></li>
-<li>scanResponseBuffer&#160;:&#160;<a class="el" href="structble__connected__t.html#aba41314a2c4141b103a4bd1793f1cfce">ble_connected_t</a></li>
-<li>scanWindowUs&#160;:&#160;<a class="el" href="structboards__config__t.html#a8e986dafff2ae3c150b17ebab4f522ea">boards_config_t</a></li>
-<li>SEND_INTERVAL_SECONDS_PER_NEIGHBOUR&#160;:&#160;<a class="el" href="classMeshTopology.html#a4de5e4786ba1c18e078a03150f985707">MeshTopology</a></li>
-<li>SEND_NOOP_INTERVAL_SECONDS&#160;:&#160;<a class="el" href="classMeshTopology.html#acc1e5cb22cf64c0c84e4bfda135f4b07">MeshTopology</a></li>
-<li>seqNr&#160;:&#160;<a class="el" href="structadc__buffer__t.html#a9b996bad665b09199e3a6924bbf9ecb8">adc_buffer_t</a></li>
-<li>service&#160;:&#160;<a class="el" href="structmicroapp__data__t.html#ac3beb63b9ea2577bed51a54a1c60ee65">microapp_data_t</a></li>
-<li>serviceUuid&#160;:&#160;<a class="el" href="structble__central__discovery__t.html#ad6fbad606fec1ecbdef0e25be59f7727">ble_central_discovery_t</a></li>
-<li>sharedEncryptionBuffer&#160;:&#160;<a class="el" href="structcharacteristic__config__t.html#a0ed2d58f9b1be24293a17e30b3281129">characteristic_config_t</a></li>
-<li>source&#160;:&#160;<a class="el" href="classevent__t.html#ad573199aeee318e34725f203dfcdc4a0">event_t</a></li>
-<li>srcStoneId&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#a0758330f86df520ff56d30dc757f9700">MeshMsgEvent</a></li>
-<li>stoneIdsPtr&#160;:&#160;<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__t.html#a257984ffc8c2aa47e835f08bbfcd47df">MeshUtil::cs_mesh_queue_item_t</a></li>
-</ul>
-
-
-<h3><a id="index_t" name="index_t"></a>- t -</h3><ul>
-<li>tapToToggleDefaultRssiThreshold&#160;:&#160;<a class="el" href="structboards__config__t.html#a93d196fc825c09c0440b55a309fe6f75">boards_config_t</a></li>
-<li>THROTTLE_COUNTER_PERIOD_MS&#160;:&#160;<a class="el" href="classAssetStore.html#a4f44dfa716cf7628854c8b7b5924a4c9">AssetStore</a></li>
-<li>throttlingCountdown&#160;:&#160;<a class="el" href="structasset__record__t.html#a98974f76c8fa7ff978853a499e2fc49c">asset_record_t</a></li>
-<li>TIMEOUT_SECONDS&#160;:&#160;<a class="el" href="classMeshTopology.html#a085659fcd4bc8dfde5d8bd0faf2e4e38">MeshTopology</a></li>
-<li>transmissionsOrTimeout&#160;:&#160;<a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html#aa7043cd77c790cbe85376d732912f148">MeshUtil::cs_mesh_queue_item_meta_data_t</a></li>
-<li>ttl&#160;:&#160;<a class="el" href="classMeshMsgEvent.html#aeb8296deb1630907a956e864860c76bc">MeshMsgEvent</a></li>
-<li>txPower&#160;:&#160;<a class="el" href="classIBeacon.html#a85b24ca2ac46d0447cdf5f1da7091aa9">IBeacon</a></li>
-<li>type&#160;:&#160;<a class="el" href="structmesh__reply__t.html#a18a0c0e8092abdc77437fa111dbf5390">mesh_reply_t</a>, <a class="el" href="classMeshMsgEvent.html#a8a48ec113b92289fda53e50f95e0a522">MeshMsgEvent</a>, <a class="el" href="structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html#afdd215822f3b840c7854f2cde25a425b">MeshUtil::cs_mesh_queue_item_meta_data_t</a>, <a class="el" href="structmicroapp__soft__interrupt__registration__t.html#a18dfd7e99328a01e274b0339ee9c3c8e">microapp_soft_interrupt_registration_t</a></li>
-</ul>
-
-
-<h3><a id="index_u" name="index_u"></a>- u -</h3><ul>
-<li>uuid&#160;:&#160;<a class="el" href="structble__central__discovery__t.html#aff884ea22e79d65c8cd4abfc8c6c61e9">ble_central_discovery_t</a>, <a class="el" href="classIBeacon.html#af9d7677aa603e5d15554fd49900d5f97">IBeacon</a></li>
-</ul>
-
-
-<h3><a id="index_v" name="index_v"></a>- v -</h3><ul>
-<li>valid&#160;:&#160;<a class="el" href="structadc__buffer__t.html#abda00e2306b4e559732bd644463fe4b5">adc_buffer_t</a></li>
-<li>valueHandle&#160;:&#160;<a class="el" href="structble__central__discovery__t.html#a58b9cfac4130ac91fcd61e18beb17ed4">ble_central_discovery_t</a></li>
-<li>variance&#160;:&#160;<a class="el" href="structrssi__data__t.html#aab7ca6b925063be672a18153a1340513">rssi_data_t</a></li>
-<li>VERSION_BROADCAST_INTERVAL_RESET_SECONDS&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#ad8aefe8b60bb215e09e64bb7248695fd">AssetFilterSyncer</a></li>
-<li>VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS&#160;:&#160;<a class="el" href="classAssetFilterSyncer.html#a1a8b81fb6f60683a15358ab22a609690">AssetFilterSyncer</a></li>
-<li>voltageAdcRangeMilliVolt&#160;:&#160;<a class="el" href="structboards__config__t.html#af0eedd644c797d357a6eb43d77870dcd">boards_config_t</a></li>
-<li>voltageAfterLoadMultiplier&#160;:&#160;<a class="el" href="structboards__config__t.html#a0c43630f8e198505965cb01ec0b2a484">boards_config_t</a></li>
-<li>voltageAfterLoadOffset&#160;:&#160;<a class="el" href="structboards__config__t.html#a9fde717e056e68e8a9fa4a4debd19df0">boards_config_t</a></li>
-<li>voltageMultiplier&#160;:&#160;<a class="el" href="structboards__config__t.html#a825867beef4a56c4fd2ae70012b54822">boards_config_t</a></li>
-<li>voltageOffset&#160;:&#160;<a class="el" href="structboards__config__t.html#aef6b65d0afa48085e6e3d453ee260559">boards_config_t</a></li>
-</ul>
-
-
-<h3><a id="index_w" name="index_w"></a>- w -</h3><ul>
-<li>write&#160;:&#160;<a class="el" href="structcharacteristic__config__t.html#a6a1372352cb483b1c93dc1d5c3493181">characteristic_config_t</a></li>
+<li>_subKeys&#160;:&#160;<a class="el" href="classRC5.html#a080a3c2870b25cdf25f0f28be8cecea8">RC5</a></li>
+<li>_subscribedForIndications&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a970861d89add791c45f5f10f5c9a72fe">CharacteristicBase</a></li>
+<li>_subscribedForNotifications&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a12766961a40513a0eb6656298bebd9e0">CharacteristicBase</a></li>
+<li>_successfullyFactoryResetBitmask&#160;:&#160;<a class="el" href="classFactoryReset.html#a6c4e7eccde030f46f295af6df6f3b2e8">FactoryReset</a></li>
+<li>_successfullyStoredBitmask&#160;:&#160;<a class="el" href="classSetup.html#aee9589ebb2ebbf92c534e91bf7edfc61">Setup</a></li>
+<li>_switchAggregator&#160;:&#160;<a class="el" href="classCrownstone.html#a504c1c3bb60969120e26b2d9c97cb6a8">Crownstone</a></li>
+<li>_switchcraftDoubleTapCountdown&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a8380d0548153be64977568bbd0a58e56">SwitchAggregator</a></li>
+<li>_switchHist&#160;:&#160;<a class="el" href="classPowerSampling.html#a51785c769fe7a1c7b92f9f68000164e5">PowerSampling</a></li>
+<li>_switchHistory&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a469f51068ca21307b6e9657c7af3f446">SwitchAggregator</a></li>
+<li>_switchState&#160;:&#160;<a class="el" href="classServiceData.html#a1848ddb7402eeb51ad2b4d7d6c1d52ea">ServiceData</a></li>
+<li>_syncCountdown&#160;:&#160;<a class="el" href="classMesh.html#aaab63ceff3679723f6795272880e0e2e">Mesh</a></li>
+<li>_synced&#160;:&#160;<a class="el" href="classMesh.html#a8d255b371de1e99ce9a4487874e77278">Mesh</a></li>
+<li>_syncFailedCountdown&#160;:&#160;<a class="el" href="classMesh.html#aba0ed93f7d1d43d24e377dfdcd9ce8ac">Mesh</a></li>
+<li>_systemTime&#160;:&#160;<a class="el" href="classCrownstone.html#a5739010efd68a41e0393a57bd4d204ad">Crownstone</a></li>
+<li>_tail&#160;:&#160;<a class="el" href="classCircularBuffer.html#ac7eb9c85fcdc2bb79322ec76bc929bc7">CircularBuffer&lt; T &gt;</a>, <a class="el" href="classCircularDifferentialBuffer.html#a1721b22f3091a76a46ea34cd213509c6">CircularDifferentialBuffer&lt; T &gt;</a></li>
+<li>_targetValues&#160;:&#160;<a class="el" href="classPWM.html#ab3a8f94f05cd24286e1b501ec18a1ace">PWM</a></li>
+<li>_temperature&#160;:&#160;<a class="el" href="classServiceData.html#a36d308ea0d7fb93499b0538a011a3bf2">ServiceData</a></li>
+<li>_temperatureGuard&#160;:&#160;<a class="el" href="classCrownstone.html#a5be438592d0221a81aca881dc0e60aa2">Crownstone</a></li>
+<li>_thresholdDifferent&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#a133717643d75cafc6ca44e095a680479">RecognizeSwitch</a></li>
+<li>_thresholdRatio&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#aae16bf6abdcf5c89307979d10432d843">RecognizeSwitch</a></li>
+<li>_thresholdSimilar&#160;:&#160;<a class="el" href="classRecognizeSwitch.html#a023ba1be0d70490f2b5768ae3709dada">RecognizeSwitch</a></li>
+<li>_throttleCountdownBumpTicks&#160;:&#160;<a class="el" href="classAssetForwarder.html#a014d1d83ee06dcbe6a006d8f3d4cf087">AssetForwarder</a></li>
+<li>_tickCounter&#160;:&#160;<a class="el" href="classMicroappController.html#a4934b1bd703248f44a12d5e2bfbadd6e">MicroappController</a></li>
+<li>_tickValues&#160;:&#160;<a class="el" href="classPWM.html#a4191c775a63887ffb0e77037014a1bc4">PWM</a></li>
+<li>_timeoutCountDown&#160;:&#160;<a class="el" href="classCrownstoneCentral.html#a3e3e91783158962c48708c29a69efb3d">CrownstoneCentral</a></li>
+<li>_timeoutMs&#160;:&#160;<a class="el" href="classBleCentral.html#abb6eb442e37f65979160ef3be80d014b">BleCentral</a>, <a class="el" href="classCrownstoneCentral.html#abc0b0694393db59e0ac2f66f3f6f9c09">CrownstoneCentral</a></li>
+<li>_timer&#160;:&#160;<a class="el" href="classCrownstone.html#a34c64f763f2c220701876a93333a4700">Crownstone</a></li>
+<li>_trackedDeviceId&#160;:&#160;<a class="el" href="classMemUsageTest.html#a49d1b659a7311c3269c6a3d604bd981c">MemUsageTest</a></li>
+<li>_trackedDevices&#160;:&#160;<a class="el" href="classCrownstone.html#a191b1baa64ae264bdf107679ac35022b">Crownstone</a></li>
+<li>_ttl&#160;:&#160;<a class="el" href="classMeshModelUnicast.html#a4256c632103638e64da10288f771967f">MeshModelUnicast</a></li>
+<li>_twi&#160;:&#160;<a class="el" href="classTwi.html#ae5b1368a4d10e315783046c1bfc5f7e5">Twi</a></li>
+<li>_twilightHandler&#160;:&#160;<a class="el" href="classSwitchAggregator.html#a0ffd9887b9d98c4d7f3484e634dfd352">SwitchAggregator</a></li>
+<li>_twilightState&#160;:&#160;<a class="el" href="classSwitchAggregator.html#ac12efacb742b69e63c135fa960d8bd86">SwitchAggregator</a></li>
+<li>_txPower&#160;:&#160;<a class="el" href="classAdvertiser.html#a60f916710161527e262674a5c0dc79ec">Advertiser</a></li>
+<li>_unicastModel&#160;:&#160;<a class="el" href="classMeshModelSelector.html#a99356cdda81a1a8aa09f79b0f9f39847">MeshModelSelector</a></li>
+<li>_updateCount&#160;:&#160;<a class="el" href="classServiceData.html#a7d26d5ce11c6ae405c39f8b0fac172a0">ServiceData</a></li>
+<li>_updateTimerData&#160;:&#160;<a class="el" href="classServiceData.html#a95cc8d439ab89e52a052e2cdbece6aba">ServiceData</a></li>
+<li>_updateTimerId&#160;:&#160;<a class="el" href="classServiceData.html#a7a3d438f12615884b9c0f402c8ecd0f6">ServiceData</a></li>
+<li>_updateValuesCountdown&#160;:&#160;<a class="el" href="classPWM.html#ac2a40da06fe5f268a179681d01130edd">PWM</a></li>
+<li>_userStatus&#160;:&#160;<a class="el" href="classUartConnection.html#a8c9edb58d2336771f749d1ccb32f5036">UartConnection</a></li>
+<li>_uuid&#160;:&#160;<a class="el" href="classCharacteristicBase.html#a228342c2aa5151b44a1daee75b5e279b">CharacteristicBase</a>, <a class="el" href="classService.html#a5194907897fc76b00970983d9ff95ae5">Service</a>, <a class="el" href="classUUID.html#a2f457a720f8398f41c53b55d49766ebc">UUID</a></li>
+<li>_uuidMap&#160;:&#160;<a class="el" href="classBackgroundAdvertisementHandler.html#a05aa0d7c962cee16a364adb27b7db46f">BackgroundAdvertisementHandler</a></li>
+<li>_value&#160;:&#160;<a class="el" href="classCharacteristic.html#ab0ca33a8f142ab5f573762e8c8b499a8">Characteristic&lt; T &gt;</a>, <a class="el" href="classCharacteristic_3_01const_01char_01_5_01_4.html#a0e429d3ab314bcacb82d23aff19ede77">Characteristic&lt; const char * &gt;</a></li>
+<li>_valueLength&#160;:&#160;<a class="el" href="classCharacteristicBase.html#abc7bde9da7f49d6068ca2a8f029e3457">CharacteristicBase</a></li>
+<li>_values&#160;:&#160;<a class="el" href="classPWM.html#a89005aca3fd44f89b33b5f033d9e7a7d">PWM</a></li>
+<li>_voltageRmsMilliVoltHist&#160;:&#160;<a class="el" href="classPowerSampling.html#a366a6214086be0ea4168272000cedf56">PowerSampling</a></li>
+<li>_wantAdvertising&#160;:&#160;<a class="el" href="classAdvertiser.html#a1acfe00b40890b5f998833f29010518c">Advertiser</a></li>
+<li>_wantConnectable&#160;:&#160;<a class="el" href="classAdvertiser.html#a90264b70a6f6b3b73fe085c5ef6b74c9">Advertiser</a></li>
+<li>_writeBuffer&#160;:&#160;<a class="el" href="classMicroappStorage.html#a5d8667ef701dc4188c45327735a8b3ee">MicroappStorage</a>, <a class="el" href="classUartHandler.html#abee4fb30d13614ba5619b5ad8208d2e6">UartHandler</a></li>
+<li>_writeNonce&#160;:&#160;<a class="el" href="classUartHandler.html#afc00783769118a7d1cf772690d0b0cf0">UartHandler</a></li>
+<li>_writeStep&#160;:&#160;<a class="el" href="classTestCrownstoneCentral.html#a07e4a8ffda00eaf6b8cf31e72b27e4e6">TestCrownstoneCentral</a></li>
+<li>_writing&#160;:&#160;<a class="el" href="classMicroappStorage.html#a2cf79a9fe57eb6a91808408e73dabb3e">MicroappStorage</a></li>
+<li>_zeroCrossDeviationIntegral&#160;:&#160;<a class="el" href="classPWM.html#a930a2e47767acce94d46b803d700bd10">PWM</a></li>
+<li>_zeroCrossingCallback&#160;:&#160;<a class="el" href="classADC.html#a98e44a8fbbe1f5227e8db72e5698834b">ADC</a></li>
+<li>_zeroCrossingChannel&#160;:&#160;<a class="el" href="classADC.html#a19743d0c378605ea05786a67d56913a9">ADC</a></li>
+<li>_zeroCrossingCounter&#160;:&#160;<a class="el" href="classPWM.html#ac5c72ed5a2f52b9f514cce87b098850f">PWM</a></li>
+<li>_zeroCrossingEnabled&#160;:&#160;<a class="el" href="classADC.html#a8c5f9d367a9a6a9839fbb71fa81f2afb">ADC</a></li>
+<li>_zeroCrossTicksDeviationAvg&#160;:&#160;<a class="el" href="classPWM.html#a482f2cc731a4131893422bdbbeb3b5e1">PWM</a></li>
+<li>_zeroCurrentCount&#160;:&#160;<a class="el" href="classPowerSampling.html#af8b89ae54846939c828f8f2ec08d4f54">PowerSampling</a></li>
+<li>_zeroValue&#160;:&#160;<a class="el" href="classADC.html#acb12a17b9065a03dc606b474624f9606">ADC</a></li>
+<li>_zeroVoltageCount&#160;:&#160;<a class="el" href="classPowerSampling.html#afb0e2bca20693cdb29104ec2dba88a38">PowerSampling</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

@@ -133,88 +133,256 @@ Collaboration diagram for Behaviour:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a1a3ffbf457a686772dda3c6034d6c90d"><td class="memItemLeft" align="right" valign="top"><a id="a1a3ffbf457a686772dda3c6034d6c90d" name="a1a3ffbf457a686772dda3c6034d6c90d"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>Type</b> : uint8_t { <b>Switch</b> = 0
-, <b>Twilight</b> = 1
-, <b>Extended</b> = 2
-, <b>Undefined</b> = 0xff
+<tr class="memitem:a1a3ffbf457a686772dda3c6034d6c90d"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90d">Type</a> : uint8_t { <a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90dabbc155fb2b111bf61c4f5ff892915e6b">Switch</a> = 0
+, <a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90da01d0722c1f9961f2b763fbe51869299a">Twilight</a> = 1
+, <a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90daf23578fcd2a868168854ab714e7de537">Extended</a> = 2
+, <a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90daec0fc0100c4fc1ce4eea230c3dc10360">Undefined</a> = 0xff
  }</td></tr>
 <tr class="separator:a1a3ffbf457a686772dda3c6034d6c90d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad8278f9c603a461940bff7b743558baf"><td class="memItemLeft" align="right" valign="top"><a id="ad8278f9c603a461940bff7b743558baf" name="ad8278f9c603a461940bff7b743558baf"></a>
-typedef std::array&lt; uint8_t, 1+13 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>SerializedDataType</b></td></tr>
+<tr class="memitem:ad8278f9c603a461940bff7b743558baf"><td class="memItemLeft" align="right" valign="top">typedef std::array&lt; uint8_t, 1+13 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#ad8278f9c603a461940bff7b743558baf">SerializedDataType</a></td></tr>
 <tr class="separator:ad8278f9c603a461940bff7b743558baf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a009d90b83688f173246022521a96f55d"><td class="memItemLeft" align="right" valign="top"><a id="a009d90b83688f173246022521a96f55d" name="a009d90b83688f173246022521a96f55d"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Behaviour</b> (Type typ, uint8_t intensity, uint8_t profileid, DayOfWeekBitMask activedaysofweek, <a class="el" href="classTimeOfDay.html">TimeOfDay</a> <a class="el" href="classBehaviour.html#afe97df8431563525d1bee6a1ce982dc0">from</a>, <a class="el" href="classTimeOfDay.html">TimeOfDay</a> <a class="el" href="classBehaviour.html#aa2d27848058cb591d6359c693d2d35c6">until</a>)</td></tr>
+<tr class="memitem:a3c695554c881998c9ef87cb407b4e451"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a3c695554c881998c9ef87cb407b4e451">~Behaviour</a> ()=default</td></tr>
+<tr class="separator:a3c695554c881998c9ef87cb407b4e451"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a009d90b83688f173246022521a96f55d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a009d90b83688f173246022521a96f55d">Behaviour</a> (<a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90d">Type</a> <a class="el" href="classBehaviour.html#a2d31c600968b556ef6e2addcd74b4211">typ</a>, uint8_t intensity, uint8_t profileid, <a class="el" href="cs__DayOfWeek_8h.html#a8b86ff171f648dfb5dadc6783febd543">DayOfWeekBitMask</a> activedaysofweek, <a class="el" href="classTimeOfDay.html">TimeOfDay</a> <a class="el" href="classBehaviour.html#afe97df8431563525d1bee6a1ce982dc0">from</a>, <a class="el" href="classTimeOfDay.html">TimeOfDay</a> <a class="el" href="classBehaviour.html#aa2d27848058cb591d6359c693d2d35c6">until</a>)</td></tr>
 <tr class="separator:a009d90b83688f173246022521a96f55d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad81845f12dece9cbe44d4504f57e0c6c"><td class="memItemLeft" align="right" valign="top"><a id="ad81845f12dece9cbe44d4504f57e0c6c" name="ad81845f12dece9cbe44d4504f57e0c6c"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Behaviour</b> (SerializedDataType arr)</td></tr>
+<tr class="memitem:ad81845f12dece9cbe44d4504f57e0c6c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#ad81845f12dece9cbe44d4504f57e0c6c">Behaviour</a> (<a class="el" href="classBehaviour.html#ad8278f9c603a461940bff7b743558baf">SerializedDataType</a> arr)</td></tr>
 <tr class="separator:ad81845f12dece9cbe44d4504f57e0c6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f12e8584a7693cdc4c0a8bc185ffc11"><td class="memItemLeft" align="right" valign="top"><a id="a2f12e8584a7693cdc4c0a8bc185ffc11" name="a2f12e8584a7693cdc4c0a8bc185ffc11"></a>
-SerializedDataType&#160;</td><td class="memItemRight" valign="bottom"><b>serialize</b> ()</td></tr>
+<tr class="memitem:a2f12e8584a7693cdc4c0a8bc185ffc11"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classBehaviour.html#ad8278f9c603a461940bff7b743558baf">SerializedDataType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a2f12e8584a7693cdc4c0a8bc185ffc11">serialize</a> ()</td></tr>
 <tr class="separator:a2f12e8584a7693cdc4c0a8bc185ffc11"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a615536cc77a24db6602ebb37ec111a29"><td class="memItemLeft" align="right" valign="top"><a id="a615536cc77a24db6602ebb37ec111a29" name="a615536cc77a24db6602ebb37ec111a29"></a>
-virtual uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><b>serialize</b> (uint8_t *outbuff, size_t max_size)</td></tr>
+<tr class="memitem:a615536cc77a24db6602ebb37ec111a29"><td class="memItemLeft" align="right" valign="top">virtual uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a615536cc77a24db6602ebb37ec111a29">serialize</a> (uint8_t *outbuff, size_t max_size)</td></tr>
 <tr class="separator:a615536cc77a24db6602ebb37ec111a29"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abad4a49b38eaa98ad458aefd21061e96"><td class="memItemLeft" align="right" valign="top"><a id="abad4a49b38eaa98ad458aefd21061e96" name="abad4a49b38eaa98ad458aefd21061e96"></a>
-virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><b>serializedSize</b> () const</td></tr>
+<tr class="memitem:abad4a49b38eaa98ad458aefd21061e96"><td class="memItemLeft" align="right" valign="top">virtual size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#abad4a49b38eaa98ad458aefd21061e96">serializedSize</a> () const</td></tr>
 <tr class="separator:abad4a49b38eaa98ad458aefd21061e96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2db9c364cf3c2959828e744a72cdafe2"><td class="memItemLeft" align="right" valign="top"><a id="a2db9c364cf3c2959828e744a72cdafe2" name="a2db9c364cf3c2959828e744a72cdafe2"></a>
-std::vector&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>serialized</b> ()</td></tr>
+<tr class="memitem:a2db9c364cf3c2959828e744a72cdafe2"><td class="memItemLeft" align="right" valign="top">std::vector&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a2db9c364cf3c2959828e744a72cdafe2">serialized</a> ()</td></tr>
 <tr class="separator:a2db9c364cf3c2959828e744a72cdafe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accda8ffba920503fecf7c351c4f92380"><td class="memItemLeft" align="right" valign="top"><a id="accda8ffba920503fecf7c351c4f92380" name="accda8ffba920503fecf7c351c4f92380"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>print</b> ()</td></tr>
+<tr class="memitem:accda8ffba920503fecf7c351c4f92380"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#accda8ffba920503fecf7c351c4f92380">print</a> ()</td></tr>
 <tr class="separator:accda8ffba920503fecf7c351c4f92380"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2c05b67527a4f2c8def6bc96ae472506"><td class="memItemLeft" align="right" valign="top"><a id="a2c05b67527a4f2c8def6bc96ae472506" name="a2c05b67527a4f2c8def6bc96ae472506"></a>
-virtual Type&#160;</td><td class="memItemRight" valign="bottom"><b>getType</b> () const</td></tr>
+<tr class="memitem:a2c05b67527a4f2c8def6bc96ae472506"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90d">Type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a2c05b67527a4f2c8def6bc96ae472506">getType</a> () const</td></tr>
 <tr class="separator:a2c05b67527a4f2c8def6bc96ae472506"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f9ce5cac8c1a450ae3d45f42b4f9fd6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a9f9ce5cac8c1a450ae3d45f42b4f9fd6">isValid</a> (<a class="el" href="classTime.html">Time</a> currenttime)</td></tr>
 <tr class="memdesc:a9f9ce5cac8c1a450ae3d45f42b4f9fd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Does the behaviour apply to the current situation? If <a class="el" href="classBehaviour.html#afe97df8431563525d1bee6a1ce982dc0" title="Returns from (incl.) which time on this behaviour applies.">from()</a> == <a class="el" href="classBehaviour.html#aa2d27848058cb591d6359c693d2d35c6" title="Returns until (excl.) which time on this behaviour applies.">until()</a> the behaviour isValid all day.  <a href="classBehaviour.html#a9f9ce5cac8c1a450ae3d45f42b4f9fd6">More...</a><br /></td></tr>
 <tr class="separator:a9f9ce5cac8c1a450ae3d45f42b4f9fd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26c22923bb79518bfd8fbadebddc4ad3"><td class="memItemLeft" align="right" valign="top"><a id="a26c22923bb79518bfd8fbadebddc4ad3" name="a26c22923bb79518bfd8fbadebddc4ad3"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>requiresPresence</b> ()</td></tr>
+<tr class="memitem:a26c22923bb79518bfd8fbadebddc4ad3"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a26c22923bb79518bfd8fbadebddc4ad3">requiresPresence</a> ()</td></tr>
 <tr class="separator:a26c22923bb79518bfd8fbadebddc4ad3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc1b0fcadb2522a5f845f3f27e13848f"><td class="memItemLeft" align="right" valign="top"><a id="afc1b0fcadb2522a5f845f3f27e13848f" name="afc1b0fcadb2522a5f845f3f27e13848f"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>requiresAbsence</b> ()</td></tr>
+<tr class="memitem:afc1b0fcadb2522a5f845f3f27e13848f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#afc1b0fcadb2522a5f845f3f27e13848f">requiresAbsence</a> ()</td></tr>
 <tr class="separator:afc1b0fcadb2522a5f845f3f27e13848f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abb308138d1188e8b209f5e1109a5c168"><td class="memItemLeft" align="right" valign="top"><a id="abb308138d1188e8b209f5e1109a5c168" name="abb308138d1188e8b209f5e1109a5c168"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>value</b> () const</td></tr>
-<tr class="memdesc:abb308138d1188e8b209f5e1109a5c168"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the intended state when this behaviour is valid. <br /></td></tr>
+<tr class="memitem:abb308138d1188e8b209f5e1109a5c168"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#abb308138d1188e8b209f5e1109a5c168">value</a> () const</td></tr>
+<tr class="memdesc:abb308138d1188e8b209f5e1109a5c168"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the intended state when this behaviour is valid.  <a href="classBehaviour.html#abb308138d1188e8b209f5e1109a5c168">More...</a><br /></td></tr>
 <tr class="separator:abb308138d1188e8b209f5e1109a5c168"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe97df8431563525d1bee6a1ce982dc0"><td class="memItemLeft" align="right" valign="top"><a id="afe97df8431563525d1bee6a1ce982dc0" name="afe97df8431563525d1bee6a1ce982dc0"></a>
-<a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><b>from</b> () const</td></tr>
-<tr class="memdesc:afe97df8431563525d1bee6a1ce982dc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns from (incl.) which time on this behaviour applies. <br /></td></tr>
+<tr class="memitem:afe97df8431563525d1bee6a1ce982dc0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#afe97df8431563525d1bee6a1ce982dc0">from</a> () const</td></tr>
+<tr class="memdesc:afe97df8431563525d1bee6a1ce982dc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns from (incl.) which time on this behaviour applies.  <a href="classBehaviour.html#afe97df8431563525d1bee6a1ce982dc0">More...</a><br /></td></tr>
 <tr class="separator:afe97df8431563525d1bee6a1ce982dc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa2d27848058cb591d6359c693d2d35c6"><td class="memItemLeft" align="right" valign="top"><a id="aa2d27848058cb591d6359c693d2d35c6" name="aa2d27848058cb591d6359c693d2d35c6"></a>
-<a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><b>until</b> () const</td></tr>
-<tr class="memdesc:aa2d27848058cb591d6359c693d2d35c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns until (excl.) which time on this behaviour applies. <br /></td></tr>
+<tr class="memitem:aa2d27848058cb591d6359c693d2d35c6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#aa2d27848058cb591d6359c693d2d35c6">until</a> () const</td></tr>
+<tr class="memdesc:aa2d27848058cb591d6359c693d2d35c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns until (excl.) which time on this behaviour applies.  <a href="classBehaviour.html#aa2d27848058cb591d6359c693d2d35c6">More...</a><br /></td></tr>
 <tr class="separator:aa2d27848058cb591d6359c693d2d35c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a2d31c600968b556ef6e2addcd74b4211"><td class="memItemLeft" align="right" valign="top"><a id="a2d31c600968b556ef6e2addcd74b4211" name="a2d31c600968b556ef6e2addcd74b4211"></a>
-Type&#160;</td><td class="memItemRight" valign="bottom"><b>typ</b></td></tr>
+<tr class="memitem:a2d31c600968b556ef6e2addcd74b4211"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90d">Type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a2d31c600968b556ef6e2addcd74b4211">typ</a></td></tr>
 <tr class="separator:a2d31c600968b556ef6e2addcd74b4211"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b626dbc7dc4814b115f9c04dfcc267e"><td class="memItemLeft" align="right" valign="top"><a id="a0b626dbc7dc4814b115f9c04dfcc267e" name="a0b626dbc7dc4814b115f9c04dfcc267e"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>activeIntensity</b> = 0</td></tr>
+<tr class="memitem:a0b626dbc7dc4814b115f9c04dfcc267e"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a0b626dbc7dc4814b115f9c04dfcc267e">activeIntensity</a> = 0</td></tr>
 <tr class="separator:a0b626dbc7dc4814b115f9c04dfcc267e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a6eff28a7d698914720c1ccb11ee34a"><td class="memItemLeft" align="right" valign="top"><a id="a9a6eff28a7d698914720c1ccb11ee34a" name="a9a6eff28a7d698914720c1ccb11ee34a"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>profileId</b> = 0</td></tr>
+<tr class="memitem:a9a6eff28a7d698914720c1ccb11ee34a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a9a6eff28a7d698914720c1ccb11ee34a">profileId</a> = 0</td></tr>
 <tr class="separator:a9a6eff28a7d698914720c1ccb11ee34a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9141e59e216e6aac2648b41891ae2652"><td class="memItemLeft" align="right" valign="top"><a id="a9141e59e216e6aac2648b41891ae2652" name="a9141e59e216e6aac2648b41891ae2652"></a>
-DayOfWeekBitMask&#160;</td><td class="memItemRight" valign="bottom"><b>activeDays</b></td></tr>
+<tr class="memitem:a9141e59e216e6aac2648b41891ae2652"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__DayOfWeek_8h.html#a8b86ff171f648dfb5dadc6783febd543">DayOfWeekBitMask</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a9141e59e216e6aac2648b41891ae2652">activeDays</a></td></tr>
 <tr class="separator:a9141e59e216e6aac2648b41891ae2652"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a3501d782dc0ca18d611894514eecfc"><td class="memItemLeft" align="right" valign="top"><a id="a2a3501d782dc0ca18d611894514eecfc" name="a2a3501d782dc0ca18d611894514eecfc"></a>
-<a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><b>behaviourAppliesFrom</b> = TimeOfDay::Midnight()</td></tr>
+<tr class="memitem:a2a3501d782dc0ca18d611894514eecfc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a2a3501d782dc0ca18d611894514eecfc">behaviourAppliesFrom</a> = <a class="el" href="classTimeOfDay.html#a65461015aef81a70657a2e21d433fa0b">TimeOfDay::Midnight</a>()</td></tr>
 <tr class="separator:a2a3501d782dc0ca18d611894514eecfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2b19f5ecb1f2337418c7a8541b1855a4"><td class="memItemLeft" align="right" valign="top"><a id="a2b19f5ecb1f2337418c7a8541b1855a4" name="a2b19f5ecb1f2337418c7a8541b1855a4"></a>
-<a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><b>behaviourAppliesUntil</b> = TimeOfDay::Midnight()</td></tr>
+<tr class="memitem:a2b19f5ecb1f2337418c7a8541b1855a4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBehaviour.html#a2b19f5ecb1f2337418c7a8541b1855a4">behaviourAppliesUntil</a> = <a class="el" href="classTimeOfDay.html#a65461015aef81a70657a2e21d433fa0b">TimeOfDay::Midnight</a>()</td></tr>
 <tr class="separator:a2b19f5ecb1f2337418c7a8541b1855a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class to derrive behaviours from, centralizing common variables such as from and until times. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="ad8278f9c603a461940bff7b743558baf" name="ad8278f9c603a461940bff7b743558baf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8278f9c603a461940bff7b743558baf">&#9670;&#160;</a></span>SerializedDataType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::array&lt;uint8_t, 1 + 13&gt; <a class="el" href="classBehaviour.html#ad8278f9c603a461940bff7b743558baf">Behaviour::SerializedDataType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a1a3ffbf457a686772dda3c6034d6c90d" name="a1a3ffbf457a686772dda3c6034d6c90d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a3ffbf457a686772dda3c6034d6c90d">&#9670;&#160;</a></span>Type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90d">Behaviour::Type</a> : uint8_t</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a1a3ffbf457a686772dda3c6034d6c90dabbc155fb2b111bf61c4f5ff892915e6b" name="a1a3ffbf457a686772dda3c6034d6c90dabbc155fb2b111bf61c4f5ff892915e6b"></a>Switch&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1a3ffbf457a686772dda3c6034d6c90da01d0722c1f9961f2b763fbe51869299a" name="a1a3ffbf457a686772dda3c6034d6c90da01d0722c1f9961f2b763fbe51869299a"></a>Twilight&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1a3ffbf457a686772dda3c6034d6c90daf23578fcd2a868168854ab714e7de537" name="a1a3ffbf457a686772dda3c6034d6c90daf23578fcd2a868168854ab714e7de537"></a>Extended&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1a3ffbf457a686772dda3c6034d6c90daec0fc0100c4fc1ce4eea230c3dc10360" name="a1a3ffbf457a686772dda3c6034d6c90daec0fc0100c4fc1ce4eea230c3dc10360"></a>Undefined&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a3c695554c881998c9ef87cb407b4e451" name="a3c695554c881998c9ef87cb407b4e451"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c695554c881998c9ef87cb407b4e451">&#9670;&#160;</a></span>~Behaviour()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual Behaviour::~Behaviour </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a009d90b83688f173246022521a96f55d" name="a009d90b83688f173246022521a96f55d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a009d90b83688f173246022521a96f55d">&#9670;&#160;</a></span>Behaviour() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classBehaviour.html">Behaviour::Behaviour</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90d">Type</a>&#160;</td>
+          <td class="paramname"><em>typ</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>intensity</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>profileid</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__DayOfWeek_8h.html#a8b86ff171f648dfb5dadc6783febd543">DayOfWeekBitMask</a>&#160;</td>
+          <td class="paramname"><em>activedaysofweek</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td>
+          <td class="paramname"><em>from</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTimeOfDay.html">TimeOfDay</a>&#160;</td>
+          <td class="paramname"><em>until</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad81845f12dece9cbe44d4504f57e0c6c" name="ad81845f12dece9cbe44d4504f57e0c6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad81845f12dece9cbe44d4504f57e0c6c">&#9670;&#160;</a></span>Behaviour() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classBehaviour.html">Behaviour::Behaviour</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classBehaviour.html#ad8278f9c603a461940bff7b743558baf">SerializedDataType</a>&#160;</td>
+          <td class="paramname"><em>arr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="afe97df8431563525d1bee6a1ce982dc0" name="afe97df8431563525d1bee6a1ce982dc0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe97df8431563525d1bee6a1ce982dc0">&#9670;&#160;</a></span>from()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html">TimeOfDay</a> Behaviour::from </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns from (incl.) which time on this behaviour applies. </p>
+
+</div>
+</div>
+<a id="a2c05b67527a4f2c8def6bc96ae472506" name="a2c05b67527a4f2c8def6bc96ae472506"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c05b67527a4f2c8def6bc96ae472506">&#9670;&#160;</a></span>getType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90d">Type</a> Behaviour::getType </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented in <a class="el" href="classExtendedSwitchBehaviour.html#a70532e1bb51e4fa2dae8e107ef68772f">ExtendedSwitchBehaviour</a>, <a class="el" href="classSwitchBehaviour.html#a9f12aedc5ed02144f607c284ffdf514f">SwitchBehaviour</a>, and <a class="el" href="classTwilightBehaviour.html#a7fd464ac861fafcf8d7fc8ae53e3a8eb">TwilightBehaviour</a>.</p>
+
+</div>
+</div>
 <a id="a9f9ce5cac8c1a450ae3d45f42b4f9fd6" name="a9f9ce5cac8c1a450ae3d45f42b4f9fd6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9f9ce5cac8c1a450ae3d45f42b4f9fd6">&#9670;&#160;</a></span>isValid()</h2>
 
@@ -233,6 +401,357 @@ DayOfWeekBitMask&#160;</td><td class="memItemRight" valign="bottom"><b>activeDay
 
 <p>Does the behaviour apply to the current situation? If <a class="el" href="classBehaviour.html#afe97df8431563525d1bee6a1ce982dc0" title="Returns from (incl.) which time on this behaviour applies.">from()</a> == <a class="el" href="classBehaviour.html#aa2d27848058cb591d6359c693d2d35c6" title="Returns until (excl.) which time on this behaviour applies.">until()</a> the behaviour isValid all day. </p>
 <p >Also checks the day of week bitmask. </p>
+
+</div>
+</div>
+<a id="accda8ffba920503fecf7c351c4f92380" name="accda8ffba920503fecf7c351c4f92380"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accda8ffba920503fecf7c351c4f92380">&#9670;&#160;</a></span>print()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Behaviour::print </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented in <a class="el" href="classExtendedSwitchBehaviour.html#ab1fb20e690f2f879a98d82b7dcb451fa">ExtendedSwitchBehaviour</a>, <a class="el" href="classSwitchBehaviour.html#a7ec564b11d9104b29902a24e9450fe1b">SwitchBehaviour</a>, and <a class="el" href="classTwilightBehaviour.html#a68ea4a6516078fe6be049a5291dfcca9">TwilightBehaviour</a>.</p>
+
+</div>
+</div>
+<a id="afc1b0fcadb2522a5f845f3f27e13848f" name="afc1b0fcadb2522a5f845f3f27e13848f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc1b0fcadb2522a5f845f3f27e13848f">&#9670;&#160;</a></span>requiresAbsence()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool Behaviour::requiresAbsence </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented in <a class="el" href="classExtendedSwitchBehaviour.html#ae4b0253c271fadc766d0bab35241c596">ExtendedSwitchBehaviour</a>, and <a class="el" href="classSwitchBehaviour.html#a3feb78f8c1c5cbb4e2d7b8431738788b">SwitchBehaviour</a>.</p>
+
+</div>
+</div>
+<a id="a26c22923bb79518bfd8fbadebddc4ad3" name="a26c22923bb79518bfd8fbadebddc4ad3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26c22923bb79518bfd8fbadebddc4ad3">&#9670;&#160;</a></span>requiresPresence()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool Behaviour::requiresPresence </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented in <a class="el" href="classExtendedSwitchBehaviour.html#ab1717c30a86188e7d1b84e4ecb59827c">ExtendedSwitchBehaviour</a>, and <a class="el" href="classSwitchBehaviour.html#a545b26f285be62d0823e42cb7b16ee13">SwitchBehaviour</a>.</p>
+
+</div>
+</div>
+<a id="a2f12e8584a7693cdc4c0a8bc185ffc11" name="a2f12e8584a7693cdc4c0a8bc185ffc11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f12e8584a7693cdc4c0a8bc185ffc11">&#9670;&#160;</a></span>serialize() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classBehaviour.html#ad8278f9c603a461940bff7b743558baf">SerializedDataType</a> Behaviour::serialize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a615536cc77a24db6602ebb37ec111a29" name="a615536cc77a24db6602ebb37ec111a29"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a615536cc77a24db6602ebb37ec111a29">&#9670;&#160;</a></span>serialize() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual uint8_t * Behaviour::serialize </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>outbuff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>max_size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented in <a class="el" href="classExtendedSwitchBehaviour.html#a94842588798dc76710355c6fa80f5c59">ExtendedSwitchBehaviour</a>, <a class="el" href="classSwitchBehaviour.html#ac49f1634d659eee7c6a17f195e4b873b">SwitchBehaviour</a>, and <a class="el" href="classTwilightBehaviour.html#aec0704cfa0c14ceb839c1aa236fbda6c">TwilightBehaviour</a>.</p>
+
+</div>
+</div>
+<a id="a2db9c364cf3c2959828e744a72cdafe2" name="a2db9c364cf3c2959828e744a72cdafe2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2db9c364cf3c2959828e744a72cdafe2">&#9670;&#160;</a></span>serialized()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; uint8_t &gt; Behaviour::serialized </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abad4a49b38eaa98ad458aefd21061e96" name="abad4a49b38eaa98ad458aefd21061e96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abad4a49b38eaa98ad458aefd21061e96">&#9670;&#160;</a></span>serializedSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual size_t Behaviour::serializedSize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented in <a class="el" href="classExtendedSwitchBehaviour.html#a911c980519181126a6761ca01e5176d9">ExtendedSwitchBehaviour</a>, <a class="el" href="classSwitchBehaviour.html#a0788dbd97a9d77ee98d93a638fda3a00">SwitchBehaviour</a>, and <a class="el" href="classTwilightBehaviour.html#a7e8cc71edf982f4c1ef3bf5ec246a06f">TwilightBehaviour</a>.</p>
+
+</div>
+</div>
+<a id="aa2d27848058cb591d6359c693d2d35c6" name="aa2d27848058cb591d6359c693d2d35c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2d27848058cb591d6359c693d2d35c6">&#9670;&#160;</a></span>until()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html">TimeOfDay</a> Behaviour::until </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns until (excl.) which time on this behaviour applies. </p>
+
+</div>
+</div>
+<a id="abb308138d1188e8b209f5e1109a5c168" name="abb308138d1188e8b209f5e1109a5c168"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb308138d1188e8b209f5e1109a5c168">&#9670;&#160;</a></span>value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t Behaviour::value </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the intended state when this behaviour is valid. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a9141e59e216e6aac2648b41891ae2652" name="a9141e59e216e6aac2648b41891ae2652"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9141e59e216e6aac2648b41891ae2652">&#9670;&#160;</a></span>activeDays</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__DayOfWeek_8h.html#a8b86ff171f648dfb5dadc6783febd543">DayOfWeekBitMask</a> Behaviour::activeDays</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0b626dbc7dc4814b115f9c04dfcc267e" name="a0b626dbc7dc4814b115f9c04dfcc267e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b626dbc7dc4814b115f9c04dfcc267e">&#9670;&#160;</a></span>activeIntensity</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t Behaviour::activeIntensity = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2a3501d782dc0ca18d611894514eecfc" name="a2a3501d782dc0ca18d611894514eecfc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a3501d782dc0ca18d611894514eecfc">&#9670;&#160;</a></span>behaviourAppliesFrom</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html">TimeOfDay</a> Behaviour::behaviourAppliesFrom = <a class="el" href="classTimeOfDay.html#a65461015aef81a70657a2e21d433fa0b">TimeOfDay::Midnight</a>()</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2b19f5ecb1f2337418c7a8541b1855a4" name="a2b19f5ecb1f2337418c7a8541b1855a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b19f5ecb1f2337418c7a8541b1855a4">&#9670;&#160;</a></span>behaviourAppliesUntil</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTimeOfDay.html">TimeOfDay</a> Behaviour::behaviourAppliesUntil = <a class="el" href="classTimeOfDay.html#a65461015aef81a70657a2e21d433fa0b">TimeOfDay::Midnight</a>()</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9a6eff28a7d698914720c1ccb11ee34a" name="a9a6eff28a7d698914720c1ccb11ee34a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a6eff28a7d698914720c1ccb11ee34a">&#9670;&#160;</a></span>profileId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t Behaviour::profileId = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2d31c600968b556ef6e2addcd74b4211" name="a2d31c600968b556ef6e2addcd74b4211"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d31c600968b556ef6e2addcd74b4211">&#9670;&#160;</a></span>typ</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classBehaviour.html#a1a3ffbf457a686772dda3c6034d6c90d">Type</a> Behaviour::typ</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

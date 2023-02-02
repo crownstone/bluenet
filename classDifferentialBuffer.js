@@ -8,7 +8,7 @@ var classDifferentialBuffer =
     [ "deinit", "classDifferentialBuffer.html#a10eda80e345a6e3989ab7bdee88dabd7", null ],
     [ "empty", "classDifferentialBuffer.html#a8b29d64f556d775ca4b24d2bca61cebf", null ],
     [ "full", "classDifferentialBuffer.html#a2c1e5e21184bdab40c83cb8aa583a777", null ],
-    [ "getBuffer", "classDifferentialBuffer.html#a0bbada50d35e1c20573732d5783035a2", null ],
+    [ "getBuffer", "classDifferentialBuffer.html#af0595146063386f2d8c7a81ab2b3ec42", null ],
     [ "getMaxByteSize", "classDifferentialBuffer.html#ab86c3a9161d48090b419194b84f17509", null ],
     [ "getMaxByteSize", "classDifferentialBuffer.html#a016744a27c53e885614dc138c7862f1a", null ],
     [ "getMaxSize", "classDifferentialBuffer.html#aedeb677ef638e7e58476973fe700d153", null ],
@@ -19,5 +19,8 @@ var classDifferentialBuffer =
     [ "pop", "classDifferentialBuffer.html#a9444425755e996ff3b7fa840b1279b0e", null ],
     [ "push", "classDifferentialBuffer.html#a1af389bcbc553cbd05d549d5c4eeccf9", null ],
     [ "release", "classDifferentialBuffer.html#a38771ded309ba6b8e14a76561a17034f", null ],
-    [ "size", "classDifferentialBuffer.html#a18fa5c3ad413a8b5678529c95f73728b", null ]
+    [ "size", "classDifferentialBuffer.html#a18fa5c3ad413a8b5678529c95f73728b", null ],
+    [ "_allocatedSelf", "classDifferentialBuffer.html#a6bb63fe0998e49352001e8d0b2b04ce4", null ],
+    [ "_buffer", "classDifferentialBuffer.html#acf76cd80ffa18baad7ecc7b1be3cb8d6", null ],
+    [ "_capacity", "classDifferentialBuffer.html#a710f5939e08d5d2ab6791fde350e7851", null ]
 ];

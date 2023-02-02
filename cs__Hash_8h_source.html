@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__Hash_8h_source.html',''); initResi
   <div class="headertitle"><div class="title">cs_Hash.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__Hash_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Oct 30, 2019</span></div>
@@ -111,21 +111,23 @@ $(document).ready(function(){initNavTree('cs__Hash_8h_source.html',''); initResi
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;cstdint&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>uint32_t Fletcher(<span class="keyword">const</span> uint8_t* <span class="keyword">const</span> data, <span class="keyword">const</span> <span class="keywordtype">size_t</span> len, uint32_t previousFletcherHash = 0);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="cs__Hash_8h.html#aa9009cdb9c5f26b4a206e08507be618e">   42</a></span>uint32_t <a class="code hl_function" href="cs__Hash_8h.html#aa9009cdb9c5f26b4a206e08507be618e">Fletcher</a>(<span class="keyword">const</span> uint8_t* <span class="keyword">const</span> data, <span class="keyword">const</span> <span class="keywordtype">size_t</span> len, uint32_t previousFletcherHash = 0);</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="keyword">inline</span> uint16_t Djb2(<span class="keyword">const</span> uint8_t* data, <span class="keyword">const</span> uint16_t size) {</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="cs__Hash_8h.html#a05c78a5a9199a41ed9b167ebe1c07d51">   53</a></span><span class="keyword">inline</span> uint16_t <a class="code hl_function" href="cs__Hash_8h.html#a05c78a5a9199a41ed9b167ebe1c07d51">Djb2</a>(<span class="keyword">const</span> uint8_t* data, <span class="keyword">const</span> uint16_t size) {</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    uint16_t hash = 5381;</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; size; ++i) {</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        hash = ((hash &lt;&lt; 5) + hash) + data[i];</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    }</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">return</span> hash;</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>}</div>
+<div class="ttc" id="acs__Hash_8h_html_a05c78a5a9199a41ed9b167ebe1c07d51"><div class="ttname"><a href="cs__Hash_8h.html#a05c78a5a9199a41ed9b167ebe1c07d51">Djb2</a></div><div class="ttdeci">uint16_t Djb2(const uint8_t *data, const uint16_t size)</div><div class="ttdoc">Calculates a djb2 hash of given data.</div><div class="ttdef"><b>Definition:</b> cs_Hash.h:53</div></div>
+<div class="ttc" id="acs__Hash_8h_html_aa9009cdb9c5f26b4a206e08507be618e"><div class="ttname"><a href="cs__Hash_8h.html#aa9009cdb9c5f26b4a206e08507be618e">Fletcher</a></div><div class="ttdeci">uint32_t Fletcher(const uint8_t *const data, const size_t len, uint32_t previousFletcherHash=0)</div><div class="ttdoc">Computes a Fletcher32 hash for the given data, interpreting it as a stream of little endian uint16_t.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_e8d03031b1e92aeb84120cb3e87677a9.html">util</a></li><li class="navelem"><b>cs_Hash.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_e8d03031b1e92aeb84120cb3e87677a9.html">util</a></li><li class="navelem"><a class="el" href="cs__Hash_8h.html">cs_Hash.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

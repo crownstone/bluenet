@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__AssetRecord_8h_source.html',''); i
   <div class="headertitle"><div class="title">cs_AssetRecord.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__AssetRecord_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Aug 17, 2021</span></div>
@@ -109,7 +109,7 @@ $(document).ready(function(){initNavTree('cs__AssetRecord_8h_source.html',''); i
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;protocol/cs_RssiAndChannel.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__RssiAndChannel_8h.html">protocol/cs_RssiAndChannel.h</a>&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="structasset__record__t.html">   12</a></span><span class="keyword">struct </span>__attribute__((__packed__)) <a class="code hl_struct" href="structasset__record__t.html">asset_record_t</a> {</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="structasset__record__t.html#a32d1d4abf129d596846486489f73033b">   16</a></span>    <a class="code hl_struct" href="structasset__id__t.html">asset_id_t</a> <a class="code hl_variable" href="structasset__record__t.html#a32d1d4abf129d596846486489f73033b">assetId</a>;</div>
@@ -121,7 +121,7 @@ $(document).ready(function(){initNavTree('cs__AssetRecord_8h_source.html',''); i
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="structasset__record__t.html#a98974f76c8fa7ff978853a499e2fc49c">   35</a></span>    uint8_t throttlingCountdown = 0;</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    stone_id_t nearestStoneId;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <a class="code hl_typedef" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> nearestStoneId;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    int8_t nearestRssi;</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#endif</span></div>
@@ -136,13 +136,13 @@ $(document).ready(function(){initNavTree('cs__AssetRecord_8h_source.html',''); i
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="keywordflow">return</span> lastReceivedCounter != 0xFF;</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    }</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <a class="code hl_struct" href="structasset__id__t.html">asset_id_t</a> id() {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="structasset__record__t.html#a909c15d853492f38e3e26e7a700cbbf6">   67</a></span>    <a class="code hl_struct" href="structasset__id__t.html">asset_id_t</a> <a class="code hl_function" href="structasset__record__t.html#a909c15d853492f38e3e26e7a700cbbf6">id</a>() {</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordflow">return</span> assetId;</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    }</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="comment">// ------------- utility functions -------------</span></div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordtype">void</span> empty() {</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="structasset__record__t.html#aaa570a1fae8efff47a5d33db35b314d0">   73</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="structasset__record__t.html#aaa570a1fae8efff47a5d33db35b314d0">empty</a>() {</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        lastReceivedCounter = 0;</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        throttlingCountdown = 0;</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1</span></div>
@@ -150,11 +150,11 @@ $(document).ready(function(){initNavTree('cs__AssetRecord_8h_source.html',''); i
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    }</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordtype">bool</span> isThrottled() {</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="structasset__record__t.html#a0a2b1ebb420abbdfdb6d6a4d2abccd89">   81</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="structasset__record__t.html#a0a2b1ebb420abbdfdb6d6a4d2abccd89">isThrottled</a>() {</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keywordflow">return</span> throttlingCountdown != 0;</div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    }</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keywordtype">void</span> setThrottlingCountdown(uint8_t ticks) {</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="structasset__record__t.html#a7dc3d217d11427a8a9e25480de0e1daf">   85</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="structasset__record__t.html#a7dc3d217d11427a8a9e25480de0e1daf">setThrottlingCountdown</a>(uint8_t ticks) {</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordflow">if</span> (ticks &gt;= 0xff) {</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            throttlingCountdown = 0xff - 1;</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        }</div>
@@ -163,24 +163,31 @@ $(document).ready(function(){initNavTree('cs__AssetRecord_8h_source.html',''); i
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        }</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    }</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordtype">void</span> addThrottlingCountdown(uint8_t ticks) {</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="structasset__record__t.html#a156382bb7c44101c28aae319688652cb">   94</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="structasset__record__t.html#a156382bb7c44101c28aae319688652cb">addThrottlingCountdown</a>(uint8_t ticks) {</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="keyword">auto</span> val = uint16_t(throttlingCountdown) + ticks;</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        setThrottlingCountdown(val);</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    }</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>};</div>
+<div class="ttc" id="acs__RssiAndChannel_8h_html"><div class="ttname"><a href="cs__RssiAndChannel_8h.html">cs_RssiAndChannel.h</a></div></div>
+<div class="ttc" id="acs__Typedefs_8h_html_a951e4694e30da46486ad86170b734039"><div class="ttname"><a href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a></div><div class="ttdeci">uint8_t stone_id_t</div><div class="ttdef"><b>Definition:</b> cs_Typedefs.h:23</div></div>
 <div class="ttc" id="astructasset__id__t_html"><div class="ttname"><a href="structasset__id__t.html">asset_id_t</a></div><div class="ttdef"><b>Definition:</b> cs_AssetFilterPackets.h:93</div></div>
 <div class="ttc" id="astructasset__record__t_html"><div class="ttname"><a href="structasset__record__t.html">asset_record_t</a></div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:12</div></div>
+<div class="ttc" id="astructasset__record__t_html_a0a2b1ebb420abbdfdb6d6a4d2abccd89"><div class="ttname"><a href="structasset__record__t.html#a0a2b1ebb420abbdfdb6d6a4d2abccd89">asset_record_t::isThrottled</a></div><div class="ttdeci">bool isThrottled()</div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:81</div></div>
+<div class="ttc" id="astructasset__record__t_html_a156382bb7c44101c28aae319688652cb"><div class="ttname"><a href="structasset__record__t.html#a156382bb7c44101c28aae319688652cb">asset_record_t::addThrottlingCountdown</a></div><div class="ttdeci">void addThrottlingCountdown(uint8_t ticks)</div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:94</div></div>
 <div class="ttc" id="astructasset__record__t_html_a22fd7b21080bbc6676a7226ed9496438"><div class="ttname"><a href="structasset__record__t.html#a22fd7b21080bbc6676a7226ed9496438">asset_record_t::isValid</a></div><div class="ttdeci">bool isValid()</div><div class="ttdoc">Returns whether this record is valid.</div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:63</div></div>
 <div class="ttc" id="astructasset__record__t_html_a32d1d4abf129d596846486489f73033b"><div class="ttname"><a href="structasset__record__t.html#a32d1d4abf129d596846486489f73033b">asset_record_t::assetId</a></div><div class="ttdeci">asset_id_t assetId</div><div class="ttdoc">ID of the asset, unique field.</div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:16</div></div>
 <div class="ttc" id="astructasset__record__t_html_a3e3ec3ef589dee99b1aea57e49aff510"><div class="ttname"><a href="structasset__record__t.html#a3e3ec3ef589dee99b1aea57e49aff510">asset_record_t::myRssi</a></div><div class="ttdeci">rssi_and_channel_t myRssi</div><div class="ttdoc">Most recent RSSI value observed by this Crownstone.</div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:21</div></div>
+<div class="ttc" id="astructasset__record__t_html_a7dc3d217d11427a8a9e25480de0e1daf"><div class="ttname"><a href="structasset__record__t.html#a7dc3d217d11427a8a9e25480de0e1daf">asset_record_t::setThrottlingCountdown</a></div><div class="ttdeci">void setThrottlingCountdown(uint8_t ticks)</div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:85</div></div>
+<div class="ttc" id="astructasset__record__t_html_a909c15d853492f38e3e26e7a700cbbf6"><div class="ttname"><a href="structasset__record__t.html#a909c15d853492f38e3e26e7a700cbbf6">asset_record_t::id</a></div><div class="ttdeci">asset_id_t id()</div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:67</div></div>
 <div class="ttc" id="astructasset__record__t_html_aa01a0dd1f7a49e1b7e2fe2c749dc020d"><div class="ttname"><a href="structasset__record__t.html#aa01a0dd1f7a49e1b7e2fe2c749dc020d">asset_record_t::invalidate</a></div><div class="ttdeci">void invalidate()</div><div class="ttdoc">Invalidate this record.</div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:56</div></div>
+<div class="ttc" id="astructasset__record__t_html_aaa570a1fae8efff47a5d33db35b314d0"><div class="ttname"><a href="structasset__record__t.html#aaa570a1fae8efff47a5d33db35b314d0">asset_record_t::empty</a></div><div class="ttdeci">void empty()</div><div class="ttdef"><b>Definition:</b> cs_AssetRecord.h:73</div></div>
 <div class="ttc" id="astructrssi__and__channel__t_html"><div class="ttname"><a href="structrssi__and__channel__t.html">rssi_and_channel_t</a></div><div class="ttdef"><b>Definition:</b> cs_RssiAndChannel.h:63</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_45a26a1c0117791ac143fe41cc0f32f2.html">localisation</a></li><li class="navelem"><b>cs_AssetRecord.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_45a26a1c0117791ac143fe41cc0f32f2.html">localisation</a></li><li class="navelem"><a class="el" href="cs__AssetRecord_8h.html">cs_AssetRecord.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

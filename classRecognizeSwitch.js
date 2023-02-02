@@ -1,12 +1,35 @@
 var classRecognizeSwitch =
 [
+    [ "FoundSwitch", "classRecognizeSwitch.html#a7cb6751801dd6d4edcca123013766eb1", [
+      [ "True", "classRecognizeSwitch.html#a7cb6751801dd6d4edcca123013766eb1a8b06b044bdae91a350ea08a7876515ba", null ],
+      [ "Almost", "classRecognizeSwitch.html#a7cb6751801dd6d4edcca123013766eb1a37e850c118ad2bef890afe4b17472502", null ],
+      [ "False", "classRecognizeSwitch.html#a7cb6751801dd6d4edcca123013766eb1a11556313c559d71048d93f72a85770cb", null ]
+    ] ],
     [ "RecognizeSwitch", "classRecognizeSwitch.html#a4fd4f00b1ab2531f7e2079fc8402baf5", null ],
+    [ "calcDiff", "classRecognizeSwitch.html#ab047bc7ddbb7c59f40f5edd59bb1e61e", null ],
     [ "configure", "classRecognizeSwitch.html#a0be9f490a6530ab046094d9e6e5d27da", null ],
     [ "deinit", "classRecognizeSwitch.html#a4a8c31ccdd70e5c9bb4b02a5c7fc7f86", null ],
     [ "detect", "classRecognizeSwitch.html#a162d7356daf6e2c618b2ef17a1975673", null ],
+    [ "detect", "classRecognizeSwitch.html#a40308ff16893e058a5bdc794e89d7ab8", null ],
+    [ "detectSwitch", "classRecognizeSwitch.html#a5d2a2f6bc9fb410cba1415cd499e7331", null ],
+    [ "getInstance", "classRecognizeSwitch.html#adff7ffe7dbd81dee27de1b9e0109526f", null ],
     [ "getLastDetection", "classRecognizeSwitch.html#a0c14c9cd75a50575da95a04f3d1624bf", null ],
+    [ "ignoreSample", "classRecognizeSwitch.html#a19d50d5335c27a5e5319ebcf7a9050fd", null ],
+    [ "ignoreSample", "classRecognizeSwitch.html#a29e330f58ebccb08d07c7ca13a1543ca", null ],
     [ "init", "classRecognizeSwitch.html#a1af7b0735fad49a3e82aec92993e7290", null ],
+    [ "setLastDetection", "classRecognizeSwitch.html#a3c4fb7e6d0fba930363fed7661fc82be", null ],
     [ "skip", "classRecognizeSwitch.html#a2011b44fde1880a48a4f13ec88c29801", null ],
     [ "start", "classRecognizeSwitch.html#aa149449ca8a30cc67cba376cb79b208e", null ],
-    [ "stop", "classRecognizeSwitch.html#a4e1c6ccc5f7b761118a310f13f4494c8", null ]
+    [ "stop", "classRecognizeSwitch.html#a4e1c6ccc5f7b761118a310f13f4494c8", null ],
+    [ "_lastAlmostDetection", "classRecognizeSwitch.html#a27ad44f6b21b09aea327c9318697971a", null ],
+    [ "_lastAlmostDetectionSamples", "classRecognizeSwitch.html#a5dc7450bd0dd42ed057ae48be36ded18", null ],
+    [ "_lastDetection", "classRecognizeSwitch.html#a45458726d0668a21a81389a8fc4de2e7", null ],
+    [ "_lastDetectionSamples", "classRecognizeSwitch.html#a7c5371387839b71916a99d7796124010", null ],
+    [ "_numBuffersRequired", "classRecognizeSwitch.html#a6ba8f3390999ad6eb22c883782a17819", null ],
+    [ "_numStoredBuffers", "classRecognizeSwitch.html#a7ae8a0d2dc8fa41d16f7d83d7135c01f", null ],
+    [ "_running", "classRecognizeSwitch.html#a9d37c4d66746f6726c9529e83f7fdaaf", null ],
+    [ "_skipSwitchDetectionTriggers", "classRecognizeSwitch.html#ace5610c713e144b1853d5f8d76987b3a", null ],
+    [ "_thresholdDifferent", "classRecognizeSwitch.html#a133717643d75cafc6ca44e095a680479", null ],
+    [ "_thresholdRatio", "classRecognizeSwitch.html#aae16bf6abdcf5c89307979d10432d843", null ],
+    [ "_thresholdSimilar", "classRecognizeSwitch.html#a023ba1be0d70490f2b5768ae3709dada", null ]
 ];

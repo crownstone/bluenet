@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__Twi_8h_source.html',''); initResiz
   <div class="headertitle"><div class="title">cs_Twi.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__Twi_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Dec 9, 2020</span></div>
@@ -109,11 +109,11 @@ $(document).ready(function(){initNavTree('cs__Twi_8h_source.html',''); initResiz
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;ble/cs_Nordic.h&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;cfg/cs_Boards.h&gt;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;events/cs_EventListener.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Nordic_8h.html">ble/cs_Nordic.h</a>&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &lt;<a class="code" href="cs__Boards_8h.html">cfg/cs_Boards.h</a>&gt;</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &lt;<a class="code" href="cs__EventListener_8h.html">events/cs_EventListener.h</a>&gt;</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">enum class</span> TwiIsrEvent { Read, Write, Error };</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58">   14</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58">TwiIsrEvent</a> { <a class="code hl_enumvalue" href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58a7a1a5f3e79fdc91edf2f5ead9d66abb4">Read</a>, <a class="code hl_enumvalue" href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58a1129c0e4d43f2d121652a7302712cff6">Write</a>, <a class="code hl_enumvalue" href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58a902b0d55fddef6f8d651fe1035b7d4bd">Error</a> };</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classTwi.html">   18</a></span><span class="keyword">class </span><a class="code hl_class" href="classTwi.html">Twi</a> : <span class="keyword">public</span> <a class="code hl_class" href="classEventListener.html">EventListener</a> {</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">public</span>:</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="classTwi.html#a30fd0be3f0bc8103337567723fe0933e">   23</a></span>    <span class="keyword">static</span> <a class="code hl_class" href="classTwi.html">Twi</a>&amp; <a class="code hl_function" href="classTwi.html#a30fd0be3f0bc8103337567723fe0933e">getInstance</a>();</div>
@@ -128,42 +128,58 @@ $(document).ready(function(){initNavTree('cs__Twi_8h_source.html',''); initResiz
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="classTwi.html#a12bee1b7ddab824660b2e664d634e523">   63</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTwi.html#a12bee1b7ddab824660b2e664d634e523">handleEvent</a>(<a class="code hl_class" href="classevent__t.html">event_t</a>&amp; event);</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classTwi.html#a66a1902687edb719e0d01d9f37b68a95">   68</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTwi.html#a66a1902687edb719e0d01d9f37b68a95">isrEvent</a>(TwiIsrEvent event);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classTwi.html#a66a1902687edb719e0d01d9f37b68a95">   68</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTwi.html#a66a1902687edb719e0d01d9f37b68a95">isrEvent</a>(<a class="code hl_enumeration" href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58">TwiIsrEvent</a> event);</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="keyword">protected</span>:</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="comment">// Local struct to store configuration.</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keyword">static</span> <span class="keyword">const</span> nrfx_twi_t _twi;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classTwi.html#ae5b1368a4d10e315783046c1bfc5f7e5">   72</a></span>    <span class="keyword">static</span> <span class="keyword">const</span> nrfx_twi_t <a class="code hl_variable" href="classTwi.html#ae5b1368a4d10e315783046c1bfc5f7e5">_twi</a>;</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <a class="code hl_class" href="classTwi.html">Twi</a>();</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <a class="code hl_class" href="classTwi.html">Twi</a>(<a class="code hl_class" href="classTwi.html">Twi</a> <span class="keyword">const</span>&amp;);</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordtype">void</span> operator=(<a class="code hl_class" href="classTwi.html">Twi</a> <span class="keyword">const</span>&amp;);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classTwi.html#a96aba374fe689b342c571d6740705bd8">   75</a></span>    <a class="code hl_function" href="classTwi.html#a96aba374fe689b342c571d6740705bd8">Twi</a>();</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classTwi.html#a815354504f713f3897e3b581ae6a80c8">   76</a></span>    <a class="code hl_function" href="classTwi.html#a815354504f713f3897e3b581ae6a80c8">Twi</a>(<a class="code hl_class" href="classTwi.html">Twi</a> <span class="keyword">const</span>&amp;);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classTwi.html#accce5a928dc8412be915aa8682ff6dd8">   77</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classTwi.html#accce5a928dc8412be915aa8682ff6dd8">operator=</a>(<a class="code hl_class" href="classTwi.html">Twi</a> <span class="keyword">const</span>&amp;);</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="comment">// Local config for driver</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    nrfx_twi_config_t _config;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="classTwi.html#acf33bc8d6fc2f19bba437a6061d40808">   80</a></span>    nrfx_twi_config_t <a class="code hl_variable" href="classTwi.html#acf33bc8d6fc2f19bba437a6061d40808">_config</a>;</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="comment">// Initialized flag</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordtype">bool</span> _initialized;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classTwi.html#a9f7f8545582e56ae42842c9f278b2479">   83</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="classTwi.html#a9f7f8545582e56ae42842c9f278b2479">_initialized</a>;</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="comment">// Initialized flag</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordtype">bool</span> _initializedBus;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classTwi.html#ab9c248e447d554af1d559d94ce7f713b">   86</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="classTwi.html#ab9c248e447d554af1d559d94ce7f713b">_initializedBus</a>;</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="comment">// Event is read</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keywordtype">bool</span> _eventRead;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="classTwi.html#a35cf566d14c283a03842cb94e44c2758">   89</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="classTwi.html#a35cf566d14c283a03842cb94e44c2758">_eventRead</a>;</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="comment">// Error event</span></div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordtype">bool</span> _eventError;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classTwi.html#a5fb43b3ee70e571821bf717fb4c9983a">   92</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="classTwi.html#a5fb43b3ee70e571821bf717fb4c9983a">_eventError</a>;</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>};</div>
 <div class="ttc" id="aclassEventListener_html"><div class="ttname"><a href="classEventListener.html">EventListener</a></div><div class="ttdoc">Event listener.</div><div class="ttdef"><b>Definition:</b> cs_EventListener.h:17</div></div>
 <div class="ttc" id="aclassTwi_html"><div class="ttname"><a href="classTwi.html">Twi</a></div><div class="ttdoc">Class that implements twi/i2c.</div><div class="ttdef"><b>Definition:</b> cs_Twi.h:18</div></div>
 <div class="ttc" id="aclassTwi_html_a12bee1b7ddab824660b2e664d634e523"><div class="ttname"><a href="classTwi.html#a12bee1b7ddab824660b2e664d634e523">Twi::handleEvent</a></div><div class="ttdeci">void handleEvent(event_t &amp;event)</div><div class="ttdoc">Incoming events.</div></div>
 <div class="ttc" id="aclassTwi_html_a30fd0be3f0bc8103337567723fe0933e"><div class="ttname"><a href="classTwi.html#a30fd0be3f0bc8103337567723fe0933e">Twi::getInstance</a></div><div class="ttdeci">static Twi &amp; getInstance()</div><div class="ttdoc">Construct twi/i2c instance.</div></div>
+<div class="ttc" id="aclassTwi_html_a35cf566d14c283a03842cb94e44c2758"><div class="ttname"><a href="classTwi.html#a35cf566d14c283a03842cb94e44c2758">Twi::_eventRead</a></div><div class="ttdeci">bool _eventRead</div><div class="ttdef"><b>Definition:</b> cs_Twi.h:89</div></div>
 <div class="ttc" id="aclassTwi_html_a382935596fa7d73e9c5a92a51d64f2bf"><div class="ttname"><a href="classTwi.html#a382935596fa7d73e9c5a92a51d64f2bf">Twi::init</a></div><div class="ttdeci">void init(const boards_config_t &amp;board)</div><div class="ttdoc">Init twi with board configuration (nothing is happening to the pins yet).</div></div>
+<div class="ttc" id="aclassTwi_html_a5fb43b3ee70e571821bf717fb4c9983a"><div class="ttname"><a href="classTwi.html#a5fb43b3ee70e571821bf717fb4c9983a">Twi::_eventError</a></div><div class="ttdeci">bool _eventError</div><div class="ttdef"><b>Definition:</b> cs_Twi.h:92</div></div>
 <div class="ttc" id="aclassTwi_html_a66a1902687edb719e0d01d9f37b68a95"><div class="ttname"><a href="classTwi.html#a66a1902687edb719e0d01d9f37b68a95">Twi::isrEvent</a></div><div class="ttdeci">void isrEvent(TwiIsrEvent event)</div><div class="ttdoc">Events from the hardware.</div></div>
+<div class="ttc" id="aclassTwi_html_a815354504f713f3897e3b581ae6a80c8"><div class="ttname"><a href="classTwi.html#a815354504f713f3897e3b581ae6a80c8">Twi::Twi</a></div><div class="ttdeci">Twi(Twi const &amp;)</div></div>
+<div class="ttc" id="aclassTwi_html_a96aba374fe689b342c571d6740705bd8"><div class="ttname"><a href="classTwi.html#a96aba374fe689b342c571d6740705bd8">Twi::Twi</a></div><div class="ttdeci">Twi()</div></div>
+<div class="ttc" id="aclassTwi_html_a9f7f8545582e56ae42842c9f278b2479"><div class="ttname"><a href="classTwi.html#a9f7f8545582e56ae42842c9f278b2479">Twi::_initialized</a></div><div class="ttdeci">bool _initialized</div><div class="ttdef"><b>Definition:</b> cs_Twi.h:83</div></div>
 <div class="ttc" id="aclassTwi_html_a9f9ee79365d7d39decbbfdcf9e9de431"><div class="ttname"><a href="classTwi.html#a9f9ee79365d7d39decbbfdcf9e9de431">Twi::read</a></div><div class="ttdeci">void read(uint8_t address, uint8_t *data, size_t &amp;length)</div><div class="ttdoc">Read data from given address.</div></div>
 <div class="ttc" id="aclassTwi_html_aaa187510f55cf34c91e70791dac48dc6"><div class="ttname"><a href="classTwi.html#aaa187510f55cf34c91e70791dac48dc6">Twi::write</a></div><div class="ttdeci">void write(uint8_t address, uint8_t *data, size_t length, bool stop)</div><div class="ttdoc">Write data to given address.</div></div>
 <div class="ttc" id="aclassTwi_html_ab67a321d377da6b82fd628ed0ab6fa4b"><div class="ttname"><a href="classTwi.html#ab67a321d377da6b82fd628ed0ab6fa4b">Twi::initBus</a></div><div class="ttdeci">void initBus(cs_twi_init_t &amp;twi)</div><div class="ttdoc">Init twi as master on the i2c bus.</div></div>
+<div class="ttc" id="aclassTwi_html_ab9c248e447d554af1d559d94ce7f713b"><div class="ttname"><a href="classTwi.html#ab9c248e447d554af1d559d94ce7f713b">Twi::_initializedBus</a></div><div class="ttdeci">bool _initializedBus</div><div class="ttdef"><b>Definition:</b> cs_Twi.h:86</div></div>
+<div class="ttc" id="aclassTwi_html_accce5a928dc8412be915aa8682ff6dd8"><div class="ttname"><a href="classTwi.html#accce5a928dc8412be915aa8682ff6dd8">Twi::operator=</a></div><div class="ttdeci">void operator=(Twi const &amp;)</div></div>
+<div class="ttc" id="aclassTwi_html_acf33bc8d6fc2f19bba437a6061d40808"><div class="ttname"><a href="classTwi.html#acf33bc8d6fc2f19bba437a6061d40808">Twi::_config</a></div><div class="ttdeci">nrfx_twi_config_t _config</div><div class="ttdef"><b>Definition:</b> cs_Twi.h:80</div></div>
+<div class="ttc" id="aclassTwi_html_ae5b1368a4d10e315783046c1bfc5f7e5"><div class="ttname"><a href="classTwi.html#ae5b1368a4d10e315783046c1bfc5f7e5">Twi::_twi</a></div><div class="ttdeci">static const nrfx_twi_t _twi</div><div class="ttdef"><b>Definition:</b> cs_Twi.h:72</div></div>
 <div class="ttc" id="aclassevent__t_html"><div class="ttname"><a href="classevent__t.html">event_t</a></div><div class="ttdoc">Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 9,...</div><div class="ttdef"><b>Definition:</b> cs_Event.h:26</div></div>
+<div class="ttc" id="acs__Boards_8h_html"><div class="ttname"><a href="cs__Boards_8h.html">cs_Boards.h</a></div></div>
+<div class="ttc" id="acs__EventListener_8h_html"><div class="ttname"><a href="cs__EventListener_8h.html">cs_EventListener.h</a></div></div>
+<div class="ttc" id="acs__Nordic_8h_html"><div class="ttname"><a href="cs__Nordic_8h.html">cs_Nordic.h</a></div></div>
+<div class="ttc" id="acs__Twi_8h_html_af6e0879e8195dedfe0e7113b0c784f58"><div class="ttname"><a href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58">TwiIsrEvent</a></div><div class="ttdeci">TwiIsrEvent</div><div class="ttdef"><b>Definition:</b> cs_Twi.h:14</div></div>
+<div class="ttc" id="acs__Twi_8h_html_af6e0879e8195dedfe0e7113b0c784f58a1129c0e4d43f2d121652a7302712cff6"><div class="ttname"><a href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58a1129c0e4d43f2d121652a7302712cff6">TwiIsrEvent::Write</a></div><div class="ttdeci">@ Write</div></div>
+<div class="ttc" id="acs__Twi_8h_html_af6e0879e8195dedfe0e7113b0c784f58a7a1a5f3e79fdc91edf2f5ead9d66abb4"><div class="ttname"><a href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58a7a1a5f3e79fdc91edf2f5ead9d66abb4">TwiIsrEvent::Read</a></div><div class="ttdeci">@ Read</div></div>
+<div class="ttc" id="acs__Twi_8h_html_af6e0879e8195dedfe0e7113b0c784f58a902b0d55fddef6f8d651fe1035b7d4bd"><div class="ttname"><a href="cs__Twi_8h.html#af6e0879e8195dedfe0e7113b0c784f58a902b0d55fddef6f8d651fe1035b7d4bd">TwiIsrEvent::Error</a></div><div class="ttdeci">@ Error</div></div>
 <div class="ttc" id="astructboards__config__t_html"><div class="ttname"><a href="structboards__config__t.html">boards_config_t</a></div><div class="ttdoc">Board configuration.</div><div class="ttdef"><b>Definition:</b> cs_Boards.h:169</div></div>
 <div class="ttc" id="astructcs__twi__init__t_html"><div class="ttname"><a href="structcs__twi__init__t.html">cs_twi_init_t</a></div><div class="ttdef"><b>Definition:</b> cs_PacketsInternal.h:394</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -171,7 +187,7 @@ $(document).ready(function(){initNavTree('cs__Twi_8h_source.html',''); initResiz
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><b>cs_Twi.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_8177e8e3bdf9b26c55431fee19ca7bd3.html">drivers</a></li><li class="navelem"><a class="el" href="cs__Twi_8h.html">cs_Twi.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

@@ -100,6 +100,9 @@ $(document).ready(function(){initNavTree('classMeshTopologyResearch.html',''); i
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classMeshTopologyResearch-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">MeshTopologyResearch Class Reference</div></div>
 </div><!--header-->
@@ -123,38 +126,241 @@ Collaboration diagram for MeshTopologyResearch:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMeshTopologyResearch__coll__graph.png" border="0" usemap="#aMeshTopologyResearch_coll__map" alt="Collaboration graph"/></div>
 <map name="aMeshTopologyResearch_coll__map" id="aMeshTopologyResearch_coll__map">
-<area shape="rect" title="This class/component keeps track of the rssi distance of a crownstone to its neighbors (i...." alt="" coords="5,79,180,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="37,5,148,31"/>
+<area shape="rect" title="This class/component keeps track of the rssi distance of a crownstone to its neighbors (i...." alt="" coords="96,108,271,133"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,13,116,38"/>
+<area shape="rect" href="classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick&#45;event or tick count and execute..." alt="" coords="141,13,226,38"/>
+<area shape="rect" href="structMeshTopologyResearch_1_1TimingSettings.html" title=" " alt="" coords="251,5,425,45"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structMeshTopologyResearch_1_1TimingSettings.html">TimingSettings</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:af306b558193fb1d3562281e55a48afb8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#af306b558193fb1d3562281e55a48afb8">MeshTopologyResearch</a> ()</td></tr>
+<tr class="separator:af306b558193fb1d3562281e55a48afb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d31ea593ebb7ad688a3b8c67b42114a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a3d31ea593ebb7ad688a3b8c67b42114a">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;evt)</td></tr>
 <tr class="memdesc:a3d31ea593ebb7ad688a3b8c67b42114a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles the following events: CS_TICK: <a class="el" href="classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick-event or tick count and execute...">Coroutine</a> for rssi data updates.  <a href="classMeshTopologyResearch.html#a3d31ea593ebb7ad688a3b8c67b42114a">More...</a><br /></td></tr>
 <tr class="separator:a3d31ea593ebb7ad688a3b8c67b42114a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2fc7fecca91e7374f5310cedc60530b0"><td class="memItemLeft" align="right" valign="top"><a id="a2fc7fecca91e7374f5310cedc60530b0" name="a2fc7fecca91e7374f5310cedc60530b0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="memdesc:a2fc7fecca91e7374f5310cedc60530b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtains the stone_id_t of this crownstone to use for forwarded ping messages. <br /></td></tr>
+<tr class="memitem:a2fc7fecca91e7374f5310cedc60530b0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a2fc7fecca91e7374f5310cedc60530b0">init</a> ()</td></tr>
+<tr class="memdesc:a2fc7fecca91e7374f5310cedc60530b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Obtains the stone_id_t of this crownstone to use for forwarded ping messages.  <a href="classMeshTopologyResearch.html#a2fc7fecca91e7374f5310cedc60530b0">More...</a><br /></td></tr>
 <tr class="separator:a2fc7fecca91e7374f5310cedc60530b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
-<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="ad03c1e6f45e92434d502995a4f31685e" name="ad03c1e6f45e92434d502995a4f31685e"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>~EventListener</b> ()</td></tr>
-<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener. <br /></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
 <tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
 <tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
 <tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top"><a id="adbdd4bec0525ca160c1b2aa5bf209cfe" name="adbdd4bec0525ca160c1b2aa5bf209cfe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></tr>
-<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>. <br /></td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
 <tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ae6b34269abf4141d93ce5d88298bb4a5"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#ae6b34269abf4141d93ce5d88298bb4a5">flushAggregatedRssiData</a> ()</td></tr>
+<tr class="memdesc:ae6b34269abf4141d93ce5d88298bb4a5"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick-event or tick count and execute...">Coroutine</a> method: To prevent the mesh from flooding, flushing is throttled.  <a href="classMeshTopologyResearch.html#ae6b34269abf4141d93ce5d88298bb4a5">More...</a><br /></td></tr>
+<tr class="separator:ae6b34269abf4141d93ce5d88298bb4a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6be76839ebbfb37fe35c9a8102ae095f"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a6be76839ebbfb37fe35c9a8102ae095f">getVarianceRepresentation</a> (float standard_deviation)</td></tr>
+<tr class="memdesc:a6be76839ebbfb37fe35c9a8102ae095f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the 3 bit descriptor of the given variance as defined in <a class="el" href="cs__PacketsInternal_8h.html">cs_PacketsInternal.h</a>.  <a href="classMeshTopologyResearch.html#a6be76839ebbfb37fe35c9a8102ae095f">More...</a><br /></td></tr>
+<tr class="separator:a6be76839ebbfb37fe35c9a8102ae095f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a266d4d10f47cf2955d12ccca713f2b09"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a266d4d10f47cf2955d12ccca713f2b09">getMeanRssiRepresentation</a> (float mean)</td></tr>
+<tr class="memdesc:a266d4d10f47cf2955d12ccca713f2b09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the 7 bit representation of the given mean as defined in <a class="el" href="cs__PacketsInternal_8h.html">cs_PacketsInternal.h</a>.  <a href="classMeshTopologyResearch.html#a266d4d10f47cf2955d12ccca713f2b09">More...</a><br /></td></tr>
+<tr class="separator:a266d4d10f47cf2955d12ccca713f2b09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a604416b54f7697c17697bbd0571a61b6"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a604416b54f7697c17697bbd0571a61b6">getCountRepresentation</a> (uint32_t count)</td></tr>
+<tr class="memdesc:a604416b54f7697c17697bbd0571a61b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the 6 bit representation of the given count as defined in <a class="el" href="cs__PacketsInternal_8h.html">cs_PacketsInternal.h</a>.  <a href="classMeshTopologyResearch.html#a604416b54f7697c17697bbd0571a61b6">More...</a><br /></td></tr>
+<tr class="separator:a604416b54f7697c17697bbd0571a61b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8443d11ecd533eff97c81b4d0fd3ae0c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a8443d11ecd533eff97c81b4d0fd3ae0c">sendPingRequestOverMesh</a> ()</td></tr>
+<tr class="memdesc:a8443d11ecd533eff97c81b4d0fd3ae0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatches an event of type CMD_SEND_MESH_MSG in order to send a CS_MESH_MODEL_TYPE_RSSI_PING.  <a href="classMeshTopologyResearch.html#a8443d11ecd533eff97c81b4d0fd3ae0c">More...</a><br /></td></tr>
+<tr class="separator:a8443d11ecd533eff97c81b4d0fd3ae0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a912cc9f60870f67c48ad98653967625e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a912cc9f60870f67c48ad98653967625e">sendPingResponseOverMesh</a> ()</td></tr>
+<tr class="memdesc:a912cc9f60870f67c48ad98653967625e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatches an event of type CMD_SEND_MESH_MSG in order to send a CMD_SEND_MESH_MSG_NOOP.  <a href="classMeshTopologyResearch.html#a912cc9f60870f67c48ad98653967625e">More...</a><br /></td></tr>
+<tr class="separator:a912cc9f60870f67c48ad98653967625e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb7305b97b100c1216727803f59536cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#aeb7305b97b100c1216727803f59536cd">receivePingMessage</a> (<a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;mesh_msg_evt)</td></tr>
+<tr class="memdesc:aeb7305b97b100c1216727803f59536cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">If the ping message is a request that has not hopped,.  <a href="classMeshTopologyResearch.html#aeb7305b97b100c1216727803f59536cd">More...</a><br /></td></tr>
+<tr class="separator:aeb7305b97b100c1216727803f59536cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a6c1d633ed7c8a31b53fc1ab445ae0d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a6a6c1d633ed7c8a31b53fc1ab445ae0d">sendRssiDataOverMesh</a> (<a class="el" href="structrssi__data__message__t.html">rssi_data_message_t</a> *rssi_data_message)</td></tr>
+<tr class="memdesc:a6a6c1d633ed7c8a31b53fc1ab445ae0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dispatches an event of type CMD_SEND_MESH_MSG in order to send a CS_MESH_MODEL_TYPE_RSSI_DATA.  <a href="classMeshTopologyResearch.html#a6a6c1d633ed7c8a31b53fc1ab445ae0d">More...</a><br /></td></tr>
+<tr class="separator:a6a6c1d633ed7c8a31b53fc1ab445ae0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac77132d5c3f37bd273be31841db0eea7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#ac77132d5c3f37bd273be31841db0eea7">sendRssiDataOverUart</a> (<a class="el" href="structrssi__data__message__t.html">rssi_data_message_t</a> *rssi_data_message)</td></tr>
+<tr class="memdesc:ac77132d5c3f37bd273be31841db0eea7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a message of type UART_OPCODE_TX_RSSI_DATA_MESSAGE with the given parameter as data.  <a href="classMeshTopologyResearch.html#ac77132d5c3f37bd273be31841db0eea7">More...</a><br /></td></tr>
+<tr class="separator:ac77132d5c3f37bd273be31841db0eea7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83e15167ab88c4789d3b4db262356954"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a83e15167ab88c4789d3b4db262356954">receiveRssiDataMessage</a> (<a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;mesh_msg_evt)</td></tr>
+<tr class="memdesc:a83e15167ab88c4789d3b4db262356954"><td class="mdescLeft">&#160;</td><td class="mdescRight">Any received <a class="el" href="structrssi__data__message__t.html">rssi_data_message_t</a> will be sendRssiDataOverUart.  <a href="classMeshTopologyResearch.html#a83e15167ab88c4789d3b4db262356954">More...</a><br /></td></tr>
+<tr class="separator:a83e15167ab88c4789d3b4db262356954"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a895e05c2ab75ead8a5b2cd20f9955d8d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a895e05c2ab75ead8a5b2cd20f9955d8d">receiveMeshMsgEvent</a> (<a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;mesh_msg_evt)</td></tr>
+<tr class="memdesc:a895e05c2ab75ead8a5b2cd20f9955d8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">If the event was no-hop:  <a href="classMeshTopologyResearch.html#a895e05c2ab75ead8a5b2cd20f9955d8d">More...</a><br /></td></tr>
+<tr class="separator:a895e05c2ab75ead8a5b2cd20f9955d8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12ba16b41d0377d68e1c9d006eab316c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a12ba16b41d0377d68e1c9d006eab316c">recordRssiValue</a> (<a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> sender_id, int8_t rssi, uint8_t channel)</td></tr>
+<tr class="memdesc:a12ba16b41d0377d68e1c9d006eab316c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves rssi value to last received map and variance recorder map.  <a href="classMeshTopologyResearch.html#a12ba16b41d0377d68e1c9d006eab316c">More...</a><br /></td></tr>
+<tr class="separator:a12ba16b41d0377d68e1c9d006eab316c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a275db979188c999477e9f1579744cdee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a275db979188c999477e9f1579744cdee">my_id</a> = 0xff</td></tr>
+<tr class="separator:a275db979188c999477e9f1579744cdee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bbecee0f940bce60df98d3026d21fee"><td class="memItemLeft" align="right" valign="top">std::map&lt; <a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>, <a class="el" href="classVarianceAggregator.html">VarianceAggregator</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a8bbecee0f940bce60df98d3026d21fee">variance_map</a> [<a class="el" href="classMeshTopologyResearch.html#a0b33fd710f567953b3d35c4d8fab0a39">CHANNEL_COUNT</a>] = {}</td></tr>
+<tr class="separator:a8bbecee0f940bce60df98d3026d21fee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6069eda5a7491f2c0a07f37ea2edd6de"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a6069eda5a7491f2c0a07f37ea2edd6de">boot_sequence_finished</a> = false</td></tr>
+<tr class="separator:a6069eda5a7491f2c0a07f37ea2edd6de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acaed3b732c3dce8fa80d637772be2401"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#acaed3b732c3dce8fa80d637772be2401">last_stone_id_broadcasted_in_burst</a> = 0</td></tr>
+<tr class="separator:acaed3b732c3dce8fa80d637772be2401"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62f1a7fda4b8325b386a9ef78f2aabef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCoroutine.html">Coroutine</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a62f1a7fda4b8325b386a9ef78f2aabef">flushRoutine</a></td></tr>
+<tr class="separator:a62f1a7fda4b8325b386a9ef78f2aabef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a0b33fd710f567953b3d35c4d8fab0a39"><td class="memItemLeft" align="right" valign="top">static constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a0b33fd710f567953b3d35c4d8fab0a39">CHANNEL_COUNT</a> = 3</td></tr>
+<tr class="separator:a0b33fd710f567953b3d35c4d8fab0a39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8eb70b83e23cc9066b11763f65f345ab"><td class="memItemLeft" align="right" valign="top">static constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#a8eb70b83e23cc9066b11763f65f345ab">CHANNEL_START</a> = 37</td></tr>
+<tr class="separator:a8eb70b83e23cc9066b11763f65f345ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad48e1589e179303e5f573a3ce8d6411a"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="structMeshTopologyResearch_1_1TimingSettings.html">TimingSettings</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshTopologyResearch.html#ad48e1589e179303e5f573a3ce8d6411a">Settings</a></td></tr>
+<tr class="separator:ad48e1589e179303e5f573a3ce8d6411a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >This class/component keeps track of the rssi distance of a crownstone to its neighbors (i.e. </p>
 <p >those within zero hop distance on the mesh).</p>
 <p >At configurable intervals it will broadcast its acquired data in a burst over the mesh so that a hub, or other interested connected devices can retrieve it. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="af306b558193fb1d3562281e55a48afb8" name="af306b558193fb1d3562281e55a48afb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af306b558193fb1d3562281e55a48afb8">&#9670;&#160;</a></span>MeshTopologyResearch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshTopologyResearch.html">MeshTopologyResearch::MeshTopologyResearch</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ae6b34269abf4141d93ce5d88298bb4a5" name="ae6b34269abf4141d93ce5d88298bb4a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6b34269abf4141d93ce5d88298bb4a5">&#9670;&#160;</a></span>flushAggregatedRssiData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t MeshTopologyResearch::flushAggregatedRssiData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classCoroutine.html" title="A coroutine essentially is a throttling mechanism: it takes in a tick-event or tick count and execute...">Coroutine</a> method: To prevent the mesh from flooding, flushing is throttled. </p>
+<ul>
+<li>Flush period: 30 minutes</li>
+<li>Burst period: 5 milliseconds</li>
+</ul>
+<p >Broadcasts a <a class="el" href="structrssi__data__message__t.html">rssi_data_message_t</a> for each of the pairs of crownstones in the local maps, together with the (oriented) average rssi value between those stones. After that, clear all the maps. </p>
+
+</div>
+</div>
+<a id="a604416b54f7697c17697bbd0571a61b6" name="a604416b54f7697c17697bbd0571a61b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a604416b54f7697c17697bbd0571a61b6">&#9670;&#160;</a></span>getCountRepresentation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t MeshTopologyResearch::getCountRepresentation </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>count</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the 6 bit representation of the given count as defined in <a class="el" href="cs__PacketsInternal_8h.html">cs_PacketsInternal.h</a>. </p>
+
+</div>
+</div>
+<a id="a266d4d10f47cf2955d12ccca713f2b09" name="a266d4d10f47cf2955d12ccca713f2b09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a266d4d10f47cf2955d12ccca713f2b09">&#9670;&#160;</a></span>getMeanRssiRepresentation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t MeshTopologyResearch::getMeanRssiRepresentation </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>mean</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the 7 bit representation of the given mean as defined in <a class="el" href="cs__PacketsInternal_8h.html">cs_PacketsInternal.h</a>. </p>
+
+</div>
+</div>
+<a id="a6be76839ebbfb37fe35c9a8102ae095f" name="a6be76839ebbfb37fe35c9a8102ae095f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6be76839ebbfb37fe35c9a8102ae095f">&#9670;&#160;</a></span>getVarianceRepresentation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t MeshTopologyResearch::getVarianceRepresentation </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>standard_deviation</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the 3 bit descriptor of the given variance as defined in <a class="el" href="cs__PacketsInternal_8h.html">cs_PacketsInternal.h</a>. </p>
+
+</div>
+</div>
 <a id="a3d31ea593ebb7ad688a3b8c67b42114a" name="a3d31ea593ebb7ad688a3b8c67b42114a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3d31ea593ebb7ad688a3b8c67b42114a">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -187,6 +393,462 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>listen</b> ()</td></t
 <p >(Will propagate data over UART for the hub to use it.) </p>
 
 <p>Implements <a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">EventListener</a>.</p>
+
+</div>
+</div>
+<a id="a2fc7fecca91e7374f5310cedc60530b0" name="a2fc7fecca91e7374f5310cedc60530b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fc7fecca91e7374f5310cedc60530b0">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshTopologyResearch::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Obtains the stone_id_t of this crownstone to use for forwarded ping messages. </p>
+
+</div>
+</div>
+<a id="a895e05c2ab75ead8a5b2cd20f9955d8d" name="a895e05c2ab75ead8a5b2cd20f9955d8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a895e05c2ab75ead8a5b2cd20f9955d8d">&#9670;&#160;</a></span>receiveMeshMsgEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshTopologyResearch::receiveMeshMsgEvent </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;&#160;</td>
+          <td class="paramname"><em>mesh_msg_evt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>If the event was no-hop: </p>
+<ul>
+<li>recordRssiValue(args...) </li>
+</ul>
+
+</div>
+</div>
+<a id="aeb7305b97b100c1216727803f59536cd" name="aeb7305b97b100c1216727803f59536cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb7305b97b100c1216727803f59536cd">&#9670;&#160;</a></span>receivePingMessage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshTopologyResearch::receivePingMessage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;&#160;</td>
+          <td class="paramname"><em>mesh_msg_evt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>If the ping message is a request that has not hopped,. </p>
+<ul>
+<li><a class="el" href="classMeshTopologyResearch.html#a912cc9f60870f67c48ad98653967625e" title="Dispatches an event of type CMD_SEND_MESH_MSG in order to send a CMD_SEND_MESH_MSG_NOOP.">sendPingResponseOverMesh()</a> </li>
+</ul>
+
+</div>
+</div>
+<a id="a83e15167ab88c4789d3b4db262356954" name="a83e15167ab88c4789d3b4db262356954"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83e15167ab88c4789d3b4db262356954">&#9670;&#160;</a></span>receiveRssiDataMessage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshTopologyResearch::receiveRssiDataMessage </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMeshMsgEvent.html">MeshMsgEvent</a> &amp;&#160;</td>
+          <td class="paramname"><em>mesh_msg_evt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Any received <a class="el" href="structrssi__data__message__t.html">rssi_data_message_t</a> will be sendRssiDataOverUart. </p>
+<p >Assumes mesh_msg_event is of type CS_MESH_MODEL_TYPE_RSSI_DATA. </p>
+
+</div>
+</div>
+<a id="a12ba16b41d0377d68e1c9d006eab316c" name="a12ba16b41d0377d68e1c9d006eab316c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12ba16b41d0377d68e1c9d006eab316c">&#9670;&#160;</a></span>recordRssiValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshTopologyResearch::recordRssiValue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>&#160;</td>
+          <td class="paramname"><em>sender_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int8_t&#160;</td>
+          <td class="paramname"><em>rssi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>channel</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Saves rssi value to last received map and variance recorder map. </p>
+<p >If the long term recorder has accumulated a lot of data, it will be reduced to prevent overflow. </p>
+
+</div>
+</div>
+<a id="a8443d11ecd533eff97c81b4d0fd3ae0c" name="a8443d11ecd533eff97c81b4d0fd3ae0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8443d11ecd533eff97c81b4d0fd3ae0c">&#9670;&#160;</a></span>sendPingRequestOverMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshTopologyResearch::sendPingRequestOverMesh </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dispatches an event of type CMD_SEND_MESH_MSG in order to send a CS_MESH_MODEL_TYPE_RSSI_PING. </p>
+
+</div>
+</div>
+<a id="a912cc9f60870f67c48ad98653967625e" name="a912cc9f60870f67c48ad98653967625e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a912cc9f60870f67c48ad98653967625e">&#9670;&#160;</a></span>sendPingResponseOverMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshTopologyResearch::sendPingResponseOverMesh </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dispatches an event of type CMD_SEND_MESH_MSG in order to send a CMD_SEND_MESH_MSG_NOOP. </p>
+<p >(This nop will be handled by receiveGenericMeshMessage) </p>
+
+</div>
+</div>
+<a id="a6a6c1d633ed7c8a31b53fc1ab445ae0d" name="a6a6c1d633ed7c8a31b53fc1ab445ae0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a6c1d633ed7c8a31b53fc1ab445ae0d">&#9670;&#160;</a></span>sendRssiDataOverMesh()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshTopologyResearch::sendRssiDataOverMesh </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrssi__data__message__t.html">rssi_data_message_t</a> *&#160;</td>
+          <td class="paramname"><em>rssi_data_message</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dispatches an event of type CMD_SEND_MESH_MSG in order to send a CS_MESH_MODEL_TYPE_RSSI_DATA. </p>
+
+</div>
+</div>
+<a id="ac77132d5c3f37bd273be31841db0eea7" name="ac77132d5c3f37bd273be31841db0eea7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac77132d5c3f37bd273be31841db0eea7">&#9670;&#160;</a></span>sendRssiDataOverUart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshTopologyResearch::sendRssiDataOverUart </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrssi__data__message__t.html">rssi_data_message_t</a> *&#160;</td>
+          <td class="paramname"><em>rssi_data_message</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Writes a message of type UART_OPCODE_TX_RSSI_DATA_MESSAGE with the given parameter as data. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a6069eda5a7491f2c0a07f37ea2edd6de" name="a6069eda5a7491f2c0a07f37ea2edd6de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6069eda5a7491f2c0a07f37ea2edd6de">&#9670;&#160;</a></span>boot_sequence_finished</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MeshTopologyResearch::boot_sequence_finished = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0b33fd710f567953b3d35c4d8fab0a39" name="a0b33fd710f567953b3d35c4d8fab0a39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b33fd710f567953b3d35c4d8fab0a39">&#9670;&#160;</a></span>CHANNEL_COUNT</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint8_t MeshTopologyResearch::CHANNEL_COUNT = 3</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8eb70b83e23cc9066b11763f65f345ab" name="a8eb70b83e23cc9066b11763f65f345ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8eb70b83e23cc9066b11763f65f345ab">&#9670;&#160;</a></span>CHANNEL_START</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr uint8_t MeshTopologyResearch::CHANNEL_START = 37</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a62f1a7fda4b8325b386a9ef78f2aabef" name="a62f1a7fda4b8325b386a9ef78f2aabef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62f1a7fda4b8325b386a9ef78f2aabef">&#9670;&#160;</a></span>flushRoutine</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCoroutine.html">Coroutine</a> MeshTopologyResearch::flushRoutine</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acaed3b732c3dce8fa80d637772be2401" name="acaed3b732c3dce8fa80d637772be2401"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acaed3b732c3dce8fa80d637772be2401">&#9670;&#160;</a></span>last_stone_id_broadcasted_in_burst</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> MeshTopologyResearch::last_stone_id_broadcasted_in_burst = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a275db979188c999477e9f1579744cdee" name="a275db979188c999477e9f1579744cdee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a275db979188c999477e9f1579744cdee">&#9670;&#160;</a></span>my_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a> MeshTopologyResearch::my_id = 0xff</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad48e1589e179303e5f573a3ce8d6411a" name="ad48e1589e179303e5f573a3ce8d6411a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad48e1589e179303e5f573a3ce8d6411a">&#9670;&#160;</a></span>Settings</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="structMeshTopologyResearch_1_1TimingSettings.html">TimingSettings</a> MeshTopologyResearch::Settings</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line">            .min_samples_to_trigger_burst = 20,</div>
+<div class="line">            .burst_period_ms              = 5,</div>
+<div class="line">            .accumulation_period_ms       = 30 * 60 * 1000,</div>
+<div class="line">            .boot_sequence_period_ms      = 1 * 60 * 1000,</div>
+<div class="line"> </div>
+<div class="line">    }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a8bbecee0f940bce60df98d3026d21fee" name="a8bbecee0f940bce60df98d3026d21fee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bbecee0f940bce60df98d3026d21fee">&#9670;&#160;</a></span>variance_map</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;<a class="el" href="cs__Typedefs_8h.html#a951e4694e30da46486ad86170b734039">stone_id_t</a>, <a class="el" href="classVarianceAggregator.html">VarianceAggregator</a>&gt; MeshTopologyResearch::variance_map[<a class="el" href="classMeshTopologyResearch.html#a0b33fd710f567953b3d35c4d8fab0a39">CHANNEL_COUNT</a>] = {}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

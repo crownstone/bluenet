@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('cs__LogPlainText_8h_source.html',''); 
   <div class="headertitle"><div class="title">cs_LogPlainText.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<a href="cs__LogPlainText_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * Author: Crownstone Team</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> * Copyright: Crownstone (https://crownstone.rocks)</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * Date: Sep 1, 2022</span></div>
@@ -109,15 +109,15 @@ $(document).ready(function(){initNavTree('cs__LogPlainText_8h_source.html',''); 
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;logging/impl/cs_LogUtils.h&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;<a class="code" href="cs__LogUtils_8h.html">logging/impl/cs_LogUtils.h</a>&gt;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keywordtype">void</span> cs_log_printf(<span class="keyword">const</span> <span class="keywordtype">char</span>* str, ...);</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>__attribute__((unused)) <span class="keyword">static</span> <span class="keywordtype">bool</span> _logPrefixPlainText = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="cs__LogPlainText_8h.html#a4854c12e0d2a3c68d4572aed53a55cba">   12</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="cs__LogPlainText_8h.html#a4854c12e0d2a3c68d4572aed53a55cba">cs_log_printf</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* str, ...);</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="cs__LogPlainText_8h.html#aa84ade4c62ff24015b773d8941b7a435">   13</a></span>__attribute__((unused)) <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="cs__LogPlainText_8h.html#aa84ade4c62ff24015b773d8941b7a435">_logPrefixPlainText</a> = <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// Adding the file name and line number, adds a lot to the binary size.</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define _FILE (sizeof(__FILE__) &gt; 30 ? __FILE__ + (sizeof(__FILE__) - 30 - 1) : __FILE__)</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="cs__LogPlainText_8h.html#a917888c1c6e773d709495236eaf46fc5">   16</a></span><span class="preprocessor">#define _FILE (sizeof(__FILE__) &gt; 30 ? __FILE__ + (sizeof(__FILE__) - 30 - 1) : __FILE__)</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define _log(level, addNewLine, fmt, ...)                         \</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="cs__LogPlainText_8h.html#adda35d4e0a5d583f24c687a30b5590a4">   18</a></span><span class="preprocessor">#define _log(level, addNewLine, fmt, ...)                         \</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">    if (level &lt;= SERIAL_VERBOSITY) {                              \</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">        if (_logPrefixPlainText) {                                \</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">            cs_log_printf(&quot;[%-30.30s : %-4d] &quot;</span>, _FILE, __LINE__); \</div>
@@ -129,13 +129,16 @@ $(document).ready(function(){initNavTree('cs__LogPlainText_8h_source.html',''); 
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        _logPrefixPlainText = addNewLine;                         \</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    }</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#define _logArray(level, addNewLine, pointer, size, ...)</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="cs__LogPlainText_8h.html#a5e72528f4bedd7af80ac44ef9da847f8">   30</a></span><span class="preprocessor">#define _logArray(level, addNewLine, pointer, size, ...)</span></div>
+<div class="ttc" id="acs__LogPlainText_8h_html_a4854c12e0d2a3c68d4572aed53a55cba"><div class="ttname"><a href="cs__LogPlainText_8h.html#a4854c12e0d2a3c68d4572aed53a55cba">cs_log_printf</a></div><div class="ttdeci">void cs_log_printf(const char *str,...)</div></div>
+<div class="ttc" id="acs__LogPlainText_8h_html_aa84ade4c62ff24015b773d8941b7a435"><div class="ttname"><a href="cs__LogPlainText_8h.html#aa84ade4c62ff24015b773d8941b7a435">_logPrefixPlainText</a></div><div class="ttdeci">static bool _logPrefixPlainText</div><div class="ttdef"><b>Definition:</b> cs_LogPlainText.h:13</div></div>
+<div class="ttc" id="acs__LogUtils_8h_html"><div class="ttname"><a href="cs__LogUtils_8h.html">cs_LogUtils.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b25cd48746385db9a78c677f87e228d3.html">logging</a></li><li class="navelem"><a class="el" href="dir_64958c04e82a2c1cf7ed5fc88bb49bfb.html">impl</a></li><li class="navelem"><b>cs_LogPlainText.h</b></li>
+    <li class="navelem"><a class="el" href="dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html">source</a></li><li class="navelem"><a class="el" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html">include</a></li><li class="navelem"><a class="el" href="dir_b25cd48746385db9a78c677f87e228d3.html">logging</a></li><li class="navelem"><a class="el" href="dir_64958c04e82a2c1cf7ed5fc88bb49bfb.html">impl</a></li><li class="navelem"><a class="el" href="cs__LogPlainText_8h.html">cs_LogPlainText.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

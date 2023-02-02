@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classCOMP.html',''); initResizable(); 
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classCOMP-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">COMP Class Reference</div></div>
 </div><!--header-->
@@ -112,10 +114,10 @@ $(document).ready(function(){initNavTree('classCOMP.html',''); initResizable(); 
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad8cea563548133f8c84278b469edec46"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#ad8cea563548133f8c84278b469edec46">init</a> (uint8_t ainPin, float thresholdDown, float thresholdUp, comp_event_cb_t callback)</td></tr>
+<tr class="memitem:ad8cea563548133f8c84278b469edec46"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#ad8cea563548133f8c84278b469edec46">init</a> (uint8_t ainPin, float thresholdDown, float thresholdUp, <a class="el" href="cs__COMP_8h.html#a74c1d4caccb24cf2051ca749dd804644">comp_event_cb_t</a> callback)</td></tr>
 <tr class="memdesc:ad8cea563548133f8c84278b469edec46"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="classCOMP.html" title="Class that enables you to get events when a the voltage on an AIN pin goes over or below a given thre...">COMP</a> unit gets initialized by indicating a pin.  <a href="classCOMP.html#ad8cea563548133f8c84278b469edec46">More...</a><br /></td></tr>
 <tr class="separator:ad8cea563548133f8c84278b469edec46"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a166287e3caeb8e2f86cd251511f5de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#a1a166287e3caeb8e2f86cd251511f5de">start</a> (CompEvent_t event)</td></tr>
+<tr class="memitem:a1a166287e3caeb8e2f86cd251511f5de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#a1a166287e3caeb8e2f86cd251511f5de">start</a> (<a class="el" href="cs__COMP_8h.html#aaaf671975f442c18e3cfd771965aaa66">CompEvent_t</a> event)</td></tr>
 <tr class="memdesc:a1a166287e3caeb8e2f86cd251511f5de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the comparator.  <a href="classCOMP.html#a1a166287e3caeb8e2f86cd251511f5de">More...</a><br /></td></tr>
 <tr class="separator:a1a166287e3caeb8e2f86cd251511f5de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a651ea3741010152278e3ad10d5ae3706"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#a651ea3741010152278e3ad10d5ae3706">sample</a> ()</td></tr>
@@ -130,14 +132,137 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a931fa67e5afbaf7866d537ba6744a527"><td class="memItemLeft" align="right" valign="top"><a id="a931fa67e5afbaf7866d537ba6744a527" name="a931fa67e5afbaf7866d537ba6744a527"></a>
-static <a class="el" href="classCOMP.html">COMP</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
+<tr class="memitem:a931fa67e5afbaf7866d537ba6744a527"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classCOMP.html">COMP</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#a931fa67e5afbaf7866d537ba6744a527">getInstance</a> ()</td></tr>
 <tr class="separator:a931fa67e5afbaf7866d537ba6744a527"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a348175ac83c07f09e959e6fac1039e64"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#a348175ac83c07f09e959e6fac1039e64">COMP</a> ()</td></tr>
+<tr class="separator:a348175ac83c07f09e959e6fac1039e64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16a94e4f855e67d2deb548a7c7f6879c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#a16a94e4f855e67d2deb548a7c7f6879c">COMP</a> (<a class="el" href="classCOMP.html">COMP</a> const &amp;)</td></tr>
+<tr class="separator:a16a94e4f855e67d2deb548a7c7f6879c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a249a16535af3ed790a975585aa280757"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#a249a16535af3ed790a975585aa280757">operator=</a> (<a class="el" href="classCOMP.html">COMP</a> const &amp;)</td></tr>
+<tr class="separator:a249a16535af3ed790a975585aa280757"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3dc6bce171f8c21c5516b59225ec6278"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#a3dc6bce171f8c21c5516b59225ec6278">applyWorkarounds</a> ()</td></tr>
+<tr class="memdesc:a3dc6bce171f8c21c5516b59225ec6278"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply work arounds that are suggested by Nordic.  <a href="classCOMP.html#a3dc6bce171f8c21c5516b59225ec6278">More...</a><br /></td></tr>
+<tr class="separator:a3dc6bce171f8c21c5516b59225ec6278"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:adb39665cbb9c49da66baf0bccb45ba7a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__COMP_8h.html#a74c1d4caccb24cf2051ca749dd804644">comp_event_cb_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCOMP.html#adb39665cbb9c49da66baf0bccb45ba7a">_callback</a> = nullptr</td></tr>
+<tr class="separator:adb39665cbb9c49da66baf0bccb45ba7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that enables you to get events when a the voltage on an AIN pin goes over or below a given threshold. </p>
 <p >There are 2 thresholds, as this class supports hysteresis. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a348175ac83c07f09e959e6fac1039e64" name="a348175ac83c07f09e959e6fac1039e64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a348175ac83c07f09e959e6fac1039e64">&#9670;&#160;</a></span>COMP() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCOMP.html">COMP::COMP</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a16a94e4f855e67d2deb548a7c7f6879c" name="a16a94e4f855e67d2deb548a7c7f6879c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16a94e4f855e67d2deb548a7c7f6879c">&#9670;&#160;</a></span>COMP() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCOMP.html">COMP::COMP</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classCOMP.html">COMP</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a3dc6bce171f8c21c5516b59225ec6278" name="a3dc6bce171f8c21c5516b59225ec6278"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3dc6bce171f8c21c5516b59225ec6278">&#9670;&#160;</a></span>applyWorkarounds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void COMP::applyWorkarounds </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Apply work arounds that are suggested by Nordic. </p>
+<p >For the NRF52 PAN 12 refers to <a class="el" href="classCOMP.html" title="Class that enables you to get events when a the voltage on an AIN pin goes over or below a given thre...">COMP</a>.</p><ul>
+<li>PAN 12 <a class="el" href="classCOMP.html" title="Class that enables you to get events when a the voltage on an AIN pin goes over or below a given thre...">COMP</a>: Reference ladder is not correctly calibrated </li>
+</ul>
+
+</div>
+</div>
+<a id="a931fa67e5afbaf7866d537ba6744a527" name="a931fa67e5afbaf7866d537ba6744a527"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a931fa67e5afbaf7866d537ba6744a527">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classCOMP.html">COMP</a> &amp; COMP::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="abb6aba2e62d146cf08c2696766567b82" name="abb6aba2e62d146cf08c2696766567b82"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abb6aba2e62d146cf08c2696766567b82">&#9670;&#160;</a></span>handleEvent()</h2>
 
@@ -207,7 +332,7 @@ static <a class="el" href="classCOMP.html">COMP</a> &amp;&#160;</td><td class="m
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">comp_event_cb_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__COMP_8h.html#a74c1d4caccb24cf2051ca749dd804644">comp_event_cb_t</a>&#160;</td>
           <td class="paramname"><em>callback</em>&#160;</td>
         </tr>
         <tr>
@@ -229,6 +354,32 @@ static <a class="el" href="classCOMP.html">COMP</a> &amp;&#160;</td><td class="m
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a249a16535af3ed790a975585aa280757" name="a249a16535af3ed790a975585aa280757"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a249a16535af3ed790a975585aa280757">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void COMP::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classCOMP.html">COMP</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -261,7 +412,7 @@ static <a class="el" href="classCOMP.html">COMP</a> &amp;&#160;</td><td class="m
         <tr>
           <td class="memname">void COMP::start </td>
           <td>(</td>
-          <td class="paramtype">CompEvent_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__COMP_8h.html#aaaf671975f442c18e3cfd771965aaa66">CompEvent_t</a>&#160;</td>
           <td class="paramname"><em>event</em></td><td>)</td>
           <td></td>
         </tr>
@@ -275,6 +426,29 @@ static <a class="el" href="classCOMP.html">COMP</a> &amp;&#160;</td><td class="m
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="adb39665cbb9c49da66baf0bccb45ba7a" name="adb39665cbb9c49da66baf0bccb45ba7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb39665cbb9c49da66baf0bccb45ba7a">&#9670;&#160;</a></span>_callback</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__COMP_8h.html#a74c1d4caccb24cf2051ca749dd804644">comp_event_cb_t</a> COMP::_callback = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

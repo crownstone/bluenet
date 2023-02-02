@@ -100,6 +100,8 @@ $(document).ready(function(){initNavTree('classAdcBuffer.html',''); initResizabl
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classAdcBuffer-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">AdcBuffer Class Reference</div></div>
 </div><!--header-->
@@ -109,21 +111,29 @@ $(document).ready(function(){initNavTree('classAdcBuffer.html',''); initResizabl
  <a href="classAdcBuffer.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="cs__AdcBuffer_8h_source.html">cs_AdcBuffer.h</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for AdcBuffer:</div>
+<div class="dyncontent">
+<div class="center"><img src="classAdcBuffer__coll__graph.png" border="0" usemap="#aAdcBuffer_coll__map" alt="Collaboration graph"/></div>
+<map name="aAdcBuffer_coll__map" id="aAdcBuffer_coll__map">
+<area shape="rect" title="Class that keeps up the buffers used for ADC." alt="" coords="37,196,124,221"/>
+<area shape="rect" href="structadc__buffer__t.html" title="Struct communicated from the ADC class when it&#39;s done sampling a buffer." alt="" coords="29,108,132,133"/>
+<area shape="rect" href="structadc__channel__config__result__t.html" title="Result struct after configuring an ADC channel." alt="" coords="5,5,156,45"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3df40db14dea1b05c200d5e5da1ea125"><td class="memItemLeft" align="right" valign="top"><a id="a3df40db14dea1b05c200d5e5da1ea125" name="a3df40db14dea1b05c200d5e5da1ea125"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="memdesc:a3df40db14dea1b05c200d5e5da1ea125"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate the buffers. <br /></td></tr>
+<tr class="memitem:a3df40db14dea1b05c200d5e5da1ea125"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a3df40db14dea1b05c200d5e5da1ea125">init</a> ()</td></tr>
+<tr class="memdesc:a3df40db14dea1b05c200d5e5da1ea125"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate the buffers.  <a href="classAdcBuffer.html#a3df40db14dea1b05c200d5e5da1ea125">More...</a><br /></td></tr>
 <tr class="separator:a3df40db14dea1b05c200d5e5da1ea125"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74d2d03abc9d80439e268f368fda6b77"><td class="memItemLeft" align="right" valign="top"><a id="a74d2d03abc9d80439e268f368fda6b77" name="a74d2d03abc9d80439e268f368fda6b77"></a>
-<a class="el" href="structadc__buffer__t.html">adc_buffer_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getBuffer</b> (adc_buffer_id_t buffer_id)</td></tr>
-<tr class="memdesc:a74d2d03abc9d80439e268f368fda6b77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get buffer with given id. <br /></td></tr>
+<tr class="memitem:a74d2d03abc9d80439e268f368fda6b77"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structadc__buffer__t.html">adc_buffer_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a74d2d03abc9d80439e268f368fda6b77">getBuffer</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> buffer_id)</td></tr>
+<tr class="memdesc:a74d2d03abc9d80439e268f368fda6b77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get buffer with given id.  <a href="classAdcBuffer.html#a74d2d03abc9d80439e268f368fda6b77">More...</a><br /></td></tr>
 <tr class="separator:a74d2d03abc9d80439e268f368fda6b77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a45b2bc5fffb0e218a15661721cc8a122"><td class="memItemLeft" align="right" valign="top">adc_sample_value_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a45b2bc5fffb0e218a15661721cc8a122">getValue</a> (adc_buffer_id_t buffer_id, adc_channel_id_t channel_id, adc_sample_value_id_t value_id)</td></tr>
+<tr class="memitem:a45b2bc5fffb0e218a15661721cc8a122"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a45b2bc5fffb0e218a15661721cc8a122">getValue</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> buffer_id, <a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channel_id, <a class="el" href="cs__Typedefs_8h.html#afb4a7e14046dc46c0969a63653623939">adc_sample_value_id_t</a> value_id)</td></tr>
 <tr class="memdesc:a45b2bc5fffb0e218a15661721cc8a122"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a particular value from a buffer.  <a href="classAdcBuffer.html#a45b2bc5fffb0e218a15661721cc8a122">More...</a><br /></td></tr>
 <tr class="separator:a45b2bc5fffb0e218a15661721cc8a122"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86a58899db5bce86cd9c0b378b585d49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a86a58899db5bce86cd9c0b378b585d49">setValue</a> (adc_buffer_id_t buffer_id, adc_channel_id_t channel_id, adc_sample_value_id_t value_id, adc_sample_value_t value)</td></tr>
+<tr class="memitem:a86a58899db5bce86cd9c0b378b585d49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a86a58899db5bce86cd9c0b378b585d49">setValue</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> buffer_id, <a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channel_id, <a class="el" href="cs__Typedefs_8h.html#afb4a7e14046dc46c0969a63653623939">adc_sample_value_id_t</a> value_id, <a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a> value)</td></tr>
 <tr class="memdesc:a86a58899db5bce86cd9c0b378b585d49"><td class="mdescLeft">&#160;</td><td class="mdescRight">For in-place filtering it is necessary to write a particular value into the buffer.  <a href="classAdcBuffer.html#a86a58899db5bce86cd9c0b378b585d49">More...</a><br /></td></tr>
 <tr class="separator:a86a58899db5bce86cd9c0b378b585d49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -132,22 +142,32 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a5b7bd23267c17f743cdef165b887704b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classAdcBuffer.html">AdcBuffer</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a5b7bd23267c17f743cdef165b887704b">getInstance</a> ()</td></tr>
 <tr class="memdesc:a5b7bd23267c17f743cdef165b887704b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Singleton implementation.  <a href="classAdcBuffer.html#a5b7bd23267c17f743cdef165b887704b">More...</a><br /></td></tr>
 <tr class="separator:a5b7bd23267c17f743cdef165b887704b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fe06912e4db6f6b9569c8a1e533f476"><td class="memItemLeft" align="right" valign="top"><a id="a0fe06912e4db6f6b9569c8a1e533f476" name="a0fe06912e4db6f6b9569c8a1e533f476"></a>
-static constexpr adc_sample_value_id_t&#160;</td><td class="memItemRight" valign="bottom"><b>getBufferLength</b> ()</td></tr>
-<tr class="memdesc:a0fe06912e4db6f6b9569c8a1e533f476"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get total number of samples in a buffer. <br /></td></tr>
+<tr class="memitem:a0fe06912e4db6f6b9569c8a1e533f476"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="cs__Typedefs_8h.html#afb4a7e14046dc46c0969a63653623939">adc_sample_value_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a0fe06912e4db6f6b9569c8a1e533f476">getBufferLength</a> ()</td></tr>
+<tr class="memdesc:a0fe06912e4db6f6b9569c8a1e533f476"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get total number of samples in a buffer.  <a href="classAdcBuffer.html#a0fe06912e4db6f6b9569c8a1e533f476">More...</a><br /></td></tr>
 <tr class="separator:a0fe06912e4db6f6b9569c8a1e533f476"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7bd9966c599054e6bac16e2712877df"><td class="memItemLeft" align="right" valign="top"><a id="ac7bd9966c599054e6bac16e2712877df" name="ac7bd9966c599054e6bac16e2712877df"></a>
-static constexpr adc_sample_value_id_t&#160;</td><td class="memItemRight" valign="bottom"><b>getChannelLength</b> ()</td></tr>
-<tr class="memdesc:ac7bd9966c599054e6bac16e2712877df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of samples for each channel in a buffer. <br /></td></tr>
+<tr class="memitem:ac7bd9966c599054e6bac16e2712877df"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="cs__Typedefs_8h.html#afb4a7e14046dc46c0969a63653623939">adc_sample_value_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#ac7bd9966c599054e6bac16e2712877df">getChannelLength</a> ()</td></tr>
+<tr class="memdesc:ac7bd9966c599054e6bac16e2712877df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of samples for each channel in a buffer.  <a href="classAdcBuffer.html#ac7bd9966c599054e6bac16e2712877df">More...</a><br /></td></tr>
 <tr class="separator:ac7bd9966c599054e6bac16e2712877df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf32f1936fc79c6b12b4890baecad69d"><td class="memItemLeft" align="right" valign="top"><a id="acf32f1936fc79c6b12b4890baecad69d" name="acf32f1936fc79c6b12b4890baecad69d"></a>
-static constexpr adc_channel_id_t&#160;</td><td class="memItemRight" valign="bottom"><b>getChannelCount</b> ()</td></tr>
-<tr class="memdesc:acf32f1936fc79c6b12b4890baecad69d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of channels per buffer. <br /></td></tr>
+<tr class="memitem:acf32f1936fc79c6b12b4890baecad69d"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#acf32f1936fc79c6b12b4890baecad69d">getChannelCount</a> ()</td></tr>
+<tr class="memdesc:acf32f1936fc79c6b12b4890baecad69d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of channels per buffer.  <a href="classAdcBuffer.html#acf32f1936fc79c6b12b4890baecad69d">More...</a><br /></td></tr>
 <tr class="separator:acf32f1936fc79c6b12b4890baecad69d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67e1ed96788286f18198c5ba6b7aec18"><td class="memItemLeft" align="right" valign="top"><a id="a67e1ed96788286f18198c5ba6b7aec18" name="a67e1ed96788286f18198c5ba6b7aec18"></a>
-static constexpr adc_buffer_id_t&#160;</td><td class="memItemRight" valign="bottom"><b>getBufferCount</b> ()</td></tr>
-<tr class="memdesc:a67e1ed96788286f18198c5ba6b7aec18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of buffers. <br /></td></tr>
+<tr class="memitem:a67e1ed96788286f18198c5ba6b7aec18"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a67e1ed96788286f18198c5ba6b7aec18">getBufferCount</a> ()</td></tr>
+<tr class="memdesc:a67e1ed96788286f18198c5ba6b7aec18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of buffers.  <a href="classAdcBuffer.html#a67e1ed96788286f18198c5ba6b7aec18">More...</a><br /></td></tr>
 <tr class="separator:a67e1ed96788286f18198c5ba6b7aec18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a3191e068340eb126289b88649a6ead1f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a3191e068340eb126289b88649a6ead1f">AdcBuffer</a> ()</td></tr>
+<tr class="separator:a3191e068340eb126289b88649a6ead1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d9513162f57e16eabe0c0e4eb211775"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#a3d9513162f57e16eabe0c0e4eb211775">AdcBuffer</a> (<a class="el" href="classAdcBuffer.html">AdcBuffer</a> const &amp;)</td></tr>
+<tr class="separator:a3d9513162f57e16eabe0c0e4eb211775"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:abaeda303ddd3bef731a693ef29c7281e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structadc__buffer__t.html">adc_buffer_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#abaeda303ddd3bef731a693ef29c7281e">_buf</a> [<a class="el" href="cs__AdcBuffer_8h.html#a1af7c5b573ca731cabbfc8c7ead8fb9d">ADC_BUFFER_COUNT</a>] = {nullptr}</td></tr>
+<tr class="separator:abaeda303ddd3bef731a693ef29c7281e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0ea85fb683f790108ab30163dec51d5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAdcBuffer.html#ab0ea85fb683f790108ab30163dec51d5">_allocated</a> = false</td></tr>
+<tr class="separator:ab0ea85fb683f790108ab30163dec51d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that keeps up the buffers used for <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a>. </p>
@@ -155,7 +175,195 @@ static constexpr adc_buffer_id_t&#160;</td><td class="memItemRight" valign="bott
 <li>Allocates the buffers.</li>
 <li>Abstracts away the interleaved nature of the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> samples. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a3191e068340eb126289b88649a6ead1f" name="a3191e068340eb126289b88649a6ead1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3191e068340eb126289b88649a6ead1f">&#9670;&#160;</a></span>AdcBuffer() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAdcBuffer.html">AdcBuffer::AdcBuffer</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3d9513162f57e16eabe0c0e4eb211775" name="a3d9513162f57e16eabe0c0e4eb211775"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d9513162f57e16eabe0c0e4eb211775">&#9670;&#160;</a></span>AdcBuffer() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAdcBuffer.html">AdcBuffer::AdcBuffer</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classAdcBuffer.html">AdcBuffer</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a74d2d03abc9d80439e268f368fda6b77" name="a74d2d03abc9d80439e268f368fda6b77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74d2d03abc9d80439e268f368fda6b77">&#9670;&#160;</a></span>getBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structadc__buffer__t.html">adc_buffer_t</a> * AdcBuffer::getBuffer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>buffer_id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get buffer with given id. </p>
+
+</div>
+</div>
+<a id="a67e1ed96788286f18198c5ba6b7aec18" name="a67e1ed96788286f18198c5ba6b7aec18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67e1ed96788286f18198c5ba6b7aec18">&#9670;&#160;</a></span>getBufferCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr <a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> AdcBuffer::getBufferCount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get number of buffers. </p>
+
+</div>
+</div>
+<a id="a0fe06912e4db6f6b9569c8a1e533f476" name="a0fe06912e4db6f6b9569c8a1e533f476"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fe06912e4db6f6b9569c8a1e533f476">&#9670;&#160;</a></span>getBufferLength()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr <a class="el" href="cs__Typedefs_8h.html#afb4a7e14046dc46c0969a63653623939">adc_sample_value_id_t</a> AdcBuffer::getBufferLength </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get total number of samples in a buffer. </p>
+
+</div>
+</div>
+<a id="acf32f1936fc79c6b12b4890baecad69d" name="acf32f1936fc79c6b12b4890baecad69d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf32f1936fc79c6b12b4890baecad69d">&#9670;&#160;</a></span>getChannelCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr <a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> AdcBuffer::getChannelCount </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get number of channels per buffer. </p>
+
+</div>
+</div>
+<a id="ac7bd9966c599054e6bac16e2712877df" name="ac7bd9966c599054e6bac16e2712877df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7bd9966c599054e6bac16e2712877df">&#9670;&#160;</a></span>getChannelLength()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static constexpr <a class="el" href="cs__Typedefs_8h.html#afb4a7e14046dc46c0969a63653623939">adc_sample_value_id_t</a> AdcBuffer::getChannelLength </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get number of samples for each channel in a buffer. </p>
+
+</div>
+</div>
 <a id="a5b7bd23267c17f743cdef165b887704b" name="a5b7bd23267c17f743cdef165b887704b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5b7bd23267c17f743cdef165b887704b">&#9670;&#160;</a></span>getInstance()</h2>
 
@@ -194,21 +402,21 @@ static constexpr adc_buffer_id_t&#160;</td><td class="memItemRight" valign="bott
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">adc_sample_value_t AdcBuffer::getValue </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a> AdcBuffer::getValue </td>
           <td>(</td>
-          <td class="paramtype">adc_buffer_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
           <td class="paramname"><em>buffer_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">adc_channel_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
           <td class="paramname"><em>channel_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">adc_sample_value_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#afb4a7e14046dc46c0969a63653623939">adc_sample_value_id_t</a>&#160;</td>
           <td class="paramname"><em>value_id</em>&#160;</td>
         </tr>
         <tr>
@@ -238,6 +446,33 @@ static constexpr adc_buffer_id_t&#160;</td><td class="memItemRight" valign="bott
 
 </div>
 </div>
+<a id="a3df40db14dea1b05c200d5e5da1ea125" name="a3df40db14dea1b05c200d5e5da1ea125"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3df40db14dea1b05c200d5e5da1ea125">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> AdcBuffer::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Allocate the buffers. </p>
+
+</div>
+</div>
 <a id="a86a58899db5bce86cd9c0b378b585d49" name="a86a58899db5bce86cd9c0b378b585d49"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a86a58899db5bce86cd9c0b378b585d49">&#9670;&#160;</a></span>setValue()</h2>
 
@@ -250,25 +485,25 @@ static constexpr adc_buffer_id_t&#160;</td><td class="memItemRight" valign="bott
         <tr>
           <td class="memname">void AdcBuffer::setValue </td>
           <td>(</td>
-          <td class="paramtype">adc_buffer_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
           <td class="paramname"><em>buffer_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">adc_channel_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
           <td class="paramname"><em>channel_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">adc_sample_value_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#afb4a7e14046dc46c0969a63653623939">adc_sample_value_id_t</a>&#160;</td>
           <td class="paramname"><em>value_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">adc_sample_value_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a>&#160;</td>
           <td class="paramname"><em>value</em>&#160;</td>
         </tr>
         <tr>
@@ -294,6 +529,51 @@ static constexpr adc_buffer_id_t&#160;</td><td class="memItemRight" valign="bott
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ab0ea85fb683f790108ab30163dec51d5" name="ab0ea85fb683f790108ab30163dec51d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0ea85fb683f790108ab30163dec51d5">&#9670;&#160;</a></span>_allocated</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool AdcBuffer::_allocated = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abaeda303ddd3bef731a693ef29c7281e" name="abaeda303ddd3bef731a693ef29c7281e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abaeda303ddd3bef731a693ef29c7281e">&#9670;&#160;</a></span>_buf</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structadc__buffer__t.html">adc_buffer_t</a>* AdcBuffer::_buf[<a class="el" href="cs__AdcBuffer_8h.html#a1af7c5b573ca731cabbfc8c7ead8fb9d">ADC_BUFFER_COUNT</a>] = {nullptr}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

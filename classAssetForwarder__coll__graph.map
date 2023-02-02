@@ -1,5 +1,12 @@
 <map id="AssetForwarder" name="AssetForwarder">
-<area shape="rect" id="node1" title="AssetForwarder makes it possible for the AssetFiltering to merge mesh messages when they have very si..." alt="" coords="63,79,186,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
-<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
+<area shape="rect" id="node1" title="AssetForwarder makes it possible for the AssetFiltering to merge mesh messages when they have very si..." alt="" coords="852,93,975,119"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="603,5,714,31"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="610,93,707,119"/>
+<area shape="rect" id="node4" href="$structAssetForwarder_1_1outbox__msg__t.html" title=" " alt="" coords="571,143,747,183"/>
+<area shape="rect" id="node5" href="$structasset__record__t.html" title=" " alt="" coords="302,151,419,176"/>
+<area shape="rect" id="node6" href="$structasset__id__t.html" title=" " alt="" coords="35,117,123,143"/>
+<area shape="rect" id="node8" href="$structcs__mesh__model__msg__asset__report__id__t.html" title=" " alt="" coords="259,81,463,121"/>
+<area shape="rect" id="node7" href="$structrssi__and__channel__t.html" title=" " alt="" coords="5,185,152,211"/>
+<area shape="rect" id="node9" href="$structcs__mesh__model__msg__asset__report__mac__t.html" title=" " alt="" coords="259,211,463,251"/>
+<area shape="rect" id="node10" href="$structmac__address__t.html" title="MAC address struct, with some useful functions." alt="" coords="19,264,139,289"/>
 </map>

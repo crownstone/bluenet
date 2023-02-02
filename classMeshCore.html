@@ -101,6 +101,8 @@ $(document).ready(function(){initNavTree('classMeshCore.html',''); initResizable
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classMeshCore-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">MeshCore Class Reference</div></div>
 </div><!--header-->
@@ -124,94 +126,140 @@ Collaboration diagram for MeshCore:</div>
 <div class="dyncontent">
 <div class="center"><img src="classMeshCore__coll__graph.png" border="0" usemap="#aMeshCore_coll__map" alt="Collaboration graph"/></div>
 <map name="aMeshCore_coll__map" id="aMeshCore_coll__map">
-<area shape="rect" title="Class that:" alt="" coords="17,79,104,104"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" title="Class that:" alt="" coords="424,101,511,127"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="49,5,160,31"/>
+<area shape="rect" title=" " alt="" coords="15,55,194,109"/>
+<area shape="rect" title=" " alt="" coords="35,133,174,159"/>
+<area shape="rect" title=" " alt="" coords="5,183,204,223"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:aeadb9dbedc1548a4f9cf37ce3b03cba4"><td class="memItemLeft" align="right" valign="top"><a id="aeadb9dbedc1548a4f9cf37ce3b03cba4" name="aeadb9dbedc1548a4f9cf37ce3b03cba4"></a>
-typedef function&lt; void()&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>callback_model_init_t</b></td></tr>
-<tr class="memdesc:aeadb9dbedc1548a4f9cf37ce3b03cba4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function definition. <br /></td></tr>
+<tr class="memitem:aeadb9dbedc1548a4f9cf37ce3b03cba4"><td class="memItemLeft" align="right" valign="top">typedef function&lt; void()&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#aeadb9dbedc1548a4f9cf37ce3b03cba4">callback_model_init_t</a></td></tr>
+<tr class="memdesc:aeadb9dbedc1548a4f9cf37ce3b03cba4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function definition.  <a href="classMeshCore.html#aeadb9dbedc1548a4f9cf37ce3b03cba4">More...</a><br /></td></tr>
 <tr class="separator:aeadb9dbedc1548a4f9cf37ce3b03cba4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0aa77605d9e80685926ff5e5467f6c9f"><td class="memItemLeft" align="right" valign="top"><a id="a0aa77605d9e80685926ff5e5467f6c9f" name="a0aa77605d9e80685926ff5e5467f6c9f"></a>
-typedef function&lt; void(dsm_handle_t appkeyHandle)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>callback_model_configure_t</b></td></tr>
-<tr class="memdesc:a0aa77605d9e80685926ff5e5467f6c9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function definition. <br /></td></tr>
+<tr class="memitem:a0aa77605d9e80685926ff5e5467f6c9f"><td class="memItemLeft" align="right" valign="top">typedef function&lt; void(dsm_handle_t appkeyHandle)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a0aa77605d9e80685926ff5e5467f6c9f">callback_model_configure_t</a></td></tr>
+<tr class="memdesc:a0aa77605d9e80685926ff5e5467f6c9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function definition.  <a href="classMeshCore.html#a0aa77605d9e80685926ff5e5467f6c9f">More...</a><br /></td></tr>
 <tr class="separator:a0aa77605d9e80685926ff5e5467f6c9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a407afa8cadc716ced4698663e6985a48"><td class="memItemLeft" align="right" valign="top"><a id="a407afa8cadc716ced4698663e6985a48" name="a407afa8cadc716ced4698663e6985a48"></a>
-typedef function&lt; void(const nrf_mesh_adv_packet_rx_data_t *scanData)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>callback_scan_t</b></td></tr>
-<tr class="memdesc:a407afa8cadc716ced4698663e6985a48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function definition. <br /></td></tr>
+<tr class="memitem:a407afa8cadc716ced4698663e6985a48"><td class="memItemLeft" align="right" valign="top">typedef function&lt; void(const nrf_mesh_adv_packet_rx_data_t *scanData)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a407afa8cadc716ced4698663e6985a48">callback_scan_t</a></td></tr>
+<tr class="memdesc:a407afa8cadc716ced4698663e6985a48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function definition.  <a href="classMeshCore.html#a407afa8cadc716ced4698663e6985a48">More...</a><br /></td></tr>
 <tr class="separator:a407afa8cadc716ced4698663e6985a48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ac07ab046bbda719450ed5880eafdbfc9"><td class="memItemLeft" align="right" valign="top"><a id="ac07ab046bbda719450ed5880eafdbfc9" name="ac07ab046bbda719450ed5880eafdbfc9"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>registerModelInitCallback</b> (const <a class="el" href="classMeshCore.html#aeadb9dbedc1548a4f9cf37ce3b03cba4">callback_model_init_t</a> &amp;closure)</td></tr>
-<tr class="memdesc:ac07ab046bbda719450ed5880eafdbfc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback function that's called when the models should be initialized. <br /></td></tr>
+<tr class="memitem:ac07ab046bbda719450ed5880eafdbfc9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#ac07ab046bbda719450ed5880eafdbfc9">registerModelInitCallback</a> (const <a class="el" href="classMeshCore.html#aeadb9dbedc1548a4f9cf37ce3b03cba4">callback_model_init_t</a> &amp;closure)</td></tr>
+<tr class="memdesc:ac07ab046bbda719450ed5880eafdbfc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback function that's called when the models should be initialized.  <a href="classMeshCore.html#ac07ab046bbda719450ed5880eafdbfc9">More...</a><br /></td></tr>
 <tr class="separator:ac07ab046bbda719450ed5880eafdbfc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51ba720bfccd380e3ce4b15c2aad6fea"><td class="memItemLeft" align="right" valign="top"><a id="a51ba720bfccd380e3ce4b15c2aad6fea" name="a51ba720bfccd380e3ce4b15c2aad6fea"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>registerModelConfigureCallback</b> (const <a class="el" href="classMeshCore.html#a0aa77605d9e80685926ff5e5467f6c9f">callback_model_configure_t</a> &amp;closure)</td></tr>
-<tr class="memdesc:a51ba720bfccd380e3ce4b15c2aad6fea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback function that's called when the models should be configured. <br /></td></tr>
+<tr class="memitem:a51ba720bfccd380e3ce4b15c2aad6fea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a51ba720bfccd380e3ce4b15c2aad6fea">registerModelConfigureCallback</a> (const <a class="el" href="classMeshCore.html#a0aa77605d9e80685926ff5e5467f6c9f">callback_model_configure_t</a> &amp;closure)</td></tr>
+<tr class="memdesc:a51ba720bfccd380e3ce4b15c2aad6fea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback function that's called when the models should be configured.  <a href="classMeshCore.html#a51ba720bfccd380e3ce4b15c2aad6fea">More...</a><br /></td></tr>
 <tr class="separator:a51ba720bfccd380e3ce4b15c2aad6fea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c1af334060acbb259724225ed81f3e4"><td class="memItemLeft" align="right" valign="top"><a id="a1c1af334060acbb259724225ed81f3e4" name="a1c1af334060acbb259724225ed81f3e4"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>registerScanCallback</b> (const <a class="el" href="classMeshCore.html#a407afa8cadc716ced4698663e6985a48">callback_scan_t</a> &amp;closure)</td></tr>
-<tr class="memdesc:a1c1af334060acbb259724225ed81f3e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback function that's called when a device was scanned. <br /></td></tr>
+<tr class="memitem:a1c1af334060acbb259724225ed81f3e4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a1c1af334060acbb259724225ed81f3e4">registerScanCallback</a> (const <a class="el" href="classMeshCore.html#a407afa8cadc716ced4698663e6985a48">callback_scan_t</a> &amp;closure)</td></tr>
+<tr class="memdesc:a1c1af334060acbb259724225ed81f3e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback function that's called when a device was scanned.  <a href="classMeshCore.html#a1c1af334060acbb259724225ed81f3e4">More...</a><br /></td></tr>
 <tr class="separator:a1c1af334060acbb259724225ed81f3e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2ee0b8d7504e54abff898967986a80c8"><td class="memItemLeft" align="right" valign="top"><a id="a2ee0b8d7504e54abff898967986a80c8" name="a2ee0b8d7504e54abff898967986a80c8"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>provision</b> ()</td></tr>
-<tr class="memdesc:a2ee0b8d7504e54abff898967986a80c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do the provisioning. <br /></td></tr>
+<tr class="memitem:a2ee0b8d7504e54abff898967986a80c8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a2ee0b8d7504e54abff898967986a80c8">provision</a> ()</td></tr>
+<tr class="memdesc:a2ee0b8d7504e54abff898967986a80c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do the provisioning.  <a href="classMeshCore.html#a2ee0b8d7504e54abff898967986a80c8">More...</a><br /></td></tr>
 <tr class="separator:a2ee0b8d7504e54abff898967986a80c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7aa121cb10aecdb3472c5379df10a45"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#ad7aa121cb10aecdb3472c5379df10a45">isFlashValid</a> ()</td></tr>
 <tr class="memdesc:ad7aa121cb10aecdb3472c5379df10a45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether flash pages have valid data.  <a href="classMeshCore.html#ad7aa121cb10aecdb3472c5379df10a45">More...</a><br /></td></tr>
 <tr class="separator:ad7aa121cb10aecdb3472c5379df10a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d9c3ff04b625d3ec983d0950f72ce33"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a8d9c3ff04b625d3ec983d0950f72ce33">init</a> (const <a class="el" href="structboards__config__t.html">boards_config_t</a> &amp;board)</td></tr>
+<tr class="memitem:a8d9c3ff04b625d3ec983d0950f72ce33"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a8d9c3ff04b625d3ec983d0950f72ce33">init</a> (const <a class="el" href="structboards__config__t.html">boards_config_t</a> &amp;board)</td></tr>
 <tr class="memdesc:a8d9c3ff04b625d3ec983d0950f72ce33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the mesh.  <a href="classMeshCore.html#a8d9c3ff04b625d3ec983d0950f72ce33">More...</a><br /></td></tr>
 <tr class="separator:a8d9c3ff04b625d3ec983d0950f72ce33"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adab758a4465800d298f8e103b1edf8e9"><td class="memItemLeft" align="right" valign="top"><a id="adab758a4465800d298f8e103b1edf8e9" name="adab758a4465800d298f8e103b1edf8e9"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getUnicastAddress</b> ()</td></tr>
-<tr class="memdesc:adab758a4465800d298f8e103b1edf8e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the unicast address of this crownstone. <br /></td></tr>
+<tr class="memitem:adab758a4465800d298f8e103b1edf8e9"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#adab758a4465800d298f8e103b1edf8e9">getUnicastAddress</a> ()</td></tr>
+<tr class="memdesc:adab758a4465800d298f8e103b1edf8e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the unicast address of this crownstone.  <a href="classMeshCore.html#adab758a4465800d298f8e103b1edf8e9">More...</a><br /></td></tr>
 <tr class="separator:adab758a4465800d298f8e103b1edf8e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a98668ca82c98f4f42a1f7f75bbf6a0ee"><td class="memItemLeft" align="right" valign="top"><a id="a98668ca82c98f4f42a1f7f75bbf6a0ee" name="a98668ca82c98f4f42a1f7f75bbf6a0ee"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>start</b> ()</td></tr>
-<tr class="memdesc:a98668ca82c98f4f42a1f7f75bbf6a0ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start using the radio. <br /></td></tr>
+<tr class="memitem:a98668ca82c98f4f42a1f7f75bbf6a0ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a98668ca82c98f4f42a1f7f75bbf6a0ee">start</a> ()</td></tr>
+<tr class="memdesc:a98668ca82c98f4f42a1f7f75bbf6a0ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start using the radio.  <a href="classMeshCore.html#a98668ca82c98f4f42a1f7f75bbf6a0ee">More...</a><br /></td></tr>
 <tr class="separator:a98668ca82c98f4f42a1f7f75bbf6a0ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1158ce463ef3b418a9f2b51f55630307"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a1158ce463ef3b418a9f2b51f55630307">stop</a> ()</td></tr>
+<tr class="memitem:a1158ce463ef3b418a9f2b51f55630307"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a1158ce463ef3b418a9f2b51f55630307">stop</a> ()</td></tr>
 <tr class="memdesc:a1158ce463ef3b418a9f2b51f55630307"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop using the radio.  <a href="classMeshCore.html#a1158ce463ef3b418a9f2b51f55630307">More...</a><br /></td></tr>
 <tr class="separator:a1158ce463ef3b418a9f2b51f55630307"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5deabbb6f08307a76ab50424841a2fe"><td class="memItemLeft" align="right" valign="top"><a id="aa5deabbb6f08307a76ab50424841a2fe" name="aa5deabbb6f08307a76ab50424841a2fe"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>setTxPower</b> (int8_t txPower)</td></tr>
-<tr class="memdesc:aa5deabbb6f08307a76ab50424841a2fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the TX power of mesh messages. <br /></td></tr>
+<tr class="memitem:aa5deabbb6f08307a76ab50424841a2fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#aa5deabbb6f08307a76ab50424841a2fe">setTxPower</a> (int8_t txPower)</td></tr>
+<tr class="memdesc:aa5deabbb6f08307a76ab50424841a2fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the TX power of mesh messages.  <a href="classMeshCore.html#aa5deabbb6f08307a76ab50424841a2fe">More...</a><br /></td></tr>
 <tr class="separator:aa5deabbb6f08307a76ab50424841a2fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d6451530398fcd939af8e1ed99af108"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a5d6451530398fcd939af8e1ed99af108">factoryReset</a> ()</td></tr>
 <tr class="memdesc:a5d6451530398fcd939af8e1ed99af108"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory reset.  <a href="classMeshCore.html#a5d6451530398fcd939af8e1ed99af108">More...</a><br /></td></tr>
 <tr class="separator:a5d6451530398fcd939af8e1ed99af108"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a096e660c491420c8d488a4e3a27bedbe"><td class="memItemLeft" align="right" valign="top"><a id="a096e660c491420c8d488a4e3a27bedbe" name="a096e660c491420c8d488a4e3a27bedbe"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>eraseAllPages</b> ()</td></tr>
-<tr class="memdesc:a096e660c491420c8d488a4e3a27bedbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erase all flash pages used by the mesh for storage. <br /></td></tr>
+<tr class="memitem:a096e660c491420c8d488a4e3a27bedbe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a096e660c491420c8d488a4e3a27bedbe">eraseAllPages</a> ()</td></tr>
+<tr class="memdesc:a096e660c491420c8d488a4e3a27bedbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erase all flash pages used by the mesh for storage.  <a href="classMeshCore.html#a096e660c491420c8d488a4e3a27bedbe">More...</a><br /></td></tr>
 <tr class="separator:a096e660c491420c8d488a4e3a27bedbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a820c19b0af554ad5c65bb5ed177470a0"><td class="memItemLeft" align="right" valign="top"><a id="a820c19b0af554ad5c65bb5ed177470a0" name="a820c19b0af554ad5c65bb5ed177470a0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>factoryResetDone</b> ()</td></tr>
-<tr class="memdesc:a820c19b0af554ad5c65bb5ed177470a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage. <br /></td></tr>
+<tr class="memitem:a820c19b0af554ad5c65bb5ed177470a0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a820c19b0af554ad5c65bb5ed177470a0">factoryResetDone</a> ()</td></tr>
+<tr class="memdesc:a820c19b0af554ad5c65bb5ed177470a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classMeshCore.html#a820c19b0af554ad5c65bb5ed177470a0">More...</a><br /></td></tr>
 <tr class="separator:a820c19b0af554ad5c65bb5ed177470a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03151f869cfd94180fa6a1982ba67456"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a03151f869cfd94180fa6a1982ba67456">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:a03151f869cfd94180fa6a1982ba67456"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classMeshCore.html#a03151f869cfd94180fa6a1982ba67456">More...</a><br /></td></tr>
 <tr class="separator:a03151f869cfd94180fa6a1982ba67456"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2b1858cfba48d286d5e8f48712e6ab68"><td class="memItemLeft" align="right" valign="top"><a id="a2b1858cfba48d286d5e8f48712e6ab68" name="a2b1858cfba48d286d5e8f48712e6ab68"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>modelsInitCallback</b> ()</td></tr>
-<tr class="memdesc:a2b1858cfba48d286d5e8f48712e6ab68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage. <br /></td></tr>
+<tr class="memitem:a2b1858cfba48d286d5e8f48712e6ab68"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a2b1858cfba48d286d5e8f48712e6ab68">modelsInitCallback</a> ()</td></tr>
+<tr class="memdesc:a2b1858cfba48d286d5e8f48712e6ab68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classMeshCore.html#a2b1858cfba48d286d5e8f48712e6ab68">More...</a><br /></td></tr>
 <tr class="separator:a2b1858cfba48d286d5e8f48712e6ab68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a656a85a739f1e46f15ece55eec2e596b"><td class="memItemLeft" align="right" valign="top"><a id="a656a85a739f1e46f15ece55eec2e596b" name="a656a85a739f1e46f15ece55eec2e596b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>scanCallback</b> (const nrf_mesh_adv_packet_rx_data_t *scanData)</td></tr>
-<tr class="memdesc:a656a85a739f1e46f15ece55eec2e596b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage. <br /></td></tr>
+<tr class="memitem:a656a85a739f1e46f15ece55eec2e596b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a656a85a739f1e46f15ece55eec2e596b">scanCallback</a> (const nrf_mesh_adv_packet_rx_data_t *scanData)</td></tr>
+<tr class="memdesc:a656a85a739f1e46f15ece55eec2e596b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classMeshCore.html#a656a85a739f1e46f15ece55eec2e596b">More...</a><br /></td></tr>
 <tr class="separator:a656a85a739f1e46f15ece55eec2e596b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ad38504ffe01474eab12311fad6de4556"><td class="memItemLeft" align="right" valign="top"><a id="ad38504ffe01474eab12311fad6de4556" name="ad38504ffe01474eab12311fad6de4556"></a>
-static <a class="el" href="classMeshCore.html">MeshCore</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:ad38504ffe01474eab12311fad6de4556"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the <a class="el" href="classMeshCore.html" title="Class that:">MeshCore</a> object. <br /></td></tr>
+<tr class="memitem:ad38504ffe01474eab12311fad6de4556"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classMeshCore.html">MeshCore</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#ad38504ffe01474eab12311fad6de4556">getInstance</a> ()</td></tr>
+<tr class="memdesc:ad38504ffe01474eab12311fad6de4556"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the <a class="el" href="classMeshCore.html" title="Class that:">MeshCore</a> object.  <a href="classMeshCore.html#ad38504ffe01474eab12311fad6de4556">More...</a><br /></td></tr>
 <tr class="separator:ad38504ffe01474eab12311fad6de4556"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ae4ecd3a540d435fc863ede9613c971f9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#ae4ecd3a540d435fc863ede9613c971f9">MeshCore</a> ()</td></tr>
+<tr class="memdesc:ae4ecd3a540d435fc863ede9613c971f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor, singleton, thus made private.  <a href="classMeshCore.html#ae4ecd3a540d435fc863ede9613c971f9">More...</a><br /></td></tr>
+<tr class="separator:ae4ecd3a540d435fc863ede9613c971f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3e4f58c0616537f67febc7b1796c00f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#ac3e4f58c0616537f67febc7b1796c00f">MeshCore</a> (<a class="el" href="classMeshCore.html">MeshCore</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:ac3e4f58c0616537f67febc7b1796c00f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor, singleton, thus made private.  <a href="classMeshCore.html#ac3e4f58c0616537f67febc7b1796c00f">More...</a><br /></td></tr>
+<tr class="separator:ac3e4f58c0616537f67febc7b1796c00f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5301c5589c4e612a877d020fec34fc2b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshCore.html">MeshCore</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a5301c5589c4e612a877d020fec34fc2b">operator=</a> (<a class="el" href="classMeshCore.html">MeshCore</a> const &amp;)=delete</td></tr>
+<tr class="memdesc:a5301c5589c4e612a877d020fec34fc2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator, singleton, thus made private.  <a href="classMeshCore.html#a5301c5589c4e612a877d020fec34fc2b">More...</a><br /></td></tr>
+<tr class="separator:a5301c5589c4e612a877d020fec34fc2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a639a4a52a9b878d6ba66a50f8d450c4f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a639a4a52a9b878d6ba66a50f8d450c4f">provisionSelf</a> (uint16_t id)</td></tr>
+<tr class="separator:a639a4a52a9b878d6ba66a50f8d450c4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7937abd1fab55c735b4d3af702a70d4b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a7937abd1fab55c735b4d3af702a70d4b">provisionLoad</a> ()</td></tr>
+<tr class="separator:a7937abd1fab55c735b4d3af702a70d4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad36d248eaee5a143eb80dd7bc4d6e6b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#ad36d248eaee5a143eb80dd7bc4d6e6b6">getFlashPages</a> (void *&amp;startAddress, void *&amp;endAddress)</td></tr>
+<tr class="separator:ad36d248eaee5a143eb80dd7bc4d6e6b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a8c2bbad5f439be81ab2e1e244e3bd209"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshCore.html#a407afa8cadc716ced4698663e6985a48">callback_scan_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a8c2bbad5f439be81ab2e1e244e3bd209">_scanCallback</a> = nullptr</td></tr>
+<tr class="separator:a8c2bbad5f439be81ab2e1e244e3bd209"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb69383d31b8916949624a2a37412737"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshCore.html#aeadb9dbedc1548a4f9cf37ce3b03cba4">callback_model_init_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#adb69383d31b8916949624a2a37412737">_modelInitCallback</a> = nullptr</td></tr>
+<tr class="separator:adb69383d31b8916949624a2a37412737"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f8155583dda8819dc4cd57ccc57995a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMeshCore.html#a0aa77605d9e80685926ff5e5467f6c9f">callback_model_configure_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a6f8155583dda8819dc4cd57ccc57995a">_modelConfigureCallback</a> = nullptr</td></tr>
+<tr class="separator:a6f8155583dda8819dc4cd57ccc57995a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ae8dff005f1d915476382bc9329d8f3"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a7ae8dff005f1d915476382bc9329d8f3">_netkey</a> [NRF_MESH_KEY_SIZE]</td></tr>
+<tr class="separator:a7ae8dff005f1d915476382bc9329d8f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa80c44be93bdce26a205944f5bdc53d5"><td class="memItemLeft" align="right" valign="top">dsm_handle_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#aa80c44be93bdce26a205944f5bdc53d5">_netkeyHandle</a> = DSM_HANDLE_INVALID</td></tr>
+<tr class="separator:aa80c44be93bdce26a205944f5bdc53d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b766be7726aa501d17ee8395b49386b"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a4b766be7726aa501d17ee8395b49386b">_appkey</a> [NRF_MESH_KEY_SIZE]</td></tr>
+<tr class="separator:a4b766be7726aa501d17ee8395b49386b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2892f61d0ab73838c86f3d18f4191c88"><td class="memItemLeft" align="right" valign="top">dsm_handle_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a2892f61d0ab73838c86f3d18f4191c88">_appkeyHandle</a> = DSM_HANDLE_INVALID</td></tr>
+<tr class="separator:a2892f61d0ab73838c86f3d18f4191c88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39d7be6b550abd6f4c5098b833f27544"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a39d7be6b550abd6f4c5098b833f27544">_devkey</a> [NRF_MESH_KEY_SIZE]</td></tr>
+<tr class="separator:a39d7be6b550abd6f4c5098b833f27544"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb86b224179173da35510987a7fb79c3"><td class="memItemLeft" align="right" valign="top">dsm_handle_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#afb86b224179173da35510987a7fb79c3">_devkeyHandle</a> = DSM_HANDLE_INVALID</td></tr>
+<tr class="separator:afb86b224179173da35510987a7fb79c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac91fee8a00e47099c4cb8a02bfaebc6f"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#ac91fee8a00e47099c4cb8a02bfaebc6f">_ownAddress</a> = 0</td></tr>
+<tr class="memdesc:ac91fee8a00e47099c4cb8a02bfaebc6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Address of this node.  <a href="classMeshCore.html#ac91fee8a00e47099c4cb8a02bfaebc6f">More...</a><br /></td></tr>
+<tr class="separator:ac91fee8a00e47099c4cb8a02bfaebc6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2589e2b9dfa5b225225b678c3037bcbc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#a2589e2b9dfa5b225225b678c3037bcbc">_isProvisioned</a> = false</td></tr>
+<tr class="separator:a2589e2b9dfa5b225225b678c3037bcbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acba08d8df8a59f8c13ea613602660aa5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMeshCore.html#acba08d8df8a59f8c13ea613602660aa5">_performingFactoryReset</a> = false</td></tr>
+<tr class="separator:acba08d8df8a59f8c13ea613602660aa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that: </p>
@@ -221,7 +269,131 @@ static <a class="el" href="classMeshCore.html">MeshCore</a> &amp;&#160;</td><td 
 <li>Performs provisioning.</li>
 <li>Manages mesh flash. </li>
 </ul>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="a0aa77605d9e80685926ff5e5467f6c9f" name="a0aa77605d9e80685926ff5e5467f6c9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0aa77605d9e80685926ff5e5467f6c9f">&#9670;&#160;</a></span>callback_model_configure_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef function&lt;void(dsm_handle_t appkeyHandle)&gt; <a class="el" href="classMeshCore.html#a0aa77605d9e80685926ff5e5467f6c9f">MeshCore::callback_model_configure_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Callback function definition. </p>
+
+</div>
+</div>
+<a id="aeadb9dbedc1548a4f9cf37ce3b03cba4" name="aeadb9dbedc1548a4f9cf37ce3b03cba4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeadb9dbedc1548a4f9cf37ce3b03cba4">&#9670;&#160;</a></span>callback_model_init_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef function&lt;void()&gt; <a class="el" href="classMeshCore.html#aeadb9dbedc1548a4f9cf37ce3b03cba4">MeshCore::callback_model_init_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Callback function definition. </p>
+
+</div>
+</div>
+<a id="a407afa8cadc716ced4698663e6985a48" name="a407afa8cadc716ced4698663e6985a48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a407afa8cadc716ced4698663e6985a48">&#9670;&#160;</a></span>callback_scan_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef function&lt;void(const nrf_mesh_adv_packet_rx_data_t* scanData)&gt; <a class="el" href="classMeshCore.html#a407afa8cadc716ced4698663e6985a48">MeshCore::callback_scan_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Callback function definition. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ae4ecd3a540d435fc863ede9613c971f9" name="ae4ecd3a540d435fc863ede9613c971f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4ecd3a540d435fc863ede9613c971f9">&#9670;&#160;</a></span>MeshCore() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshCore.html">MeshCore::MeshCore</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor, singleton, thus made private. </p>
+
+</div>
+</div>
+<a id="ac3e4f58c0616537f67febc7b1796c00f" name="ac3e4f58c0616537f67febc7b1796c00f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3e4f58c0616537f67febc7b1796c00f">&#9670;&#160;</a></span>MeshCore() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshCore.html">MeshCore::MeshCore</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMeshCore.html">MeshCore</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy constructor, singleton, thus made private. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a096e660c491420c8d488a4e3a27bedbe" name="a096e660c491420c8d488a4e3a27bedbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a096e660c491420c8d488a4e3a27bedbe">&#9670;&#160;</a></span>eraseAllPages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshCore::eraseAllPages </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Erase all flash pages used by the mesh for storage. </p>
+
+</div>
+</div>
 <a id="a5d6451530398fcd939af8e1ed99af108" name="a5d6451530398fcd939af8e1ed99af108"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5d6451530398fcd939af8e1ed99af108">&#9670;&#160;</a></span>factoryReset()</h2>
 
@@ -239,6 +411,107 @@ static <a class="el" href="classMeshCore.html">MeshCore</a> &amp;&#160;</td><td 
 
 <p>Factory reset. </p>
 <p >Clear all stored data. Will send event EVT_MESH_FACTORY_RESET when done. </p>
+
+</div>
+</div>
+<a id="a820c19b0af554ad5c65bb5ed177470a0" name="a820c19b0af554ad5c65bb5ed177470a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a820c19b0af554ad5c65bb5ed177470a0">&#9670;&#160;</a></span>factoryResetDone()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::factoryResetDone </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Internal usage. </p>
+
+</div>
+</div>
+<a id="ad36d248eaee5a143eb80dd7bc4d6e6b6" name="ad36d248eaee5a143eb80dd7bc4d6e6b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad36d248eaee5a143eb80dd7bc4d6e6b6">&#9670;&#160;</a></span>getFlashPages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::getFlashPages </td>
+          <td>(</td>
+          <td class="paramtype">void *&amp;&#160;</td>
+          <td class="paramname"><em>startAddress</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&amp;&#160;</td>
+          <td class="paramname"><em>endAddress</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad38504ffe01474eab12311fad6de4556" name="ad38504ffe01474eab12311fad6de4556"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad38504ffe01474eab12311fad6de4556">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classMeshCore.html">MeshCore</a> &amp; MeshCore::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a reference to the <a class="el" href="classMeshCore.html" title="Class that:">MeshCore</a> object. </p>
+
+</div>
+</div>
+<a id="adab758a4465800d298f8e103b1edf8e9" name="adab758a4465800d298f8e103b1edf8e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adab758a4465800d298f8e103b1edf8e9">&#9670;&#160;</a></span>getUnicastAddress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t MeshCore::getUnicastAddress </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the unicast address of this crownstone. </p>
 
 </div>
 </div>
@@ -279,7 +552,7 @@ static <a class="el" href="classMeshCore.html">MeshCore</a> &amp;&#160;</td><td 
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t MeshCore::init </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshCore::init </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structboards__config__t.html">boards_config_t</a> &amp;&#160;</td>
           <td class="paramname"><em>board</em></td><td>)</td>
@@ -316,6 +589,242 @@ ERR_WRONG_STATE Flash pages should be erased. </dd></dl>
 
 </div>
 </div>
+<a id="a2b1858cfba48d286d5e8f48712e6ab68" name="a2b1858cfba48d286d5e8f48712e6ab68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b1858cfba48d286d5e8f48712e6ab68">&#9670;&#160;</a></span>modelsInitCallback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::modelsInitCallback </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Internal usage. </p>
+
+</div>
+</div>
+<a id="a5301c5589c4e612a877d020fec34fc2b" name="a5301c5589c4e612a877d020fec34fc2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5301c5589c4e612a877d020fec34fc2b">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshCore.html">MeshCore</a> &amp; MeshCore::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classMeshCore.html">MeshCore</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assignment operator, singleton, thus made private. </p>
+
+</div>
+</div>
+<a id="a2ee0b8d7504e54abff898967986a80c8" name="a2ee0b8d7504e54abff898967986a80c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ee0b8d7504e54abff898967986a80c8">&#9670;&#160;</a></span>provision()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::provision </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Do the provisioning. </p>
+
+</div>
+</div>
+<a id="a7937abd1fab55c735b4d3af702a70d4b" name="a7937abd1fab55c735b4d3af702a70d4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7937abd1fab55c735b4d3af702a70d4b">&#9670;&#160;</a></span>provisionLoad()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::provisionLoad </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a639a4a52a9b878d6ba66a50f8d450c4f" name="a639a4a52a9b878d6ba66a50f8d450c4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a639a4a52a9b878d6ba66a50f8d450c4f">&#9670;&#160;</a></span>provisionSelf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::provisionSelf </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a51ba720bfccd380e3ce4b15c2aad6fea" name="a51ba720bfccd380e3ce4b15c2aad6fea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51ba720bfccd380e3ce4b15c2aad6fea">&#9670;&#160;</a></span>registerModelConfigureCallback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::registerModelConfigureCallback </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classMeshCore.html#a0aa77605d9e80685926ff5e5467f6c9f">callback_model_configure_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>closure</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register a callback function that's called when the models should be configured. </p>
+
+</div>
+</div>
+<a id="ac07ab046bbda719450ed5880eafdbfc9" name="ac07ab046bbda719450ed5880eafdbfc9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac07ab046bbda719450ed5880eafdbfc9">&#9670;&#160;</a></span>registerModelInitCallback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::registerModelInitCallback </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classMeshCore.html#aeadb9dbedc1548a4f9cf37ce3b03cba4">callback_model_init_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>closure</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register a callback function that's called when the models should be initialized. </p>
+
+</div>
+</div>
+<a id="a1c1af334060acbb259724225ed81f3e4" name="a1c1af334060acbb259724225ed81f3e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c1af334060acbb259724225ed81f3e4">&#9670;&#160;</a></span>registerScanCallback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::registerScanCallback </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classMeshCore.html#a407afa8cadc716ced4698663e6985a48">callback_scan_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>closure</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register a callback function that's called when a device was scanned. </p>
+
+</div>
+</div>
+<a id="a656a85a739f1e46f15ece55eec2e596b" name="a656a85a739f1e46f15ece55eec2e596b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a656a85a739f1e46f15ece55eec2e596b">&#9670;&#160;</a></span>scanCallback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::scanCallback </td>
+          <td>(</td>
+          <td class="paramtype">const nrf_mesh_adv_packet_rx_data_t *&#160;</td>
+          <td class="paramname"><em>scanData</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Internal usage. </p>
+
+</div>
+</div>
+<a id="aa5deabbb6f08307a76ab50424841a2fe" name="aa5deabbb6f08307a76ab50424841a2fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5deabbb6f08307a76ab50424841a2fe">&#9670;&#160;</a></span>setTxPower()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshCore::setTxPower </td>
+          <td>(</td>
+          <td class="paramtype">int8_t&#160;</td>
+          <td class="paramname"><em>txPower</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the TX power of mesh messages. </p>
+
+</div>
+</div>
+<a id="a98668ca82c98f4f42a1f7f75bbf6a0ee" name="a98668ca82c98f4f42a1f7f75bbf6a0ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98668ca82c98f4f42a1f7f75bbf6a0ee">&#9670;&#160;</a></span>start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MeshCore::start </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Start using the radio. </p>
+
+</div>
+</div>
 <a id="a1158ce463ef3b418a9f2b51f55630307" name="a1158ce463ef3b418a9f2b51f55630307"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1158ce463ef3b418a9f2b51f55630307">&#9670;&#160;</a></span>stop()</h2>
 
@@ -323,7 +832,7 @@ ERR_WRONG_STATE Flash pages should be erased. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t MeshCore::stop </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> MeshCore::stop </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -335,6 +844,273 @@ ERR_WRONG_STATE Flash pages should be erased. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>ERR_SUCCESS When the mesh stopped. </dd>
 <dd>
 ERR_WAIT_FOR_SUCCESS When the mesh will stop, wait for NRF_MESH_EVT_DISABLED. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a4b766be7726aa501d17ee8395b49386b" name="a4b766be7726aa501d17ee8395b49386b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b766be7726aa501d17ee8395b49386b">&#9670;&#160;</a></span>_appkey</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t MeshCore::_appkey[NRF_MESH_KEY_SIZE]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2892f61d0ab73838c86f3d18f4191c88" name="a2892f61d0ab73838c86f3d18f4191c88"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2892f61d0ab73838c86f3d18f4191c88">&#9670;&#160;</a></span>_appkeyHandle</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">dsm_handle_t MeshCore::_appkeyHandle = DSM_HANDLE_INVALID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a39d7be6b550abd6f4c5098b833f27544" name="a39d7be6b550abd6f4c5098b833f27544"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39d7be6b550abd6f4c5098b833f27544">&#9670;&#160;</a></span>_devkey</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t MeshCore::_devkey[NRF_MESH_KEY_SIZE]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afb86b224179173da35510987a7fb79c3" name="afb86b224179173da35510987a7fb79c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb86b224179173da35510987a7fb79c3">&#9670;&#160;</a></span>_devkeyHandle</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">dsm_handle_t MeshCore::_devkeyHandle = DSM_HANDLE_INVALID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2589e2b9dfa5b225225b678c3037bcbc" name="a2589e2b9dfa5b225225b678c3037bcbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2589e2b9dfa5b225225b678c3037bcbc">&#9670;&#160;</a></span>_isProvisioned</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MeshCore::_isProvisioned = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6f8155583dda8819dc4cd57ccc57995a" name="a6f8155583dda8819dc4cd57ccc57995a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f8155583dda8819dc4cd57ccc57995a">&#9670;&#160;</a></span>_modelConfigureCallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshCore.html#a0aa77605d9e80685926ff5e5467f6c9f">callback_model_configure_t</a> MeshCore::_modelConfigureCallback = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adb69383d31b8916949624a2a37412737" name="adb69383d31b8916949624a2a37412737"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb69383d31b8916949624a2a37412737">&#9670;&#160;</a></span>_modelInitCallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshCore.html#aeadb9dbedc1548a4f9cf37ce3b03cba4">callback_model_init_t</a> MeshCore::_modelInitCallback = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7ae8dff005f1d915476382bc9329d8f3" name="a7ae8dff005f1d915476382bc9329d8f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ae8dff005f1d915476382bc9329d8f3">&#9670;&#160;</a></span>_netkey</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t MeshCore::_netkey[NRF_MESH_KEY_SIZE]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa80c44be93bdce26a205944f5bdc53d5" name="aa80c44be93bdce26a205944f5bdc53d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa80c44be93bdce26a205944f5bdc53d5">&#9670;&#160;</a></span>_netkeyHandle</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">dsm_handle_t MeshCore::_netkeyHandle = DSM_HANDLE_INVALID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac91fee8a00e47099c4cb8a02bfaebc6f" name="ac91fee8a00e47099c4cb8a02bfaebc6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac91fee8a00e47099c4cb8a02bfaebc6f">&#9670;&#160;</a></span>_ownAddress</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t MeshCore::_ownAddress = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Address of this node. </p>
+
+</div>
+</div>
+<a id="acba08d8df8a59f8c13ea613602660aa5" name="acba08d8df8a59f8c13ea613602660aa5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acba08d8df8a59f8c13ea613602660aa5">&#9670;&#160;</a></span>_performingFactoryReset</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MeshCore::_performingFactoryReset = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8c2bbad5f439be81ab2e1e244e3bd209" name="a8c2bbad5f439be81ab2e1e244e3bd209"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c2bbad5f439be81ab2e1e244e3bd209">&#9670;&#160;</a></span>_scanCallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMeshCore.html#a407afa8cadc716ced4698663e6985a48">callback_scan_t</a> MeshCore::_scanCallback = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

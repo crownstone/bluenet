@@ -1,6 +1,6 @@
 var structmicroapp__info__t =
 [
-    [ "appsStatus", "structmicroapp__info__t.html#a20e18b07722a8e2ac567963536bd14d7", null ],
+    [ "appsStatus", "structmicroapp__info__t.html#a062f1b33422e3d4ed233d9ee4a3517d9", null ],
     [ "maxApps", "structmicroapp__info__t.html#a242488108f229414e06d434dc8629cc0", null ],
     [ "maxAppSize", "structmicroapp__info__t.html#aeeed0e6709bd04ea9953807d9cd2807c", null ],
     [ "maxChunkSize", "structmicroapp__info__t.html#a6c39b672216245f0d7466abcf77c6327", null ],

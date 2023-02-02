@@ -102,6 +102,7 @@ $(document).ready(function(){initNavTree('classState.html',''); initResizable();
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="classState-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">State Class Reference</div></div>
 </div><!--header-->
@@ -136,149 +137,179 @@ Collaboration diagram for State:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a9ddc1df6f998184d6477b48fab90281c"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a9ddc1df6f998184d6477b48fab90281c">~State</a> ()</td></tr>
+<tr class="separator:a9ddc1df6f998184d6477b48fab90281c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad37d1373fa95b45718ff471799dfc067"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ad37d1373fa95b45718ff471799dfc067">init</a> (<a class="el" href="structboards__config__t.html">boards_config_t</a> *boardsConfig)</td></tr>
 <tr class="memdesc:ad37d1373fa95b45718ff471799dfc067"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> object with the board configuration.  <a href="classState.html#ad37d1373fa95b45718ff471799dfc067">More...</a><br /></td></tr>
 <tr class="separator:ad37d1373fa95b45718ff471799dfc067"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a02973119b3d6fd68ed47fbcac198e6"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a5a02973119b3d6fd68ed47fbcac198e6">get</a> (<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, const PersistenceMode mode=PersistenceMode::STRATEGY1)</td></tr>
+<tr class="memitem:a5a02973119b3d6fd68ed47fbcac198e6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a5a02973119b3d6fd68ed47fbcac198e6">get</a> (<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a> mode=PersistenceMode::STRATEGY1)</td></tr>
 <tr class="memdesc:a5a02973119b3d6fd68ed47fbcac198e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get copy of a state value.  <a href="classState.html#a5a02973119b3d6fd68ed47fbcac198e6">More...</a><br /></td></tr>
 <tr class="separator:a5a02973119b3d6fd68ed47fbcac198e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63baa15ae12ca1d3b009bf908c65ad73"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a63baa15ae12ca1d3b009bf908c65ad73">get</a> (const CS_TYPE type, void *value, size16_t size)</td></tr>
+<tr class="memitem:a63baa15ae12ca1d3b009bf908c65ad73"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a63baa15ae12ca1d3b009bf908c65ad73">get</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> type, void *value, <a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a> size)</td></tr>
 <tr class="memdesc:a63baa15ae12ca1d3b009bf908c65ad73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function for <a class="el" href="classState.html#a5a02973119b3d6fd68ed47fbcac198e6" title="Get copy of a state value.">get()</a> with id 0.  <a href="classState.html#a63baa15ae12ca1d3b009bf908c65ad73">More...</a><br /></td></tr>
 <tr class="separator:a63baa15ae12ca1d3b009bf908c65ad73"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af808c9d5d864e8a9459bc1617f6cdb1a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#af808c9d5d864e8a9459bc1617f6cdb1a">isTrue</a> (CS_TYPE type, const PersistenceMode mode=PersistenceMode::STRATEGY1)</td></tr>
+<tr class="memitem:af808c9d5d864e8a9459bc1617f6cdb1a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#af808c9d5d864e8a9459bc1617f6cdb1a">isTrue</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> type, const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a> mode=PersistenceMode::STRATEGY1)</td></tr>
 <tr class="memdesc:af808c9d5d864e8a9459bc1617f6cdb1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shorthand for <a class="el" href="classState.html#a5a02973119b3d6fd68ed47fbcac198e6" title="Get copy of a state value.">get()</a> for boolean data types, and id 0.  <a href="classState.html#af808c9d5d864e8a9459bc1617f6cdb1a">More...</a><br /></td></tr>
 <tr class="separator:af808c9d5d864e8a9459bc1617f6cdb1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae36a79c4643010cc2adf73a75b8447fb"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ae36a79c4643010cc2adf73a75b8447fb">getIds</a> (CS_TYPE type, std::vector&lt; cs_state_id_t &gt; *&amp;ids)</td></tr>
+<tr class="memitem:ae36a79c4643010cc2adf73a75b8447fb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ae36a79c4643010cc2adf73a75b8447fb">getIds</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> type, std::vector&lt; <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> &gt; *&amp;ids)</td></tr>
 <tr class="memdesc:ae36a79c4643010cc2adf73a75b8447fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a list of IDs for given type.  <a href="classState.html#ae36a79c4643010cc2adf73a75b8447fb">More...</a><br /></td></tr>
 <tr class="separator:ae36a79c4643010cc2adf73a75b8447fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8451f4870511d24e4fe931c1cf4d6246"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a8451f4870511d24e4fe931c1cf4d6246">set</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, PersistenceMode mode=PersistenceMode::STRATEGY1)</td></tr>
+<tr class="memitem:a8451f4870511d24e4fe931c1cf4d6246"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a8451f4870511d24e4fe931c1cf4d6246">set</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a> mode=PersistenceMode::STRATEGY1)</td></tr>
 <tr class="memdesc:a8451f4870511d24e4fe931c1cf4d6246"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set state to new value, via copy.  <a href="classState.html#a8451f4870511d24e4fe931c1cf4d6246">More...</a><br /></td></tr>
 <tr class="separator:a8451f4870511d24e4fe931c1cf4d6246"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f411b0baa1244bd3202502dc9a44bd7"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a3f411b0baa1244bd3202502dc9a44bd7">set</a> (const CS_TYPE type, void *value, size16_t size)</td></tr>
+<tr class="memitem:a3f411b0baa1244bd3202502dc9a44bd7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a3f411b0baa1244bd3202502dc9a44bd7">set</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> type, void *value, <a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a> size)</td></tr>
 <tr class="memdesc:a3f411b0baa1244bd3202502dc9a44bd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function for <a class="el" href="classState.html#a8451f4870511d24e4fe931c1cf4d6246" title="Set state to new value, via copy.">set()</a>.  <a href="classState.html#a3f411b0baa1244bd3202502dc9a44bd7">More...</a><br /></td></tr>
 <tr class="separator:a3f411b0baa1244bd3202502dc9a44bd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42cff7fd1b35b70a093ccfa4f5829769"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a42cff7fd1b35b70a093ccfa4f5829769">setDelayed</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, uint8_t delay)</td></tr>
+<tr class="memitem:a42cff7fd1b35b70a093ccfa4f5829769"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a42cff7fd1b35b70a093ccfa4f5829769">setDelayed</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, uint8_t delay)</td></tr>
 <tr class="memdesc:a42cff7fd1b35b70a093ccfa4f5829769"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the state to a new value, but delay the write to flash.  <a href="classState.html#a42cff7fd1b35b70a093ccfa4f5829769">More...</a><br /></td></tr>
 <tr class="separator:a42cff7fd1b35b70a093ccfa4f5829769"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad37d56e82b944fa5cc8bce060ebd2ff6"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ad37d56e82b944fa5cc8bce060ebd2ff6">setThrottled</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, uint32_t period)</td></tr>
+<tr class="memitem:ad37d56e82b944fa5cc8bce060ebd2ff6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ad37d56e82b944fa5cc8bce060ebd2ff6">setThrottled</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, uint32_t period)</td></tr>
 <tr class="memdesc:ad37d56e82b944fa5cc8bce060ebd2ff6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write variable to flash in a throttled mode.  <a href="classState.html#ad37d56e82b944fa5cc8bce060ebd2ff6">More...</a><br /></td></tr>
 <tr class="separator:ad37d56e82b944fa5cc8bce060ebd2ff6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d963b9f6ade3b8662e1ff0062e27708"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a6d963b9f6ade3b8662e1ff0062e27708">verifySizeForGet</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
+<tr class="memitem:a6d963b9f6ade3b8662e1ff0062e27708"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a6d963b9f6ade3b8662e1ff0062e27708">verifySizeForGet</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
 <tr class="memdesc:a6d963b9f6ade3b8662e1ff0062e27708"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify size of user data for getting a state.  <a href="classState.html#a6d963b9f6ade3b8662e1ff0062e27708">More...</a><br /></td></tr>
 <tr class="separator:a6d963b9f6ade3b8662e1ff0062e27708"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a46d2af69aaa0380f678f138be0618e02"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a46d2af69aaa0380f678f138be0618e02">verifySizeForSet</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
+<tr class="memitem:a46d2af69aaa0380f678f138be0618e02"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a46d2af69aaa0380f678f138be0618e02">verifySizeForSet</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
 <tr class="memdesc:a46d2af69aaa0380f678f138be0618e02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify size of user data for setting a state.  <a href="classState.html#a46d2af69aaa0380f678f138be0618e02">More...</a><br /></td></tr>
 <tr class="separator:a46d2af69aaa0380f678f138be0618e02"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad477ee685332e4424e80848abdae1412"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ad477ee685332e4424e80848abdae1412">remove</a> (const CS_TYPE &amp;type, cs_state_id_t id, const PersistenceMode mode=PersistenceMode::STRATEGY1)</td></tr>
+<tr class="memitem:ad477ee685332e4424e80848abdae1412"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ad477ee685332e4424e80848abdae1412">remove</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id, const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a> mode=PersistenceMode::STRATEGY1)</td></tr>
 <tr class="memdesc:ad477ee685332e4424e80848abdae1412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove a state variable.  <a href="classState.html#ad477ee685332e4424e80848abdae1412">More...</a><br /></td></tr>
 <tr class="separator:ad477ee685332e4424e80848abdae1412"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab6f0c54230e8b920fa430e97906894fc"><td class="memItemLeft" align="right" valign="top"><a id="ab6f0c54230e8b920fa430e97906894fc" name="ab6f0c54230e8b920fa430e97906894fc"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>factoryReset</b> ()</td></tr>
-<tr class="memdesc:ab6f0c54230e8b920fa430e97906894fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erase all used persistent storage. <br /></td></tr>
+<tr class="memitem:ab6f0c54230e8b920fa430e97906894fc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ab6f0c54230e8b920fa430e97906894fc">factoryReset</a> ()</td></tr>
+<tr class="memdesc:ab6f0c54230e8b920fa430e97906894fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Erase all used persistent storage.  <a href="classState.html#ab6f0c54230e8b920fa430e97906894fc">More...</a><br /></td></tr>
 <tr class="separator:ab6f0c54230e8b920fa430e97906894fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f122ed63d6c04b8aba8e27e0f5249fe"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a4f122ed63d6c04b8aba8e27e0f5249fe">cleanUp</a> ()</td></tr>
+<tr class="memitem:a4f122ed63d6c04b8aba8e27e0f5249fe"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a4f122ed63d6c04b8aba8e27e0f5249fe">cleanUp</a> ()</td></tr>
 <tr class="memdesc:a4f122ed63d6c04b8aba8e27e0f5249fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clean up persistent storage.  <a href="classState.html#a4f122ed63d6c04b8aba8e27e0f5249fe">More...</a><br /></td></tr>
 <tr class="separator:a4f122ed63d6c04b8aba8e27e0f5249fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1759335a4b5529aff8a9221db3d35559"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a1759335a4b5529aff8a9221db3d35559">getViaPointer</a> (<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, const PersistenceMode mode=PersistenceMode::STRATEGY1)</td></tr>
+<tr class="memitem:a1759335a4b5529aff8a9221db3d35559"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a1759335a4b5529aff8a9221db3d35559">getViaPointer</a> (<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a> mode=PersistenceMode::STRATEGY1)</td></tr>
 <tr class="memdesc:a1759335a4b5529aff8a9221db3d35559"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get pointer to state value.  <a href="classState.html#a1759335a4b5529aff8a9221db3d35559">More...</a><br /></td></tr>
 <tr class="separator:a1759335a4b5529aff8a9221db3d35559"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa80421b79db2b144889db602e12a39ef"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#aa80421b79db2b144889db602e12a39ef">setViaPointer</a> (CS_TYPE type)</td></tr>
+<tr class="memitem:aa80421b79db2b144889db602e12a39ef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#aa80421b79db2b144889db602e12a39ef">setViaPointer</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> type)</td></tr>
 <tr class="memdesc:aa80421b79db2b144889db602e12a39ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update state value.  <a href="classState.html#aa80421b79db2b144889db602e12a39ef">More...</a><br /></td></tr>
 <tr class="separator:aa80421b79db2b144889db602e12a39ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31f85d6f2813360b7c4e65078d324a9e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a31f85d6f2813360b7c4e65078d324a9e">startWritesToFlash</a> ()</td></tr>
 <tr class="memdesc:a31f85d6f2813360b7c4e65078d324a9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">After calling this, state is allowed to write to flash.  <a href="classState.html#a31f85d6f2813360b7c4e65078d324a9e">More...</a><br /></td></tr>
 <tr class="separator:a31f85d6f2813360b7c4e65078d324a9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85b6e94c27167ef4ae1be2436f0f7805"><td class="memItemLeft" align="right" valign="top"><a id="a85b6e94c27167ef4ae1be2436f0f7805" name="a85b6e94c27167ef4ae1be2436f0f7805"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>handleStorageError</b> (cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id)</td></tr>
-<tr class="memdesc:a85b6e94c27167ef4ae1be2436f0f7805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage. <br /></td></tr>
+<tr class="memitem:a85b6e94c27167ef4ae1be2436f0f7805"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a85b6e94c27167ef4ae1be2436f0f7805">handleStorageError</a> (<a class="el" href="cs__Storage_8h.html#acfa74f337904b1c7daf0a85bd953ce9b">cs_storage_operation_t</a> operation, <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> type, <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id)</td></tr>
+<tr class="memdesc:a85b6e94c27167ef4ae1be2436f0f7805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal usage.  <a href="classState.html#a85b6e94c27167ef4ae1be2436f0f7805">More...</a><br /></td></tr>
 <tr class="separator:a85b6e94c27167ef4ae1be2436f0f7805"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7669e3e5afe2e3280630d785afc9ef34"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a7669e3e5afe2e3280630d785afc9ef34">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)</td></tr>
 <tr class="memdesc:a7669e3e5afe2e3280630d785afc9ef34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle (crownstone) events.  <a href="classState.html#a7669e3e5afe2e3280630d785afc9ef34">More...</a><br /></td></tr>
 <tr class="separator:a7669e3e5afe2e3280630d785afc9ef34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classBaseClass"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classBaseClass')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classBaseClass.html">BaseClass&lt; N &gt;</a></td></tr>
-<tr class="memitem:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a9e2337c2676bf9fbcca00ab7750bbf14" name="a9e2337c2676bf9fbcca00ab7750bbf14"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:aa8b0502f9dd06a726a07526f4a344354 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#aa8b0502f9dd06a726a07526f4a344354">BaseClass</a> ()</td></tr>
+<tr class="separator:aa8b0502f9dd06a726a07526f4a344354 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a9e2337c2676bf9fbcca00ab7750bbf14">isInitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a0290904b966a159231f848cfb5fd97a4" name="a0290904b966a159231f848cfb5fd97a4"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setInitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a0290904b966a159231f848cfb5fd97a4">setInitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a4391d2f80e021fc4420fb48278a314ae" name="a4391d2f80e021fc4420fb48278a314ae"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setUninitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a4391d2f80e021fc4420fb48278a314ae">setUninitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ad18d563a732ed9d6659d6b38492f89dc"><td class="memItemLeft" align="right" valign="top"><a id="ad18d563a732ed9d6659d6b38492f89dc" name="ad18d563a732ed9d6659d6b38492f89dc"></a>
-static <a class="el" href="classState.html">State</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:ad18d563a732ed9d6659d6b38492f89dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> object. <br /></td></tr>
+<tr class="memitem:ad18d563a732ed9d6659d6b38492f89dc"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classState.html">State</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ad18d563a732ed9d6659d6b38492f89dc">getInstance</a> ()</td></tr>
+<tr class="memdesc:ad18d563a732ed9d6659d6b38492f89dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> object.  <a href="classState.html#ad18d563a732ed9d6659d6b38492f89dc">More...</a><br /></td></tr>
 <tr class="separator:ad18d563a732ed9d6659d6b38492f89dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a32a47427f426acbdc17d35eefe111890"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a32a47427f426acbdc17d35eefe111890">findInRam</a> (const CS_TYPE &amp;type, cs_state_id_t id, size16_t &amp;index_in_ram)</td></tr>
+<tr class="memitem:a32a47427f426acbdc17d35eefe111890"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a32a47427f426acbdc17d35eefe111890">findInRam</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id, <a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a> &amp;index_in_ram)</td></tr>
 <tr class="memdesc:a32a47427f426acbdc17d35eefe111890"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find given type in ram.  <a href="classState.html#a32a47427f426acbdc17d35eefe111890">More...</a><br /></td></tr>
 <tr class="separator:a32a47427f426acbdc17d35eefe111890"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f8f20fff6d3e4206999d9731f6fa607"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a0f8f20fff6d3e4206999d9731f6fa607">storeInRam</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, size16_t &amp;index_in_ram)</td></tr>
+<tr class="memitem:a0f8f20fff6d3e4206999d9731f6fa607"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a0f8f20fff6d3e4206999d9731f6fa607">storeInRam</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, <a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a> &amp;index_in_ram)</td></tr>
 <tr class="memdesc:a0f8f20fff6d3e4206999d9731f6fa607"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores state variable in ram.  <a href="classState.html#a0f8f20fff6d3e4206999d9731f6fa607">More...</a><br /></td></tr>
 <tr class="separator:a0f8f20fff6d3e4206999d9731f6fa607"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2f586f7d62690af97d138a6703129d9"><td class="memItemLeft" align="right" valign="top"><a id="ad2f586f7d62690af97d138a6703129d9" name="ad2f586f7d62690af97d138a6703129d9"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>storeInRam</b> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
-<tr class="memdesc:ad2f586f7d62690af97d138a6703129d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function, in case you're not interested in index in ram. <br /></td></tr>
+<tr class="memitem:ad2f586f7d62690af97d138a6703129d9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ad2f586f7d62690af97d138a6703129d9">storeInRam</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
+<tr class="memdesc:ad2f586f7d62690af97d138a6703129d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function, in case you're not interested in index in ram.  <a href="classState.html#ad2f586f7d62690af97d138a6703129d9">More...</a><br /></td></tr>
 <tr class="separator:ad2f586f7d62690af97d138a6703129d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d45df4e62a87a10b5cc854b9bad1236"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a0d45df4e62a87a10b5cc854b9bad1236">loadFromRam</a> (<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
+<tr class="memitem:a0d45df4e62a87a10b5cc854b9bad1236"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a0d45df4e62a87a10b5cc854b9bad1236">loadFromRam</a> (<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
 <tr class="memdesc:a0d45df4e62a87a10b5cc854b9bad1236"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies from ram to target buffer.  <a href="classState.html#a0d45df4e62a87a10b5cc854b9bad1236">More...</a><br /></td></tr>
 <tr class="separator:a0d45df4e62a87a10b5cc854b9bad1236"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42147d96fff13879450686937c7a1a93"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a42147d96fff13879450686937c7a1a93">addToRam</a> (const CS_TYPE &amp;type, cs_state_id_t id, size16_t size)</td></tr>
+<tr class="memitem:a42147d96fff13879450686937c7a1a93"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a42147d96fff13879450686937c7a1a93">addToRam</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id, <a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a> size)</td></tr>
 <tr class="memdesc:a42147d96fff13879450686937c7a1a93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a new state_data struct to ram.  <a href="classState.html#a42147d96fff13879450686937c7a1a93">More...</a><br /></td></tr>
 <tr class="separator:a42147d96fff13879450686937c7a1a93"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a92388d397775a8af4318403e33972fad"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a92388d397775a8af4318403e33972fad">removeFromRam</a> (const CS_TYPE &amp;type, cs_state_id_t id)</td></tr>
+<tr class="memitem:a92388d397775a8af4318403e33972fad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a92388d397775a8af4318403e33972fad">removeFromRam</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id)</td></tr>
 <tr class="memdesc:a92388d397775a8af4318403e33972fad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removed a state variable from ram.  <a href="classState.html#a92388d397775a8af4318403e33972fad">More...</a><br /></td></tr>
 <tr class="separator:a92388d397775a8af4318403e33972fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac3b62ec4b0cff5f5e7a4446a5c19877b"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ac3b62ec4b0cff5f5e7a4446a5c19877b">compareWithRam</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, uint32_t &amp;cmp_result)</td></tr>
+<tr class="memitem:ac3b62ec4b0cff5f5e7a4446a5c19877b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ac3b62ec4b0cff5f5e7a4446a5c19877b">compareWithRam</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, uint32_t &amp;cmp_result)</td></tr>
 <tr class="memdesc:ac3b62ec4b0cff5f5e7a4446a5c19877b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check a particular value with the value currently in ram.  <a href="classState.html#ac3b62ec4b0cff5f5e7a4446a5c19877b">More...</a><br /></td></tr>
 <tr class="separator:ac3b62ec4b0cff5f5e7a4446a5c19877b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0b9ba4bfcd10dc3dfaf919cbb610339"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#aa0b9ba4bfcd10dc3dfaf919cbb610339">storeInFlash</a> (size16_t &amp;index_in_ram)</td></tr>
+<tr class="memitem:aa0b9ba4bfcd10dc3dfaf919cbb610339"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#aa0b9ba4bfcd10dc3dfaf919cbb610339">storeInFlash</a> (<a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a> &amp;index_in_ram)</td></tr>
 <tr class="memdesc:aa0b9ba4bfcd10dc3dfaf919cbb610339"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes state variable in ram to flash.  <a href="classState.html#aa0b9ba4bfcd10dc3dfaf919cbb610339">More...</a><br /></td></tr>
 <tr class="separator:aa0b9ba4bfcd10dc3dfaf919cbb610339"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31abb8b0ed41b1e66f36103fbddac2db"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a31abb8b0ed41b1e66f36103fbddac2db">removeFromFlash</a> (const CS_TYPE &amp;type, const cs_state_id_t id)</td></tr>
+<tr class="memitem:a31abb8b0ed41b1e66f36103fbddac2db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a31abb8b0ed41b1e66f36103fbddac2db">removeFromFlash</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, const <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id)</td></tr>
 <tr class="memdesc:a31abb8b0ed41b1e66f36103fbddac2db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove given id of given type from flash.  <a href="classState.html#a31abb8b0ed41b1e66f36103fbddac2db">More...</a><br /></td></tr>
 <tr class="separator:a31abb8b0ed41b1e66f36103fbddac2db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b69f3230f7c1997f7a256ab9b7f5938"><td class="memItemLeft" align="right" valign="top">cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a6b69f3230f7c1997f7a256ab9b7f5938">addToQueue</a> (StateQueueOp operation, const CS_TYPE &amp;type, cs_state_id_t id, uint32_t delayMs, const StateQueueMode mode)</td></tr>
+<tr class="memitem:a6b69f3230f7c1997f7a256ab9b7f5938"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a6b69f3230f7c1997f7a256ab9b7f5938">addToQueue</a> (<a class="el" href="cs__State_8h.html#a8de183f21672af3da020d74c2329593e">StateQueueOp</a> operation, const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id, uint32_t delayMs, const <a class="el" href="cs__State_8h.html#ae94b86a0e825cfb7655632307f03ef47">StateQueueMode</a> mode)</td></tr>
 <tr class="memdesc:a6b69f3230f7c1997f7a256ab9b7f5938"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add an operation to queue.  <a href="classState.html#a6b69f3230f7c1997f7a256ab9b7f5938">More...</a><br /></td></tr>
 <tr class="separator:a6b69f3230f7c1997f7a256ab9b7f5938"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aefe2a0023b8e2f4f7f80a440c0cc51e1"><td class="memItemLeft" align="right" valign="top"><a id="aefe2a0023b8e2f4f7f80a440c0cc51e1" name="aefe2a0023b8e2f4f7f80a440c0cc51e1"></a>
-cs_ret_code_t&#160;</td><td class="memItemRight" valign="bottom"><b>allocate</b> (<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
+<tr class="memitem:aefe2a0023b8e2f4f7f80a440c0cc51e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#aefe2a0023b8e2f4f7f80a440c0cc51e1">allocate</a> (<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
 <tr class="separator:aefe2a0023b8e2f4f7f80a440c0cc51e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd8db51828e0053ee3d80e28e45d2576"><td class="memItemLeft" align="right" valign="top"><a id="abd8db51828e0053ee3d80e28e45d2576" name="abd8db51828e0053ee3d80e28e45d2576"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>delayedStoreTick</b> ()</td></tr>
+<tr class="memitem:abd8db51828e0053ee3d80e28e45d2576"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#abd8db51828e0053ee3d80e28e45d2576">delayedStoreTick</a> ()</td></tr>
 <tr class="separator:abd8db51828e0053ee3d80e28e45d2576"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:ad5bdf8d949dd7daa6fd6e9404c9369a8"><td class="memItemLeft" align="right" valign="top"><a id="ad5bdf8d949dd7daa6fd6e9404c9369a8" name="ad5bdf8d949dd7daa6fd6e9404c9369a8"></a>
-<a class="el" href="classStorage.html">Storage</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>_storage</b></td></tr>
+<tr class="memitem:ad5bdf8d949dd7daa6fd6e9404c9369a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classStorage.html">Storage</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ad5bdf8d949dd7daa6fd6e9404c9369a8">_storage</a></td></tr>
 <tr class="separator:ad5bdf8d949dd7daa6fd6e9404c9369a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2dfa6cb4c5c30e3d3e17a6ccd078849"><td class="memItemLeft" align="right" valign="top"><a id="ac2dfa6cb4c5c30e3d3e17a6ccd078849" name="ac2dfa6cb4c5c30e3d3e17a6ccd078849"></a>
-<a class="el" href="structboards__config__t.html">boards_config_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>_boardsConfig</b></td></tr>
+<tr class="memitem:ac2dfa6cb4c5c30e3d3e17a6ccd078849"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structboards__config__t.html">boards_config_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ac2dfa6cb4c5c30e3d3e17a6ccd078849">_boardsConfig</a></td></tr>
 <tr class="separator:ac2dfa6cb4c5c30e3d3e17a6ccd078849"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd3db77197d3244fbc3deefdac38ac2d"><td class="memItemLeft" align="right" valign="top"><a id="acd3db77197d3244fbc3deefdac38ac2d" name="acd3db77197d3244fbc3deefdac38ac2d"></a>
-std::vector&lt; <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>_ram_data_register</b></td></tr>
-<tr class="memdesc:acd3db77197d3244fbc3deefdac38ac2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores state data structs with pointers to state data. <br /></td></tr>
+<tr class="memitem:acd3db77197d3244fbc3deefdac38ac2d"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#acd3db77197d3244fbc3deefdac38ac2d">_ram_data_register</a></td></tr>
+<tr class="memdesc:acd3db77197d3244fbc3deefdac38ac2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores state data structs with pointers to state data.  <a href="classState.html#acd3db77197d3244fbc3deefdac38ac2d">More...</a><br /></td></tr>
 <tr class="separator:acd3db77197d3244fbc3deefdac38ac2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4e1581cd425e1be9b0480579a05e9b63"><td class="memItemLeft" align="right" valign="top"><a id="a4e1581cd425e1be9b0480579a05e9b63" name="a4e1581cd425e1be9b0480579a05e9b63"></a>
-std::vector&lt; <a class="el" href="structcs__id__list__t.html">cs_id_list_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>_idsCache</b></td></tr>
-<tr class="memdesc:a4e1581cd425e1be9b0480579a05e9b63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores list of existing ids for certain types. <br /></td></tr>
+<tr class="memitem:a4e1581cd425e1be9b0480579a05e9b63"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structcs__id__list__t.html">cs_id_list_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a4e1581cd425e1be9b0480579a05e9b63">_idsCache</a></td></tr>
+<tr class="memdesc:a4e1581cd425e1be9b0480579a05e9b63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores list of existing ids for certain types.  <a href="classState.html#a4e1581cd425e1be9b0480579a05e9b63">More...</a><br /></td></tr>
 <tr class="separator:a4e1581cd425e1be9b0480579a05e9b63"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afbb96b8b8c16890d48aef2a69baea700"><td class="memItemLeft" align="right" valign="top"><a id="afbb96b8b8c16890d48aef2a69baea700" name="afbb96b8b8c16890d48aef2a69baea700"></a>
-std::vector&lt; <a class="el" href="structcs__state__store__queue__t.html">cs_state_store_queue_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>_store_queue</b></td></tr>
-<tr class="memdesc:afbb96b8b8c16890d48aef2a69baea700"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the queue of flash operations. <br /></td></tr>
+<tr class="memitem:afbb96b8b8c16890d48aef2a69baea700"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structcs__state__store__queue__t.html">cs_state_store_queue_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#afbb96b8b8c16890d48aef2a69baea700">_store_queue</a></td></tr>
+<tr class="memdesc:afbb96b8b8c16890d48aef2a69baea700"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the queue of flash operations.  <a href="classState.html#afbb96b8b8c16890d48aef2a69baea700">More...</a><br /></td></tr>
 <tr class="separator:afbb96b8b8c16890d48aef2a69baea700"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b98363e46586ae96d74e8215625524e"><td class="memItemLeft" align="right" valign="top"><a id="a5b98363e46586ae96d74e8215625524e" name="a5b98363e46586ae96d74e8215625524e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>_startedWritingToFlash</b> = false</td></tr>
+<tr class="memitem:a5b98363e46586ae96d74e8215625524e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a5b98363e46586ae96d74e8215625524e">_startedWritingToFlash</a> = false</td></tr>
 <tr class="separator:a5b98363e46586ae96d74e8215625524e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0d227f295a560980c01cf0723f45da2"><td class="memItemLeft" align="right" valign="top"><a id="ae0d227f295a560980c01cf0723f45da2" name="ae0d227f295a560980c01cf0723f45da2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryReset</b> = false</td></tr>
+<tr class="memitem:ae0d227f295a560980c01cf0723f45da2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ae0d227f295a560980c01cf0723f45da2">_performingFactoryReset</a> = false</td></tr>
 <tr class="separator:ae0d227f295a560980c01cf0723f45da2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ab91bb1dd5aa6260ab2a456581daf9ec2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ab91bb1dd5aa6260ab2a456581daf9ec2">State</a> ()</td></tr>
+<tr class="memdesc:ab91bb1dd5aa6260ab2a456581daf9ec2"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> constructor, singleton, thus made private.  <a href="classState.html#ab91bb1dd5aa6260ab2a456581daf9ec2">More...</a><br /></td></tr>
+<tr class="separator:ab91bb1dd5aa6260ab2a456581daf9ec2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d6994c36c4203b76874ed0d28d6ec6c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a1d6994c36c4203b76874ed0d28d6ec6c">State</a> (<a class="el" href="classState.html">State</a> const &amp;)</td></tr>
+<tr class="memdesc:a1d6994c36c4203b76874ed0d28d6ec6c"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> copy constructor, singleton, thus made private.  <a href="classState.html#a1d6994c36c4203b76874ed0d28d6ec6c">More...</a><br /></td></tr>
+<tr class="separator:a1d6994c36c4203b76874ed0d28d6ec6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac8f64ec9e9424b7a2f0cadc02743369"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#aac8f64ec9e9424b7a2f0cadc02743369">operator=</a> (<a class="el" href="classState.html">State</a> const &amp;)</td></tr>
+<tr class="memdesc:aac8f64ec9e9424b7a2f0cadc02743369"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator, singleton, thus made private.  <a href="classState.html#aac8f64ec9e9424b7a2f0cadc02743369">More...</a><br /></td></tr>
+<tr class="separator:aac8f64ec9e9424b7a2f0cadc02743369"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea2a79c4177ce02320291c82ef2e7886"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#aea2a79c4177ce02320291c82ef2e7886">setInternal</a> (const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data, <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a> mode)</td></tr>
+<tr class="separator:aea2a79c4177ce02320291c82ef2e7886"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b577c4cc604e8107eade91e7e360a3c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a4b577c4cc604e8107eade91e7e360a3c">removeInternal</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id, const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a> mode)</td></tr>
+<tr class="separator:a4b577c4cc604e8107eade91e7e360a3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17fdcd63279a1dfeb74199395d8e92dc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a17fdcd63279a1dfeb74199395d8e92dc">handleFactoryResetResult</a> (<a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> retCode)</td></tr>
+<tr class="memdesc:a17fdcd63279a1dfeb74199395d8e92dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle factory reset result.  <a href="classState.html#a17fdcd63279a1dfeb74199395d8e92dc">More...</a><br /></td></tr>
+<tr class="separator:a17fdcd63279a1dfeb74199395d8e92dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6aee572f97abdf369e87b9708283bac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ac6aee572f97abdf369e87b9708283bac">getDefaultValue</a> (<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;data)</td></tr>
+<tr class="separator:ac6aee572f97abdf369e87b9708283bac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee5ef47a36915704ce147054272b43ac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#aee5ef47a36915704ce147054272b43ac">getIdsFromFlash</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, std::vector&lt; <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> &gt; *&amp;ids)</td></tr>
+<tr class="memdesc:aee5ef47a36915704ce147054272b43ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get and cache all IDs with given type from flash.  <a href="classState.html#aee5ef47a36915704ce147054272b43ac">More...</a><br /></td></tr>
+<tr class="separator:aee5ef47a36915704ce147054272b43ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5caf98fe34f10b2250f13729a8fde93"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#ab5caf98fe34f10b2250f13729a8fde93">addId</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id)</td></tr>
+<tr class="memdesc:ab5caf98fe34f10b2250f13729a8fde93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add ID to list of cached IDs.  <a href="classState.html#ab5caf98fe34f10b2250f13729a8fde93">More...</a><br /></td></tr>
+<tr class="separator:ab5caf98fe34f10b2250f13729a8fde93"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a3d80c9b40a5d2b587f9b61d0fb74c8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classState.html#a9a3d80c9b40a5d2b587f9b61d0fb74c8">remId</a> (const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;type, <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> id)</td></tr>
+<tr class="memdesc:a9a3d80c9b40a5d2b587f9b61d0fb74c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove ID from list of cached IDs.  <a href="classState.html#a9a3d80c9b40a5d2b587f9b61d0fb74c8">More...</a><br /></td></tr>
+<tr class="separator:a9a3d80c9b40a5d2b587f9b61d0fb74c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Stores state values in RAM and/or FLASH. </p>
@@ -316,7 +347,127 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryRes
 </ul>
 </li>
 </ol>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a9ddc1df6f998184d6477b48fab90281c" name="a9ddc1df6f998184d6477b48fab90281c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ddc1df6f998184d6477b48fab90281c">&#9670;&#160;</a></span>~State()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual State::~State </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab91bb1dd5aa6260ab2a456581daf9ec2" name="ab91bb1dd5aa6260ab2a456581daf9ec2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab91bb1dd5aa6260ab2a456581daf9ec2">&#9670;&#160;</a></span>State() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classState.html">State::State</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> constructor, singleton, thus made private. </p>
+
+</div>
+</div>
+<a id="a1d6994c36c4203b76874ed0d28d6ec6c" name="a1d6994c36c4203b76874ed0d28d6ec6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d6994c36c4203b76874ed0d28d6ec6c">&#9670;&#160;</a></span>State() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classState.html">State::State</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classState.html">State</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> copy constructor, singleton, thus made private. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ab5caf98fe34f10b2250f13729a8fde93" name="ab5caf98fe34f10b2250f13729a8fde93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5caf98fe34f10b2250f13729a8fde93">&#9670;&#160;</a></span>addId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::addId </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
+          <td class="paramname"><em>id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add ID to list of cached IDs. </p>
+<p >Will <em>NOT</em> create a new list if no list for this type exists. </p>
+
+</div>
+</div>
 <a id="a6b69f3230f7c1997f7a256ab9b7f5938" name="a6b69f3230f7c1997f7a256ab9b7f5938"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6b69f3230f7c1997f7a256ab9b7f5938">&#9670;&#160;</a></span>addToQueue()</h2>
 
@@ -327,21 +478,21 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryRes
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::addToQueue </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::addToQueue </td>
           <td>(</td>
-          <td class="paramtype">StateQueueOp&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__State_8h.html#a8de183f21672af3da020d74c2329593e">StateQueueOp</a>&#160;</td>
           <td class="paramname"><em>operation</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const CS_TYPE &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_state_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
           <td class="paramname"><em>id</em>, </td>
         </tr>
         <tr>
@@ -353,7 +504,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryRes
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const StateQueueMode&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__State_8h.html#ae94b86a0e825cfb7655632307f03ef47">StateQueueMode</a>&#160;</td>
           <td class="paramname"><em>mode</em>&#160;</td>
         </tr>
         <tr>
@@ -396,19 +547,19 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryRes
         <tr>
           <td class="memname"><a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp; State::addToRam </td>
           <td>(</td>
-          <td class="paramtype">const CS_TYPE &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_state_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
           <td class="paramname"><em>id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size16_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a>&#160;</td>
           <td class="paramname"><em>size</em>&#160;</td>
         </tr>
         <tr>
@@ -437,6 +588,32 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryRes
 
 </div>
 </div>
+<a id="aefe2a0023b8e2f4f7f80a440c0cc51e1" name="aefe2a0023b8e2f4f7f80a440c0cc51e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefe2a0023b8e2f4f7f80a440c0cc51e1">&#9670;&#160;</a></span>allocate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::allocate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a4f122ed63d6c04b8aba8e27e0f5249fe" name="a4f122ed63d6c04b8aba8e27e0f5249fe"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4f122ed63d6c04b8aba8e27e0f5249fe">&#9670;&#160;</a></span>cleanUp()</h2>
 
@@ -444,7 +621,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryRes
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::cleanUp </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::cleanUp </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -468,7 +645,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryRes
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::compareWithRam </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::compareWithRam </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em>, </td>
@@ -504,6 +681,50 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryRes
 
 </div>
 </div>
+<a id="abd8db51828e0053ee3d80e28e45d2576" name="abd8db51828e0053ee3d80e28e45d2576"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd8db51828e0053ee3d80e28e45d2576">&#9670;&#160;</a></span>delayedStoreTick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void State::delayedStoreTick </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab6f0c54230e8b920fa430e97906894fc" name="ab6f0c54230e8b920fa430e97906894fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6f0c54230e8b920fa430e97906894fc">&#9670;&#160;</a></span>factoryReset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void State::factoryReset </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Erase all used persistent storage. </p>
+
+</div>
+</div>
 <a id="a32a47427f426acbdc17d35eefe111890" name="a32a47427f426acbdc17d35eefe111890"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a32a47427f426acbdc17d35eefe111890">&#9670;&#160;</a></span>findInRam()</h2>
 
@@ -514,21 +735,21 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>_performingFactoryRes
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::findInRam </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::findInRam </td>
           <td>(</td>
-          <td class="paramtype">const CS_TYPE &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_state_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
           <td class="paramname"><em>id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size16_t &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a> &amp;&#160;</td>
           <td class="paramname"><em>index_in_ram</em>&#160;</td>
         </tr>
         <tr>
@@ -566,9 +787,9 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::get </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::get </td>
           <td>(</td>
-          <td class="paramtype">const CS_TYPE&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a>&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
@@ -580,7 +801,7 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size16_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a>&#160;</td>
           <td class="paramname"><em>size</em>&#160;</td>
         </tr>
         <tr>
@@ -603,7 +824,7 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::get </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::get </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em>, </td>
@@ -611,7 +832,7 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const PersistenceMode&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a>&#160;</td>
           <td class="paramname"><em>mode</em> = <code>PersistenceMode::STRATEGY1</code>&#160;</td>
         </tr>
         <tr>
@@ -634,6 +855,32 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 
 </div>
 </div>
+<a id="ac6aee572f97abdf369e87b9708283bac" name="ac6aee572f97abdf369e87b9708283bac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6aee572f97abdf369e87b9708283bac">&#9670;&#160;</a></span>getDefaultValue()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::getDefaultValue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ae36a79c4643010cc2adf73a75b8447fb" name="ae36a79c4643010cc2adf73a75b8447fb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae36a79c4643010cc2adf73a75b8447fb">&#9670;&#160;</a></span>getIds()</h2>
 
@@ -641,15 +888,15 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::getIds </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::getIds </td>
           <td>(</td>
-          <td class="paramtype">CS_TYPE&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a>&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::vector&lt; cs_state_id_t &gt; *&amp;&#160;</td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> &gt; *&amp;&#160;</td>
           <td class="paramname"><em>ids</em>&#160;</td>
         </tr>
         <tr>
@@ -673,6 +920,79 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 
 </div>
 </div>
+<a id="aee5ef47a36915704ce147054272b43ac" name="aee5ef47a36915704ce147054272b43ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee5ef47a36915704ce147054272b43ac">&#9670;&#160;</a></span>getIdsFromFlash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::getIdsFromFlash </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a> &gt; *&amp;&#160;</td>
+          <td class="paramname"><em>ids</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get and cache all IDs with given type from flash. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td><a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> type. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">ids</td><td>List of ids. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Return code. </dd></dl>
+
+</div>
+</div>
+<a id="ad18d563a732ed9d6659d6b38492f89dc" name="ad18d563a732ed9d6659d6b38492f89dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad18d563a732ed9d6659d6b38492f89dc">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classState.html">State</a> &amp; State::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a reference to the <a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> object. </p>
+
+</div>
+</div>
 <a id="a1759335a4b5529aff8a9221db3d35559" name="a1759335a4b5529aff8a9221db3d35559"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1759335a4b5529aff8a9221db3d35559">&#9670;&#160;</a></span>getViaPointer()</h2>
 
@@ -680,7 +1000,7 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::getViaPointer </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::getViaPointer </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em>, </td>
@@ -688,7 +1008,7 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const PersistenceMode&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a>&#160;</td>
           <td class="paramname"><em>mode</em> = <code>PersistenceMode::STRATEGY1</code>&#160;</td>
         </tr>
         <tr>
@@ -740,6 +1060,71 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 
 </div>
 </div>
+<a id="a17fdcd63279a1dfeb74199395d8e92dc" name="a17fdcd63279a1dfeb74199395d8e92dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17fdcd63279a1dfeb74199395d8e92dc">&#9670;&#160;</a></span>handleFactoryResetResult()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool State::handleFactoryResetResult </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a>&#160;</td>
+          <td class="paramname"><em>retCode</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Handle factory reset result. </p>
+<p >@retrun False when factory reset needs to be retried. </p>
+
+</div>
+</div>
+<a id="a85b6e94c27167ef4ae1be2436f0f7805" name="a85b6e94c27167ef4ae1be2436f0f7805"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85b6e94c27167ef4ae1be2436f0f7805">&#9670;&#160;</a></span>handleStorageError()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void State::handleStorageError </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Storage_8h.html#acfa74f337904b1c7daf0a85bd953ce9b">cs_storage_operation_t</a>&#160;</td>
+          <td class="paramname"><em>operation</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
+          <td class="paramname"><em>id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Internal usage. </p>
+
+</div>
+</div>
 <a id="ad37d1373fa95b45718ff471799dfc067" name="ad37d1373fa95b45718ff471799dfc067"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad37d1373fa95b45718ff471799dfc067">&#9670;&#160;</a></span>init()</h2>
 
@@ -775,13 +1160,13 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
         <tr>
           <td class="memname">bool State::isTrue </td>
           <td>(</td>
-          <td class="paramtype">CS_TYPE&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a>&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const PersistenceMode&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a>&#160;</td>
           <td class="paramname"><em>mode</em> = <code>PersistenceMode::STRATEGY1</code>&#160;</td>
         </tr>
         <tr>
@@ -814,7 +1199,7 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::loadFromRam </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::loadFromRam </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em></td><td>)</td>
@@ -843,6 +1228,72 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 
 </div>
 </div>
+<a id="aac8f64ec9e9424b7a2f0cadc02743369" name="aac8f64ec9e9424b7a2f0cadc02743369"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac8f64ec9e9424b7a2f0cadc02743369">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void State::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classState.html">State</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assignment operator, singleton, thus made private. </p>
+
+</div>
+</div>
+<a id="a9a3d80c9b40a5d2b587f9b61d0fb74c8" name="a9a3d80c9b40a5d2b587f9b61d0fb74c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9a3d80c9b40a5d2b587f9b61d0fb74c8">&#9670;&#160;</a></span>remId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::remId </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
+          <td class="paramname"><em>id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Remove ID from list of cached IDs. </p>
+
+</div>
+</div>
 <a id="ad477ee685332e4424e80848abdae1412" name="ad477ee685332e4424e80848abdae1412"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad477ee685332e4424e80848abdae1412">&#9670;&#160;</a></span>remove()</h2>
 
@@ -850,21 +1301,21 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::remove </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::remove </td>
           <td>(</td>
-          <td class="paramtype">const CS_TYPE &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_state_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
           <td class="paramname"><em>id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const PersistenceMode&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a>&#160;</td>
           <td class="paramname"><em>mode</em> = <code>PersistenceMode::STRATEGY1</code>&#160;</td>
         </tr>
         <tr>
@@ -897,15 +1348,15 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::removeFromFlash </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::removeFromFlash </td>
           <td>(</td>
-          <td class="paramtype">const CS_TYPE &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const cs_state_id_t&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
           <td class="paramname"><em>id</em>&#160;</td>
         </tr>
         <tr>
@@ -944,15 +1395,15 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::removeFromRam </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::removeFromRam </td>
           <td>(</td>
-          <td class="paramtype">const CS_TYPE &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">cs_state_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
           <td class="paramname"><em>id</em>&#160;</td>
         </tr>
         <tr>
@@ -980,6 +1431,48 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 
 </div>
 </div>
+<a id="a4b577c4cc604e8107eade91e7e360a3c" name="a4b577c4cc604e8107eade91e7e360a3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b577c4cc604e8107eade91e7e360a3c">&#9670;&#160;</a></span>removeInternal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::removeInternal </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a> &amp;&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a5eca7caa3dc8cb05cbf0b5d6efed8b3b">cs_state_id_t</a>&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a>&#160;</td>
+          <td class="paramname"><em>mode</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a8451f4870511d24e4fe931c1cf4d6246" name="a8451f4870511d24e4fe931c1cf4d6246"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8451f4870511d24e4fe931c1cf4d6246">&#9670;&#160;</a></span>set() <span class="overload">[1/2]</span></h2>
 
@@ -987,7 +1480,7 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::set </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::set </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em>, </td>
@@ -995,7 +1488,7 @@ ERR_NOT_FOUND when type was not found. </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">PersistenceMode&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a>&#160;</td>
           <td class="paramname"><em>mode</em> = <code>PersistenceMode::STRATEGY1</code>&#160;</td>
         </tr>
         <tr>
@@ -1029,9 +1522,9 @@ Other codes for errors. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::set </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::set </td>
           <td>(</td>
-          <td class="paramtype">const CS_TYPE&#160;</td>
+          <td class="paramtype">const <a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a>&#160;</td>
           <td class="paramname"><em>type</em>, </td>
         </tr>
         <tr>
@@ -1043,7 +1536,7 @@ Other codes for errors. </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size16_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a>&#160;</td>
           <td class="paramname"><em>size</em>&#160;</td>
         </tr>
         <tr>
@@ -1066,7 +1559,7 @@ Other codes for errors. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::setDelayed </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::setDelayed </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em>, </td>
@@ -1098,6 +1591,42 @@ Other codes for errors. </dd></dl>
 
 </div>
 </div>
+<a id="aea2a79c4177ce02320291c82ef2e7886" name="aea2a79c4177ce02320291c82ef2e7886"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea2a79c4177ce02320291c82ef2e7886">&#9670;&#160;</a></span>setInternal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::setInternal </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__StateData_8h.html#ad7eda55547852fa4e2f09c893e7a1382">PersistenceMode</a>&#160;</td>
+          <td class="paramname"><em>mode</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ad37d56e82b944fa5cc8bce060ebd2ff6" name="ad37d56e82b944fa5cc8bce060ebd2ff6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad37d56e82b944fa5cc8bce060ebd2ff6">&#9670;&#160;</a></span>setThrottled()</h2>
 
@@ -1105,7 +1634,7 @@ Other codes for errors. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::setThrottled </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::setThrottled </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em>, </td>
@@ -1144,9 +1673,9 @@ Other codes for errors. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::setViaPointer </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::setViaPointer </td>
           <td>(</td>
-          <td class="paramtype">CS_TYPE&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1">CS_TYPE</a>&#160;</td>
           <td class="paramname"><em>type</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1195,9 +1724,9 @@ Other codes for errors. </dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::storeInFlash </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::storeInFlash </td>
           <td>(</td>
-          <td class="paramtype">size16_t &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a> &amp;&#160;</td>
           <td class="paramname"><em>index_in_ram</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1221,8 +1750,8 @@ Other codes for errors. </dd></dl>
 
 </div>
 </div>
-<a id="a0f8f20fff6d3e4206999d9731f6fa607" name="a0f8f20fff6d3e4206999d9731f6fa607"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0f8f20fff6d3e4206999d9731f6fa607">&#9670;&#160;</a></span>storeInRam()</h2>
+<a id="ad2f586f7d62690af97d138a6703129d9" name="ad2f586f7d62690af97d138a6703129d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2f586f7d62690af97d138a6703129d9">&#9670;&#160;</a></span>storeInRam() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1231,7 +1760,35 @@ Other codes for errors. </dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::storeInRam </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::storeInRam </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Convenience function, in case you're not interested in index in ram. </p>
+
+</div>
+</div>
+<a id="a0f8f20fff6d3e4206999d9731f6fa607" name="a0f8f20fff6d3e4206999d9731f6fa607"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f8f20fff6d3e4206999d9731f6fa607">&#9670;&#160;</a></span>storeInRam() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::storeInRam </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em>, </td>
@@ -1239,7 +1796,7 @@ Other codes for errors. </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size16_t &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a0b645fffb0a0a0d631306f335d4dfaec">size16_t</a> &amp;&#160;</td>
           <td class="paramname"><em>index_in_ram</em>&#160;</td>
         </tr>
         <tr>
@@ -1275,7 +1832,7 @@ Other codes for errors. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::verifySizeForGet </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::verifySizeForGet </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em></td><td>)</td>
@@ -1302,7 +1859,7 @@ Other codes for errors. </dd></dl>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">cs_ret_code_t State::verifySizeForSet </td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#ab09e5fe247ba3ab46e9e728c8499ecaf">cs_ret_code_t</a> State::verifySizeForSet </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structcs__state__data__t.html">cs_state_data_t</a> &amp;&#160;</td>
           <td class="paramname"><em>data</em></td><td>)</td>
@@ -1319,6 +1876,167 @@ Other codes for errors. </dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Return code. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ac2dfa6cb4c5c30e3d3e17a6ccd078849" name="ac2dfa6cb4c5c30e3d3e17a6ccd078849"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2dfa6cb4c5c30e3d3e17a6ccd078849">&#9670;&#160;</a></span>_boardsConfig</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structboards__config__t.html">boards_config_t</a>* State::_boardsConfig</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4e1581cd425e1be9b0480579a05e9b63" name="a4e1581cd425e1be9b0480579a05e9b63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e1581cd425e1be9b0480579a05e9b63">&#9670;&#160;</a></span>_idsCache</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="structcs__id__list__t.html">cs_id_list_t</a>&gt; State::_idsCache</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stores list of existing ids for certain types. </p>
+
+</div>
+</div>
+<a id="ae0d227f295a560980c01cf0723f45da2" name="ae0d227f295a560980c01cf0723f45da2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0d227f295a560980c01cf0723f45da2">&#9670;&#160;</a></span>_performingFactoryReset</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool State::_performingFactoryReset = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acd3db77197d3244fbc3deefdac38ac2d" name="acd3db77197d3244fbc3deefdac38ac2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd3db77197d3244fbc3deefdac38ac2d">&#9670;&#160;</a></span>_ram_data_register</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="structcs__state__data__t.html">cs_state_data_t</a>&gt; State::_ram_data_register</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stores state data structs with pointers to state data. </p>
+
+</div>
+</div>
+<a id="a5b98363e46586ae96d74e8215625524e" name="a5b98363e46586ae96d74e8215625524e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b98363e46586ae96d74e8215625524e">&#9670;&#160;</a></span>_startedWritingToFlash</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool State::_startedWritingToFlash = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad5bdf8d949dd7daa6fd6e9404c9369a8" name="ad5bdf8d949dd7daa6fd6e9404c9369a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5bdf8d949dd7daa6fd6e9404c9369a8">&#9670;&#160;</a></span>_storage</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStorage.html">Storage</a>* State::_storage</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afbb96b8b8c16890d48aef2a69baea700" name="afbb96b8b8c16890d48aef2a69baea700"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afbb96b8b8c16890d48aef2a69baea700">&#9670;&#160;</a></span>_store_queue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;<a class="el" href="structcs__state__store__queue__t.html">cs_state_store_queue_t</a>&gt; State::_store_queue</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stores the queue of flash operations. </p>
 
 </div>
 </div>

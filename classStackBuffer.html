@@ -99,65 +99,639 @@ $(document).ready(function(){initNavTree('classStackBuffer.html',''); initResiza
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classStackBuffer-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">StackBuffer&lt; T &gt; Class Template Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__StackBuffer_8h_source.html">cs_StackBuffer.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ac57d3f9e38df484761b59b7f19f712e8"><td class="memItemLeft" align="right" valign="top"><a id="ac57d3f9e38df484761b59b7f19f712e8" name="ac57d3f9e38df484761b59b7f19f712e8"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>StackBuffer</b> (uint16_t capacity)</td></tr>
+<tr class="memitem:ac57d3f9e38df484761b59b7f19f712e8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#ac57d3f9e38df484761b59b7f19f712e8">StackBuffer</a> (uint16_t <a class="el" href="classStackBuffer.html#a81a090a49988c465a9e584f848f5f314">capacity</a>)</td></tr>
 <tr class="separator:ac57d3f9e38df484761b59b7f19f712e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad43989fbd9756b5b90e3699ed5d9c020"><td class="memItemLeft" align="right" valign="top"><a id="ad43989fbd9756b5b90e3699ed5d9c020" name="ad43989fbd9756b5b90e3699ed5d9c020"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getMaxByteSize</b> (uint16_t capacity)</td></tr>
+<tr class="memitem:a8bd841328c171f6c6eb248172021f064"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a8bd841328c171f6c6eb248172021f064">~StackBuffer</a> ()</td></tr>
+<tr class="separator:a8bd841328c171f6c6eb248172021f064"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad43989fbd9756b5b90e3699ed5d9c020"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#ad43989fbd9756b5b90e3699ed5d9c020">getMaxByteSize</a> (uint16_t <a class="el" href="classStackBuffer.html#a81a090a49988c465a9e584f848f5f314">capacity</a>)</td></tr>
 <tr class="separator:ad43989fbd9756b5b90e3699ed5d9c020"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c1f56d0a92bd7b0b80fed556c5fcbdc"><td class="memItemLeft" align="right" valign="top"><a id="a3c1f56d0a92bd7b0b80fed556c5fcbdc" name="a3c1f56d0a92bd7b0b80fed556c5fcbdc"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getMaxByteSize</b> ()</td></tr>
+<tr class="memitem:a3c1f56d0a92bd7b0b80fed556c5fcbdc"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a3c1f56d0a92bd7b0b80fed556c5fcbdc">getMaxByteSize</a> ()</td></tr>
 <tr class="separator:a3c1f56d0a92bd7b0b80fed556c5fcbdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae05e212d952ab1748eef8bb90dc94408"><td class="memItemLeft" align="right" valign="top"><a id="ae05e212d952ab1748eef8bb90dc94408" name="ae05e212d952ab1748eef8bb90dc94408"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getMaxSize</b> (uint16_t byteSize)</td></tr>
+<tr class="memitem:ae05e212d952ab1748eef8bb90dc94408"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#ae05e212d952ab1748eef8bb90dc94408">getMaxSize</a> (uint16_t byteSize)</td></tr>
 <tr class="separator:ae05e212d952ab1748eef8bb90dc94408"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a97fe7ffd53579db1d03101b65a246ddd"><td class="memItemLeft" align="right" valign="top"><a id="a97fe7ffd53579db1d03101b65a246ddd" name="a97fe7ffd53579db1d03101b65a246ddd"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
+<tr class="memitem:a97fe7ffd53579db1d03101b65a246ddd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a97fe7ffd53579db1d03101b65a246ddd">init</a> ()</td></tr>
 <tr class="separator:a97fe7ffd53579db1d03101b65a246ddd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3654a34e8cac39ad32f241197c5ed4ad"><td class="memItemLeft" align="right" valign="top"><a id="a3654a34e8cac39ad32f241197c5ed4ad" name="a3654a34e8cac39ad32f241197c5ed4ad"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>deinit</b> ()</td></tr>
+<tr class="memitem:a3654a34e8cac39ad32f241197c5ed4ad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a3654a34e8cac39ad32f241197c5ed4ad">deinit</a> ()</td></tr>
 <tr class="separator:a3654a34e8cac39ad32f241197c5ed4ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a122f0355c6a292661918947b5cfe9df4"><td class="memItemLeft" align="right" valign="top"><a id="a122f0355c6a292661918947b5cfe9df4" name="a122f0355c6a292661918947b5cfe9df4"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>assign</b> (buffer_ptr_t buffer, uint16_t bufferSize)</td></tr>
+<tr class="memitem:a122f0355c6a292661918947b5cfe9df4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a122f0355c6a292661918947b5cfe9df4">assign</a> (<a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a> buffer, uint16_t bufferSize)</td></tr>
 <tr class="separator:a122f0355c6a292661918947b5cfe9df4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9e6ca6d93f4fe679ae07c44f9f8dffc0"><td class="memItemLeft" align="right" valign="top"><a id="a9e6ca6d93f4fe679ae07c44f9f8dffc0" name="a9e6ca6d93f4fe679ae07c44f9f8dffc0"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>release</b> ()</td></tr>
+<tr class="memitem:a9e6ca6d93f4fe679ae07c44f9f8dffc0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a9e6ca6d93f4fe679ae07c44f9f8dffc0">release</a> ()</td></tr>
 <tr class="separator:a9e6ca6d93f4fe679ae07c44f9f8dffc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acfc8f8f62100288c6a7484a99d118b83"><td class="memItemLeft" align="right" valign="top"><a id="acfc8f8f62100288c6a7484a99d118b83" name="acfc8f8f62100288c6a7484a99d118b83"></a>
-<a class="el" href="structstack__buffer__t.html">stack_buffer_t</a>&lt; T &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>getBuffer</b> ()</td></tr>
+<tr class="memitem:acfc8f8f62100288c6a7484a99d118b83"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structstack__buffer__t.html">stack_buffer_t</a>&lt; T &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#acfc8f8f62100288c6a7484a99d118b83">getBuffer</a> ()</td></tr>
 <tr class="separator:acfc8f8f62100288c6a7484a99d118b83"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42d0ecefee6087477e37ac85da0dd9a2"><td class="memItemLeft" align="right" valign="top"><a id="a42d0ecefee6087477e37ac85da0dd9a2" name="a42d0ecefee6087477e37ac85da0dd9a2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> ()</td></tr>
+<tr class="memitem:a42d0ecefee6087477e37ac85da0dd9a2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a42d0ecefee6087477e37ac85da0dd9a2">clear</a> ()</td></tr>
 <tr class="separator:a42d0ecefee6087477e37ac85da0dd9a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b187ecd200d5e2929f02048a49e5bb6"><td class="memItemLeft" align="right" valign="top"><a id="a4b187ecd200d5e2929f02048a49e5bb6" name="a4b187ecd200d5e2929f02048a49e5bb6"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>size</b> () const</td></tr>
+<tr class="memitem:a4b187ecd200d5e2929f02048a49e5bb6"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a4b187ecd200d5e2929f02048a49e5bb6">size</a> () const</td></tr>
 <tr class="separator:a4b187ecd200d5e2929f02048a49e5bb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81a090a49988c465a9e584f848f5f314"><td class="memItemLeft" align="right" valign="top"><a id="a81a090a49988c465a9e584f848f5f314" name="a81a090a49988c465a9e584f848f5f314"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>capacity</b> () const</td></tr>
+<tr class="memitem:a81a090a49988c465a9e584f848f5f314"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a81a090a49988c465a9e584f848f5f314">capacity</a> () const</td></tr>
 <tr class="separator:a81a090a49988c465a9e584f848f5f314"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a627df5106cd678d0aa82d1b59e11d265"><td class="memItemLeft" align="right" valign="top"><a id="a627df5106cd678d0aa82d1b59e11d265" name="a627df5106cd678d0aa82d1b59e11d265"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>empty</b> () const</td></tr>
+<tr class="memitem:a627df5106cd678d0aa82d1b59e11d265"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a627df5106cd678d0aa82d1b59e11d265">empty</a> () const</td></tr>
 <tr class="separator:a627df5106cd678d0aa82d1b59e11d265"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95817c5020fa8cfbf611bfa804a2488e"><td class="memItemLeft" align="right" valign="top"><a id="a95817c5020fa8cfbf611bfa804a2488e" name="a95817c5020fa8cfbf611bfa804a2488e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>full</b> () const</td></tr>
+<tr class="memitem:a95817c5020fa8cfbf611bfa804a2488e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a95817c5020fa8cfbf611bfa804a2488e">full</a> () const</td></tr>
 <tr class="separator:a95817c5020fa8cfbf611bfa804a2488e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5a56b2f7e1dc6c434cbce540dac3b05"><td class="memItemLeft" align="right" valign="top"><a id="ac5a56b2f7e1dc6c434cbce540dac3b05" name="ac5a56b2f7e1dc6c434cbce540dac3b05"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>push</b> (T value)</td></tr>
+<tr class="memitem:ac5a56b2f7e1dc6c434cbce540dac3b05"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#ac5a56b2f7e1dc6c434cbce540dac3b05">push</a> (T value)</td></tr>
 <tr class="separator:ac5a56b2f7e1dc6c434cbce540dac3b05"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa8e5237178b24063c4892077f1a178d"><td class="memItemLeft" align="right" valign="top"><a id="aaa8e5237178b24063c4892077f1a178d" name="aaa8e5237178b24063c4892077f1a178d"></a>
-T&#160;</td><td class="memItemRight" valign="bottom"><b>pop</b> ()</td></tr>
+<tr class="memitem:aaa8e5237178b24063c4892077f1a178d"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#aaa8e5237178b24063c4892077f1a178d">pop</a> ()</td></tr>
 <tr class="separator:aaa8e5237178b24063c4892077f1a178d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a575f7d2b971b2a2ad243b55191d5ca8d"><td class="memItemLeft" align="right" valign="top"><a id="a575f7d2b971b2a2ad243b55191d5ca8d" name="a575f7d2b971b2a2ad243b55191d5ca8d"></a>
-T&#160;</td><td class="memItemRight" valign="bottom"><b>operator[]</b> (uint16_t idx) const</td></tr>
+<tr class="memitem:a575f7d2b971b2a2ad243b55191d5ca8d"><td class="memItemLeft" align="right" valign="top">T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a575f7d2b971b2a2ad243b55191d5ca8d">operator[]</a> (uint16_t idx) const</td></tr>
 <tr class="separator:a575f7d2b971b2a2ad243b55191d5ca8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a0065d27bd1be4d8f554645f17fc2a9be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structstack__buffer__t.html">stack_buffer_t</a>&lt; T &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#a0065d27bd1be4d8f554645f17fc2a9be">_buffer</a></td></tr>
+<tr class="separator:a0065d27bd1be4d8f554645f17fc2a9be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa75b63f3b140a87e95543e060e9ec38a"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#aa75b63f3b140a87e95543e060e9ec38a">_capacity</a></td></tr>
+<tr class="separator:aa75b63f3b140a87e95543e060e9ec38a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af391275b52606119b7e334cd8fc15026"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStackBuffer.html#af391275b52606119b7e334cd8fc15026">_allocatedSelf</a></td></tr>
+<tr class="separator:af391275b52606119b7e334cd8fc15026"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ac57d3f9e38df484761b59b7f19f712e8" name="ac57d3f9e38df484761b59b7f19f712e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac57d3f9e38df484761b59b7f19f712e8">&#9670;&#160;</a></span>StackBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;<a class="el" href="classStackBuffer.html">::StackBuffer</a> </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>capacity</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8bd841328c171f6c6eb248172021f064" name="a8bd841328c171f6c6eb248172021f064"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bd841328c171f6c6eb248172021f064">&#9670;&#160;</a></span>~StackBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::~<a class="el" href="classStackBuffer.html">StackBuffer</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a122f0355c6a292661918947b5cfe9df4" name="a122f0355c6a292661918947b5cfe9df4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a122f0355c6a292661918947b5cfe9df4">&#9670;&#160;</a></span>assign()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::assign </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#acca0620af7857013df0e84d85e7668ea">buffer_ptr_t</a>&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>bufferSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a81a090a49988c465a9e584f848f5f314" name="a81a090a49988c465a9e584f848f5f314"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81a090a49988c465a9e584f848f5f314">&#9670;&#160;</a></span>capacity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::capacity </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a42d0ecefee6087477e37ac85da0dd9a2" name="a42d0ecefee6087477e37ac85da0dd9a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42d0ecefee6087477e37ac85da0dd9a2">&#9670;&#160;</a></span>clear()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::clear </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3654a34e8cac39ad32f241197c5ed4ad" name="a3654a34e8cac39ad32f241197c5ed4ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3654a34e8cac39ad32f241197c5ed4ad">&#9670;&#160;</a></span>deinit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::deinit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a627df5106cd678d0aa82d1b59e11d265" name="a627df5106cd678d0aa82d1b59e11d265"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a627df5106cd678d0aa82d1b59e11d265">&#9670;&#160;</a></span>empty()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::empty </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a95817c5020fa8cfbf611bfa804a2488e" name="a95817c5020fa8cfbf611bfa804a2488e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95817c5020fa8cfbf611bfa804a2488e">&#9670;&#160;</a></span>full()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::full </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acfc8f8f62100288c6a7484a99d118b83" name="acfc8f8f62100288c6a7484a99d118b83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfc8f8f62100288c6a7484a99d118b83">&#9670;&#160;</a></span>getBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structstack__buffer__t.html">stack_buffer_t</a>&lt; T &gt; * <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::getBuffer </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3c1f56d0a92bd7b0b80fed556c5fcbdc" name="a3c1f56d0a92bd7b0b80fed556c5fcbdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c1f56d0a92bd7b0b80fed556c5fcbdc">&#9670;&#160;</a></span>getMaxByteSize() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::getMaxByteSize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad43989fbd9756b5b90e3699ed5d9c020" name="ad43989fbd9756b5b90e3699ed5d9c020"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad43989fbd9756b5b90e3699ed5d9c020">&#9670;&#160;</a></span>getMaxByteSize() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::getMaxByteSize </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>capacity</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae05e212d952ab1748eef8bb90dc94408" name="ae05e212d952ab1748eef8bb90dc94408"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae05e212d952ab1748eef8bb90dc94408">&#9670;&#160;</a></span>getMaxSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::getMaxSize </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>byteSize</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a97fe7ffd53579db1d03101b65a246ddd" name="a97fe7ffd53579db1d03101b65a246ddd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97fe7ffd53579db1d03101b65a246ddd">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a575f7d2b971b2a2ad243b55191d5ca8d" name="a575f7d2b971b2a2ad243b55191d5ca8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a575f7d2b971b2a2ad243b55191d5ca8d">&#9670;&#160;</a></span>operator[]()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::operator[] </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>idx</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaa8e5237178b24063c4892077f1a178d" name="aaa8e5237178b24063c4892077f1a178d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa8e5237178b24063c4892077f1a178d">&#9670;&#160;</a></span>pop()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::pop </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac5a56b2f7e1dc6c434cbce540dac3b05" name="ac5a56b2f7e1dc6c434cbce540dac3b05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5a56b2f7e1dc6c434cbce540dac3b05">&#9670;&#160;</a></span>push()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::push </td>
+          <td>(</td>
+          <td class="paramtype">T&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9e6ca6d93f4fe679ae07c44f9f8dffc0" name="a9e6ca6d93f4fe679ae07c44f9f8dffc0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e6ca6d93f4fe679ae07c44f9f8dffc0">&#9670;&#160;</a></span>release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::release </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4b187ecd200d5e2929f02048a49e5bb6" name="a4b187ecd200d5e2929f02048a49e5bb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b187ecd200d5e2929f02048a49e5bb6">&#9670;&#160;</a></span>size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="af391275b52606119b7e334cd8fc15026" name="af391275b52606119b7e334cd8fc15026"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af391275b52606119b7e334cd8fc15026">&#9670;&#160;</a></span>_allocatedSelf</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::_allocatedSelf</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0065d27bd1be4d8f554645f17fc2a9be" name="a0065d27bd1be4d8f554645f17fc2a9be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0065d27bd1be4d8f554645f17fc2a9be">&#9670;&#160;</a></span>_buffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structstack__buffer__t.html">stack_buffer_t</a>&lt;T&gt;* <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::_buffer</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa75b63f3b140a87e95543e060e9ec38a" name="aa75b63f3b140a87e95543e060e9ec38a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa75b63f3b140a87e95543e060e9ec38a">&#9670;&#160;</a></span>_capacity</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t <a class="el" href="classStackBuffer.html">StackBuffer</a>&lt; T &gt;::_capacity</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>source/include/structs/buffer/<a class="el" href="cs__StackBuffer_8h_source.html">cs_StackBuffer.h</a></li>
 </ul>

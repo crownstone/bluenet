@@ -101,10 +101,15 @@ $(document).ready(function(){initNavTree('classPowerSampling.html',''); initResi
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classPowerSampling-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">PowerSampling Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="cs__PowerSampling_8h_source.html">cs_PowerSampling.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for PowerSampling:</div>
 <div class="dyncontent">
@@ -119,9 +124,21 @@ Collaboration diagram for PowerSampling:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPowerSampling__coll__graph.png" border="0" usemap="#aPowerSampling_coll__map" alt="Collaboration graph"/></div>
 <map name="aPowerSampling_coll__map" id="aPowerSampling_coll__map">
-<area shape="rect" title=" " alt="" coords="79,93,202,119"/>
-<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
-<area shape="rect" href="structadc__channel__config__t.html" title="Struct to configure an ADC channel." alt="" coords="141,5,303,31"/>
+<area shape="rect" title=" " alt="" coords="1067,459,1189,485"/>
+<area shape="rect" href="classEventListener.html" title="Event listener." alt="" coords="299,98,409,123"/>
+<area shape="rect" href="classADC.html" title="Analog&#45;Digital conversion." alt="" coords="710,210,761,235"/>
+<area shape="rect" href="structadc__config__t.html" title="Struct to configure the ADC." alt="" coords="302,150,406,175"/>
+<area shape="rect" href="structadc__channel__config__t.html" title="Struct to configure an ADC channel." alt="" coords="5,98,168,123"/>
+<area shape="rect" href="structadc__channel__config__result__t.html" title="Result struct after configuring an ADC channel." alt="" coords="279,203,429,243"/>
+<area shape="rect" href="classCircularBuffer.html" title=" " alt="" coords="279,287,429,327"/>
+<area shape="rect" href="structboards__config__t.html" title="Board configuration." alt="" coords="673,375,798,401"/>
+<area shape="rect" href="structcs__power__samples__header__t.html" title=" " alt="" coords="631,425,840,450"/>
+<area shape="rect" href="classCircularBuffer.html" title=" " alt="" coords="651,475,820,515"/>
+<area shape="rect" href="unionswitch__state__t.html" title="Switch state: combination of relay and dimmer state." alt="" coords="296,515,412,541"/>
+<area shape="rect" href="structMedianFilter.html" title=" " alt="" coords="684,602,787,627"/>
+<area shape="rect" href="classCircularBuffer.html" title=" " alt="" coords="642,662,829,687"/>
+<area shape="rect" href="structcs__adc__restarts__t.html" title=" " alt="" coords="668,711,803,737"/>
+<area shape="rect" href="structcs__adc__channel__swaps__t.html" title=" " alt="" coords="643,761,827,786"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -136,21 +153,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8c5665b1031346c3829bff7a86ebea68"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a8c5665b1031346c3829bff7a86ebea68">init</a> (const <a class="el" href="structboards__config__t.html">boards_config_t</a> *boardConfig)</td></tr>
 <tr class="memdesc:a8c5665b1031346c3829bff7a86ebea68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the class.  <a href="classPowerSampling.html#a8c5665b1031346c3829bff7a86ebea68">More...</a><br /></td></tr>
 <tr class="separator:a8c5665b1031346c3829bff7a86ebea68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6773442010a2487dbbd1277e678f4dea"><td class="memItemLeft" align="right" valign="top"><a id="a6773442010a2487dbbd1277e678f4dea" name="a6773442010a2487dbbd1277e678f4dea"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>powerSampleFirstStart</b> ()</td></tr>
-<tr class="memdesc:a6773442010a2487dbbd1277e678f4dea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes and starts the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a>, also starts interval timer. <br /></td></tr>
+<tr class="memitem:a6773442010a2487dbbd1277e678f4dea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a6773442010a2487dbbd1277e678f4dea">powerSampleFirstStart</a> ()</td></tr>
+<tr class="memdesc:a6773442010a2487dbbd1277e678f4dea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes and starts the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a>, also starts interval timer.  <a href="classPowerSampling.html#a6773442010a2487dbbd1277e678f4dea">More...</a><br /></td></tr>
 <tr class="separator:a6773442010a2487dbbd1277e678f4dea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0cefadbcb5886af4466b80d824ea0ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ae0cefadbcb5886af4466b80d824ea0ae">startSampling</a> ()</td></tr>
 <tr class="memdesc:ae0cefadbcb5886af4466b80d824ea0ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starts a new power sample burst.  <a href="classPowerSampling.html#ae0cefadbcb5886af4466b80d824ea0ae">More...</a><br /></td></tr>
 <tr class="separator:ae0cefadbcb5886af4466b80d824ea0ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ca24d82090f52c050f8f6631ba300c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a1ca24d82090f52c050f8f6631ba300c7">powerSampleAdcDone</a> (adc_buffer_id_t bufIndex)</td></tr>
+<tr class="memitem:a1ca24d82090f52c050f8f6631ba300c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a1ca24d82090f52c050f8f6631ba300c7">powerSampleAdcDone</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
 <tr class="memdesc:a1ca24d82090f52c050f8f6631ba300c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when the sample burst is finished.  <a href="classPowerSampling.html#a1ca24d82090f52c050f8f6631ba300c7">More...</a><br /></td></tr>
 <tr class="separator:a1ca24d82090f52c050f8f6631ba300c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af101aa83b21642ccec52957f3e13fda0"><td class="memItemLeft" align="right" valign="top"><a id="af101aa83b21642ccec52957f3e13fda0" name="af101aa83b21642ccec52957f3e13fda0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>sampleCurrentDone</b> (uint8_t type)</td></tr>
-<tr class="memdesc:af101aa83b21642ccec52957f3e13fda0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill up the current curve and send it out over bluetooth @type specifies over which characteristic the current curve should be sent. <br /></td></tr>
+<tr class="memitem:af101aa83b21642ccec52957f3e13fda0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#af101aa83b21642ccec52957f3e13fda0">sampleCurrentDone</a> (uint8_t type)</td></tr>
+<tr class="memdesc:af101aa83b21642ccec52957f3e13fda0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill up the current curve and send it out over bluetooth @type specifies over which characteristic the current curve should be sent.  <a href="classPowerSampling.html#af101aa83b21642ccec52957f3e13fda0">More...</a><br /></td></tr>
 <tr class="separator:af101aa83b21642ccec52957f3e13fda0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d98b9209ba9113630c3a1777c53cbad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a7d98b9209ba9113630c3a1777c53cbad">enableZeroCrossingInterrupt</a> (ps_zero_crossing_cb_t callback)</td></tr>
+<tr class="memitem:a7d98b9209ba9113630c3a1777c53cbad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a7d98b9209ba9113630c3a1777c53cbad">enableZeroCrossingInterrupt</a> (<a class="el" href="cs__PowerSampling_8h.html#a3d09582dfe4515a7945adcdd99ccb587">ps_zero_crossing_cb_t</a> callback)</td></tr>
 <tr class="memdesc:a7d98b9209ba9113630c3a1777c53cbad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable zero crossing detection on given channel, generating interrupts.  <a href="classPowerSampling.html#a7d98b9209ba9113630c3a1777c53cbad">More...</a><br /></td></tr>
 <tr class="separator:a7d98b9209ba9113630c3a1777c53cbad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a499dfef9009447bc6ff8c4e1314d8389"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a499dfef9009447bc6ff8c4e1314d8389">getSkippedBufCount</a> ()</td></tr>
@@ -162,12 +177,684 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sampleCurrentDone</b>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:adc3adc7b4f7146289c5e150ac70fdc66"><td class="memItemLeft" align="right" valign="top"><a id="adc3adc7b4f7146289c5e150ac70fdc66" name="adc3adc7b4f7146289c5e150ac70fdc66"></a>
-static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
-<tr class="memdesc:adc3adc7b4f7146289c5e150ac70fdc66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation) <br /></td></tr>
+<tr class="memitem:adc3adc7b4f7146289c5e150ac70fdc66"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#adc3adc7b4f7146289c5e150ac70fdc66">getInstance</a> ()</td></tr>
+<tr class="memdesc:adc3adc7b4f7146289c5e150ac70fdc66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a static singleton (no dynamic memory allocation)  <a href="classPowerSampling.html#adc3adc7b4f7146289c5e150ac70fdc66">More...</a><br /></td></tr>
 <tr class="separator:adc3adc7b4f7146289c5e150ac70fdc66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a8003e3a82f724b47aa1cf59ca592dd14"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a8003e3a82f724b47aa1cf59ca592dd14">PowerSampling</a> ()</td></tr>
+<tr class="separator:a8003e3a82f724b47aa1cf59ca592dd14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af62c0e202123f520813991e446dd10a8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#af62c0e202123f520813991e446dd10a8">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a755aa20a4564b756492234718a706de4">CONFIG_VOLTAGE_MULTIPLIER</a>) _voltageMultiplier</td></tr>
+<tr class="separator:af62c0e202123f520813991e446dd10a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2726786891708ff89f491165f55f3090"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a2726786891708ff89f491165f55f3090">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a7b59579f947b36647b2715368085c38f">CONFIG_CURRENT_MULTIPLIER</a>) _currentMultiplier</td></tr>
+<tr class="memdesc:a2726786891708ff89f491165f55f3090"><td class="mdescLeft">&#160;</td><td class="mdescRight">Voltage multiplier from settings.  <a href="classPowerSampling.html#a2726786891708ff89f491165f55f3090">More...</a><br /></td></tr>
+<tr class="separator:a2726786891708ff89f491165f55f3090"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64d6ad07cfbc7bed154a8b5d6796f4bf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a64d6ad07cfbc7bed154a8b5d6796f4bf">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a45ffe51774f8a84a32eaef46bc73b7d4">CONFIG_VOLTAGE_ADC_ZERO</a>) _voltageZero</td></tr>
+<tr class="memdesc:a64d6ad07cfbc7bed154a8b5d6796f4bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current multiplier from settings.  <a href="classPowerSampling.html#a64d6ad07cfbc7bed154a8b5d6796f4bf">More...</a><br /></td></tr>
+<tr class="separator:a64d6ad07cfbc7bed154a8b5d6796f4bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3e21e24f1b5437031d12bcb25633549"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ae3e21e24f1b5437031d12bcb25633549">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a422a0dade28008a9f8d7eefb9193f9b9">CONFIG_CURRENT_ADC_ZERO</a>) _currentZero</td></tr>
+<tr class="memdesc:ae3e21e24f1b5437031d12bcb25633549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Voltage zero from settings.  <a href="classPowerSampling.html#ae3e21e24f1b5437031d12bcb25633549">More...</a><br /></td></tr>
+<tr class="separator:ae3e21e24f1b5437031d12bcb25633549"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb0d61bc760b5d4c4e715a2c3becd0b9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#adb0d61bc760b5d4c4e715a2c3becd0b9">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1ad2f94e7368b4eed8d58aa32b166819ce">CONFIG_POWER_ZERO</a>) _powerZero</td></tr>
+<tr class="memdesc:adb0d61bc760b5d4c4e715a2c3becd0b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current zero from settings.  <a href="classPowerSampling.html#adb0d61bc760b5d4c4e715a2c3becd0b9">More...</a><br /></td></tr>
+<tr class="separator:adb0d61bc760b5d4c4e715a2c3becd0b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a252b35efeb6cd33d8c40178b3cdb547c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a252b35efeb6cd33d8c40178b3cdb547c">TYPIFY</a> (<a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1ae3765e0965e27c30f8baf22dd1c1a690">CONFIG_SOFT_FUSE_CURRENT_THRESHOLD</a>) _currentMilliAmpThreshold</td></tr>
+<tr class="separator:a252b35efeb6cd33d8c40178b3cdb547c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa265f7257826c462a99a7e4eeea7b60b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#aa265f7257826c462a99a7e4eeea7b60b">initEnergyUsed</a> ()</td></tr>
+<tr class="memdesc:aa265f7257826c462a99a7e4eeea7b60b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load energy used from IPC ram.  <a href="classPowerSampling.html#aa265f7257826c462a99a7e4eeea7b60b">More...</a><br /></td></tr>
+<tr class="separator:aa265f7257826c462a99a7e4eeea7b60b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affbaee2b766f26139818c3352d5b57d3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#affbaee2b766f26139818c3352d5b57d3">storeEnergyUsed</a> ()</td></tr>
+<tr class="memdesc:affbaee2b766f26139818c3352d5b57d3"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classStore.html" title="A variable size storage utility for objects of type RecordType with absolute maximum MaxItemCount.">Store</a> energy used to IPC ram.  <a href="classPowerSampling.html#affbaee2b766f26139818c3352d5b57d3">More...</a><br /></td></tr>
+<tr class="separator:affbaee2b766f26139818c3352d5b57d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a634d573d74a0c62b9608b296b3a35cd8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a634d573d74a0c62b9608b296b3a35cd8">initAverages</a> ()</td></tr>
+<tr class="memdesc:a634d573d74a0c62b9608b296b3a35cd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the moving averages.  <a href="classPowerSampling.html#a634d573d74a0c62b9608b296b3a35cd8">More...</a><br /></td></tr>
+<tr class="separator:a634d573d74a0c62b9608b296b3a35cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83f434e56c9b72967bfa46c473928d7a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a83f434e56c9b72967bfa46c473928d7a">isValidBuf</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
+<tr class="memdesc:a83f434e56c9b72967bfa46c473928d7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the given buffer is valid.  <a href="classPowerSampling.html#a83f434e56c9b72967bfa46c473928d7a">More...</a><br /></td></tr>
+<tr class="separator:a83f434e56c9b72967bfa46c473928d7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24544593a9f8bd584c84c3bbd0b3f858"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a24544593a9f8bd584c84c3bbd0b3f858">isConsecutiveBuf</a> (<a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a> seqNr, <a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a> prevSeqNr)</td></tr>
+<tr class="memdesc:a24544593a9f8bd584c84c3bbd0b3f858"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the given sequence nr follows directly after the previous sequence nr.  <a href="classPowerSampling.html#a24544593a9f8bd584c84c3bbd0b3f858">More...</a><br /></td></tr>
+<tr class="separator:a24544593a9f8bd584c84c3bbd0b3f858"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a501ea59639e70e0f05f012d654a64be6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a501ea59639e70e0f05f012d654a64be6">removeInvalidBufs</a> ()</td></tr>
+<tr class="memdesc:a501ea59639e70e0f05f012d654a64be6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove all buffers from queue that are older than the newest invalid buffer.  <a href="classPowerSampling.html#a501ea59639e70e0f05f012d654a64be6">More...</a><br /></td></tr>
+<tr class="separator:a501ea59639e70e0f05f012d654a64be6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c4e16eb4c034c906208827d55889786"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a8c4e16eb4c034c906208827d55889786">calculateVoltageZero</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
+<tr class="memdesc:a8c4e16eb4c034c906208827d55889786"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the value of the zero line of the voltage samples (the offset).  <a href="classPowerSampling.html#a8c4e16eb4c034c906208827d55889786">More...</a><br /></td></tr>
+<tr class="separator:a8c4e16eb4c034c906208827d55889786"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3bc9dcaaa8ae421f6c43c9724c42ae3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ae3bc9dcaaa8ae421f6c43c9724c42ae3">calculateCurrentZero</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
+<tr class="memdesc:ae3bc9dcaaa8ae421f6c43c9724c42ae3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the value of the zero line of the current samples.  <a href="classPowerSampling.html#ae3bc9dcaaa8ae421f6c43c9724c42ae3">More...</a><br /></td></tr>
+<tr class="separator:ae3bc9dcaaa8ae421f6c43c9724c42ae3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b5e9bd0abb586ad5d2fc06b1d4c737e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a0b5e9bd0abb586ad5d2fc06b1d4c737e">filter</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndexIn, <a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndexOut, <a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channel_id)</td></tr>
+<tr class="memdesc:a0b5e9bd0abb586ad5d2fc06b1d4c737e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filter the samples.  <a href="classPowerSampling.html#a0b5e9bd0abb586ad5d2fc06b1d4c737e">More...</a><br /></td></tr>
+<tr class="separator:a0b5e9bd0abb586ad5d2fc06b1d4c737e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac69718d4c6fd0fd10065a5f15618b94f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ac69718d4c6fd0fd10065a5f15618b94f">isVoltageAndCurrentSwapped</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex, <a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> prevBufIndex)</td></tr>
+<tr class="memdesc:ac69718d4c6fd0fd10065a5f15618b94f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if voltage and current index are swapped.  <a href="classPowerSampling.html#ac69718d4c6fd0fd10065a5f15618b94f">More...</a><br /></td></tr>
+<tr class="separator:ac69718d4c6fd0fd10065a5f15618b94f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad1c88998947123c254c99f7660c6a41"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#aad1c88998947123c254c99f7660c6a41">calculatePower</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
+<tr class="memdesc:aad1c88998947123c254c99f7660c6a41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the average power usage.  <a href="classPowerSampling.html#aad1c88998947123c254c99f7660c6a41">More...</a><br /></td></tr>
+<tr class="separator:aad1c88998947123c254c99f7660c6a41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a617f61ca3b101f071f5cf78a3ab42a51"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a617f61ca3b101f071f5cf78a3ab42a51">calculateSlowAveragePower</a> (float powerMilliWatt, float fastAvgPowerMilliWatt)</td></tr>
+<tr class="separator:a617f61ca3b101f071f5cf78a3ab42a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20ba721fc160a7c75d972c4ae4e905f6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a20ba721fc160a7c75d972c4ae4e905f6">calibratePowerZero</a> (int32_t powerMilliWatt)</td></tr>
+<tr class="memdesc:a20ba721fc160a7c75d972c4ae4e905f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines measured power usage with no load.  <a href="classPowerSampling.html#a20ba721fc160a7c75d972c4ae4e905f6">More...</a><br /></td></tr>
+<tr class="separator:a20ba721fc160a7c75d972c4ae4e905f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e5b6129c8073030fde3c4c9b1f4f364"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a7e5b6129c8073030fde3c4c9b1f4f364">calculateEnergy</a> ()</td></tr>
+<tr class="memdesc:a7e5b6129c8073030fde3c4c9b1f4f364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the energy used.  <a href="classPowerSampling.html#a7e5b6129c8073030fde3c4c9b1f4f364">More...</a><br /></td></tr>
+<tr class="separator:a7e5b6129c8073030fde3c4c9b1f4f364"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6419017820f0cc703aff0b58b16b401c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a6419017820f0cc703aff0b58b16b401c">checkSoftfuse</a> (int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, <a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
+<tr class="memdesc:a6419017820f0cc703aff0b58b16b401c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the current goes above a threshold (for long enough).  <a href="classPowerSampling.html#a6419017820f0cc703aff0b58b16b401c">More...</a><br /></td></tr>
+<tr class="separator:a6419017820f0cc703aff0b58b16b401c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7bbcf9bf11079e6d4b4de645383ed9c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ad7bbcf9bf11079e6d4b4de645383ed9c">handleGetPowerSamples</a> (<a class="el" href="cs__Packets_8h.html#a4bb9f35424e6a05285b12c4e0023bc36">PowerSamplesType</a> type, uint8_t index, <a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;result)</td></tr>
+<tr class="separator:ad7bbcf9bf11079e6d4b4de645383ed9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99aec761a4c6e4d68882c57d5b970305"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a99aec761a4c6e4d68882c57d5b970305">selectNextPin</a> (<a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channel)</td></tr>
+<tr class="separator:a99aec761a4c6e4d68882c57d5b970305"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a955e896601f3aa6f5547d980cb53ff65"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a955e896601f3aa6f5547d980cb53ff65">enableDifferentialModeCurrent</a> (bool enable)</td></tr>
+<tr class="separator:a955e896601f3aa6f5547d980cb53ff65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12c546f0b360cf3053902c5458e5a1fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a12c546f0b360cf3053902c5458e5a1fb">enableDifferentialModeVoltage</a> (bool enable)</td></tr>
+<tr class="separator:a12c546f0b360cf3053902c5458e5a1fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c3cb0cf79219337ab6aabaf0b165a75"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a3c3cb0cf79219337ab6aabaf0b165a75">changeRange</a> (uint8_t channel, int32_t amount)</td></tr>
+<tr class="separator:a3c3cb0cf79219337ab6aabaf0b165a75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b3a904a8ed53e1dea5284a8d07061f8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a9b3a904a8ed53e1dea5284a8d07061f8">applyAdcConfig</a> (<a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a> channelIndex)</td></tr>
+<tr class="separator:a9b3a904a8ed53e1dea5284a8d07061f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a57d1ebec039b53c6c10010ba791c9f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a4a57d1ebec039b53c6c10010ba791c9f">enableSwitchcraft</a> (bool enable)</td></tr>
+<tr class="separator:a4a57d1ebec039b53c6c10010ba791c9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86468d2a0588eda428846206378a9a2b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a86468d2a0588eda428846206378a9a2b">printBuf</a> (<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> bufIndex)</td></tr>
+<tr class="separator:a86468d2a0588eda428846206378a9a2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classEventListener"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventListener')"><img src="closed.png" alt="-"/>&#160;Private Member Functions inherited from <a class="el" href="classEventListener.html">EventListener</a></td></tr>
+<tr class="memitem:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ac8cfe1097cbec18fac9313feccdb0e20">EventListener</a> ()</td></tr>
+<tr class="separator:ac8cfe1097cbec18fac9313feccdb0e20 inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">~EventListener</a> ()</td></tr>
+<tr class="memdesc:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">unregisters the listener.  <a href="classEventListener.html#ad03c1e6f45e92434d502995a4f31685e">More...</a><br /></td></tr>
+<tr class="separator:ad03c1e6f45e92434d502995a4f31685e inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">handleEvent</a> (<a class="el" href="classevent__t.html">event_t</a> &amp;event)=0</td></tr>
+<tr class="memdesc:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle events.  <a href="classEventListener.html#ab746290fb9240d83d231cd390c3cafad">More...</a><br /></td></tr>
+<tr class="separator:ab746290fb9240d83d231cd390c3cafad inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">listen</a> ()</td></tr>
+<tr class="memdesc:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers this with the <a class="el" href="classEventDispatcher.html" title="Event dispatcher.">EventDispatcher</a>.  <a href="classEventListener.html#adbdd4bec0525ca160c1b2aa5bf209cfe">More...</a><br /></td></tr>
+<tr class="separator:adbdd4bec0525ca160c1b2aa5bf209cfe inherit pub_methods_classEventListener"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a512bc52b2d12a6766642e68ec40b0e81"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a512bc52b2d12a6766642e68ec40b0e81">_isInitialized</a> = false</td></tr>
+<tr class="memdesc:a512bc52b2d12a6766642e68ec40b0e81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Variable to keep up whether power sampling is initialized.  <a href="classPowerSampling.html#a512bc52b2d12a6766642e68ec40b0e81">More...</a><br /></td></tr>
+<tr class="separator:a512bc52b2d12a6766642e68ec40b0e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45fcfece2784997fdad59afbe26ca33b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classADC.html">ADC</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a45fcfece2784997fdad59afbe26ca33b">_adc</a></td></tr>
+<tr class="memdesc:a45fcfece2784997fdad59afbe26ca33b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> instance.  <a href="classPowerSampling.html#a45fcfece2784997fdad59afbe26ca33b">More...</a><br /></td></tr>
+<tr class="separator:a45fcfece2784997fdad59afbe26ca33b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d2b6ce7d681e469acae708caa1be5b9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Types_8h.html#a25bbfb7442459b8d546e1f1551835479">OperationMode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a7d2b6ce7d681e469acae708caa1be5b9">_operationMode</a></td></tr>
+<tr class="memdesc:a7d2b6ce7d681e469acae708caa1be5b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operation mode of this device.  <a href="classPowerSampling.html#a7d2b6ce7d681e469acae708caa1be5b9">More...</a><br /></td></tr>
+<tr class="separator:a7d2b6ce7d681e469acae708caa1be5b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab4ea7990f24b77ff8087dd6b2fd8dec"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structboards__config__t.html">boards_config_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#aab4ea7990f24b77ff8087dd6b2fd8dec">_boardConfig</a> = nullptr</td></tr>
+<tr class="separator:aab4ea7990f24b77ff8087dd6b2fd8dec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fe8f2bfde4fdb65fd798e358687f2c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; <a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a9fe8f2bfde4fdb65fd798e358687f2c1">_bufferQueue</a></td></tr>
+<tr class="memdesc:a9fe8f2bfde4fdb65fd798e358687f2c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Queue of buffers we can use for processing.  <a href="classPowerSampling.html#a9fe8f2bfde4fdb65fd798e358687f2c1">More...</a><br /></td></tr>
+<tr class="separator:a9fe8f2bfde4fdb65fd798e358687f2c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83c9d7e31b553d84076bb7af76b285c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcs__power__samples__header__t.html">cs_power_samples_header_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a83c9d7e31b553d84076bb7af76b285c4">_lastSoftfuse</a></td></tr>
+<tr class="separator:a83c9d7e31b553d84076bb7af76b285c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a762fb6db01be318df47d835ac415c3a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a762fb6db01be318df47d835ac415c3a5">_lastSoftfuseSamples</a> [<a class="el" href="classAdcBuffer.html#ac7bd9966c599054e6bac16e2712877df">AdcBuffer::getChannelLength</a>()] = {0}</td></tr>
+<tr class="separator:a762fb6db01be318df47d835ac415c3a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51785c769fe7a1c7b92f9f68000164e5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; <a class="el" href="unionswitch__state__t.html">switch_state_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a51785c769fe7a1c7b92f9f68000164e5">_switchHist</a></td></tr>
+<tr class="separator:a51785c769fe7a1c7b92f9f68000164e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca2ba4ee2493dc823a50a85ed1718510"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcs__power__samples__header__t.html">cs_power_samples_header_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#aca2ba4ee2493dc823a50a85ed1718510">_lastSwitchSamplesHeader</a></td></tr>
+<tr class="separator:aca2ba4ee2493dc823a50a85ed1718510"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af32ea824f2e6f91b378232ac44138371"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#af32ea824f2e6f91b378232ac44138371">_lastSwitchSamples</a> [<a class="el" href="classPowerSampling.html#a86bbfc55b123a90542b6f1143975b02e">numSwitchSamplesBuffers</a> *<a class="el" href="classAdcBuffer.html#ac7bd9966c599054e6bac16e2712877df">AdcBuffer::getChannelLength</a>()] = {0}</td></tr>
+<tr class="separator:af32ea824f2e6f91b378232ac44138371"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2f3b8b10355609584c81d5d182053c9"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ac2f3b8b10355609584c81d5d182053c9">_avgZeroCurrentDiscount</a></td></tr>
+<tr class="memdesc:ac2f3b8b10355609584c81d5d182053c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Power zero from settings.  <a href="classPowerSampling.html#ac2f3b8b10355609584c81d5d182053c9">More...</a><br /></td></tr>
+<tr class="separator:ac2f3b8b10355609584c81d5d182053c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace659ee2b33a5985aeb66be7357c1456"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ace659ee2b33a5985aeb66be7357c1456">_avgZeroVoltageDiscount</a></td></tr>
+<tr class="separator:ace659ee2b33a5985aeb66be7357c1456"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7154f30a7603638f3a65d8af796cbe9"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ad7154f30a7603638f3a65d8af796cbe9">_avgPowerDiscount</a></td></tr>
+<tr class="separator:ad7154f30a7603638f3a65d8af796cbe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab28dcc662579401fc8ac80c4c794b0a9"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ab28dcc662579401fc8ac80c4c794b0a9">_slowAvgPowerDiscount</a></td></tr>
+<tr class="separator:ab28dcc662579401fc8ac80c4c794b0a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6167d2555705d7c8ebe1765452a70498"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a6167d2555705d7c8ebe1765452a70498">_slowAvgPowerMilliWatt</a> = 0.0f</td></tr>
+<tr class="separator:a6167d2555705d7c8ebe1765452a70498"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12aeac8a8b48d39ec9985c162e28bcb4"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a12aeac8a8b48d39ec9985c162e28bcb4">_slowAvgPowerCount</a></td></tr>
+<tr class="separator:a12aeac8a8b48d39ec9985c162e28bcb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad27b62d5945491a5b3f1e9104bfa0b2"><td class="memItemLeft" align="right" valign="top">const uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#aad27b62d5945491a5b3f1e9104bfa0b2">slowAvgPowerConvergedCount</a> = 1000</td></tr>
+<tr class="separator:aad27b62d5945491a5b3f1e9104bfa0b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79e8e44d79e689c89c7f1d7b9a472a6a"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a79e8e44d79e689c89c7f1d7b9a472a6a">_powerDiffThresholdPart</a></td></tr>
+<tr class="separator:a79e8e44d79e689c89c7f1d7b9a472a6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31fa462d3b677cea621213952d1f129c"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a31fa462d3b677cea621213952d1f129c">_powerDiffThresholdMinMilliWatt</a></td></tr>
+<tr class="separator:a31fa462d3b677cea621213952d1f129c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a968fed3a8c3809b2e057a37396df08f8"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a968fed3a8c3809b2e057a37396df08f8">_negativePowerThresholdMilliWatt</a></td></tr>
+<tr class="separator:a968fed3a8c3809b2e057a37396df08f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a575fe5e55425ec3722993a3f864c3611"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a575fe5e55425ec3722993a3f864c3611">_boardPowerZero</a></td></tr>
+<tr class="separator:a575fe5e55425ec3722993a3f864c3611"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a445fad0b0165a55481797e626b60c038"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a445fad0b0165a55481797e626b60c038">_avgZeroVoltage</a></td></tr>
+<tr class="memdesc:a445fad0b0165a55481797e626b60c038"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measured power when there is no load for this board (mW).  <a href="classPowerSampling.html#a445fad0b0165a55481797e626b60c038">More...</a><br /></td></tr>
+<tr class="separator:a445fad0b0165a55481797e626b60c038"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e2d870f94dcb81c23629bafb2edd346"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a3e2d870f94dcb81c23629bafb2edd346">_avgZeroCurrent</a></td></tr>
+<tr class="memdesc:a3e2d870f94dcb81c23629bafb2edd346"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used for storing and calculating the average zero voltage value (times 1024).  <a href="classPowerSampling.html#a3e2d870f94dcb81c23629bafb2edd346">More...</a><br /></td></tr>
+<tr class="separator:a3e2d870f94dcb81c23629bafb2edd346"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a765fd6d9b4c20aad0bf0e31a5b5cbf00"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a765fd6d9b4c20aad0bf0e31a5b5cbf00">_recalibrateZeroVoltage</a></td></tr>
+<tr class="memdesc:a765fd6d9b4c20aad0bf0e31a5b5cbf00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used for storing and calculating the average zero current value (times 1024).  <a href="classPowerSampling.html#a765fd6d9b4c20aad0bf0e31a5b5cbf00">More...</a><br /></td></tr>
+<tr class="separator:a765fd6d9b4c20aad0bf0e31a5b5cbf00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdcebf436007a9063cc148e0f3813932"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#abdcebf436007a9063cc148e0f3813932">_recalibrateZeroCurrent</a></td></tr>
+<tr class="memdesc:abdcebf436007a9063cc148e0f3813932"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not the zero voltage value should be recalculated.  <a href="classPowerSampling.html#abdcebf436007a9063cc148e0f3813932">More...</a><br /></td></tr>
+<tr class="separator:abdcebf436007a9063cc148e0f3813932"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb0e2bca20693cdb29104ec2dba88a38"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#afb0e2bca20693cdb29104ec2dba88a38">_zeroVoltageCount</a></td></tr>
+<tr class="memdesc:afb0e2bca20693cdb29104ec2dba88a38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not the zero current value should be recalculated.  <a href="classPowerSampling.html#afb0e2bca20693cdb29104ec2dba88a38">More...</a><br /></td></tr>
+<tr class="separator:afb0e2bca20693cdb29104ec2dba88a38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af8b89ae54846939c828f8f2ec08d4f54"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#af8b89ae54846939c828f8f2ec08d4f54">_zeroCurrentCount</a></td></tr>
+<tr class="memdesc:af8b89ae54846939c828f8f2ec08d4f54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of times the zero voltage has been calculated.  <a href="classPowerSampling.html#af8b89ae54846939c828f8f2ec08d4f54">More...</a><br /></td></tr>
+<tr class="separator:af8b89ae54846939c828f8f2ec08d4f54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3670bbc8bbca1d7aa73bfab35355f8e7"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a3670bbc8bbca1d7aa73bfab35355f8e7">_avgPowerMilliWatt</a></td></tr>
+<tr class="memdesc:a3670bbc8bbca1d7aa73bfab35355f8e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of times the zero current has been calculated.  <a href="classPowerSampling.html#a3670bbc8bbca1d7aa73bfab35355f8e7">More...</a><br /></td></tr>
+<tr class="separator:a3670bbc8bbca1d7aa73bfab35355f8e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae17892a6d0f1b7a081bf7563736932f2"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ae17892a6d0f1b7a081bf7563736932f2">_avgCurrentRmsMilliAmp</a></td></tr>
+<tr class="memdesc:ae17892a6d0f1b7a081bf7563736932f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to send out the average power (in mW).  <a href="classPowerSampling.html#ae17892a6d0f1b7a081bf7563736932f2">More...</a><br /></td></tr>
+<tr class="separator:ae17892a6d0f1b7a081bf7563736932f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad89d4ccef3bba1997b0860c426864fee"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ad89d4ccef3bba1997b0860c426864fee">_avgVoltageRmsMilliVolt</a></td></tr>
+<tr class="memdesc:ad89d4ccef3bba1997b0860c426864fee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used for storing the average rms current (in mA).  <a href="classPowerSampling.html#ad89d4ccef3bba1997b0860c426864fee">More...</a><br /></td></tr>
+<tr class="separator:ad89d4ccef3bba1997b0860c426864fee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a449fcadc9e1eb0f78ea3f3587bdebac3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="Element_8h.html#a10979058733bad1a0af212977d7bb8ac">PowerVector</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a449fcadc9e1eb0f78ea3f3587bdebac3">_inputSamples</a></td></tr>
+<tr class="memdesc:a449fcadc9e1eb0f78ea3f3587bdebac3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used for storing the average rms voltage (in mV).  <a href="classPowerSampling.html#a449fcadc9e1eb0f78ea3f3587bdebac3">More...</a><br /></td></tr>
+<tr class="separator:a449fcadc9e1eb0f78ea3f3587bdebac3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad49a1186dfa55b637b9999dfd895c6c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="Element_8h.html#a10979058733bad1a0af212977d7bb8ac">PowerVector</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ad49a1186dfa55b637b9999dfd895c6c1">_outputSamples</a></td></tr>
+<tr class="memdesc:ad49a1186dfa55b637b9999dfd895c6c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used for storing the samples to be filtered.  <a href="classPowerSampling.html#ad49a1186dfa55b637b9999dfd895c6c1">More...</a><br /></td></tr>
+<tr class="separator:ad49a1186dfa55b637b9999dfd895c6c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78be371818ad252e67bf8e992858d7ee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structMedianFilter.html">MedianFilter</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a78be371818ad252e67bf8e992858d7ee">_filterParams</a></td></tr>
+<tr class="memdesc:a78be371818ad252e67bf8e992858d7ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used for storing the filtered samples.  <a href="classPowerSampling.html#a78be371818ad252e67bf8e992858d7ee">More...</a><br /></td></tr>
+<tr class="separator:a78be371818ad252e67bf8e992858d7ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7251a37829c83a01511fc87ea1db8d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; int32_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ad7251a37829c83a01511fc87ea1db8d7">_powerMilliWattHist</a></td></tr>
+<tr class="memdesc:ad7251a37829c83a01511fc87ea1db8d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the parameters for the moving median filter.  <a href="classPowerSampling.html#ad7251a37829c83a01511fc87ea1db8d7">More...</a><br /></td></tr>
+<tr class="separator:ad7251a37829c83a01511fc87ea1db8d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6725cec99671f4bd56e2854f33564e24"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; int32_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a6725cec99671f4bd56e2854f33564e24">_currentRmsMilliAmpHist</a></td></tr>
+<tr class="memdesc:a6725cec99671f4bd56e2854f33564e24"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to store a history of the power.  <a href="classPowerSampling.html#a6725cec99671f4bd56e2854f33564e24">More...</a><br /></td></tr>
+<tr class="separator:a6725cec99671f4bd56e2854f33564e24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ede562a461892f48196123186256a4d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; int32_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a0ede562a461892f48196123186256a4d">_filteredCurrentRmsHistMA</a></td></tr>
+<tr class="memdesc:a0ede562a461892f48196123186256a4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to store a history of the current_rms.  <a href="classPowerSampling.html#a0ede562a461892f48196123186256a4d">More...</a><br /></td></tr>
+<tr class="separator:a0ede562a461892f48196123186256a4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a366a6214086be0ea4168272000cedf56"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt; int32_t &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a366a6214086be0ea4168272000cedf56">_voltageRmsMilliVoltHist</a></td></tr>
+<tr class="memdesc:a366a6214086be0ea4168272000cedf56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to store a history of the filtered current_rms.  <a href="classPowerSampling.html#a366a6214086be0ea4168272000cedf56">More...</a><br /></td></tr>
+<tr class="separator:a366a6214086be0ea4168272000cedf56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8e9382c11d5dd61e042ba5ef83feae4"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ae8e9382c11d5dd61e042ba5ef83feae4">_histCopy</a> [<a class="el" href="cs__Config_8h.html#aca75ea57c61b7fe6f46697760e820777">POWER_SAMPLING_RMS_WINDOW_SIZE</a>]</td></tr>
+<tr class="memdesc:ae8e9382c11d5dd61e042ba5ef83feae4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to store a history of the voltage_rms.  <a href="classPowerSampling.html#ae8e9382c11d5dd61e042ba5ef83feae4">More...</a><br /></td></tr>
+<tr class="separator:ae8e9382c11d5dd61e042ba5ef83feae4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4720c06519f4285feeda0cd20926b90b"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a4720c06519f4285feeda0cd20926b90b">_consecutiveDimmerOvercurrent</a> = 0</td></tr>
+<tr class="memdesc:a4720c06519f4285feeda0cd20926b90b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to copy a history to (so it can be used to calculate the median)  <a href="classPowerSampling.html#a4720c06519f4285feeda0cd20926b90b">More...</a><br /></td></tr>
+<tr class="separator:a4720c06519f4285feeda0cd20926b90b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a026052b37a6e50e2eb5cd6b35fa8bfd3"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a026052b37a6e50e2eb5cd6b35fa8bfd3">_consecutiveOvercurrent</a> = 0</td></tr>
+<tr class="separator:a026052b37a6e50e2eb5cd6b35fa8bfd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1395e1c3d8666e337834c72cbf0d4df"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ac1395e1c3d8666e337834c72cbf0d4df">_currentMilliAmpThresholdDimmer</a></td></tr>
+<tr class="memdesc:ac1395e1c3d8666e337834c72cbf0d4df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current threshold from settings.  <a href="classPowerSampling.html#ac1395e1c3d8666e337834c72cbf0d4df">More...</a><br /></td></tr>
+<tr class="separator:ac1395e1c3d8666e337834c72cbf0d4df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ae70432b9740c4a7a495d142adc0636"><td class="memItemLeft" align="right" valign="top">int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a7ae70432b9740c4a7a495d142adc0636">_energyUsedmicroJoule</a> = 0</td></tr>
+<tr class="memdesc:a7ae70432b9740c4a7a495d142adc0636"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current threshold when using dimmer from settings.  <a href="classPowerSampling.html#a7ae70432b9740c4a7a495d142adc0636">More...</a><br /></td></tr>
+<tr class="separator:a7ae70432b9740c4a7a495d142adc0636"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34e80bc4badedcf58402f7f39e35d504"><td class="memItemLeft" align="right" valign="top"><a class="el" href="unionswitch__state__t.html">switch_state_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a34e80bc4badedcf58402f7f39e35d504">_lastSwitchState</a></td></tr>
+<tr class="memdesc:a34e80bc4badedcf58402f7f39e35d504"><td class="mdescLeft">&#160;</td><td class="mdescRight">Energy used in micro joule.  <a href="classPowerSampling.html#a34e80bc4badedcf58402f7f39e35d504">More...</a><br /></td></tr>
+<tr class="separator:a34e80bc4badedcf58402f7f39e35d504"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54f0956f5be6394337c8e908e73a2ca9"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a54f0956f5be6394337c8e908e73a2ca9">_lastSwitchOffTicks</a></td></tr>
+<tr class="memdesc:a54f0956f5be6394337c8e908e73a2ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the last seen switch state.  <a href="classPowerSampling.html#a54f0956f5be6394337c8e908e73a2ca9">More...</a><br /></td></tr>
+<tr class="separator:a54f0956f5be6394337c8e908e73a2ca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a189a86f6c0f6d4d4923eefbc667071ed"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a189a86f6c0f6d4d4923eefbc667071ed">_lastSwitchOffTicksValid</a> = false</td></tr>
+<tr class="memdesc:a189a86f6c0f6d4d4923eefbc667071ed"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRTC.html" title="Wrapper class for RTC functions.">RTC</a> ticks when the switch was last turned off.  <a href="classPowerSampling.html#a189a86f6c0f6d4d4923eefbc667071ed">More...</a><br /></td></tr>
+<tr class="separator:a189a86f6c0f6d4d4923eefbc667071ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c14935181a92043a70aab726035c6be"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a0c14935181a92043a70aab726035c6be">_dimmerFailureDetectionStarted</a> = false</td></tr>
+<tr class="memdesc:a0c14935181a92043a70aab726035c6be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up whether the last switch off time is valid.  <a href="classPowerSampling.html#a0c14935181a92043a70aab726035c6be">More...</a><br /></td></tr>
+<tr class="separator:a0c14935181a92043a70aab726035c6be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae80e426df3ac2bb1b93a2d44777213d8"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ae80e426df3ac2bb1b93a2d44777213d8">_calibratePowerZeroCountDown</a> = 4000 / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a></td></tr>
+<tr class="memdesc:ae80e426df3ac2bb1b93a2d44777213d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep up whether the IGBT failure detection has started yet.  <a href="classPowerSampling.html#ae80e426df3ac2bb1b93a2d44777213d8">More...</a><br /></td></tr>
+<tr class="separator:ae80e426df3ac2bb1b93a2d44777213d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabc5eb96483d56a747286a70468a6280"><td class="memItemLeft" >struct {</td></tr>
+<tr class="memitem:a121fa53bc7df7e11b89a9a89c87c8a27"><td class="memItemLeft" >&#160;&#160;&#160;<a class="el" href="structadc__channel__config__t.html">adc_channel_config_t</a>&#160;&#160;&#160;<a class="el" href="classPowerSampling.html#ab8ce4a0d57c31cf3a3ab7d897dbb1bef">config</a></td></tr>
+<tr class="separator:a121fa53bc7df7e11b89a9a89c87c8a27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab55df648b7731cc579a1dec6ab54f538"><td class="memItemLeft" >&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<a class="el" href="classPowerSampling.html#a00ea0aae68cd5d0ce977cd674ff85c7a">pinIndex</a> = 0</td></tr>
+<tr class="separator:ab55df648b7731cc579a1dec6ab54f538"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c940864cd930cbbaa739ed3df67257c"><td class="memItemLeft" >&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<a class="el" href="classPowerSampling.html#a98cddee95b50b2652dc7209ce362c893">pinCount</a> = 0</td></tr>
+<tr class="separator:a7c940864cd930cbbaa739ed3df67257c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabc5eb96483d56a747286a70468a6280"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#aabc5eb96483d56a747286a70468a6280">_adcConfig</a> [2]</td></tr>
+<tr class="separator:aabc5eb96483d56a747286a70468a6280"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89c75e1c49204dc24a3b7d14269b0d24"><td class="memItemLeft" >union {</td></tr>
+<tr class="memitem:a80a5bd38e47e1cb981aed98167241e5d"><td class="memItemLeft" >&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:a4311957cd4190ef680da184a1b0df2c4"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="classPowerSampling.html#a385d7ef2b40ad053cc4960ce9fceb154">power</a>: 1</td></tr>
+<tr class="separator:a4311957cd4190ef680da184a1b0df2c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1224272c554b6a8d18dc0921a5cf88c"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="classPowerSampling.html#a25f4d37ff083c758d1b1d71bb6ac7891">current</a>: 1</td></tr>
+<tr class="separator:ac1224272c554b6a8d18dc0921a5cf88c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41e625754e3edbaa3b56c6cc6ca7cfe0"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="classPowerSampling.html#ae6ac9f0b4bb808ac1f77dddf0a83150e">voltage</a>: 1</td></tr>
+<tr class="separator:a41e625754e3edbaa3b56c6cc6ca7cfe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bd151a2d3b222796ba962173c222e06"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="classPowerSampling.html#a16f3a09e8a5cd7a137d7aa81569b1a8e">filteredCurrent</a>: 1</td></tr>
+<tr class="separator:a4bd151a2d3b222796ba962173c222e06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80a5bd38e47e1cb981aed98167241e5d"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;&#160;&#160;<a class="el" href="classPowerSampling.html#a07c2deaa5e514241795530546ec5522f">flags</a></td></tr>
+<tr class="separator:a80a5bd38e47e1cb981aed98167241e5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90c790e2079a66e72bc8a023196c8b56"><td class="memItemLeft" >&#160;&#160;&#160;uint32_t&#160;&#160;&#160;<a class="el" href="classPowerSampling.html#ae3ac358db377ef5b8596871a54eb6ad3">asInt</a></td></tr>
+<tr class="separator:a90c790e2079a66e72bc8a023196c8b56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89c75e1c49204dc24a3b7d14269b0d24"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a89c75e1c49204dc24a3b7d14269b0d24">_logsEnabled</a></td></tr>
+<tr class="separator:a89c75e1c49204dc24a3b7d14269b0d24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe3b1e9d2bc8f697eab91c94c4360e7c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#abe3b1e9d2bc8f697eab91c94c4360e7c">_lastBufSeqNr</a> = 0</td></tr>
+<tr class="separator:abe3b1e9d2bc8f697eab91c94c4360e7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e18ce1fe383717b99a112d8b2c86ca8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a5e18ce1fe383717b99a112d8b2c86ca8">_lastBufIndex</a> = 0</td></tr>
+<tr class="separator:a5e18ce1fe383717b99a112d8b2c86ca8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0877c8b83422ac1a1871b356bca62e00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a0877c8b83422ac1a1871b356bca62e00">_lastFilteredBufIndex</a> = 0</td></tr>
+<tr class="separator:a0877c8b83422ac1a1871b356bca62e00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2bc677cadcb58c417a0459ad11f0928"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcs__adc__restarts__t.html">cs_adc_restarts_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#ae2bc677cadcb58c417a0459ad11f0928">_adcRestarts</a></td></tr>
+<tr class="separator:ae2bc677cadcb58c417a0459ad11f0928"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59fb9da4bf0e76e8d4ebb94e0a739829"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structcs__adc__channel__swaps__t.html">cs_adc_channel_swaps_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a59fb9da4bf0e76e8d4ebb94e0a739829">_adcChannelSwaps</a></td></tr>
+<tr class="separator:a59fb9da4bf0e76e8d4ebb94e0a739829"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a51074d4be0b1e9218ab8ac5685c351"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a1a51074d4be0b1e9218ab8ac5685c351">_bufSkipCount</a> = 0</td></tr>
+<tr class="memdesc:a1a51074d4be0b1e9218ab8ac5685c351"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count number of buffers that have been skipped for processing.  <a href="classPowerSampling.html#a1a51074d4be0b1e9218ab8ac5685c351">More...</a><br /></td></tr>
+<tr class="separator:a1a51074d4be0b1e9218ab8ac5685c351"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a42b814ec5b6cd5dbcbfc5ddbe45d8fa6"><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a42b814ec5b6cd5dbcbfc5ddbe45d8fa6">numFilteredBuffersForProcessing</a> = 4</td></tr>
+<tr class="separator:a42b814ec5b6cd5dbcbfc5ddbe45d8fa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3935dff30b523f1a6acf6a0afdc29db7"><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a3935dff30b523f1a6acf6a0afdc29db7">numUnfilteredBuffers</a> = 1</td></tr>
+<tr class="separator:a3935dff30b523f1a6acf6a0afdc29db7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52683db6f0dee2259776d7daf5ab66f4"><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a52683db6f0dee2259776d7daf5ab66f4">switchHistSize</a> = 3</td></tr>
+<tr class="separator:a52683db6f0dee2259776d7daf5ab66f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86bbfc55b123a90542b6f1143975b02e"><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPowerSampling.html#a86bbfc55b123a90542b6f1143975b02e">numSwitchSamplesBuffers</a> = 6</td></tr>
+<tr class="separator:a86bbfc55b123a90542b6f1143975b02e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a8003e3a82f724b47aa1cf59ca592dd14" name="a8003e3a82f724b47aa1cf59ca592dd14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8003e3a82f724b47aa1cf59ca592dd14">&#9670;&#160;</a></span>PowerSampling()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classPowerSampling.html">PowerSampling::PowerSampling</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a9b3a904a8ed53e1dea5284a8d07061f8" name="a9b3a904a8ed53e1dea5284a8d07061f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b3a904a8ed53e1dea5284a8d07061f8">&#9670;&#160;</a></span>applyAdcConfig()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::applyAdcConfig </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
+          <td class="paramname"><em>channelIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae3bc9dcaaa8ae421f6c43c9724c42ae3" name="ae3bc9dcaaa8ae421f6c43c9724c42ae3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3bc9dcaaa8ae421f6c43c9724c42ae3">&#9670;&#160;</a></span>calculateCurrentZero()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::calculateCurrentZero </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Calculate the value of the zero line of the current samples. </p>
+
+</div>
+</div>
+<a id="a7e5b6129c8073030fde3c4c9b1f4f364" name="a7e5b6129c8073030fde3c4c9b1f4f364"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e5b6129c8073030fde3c4c9b1f4f364">&#9670;&#160;</a></span>calculateEnergy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::calculateEnergy </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Calculate the energy used. </p>
+
+</div>
+</div>
+<a id="aad1c88998947123c254c99f7660c6a41" name="aad1c88998947123c254c99f7660c6a41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad1c88998947123c254c99f7660c6a41">&#9670;&#160;</a></span>calculatePower()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::calculatePower </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Calculate the average power usage. </p>
+<dl class="section return"><dt>Returns</dt><dd>true when calculation was successful. </dd></dl>
+
+</div>
+</div>
+<a id="a617f61ca3b101f071f5cf78a3ab42a51" name="a617f61ca3b101f071f5cf78a3ab42a51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a617f61ca3b101f071f5cf78a3ab42a51">&#9670;&#160;</a></span>calculateSlowAveragePower()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::calculateSlowAveragePower </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>powerMilliWatt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>fastAvgPowerMilliWatt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8c4e16eb4c034c906208827d55889786" name="a8c4e16eb4c034c906208827d55889786"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c4e16eb4c034c906208827d55889786">&#9670;&#160;</a></span>calculateVoltageZero()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::calculateVoltageZero </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Calculate the value of the zero line of the voltage samples (the offset). </p>
+
+</div>
+</div>
+<a id="a20ba721fc160a7c75d972c4ae4e905f6" name="a20ba721fc160a7c75d972c4ae4e905f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20ba721fc160a7c75d972c4ae4e905f6">&#9670;&#160;</a></span>calibratePowerZero()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::calibratePowerZero </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>powerMilliWatt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Determines measured power usage with no load. </p>
+<p >When successful, sets the value in state.</p>
+<p >Careful: make sure this doesn't interfere with dimmer on failure detection. </p>
+
+</div>
+</div>
+<a id="a3c3cb0cf79219337ab6aabaf0b165a75" name="a3c3cb0cf79219337ab6aabaf0b165a75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c3cb0cf79219337ab6aabaf0b165a75">&#9670;&#160;</a></span>changeRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::changeRange </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>channel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>amount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6419017820f0cc703aff0b58b16b401c" name="a6419017820f0cc703aff0b58b16b401c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6419017820f0cc703aff0b58b16b401c">&#9670;&#160;</a></span>checkSoftfuse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::checkSoftfuse </td>
+          <td>(</td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>currentRmsMilliAmp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>currentRmsMilliAmpFiltered</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>voltageRmsMilliVolt</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Check if the current goes above a threshold (for long enough). </p>
+<p >Emits an event when a softfuse triggers. Stores the current buffer of the last buffer that's above threshold, before the softfuse triggered.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">currentRmsMilliAmp</td><td>RMS current in mA of the last AC period. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">currentRmsMilliAmpFiltered</td><td>Filtered (averaged or so) RMS current in mA. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">voltageRmsMilliVolt</td><td>RMS voltage in mV of the last AC period. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">power</td><td>Struct that holds the buffers. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a955e896601f3aa6f5547d980cb53ff65" name="a955e896601f3aa6f5547d980cb53ff65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a955e896601f3aa6f5547d980cb53ff65">&#9670;&#160;</a></span>enableDifferentialModeCurrent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::enableDifferentialModeCurrent </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>enable</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a12c546f0b360cf3053902c5458e5a1fb" name="a12c546f0b360cf3053902c5458e5a1fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12c546f0b360cf3053902c5458e5a1fb">&#9670;&#160;</a></span>enableDifferentialModeVoltage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::enableDifferentialModeVoltage </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>enable</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4a57d1ebec039b53c6c10010ba791c9f" name="a4a57d1ebec039b53c6c10010ba791c9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a57d1ebec039b53c6c10010ba791c9f">&#9670;&#160;</a></span>enableSwitchcraft()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::enableSwitchcraft </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>enable</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a7d98b9209ba9113630c3a1777c53cbad" name="a7d98b9209ba9113630c3a1777c53cbad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7d98b9209ba9113630c3a1777c53cbad">&#9670;&#160;</a></span>enableZeroCrossingInterrupt()</h2>
 
@@ -177,7 +864,7 @@ static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160
         <tr>
           <td class="memname">void PowerSampling::enableZeroCrossingInterrupt </td>
           <td>(</td>
-          <td class="paramtype">ps_zero_crossing_cb_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__PowerSampling_8h.html#a3d09582dfe4515a7945adcdd99ccb587">ps_zero_crossing_cb_t</a>&#160;</td>
           <td class="paramname"><em>callback</em></td><td>)</td>
           <td></td>
         </tr>
@@ -191,6 +878,77 @@ static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a0b5e9bd0abb586ad5d2fc06b1d4c737e" name="a0b5e9bd0abb586ad5d2fc06b1d4c737e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b5e9bd0abb586ad5d2fc06b1d4c737e">&#9670;&#160;</a></span>filter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::filter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndexIn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndexOut</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
+          <td class="paramname"><em>channel_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Filter the samples. </p>
+
+</div>
+</div>
+<a id="adc3adc7b4f7146289c5e150ac70fdc66" name="adc3adc7b4f7146289c5e150ac70fdc66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc3adc7b4f7146289c5e150ac70fdc66">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp; PowerSampling::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets a static singleton (no dynamic memory allocation) </p>
 
 </div>
 </div>
@@ -244,6 +1002,48 @@ static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160
 
 </div>
 </div>
+<a id="ad7bbcf9bf11079e6d4b4de645383ed9c" name="ad7bbcf9bf11079e6d4b4de645383ed9c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7bbcf9bf11079e6d4b4de645383ed9c">&#9670;&#160;</a></span>handleGetPowerSamples()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::handleGetPowerSamples </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Packets_8h.html#a4bb9f35424e6a05285b12c4e0023bc36">PowerSamplesType</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcs__result__t.html">cs_result_t</a> &amp;&#160;</td>
+          <td class="paramname"><em>result</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a8c5665b1031346c3829bff7a86ebea68" name="a8c5665b1031346c3829bff7a86ebea68"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8c5665b1031346c3829bff7a86ebea68">&#9670;&#160;</a></span>init()</h2>
 
@@ -265,6 +1065,167 @@ static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160
 
 </div>
 </div>
+<a id="a634d573d74a0c62b9608b296b3a35cd8" name="a634d573d74a0c62b9608b296b3a35cd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a634d573d74a0c62b9608b296b3a35cd8">&#9670;&#160;</a></span>initAverages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::initAverages </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Initialize the moving averages. </p>
+
+</div>
+</div>
+<a id="aa265f7257826c462a99a7e4eeea7b60b" name="aa265f7257826c462a99a7e4eeea7b60b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa265f7257826c462a99a7e4eeea7b60b">&#9670;&#160;</a></span>initEnergyUsed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::initEnergyUsed </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Load energy used from IPC ram. </p>
+
+</div>
+</div>
+<a id="a24544593a9f8bd584c84c3bbd0b3f858" name="a24544593a9f8bd584c84c3bbd0b3f858"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a24544593a9f8bd584c84c3bbd0b3f858">&#9670;&#160;</a></span>isConsecutiveBuf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::isConsecutiveBuf </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a>&#160;</td>
+          <td class="paramname"><em>seqNr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a>&#160;</td>
+          <td class="paramname"><em>prevSeqNr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the given sequence nr follows directly after the previous sequence nr. </p>
+<p >This can change at any moment (set in interrupt). </p>
+
+</div>
+</div>
+<a id="a83f434e56c9b72967bfa46c473928d7a" name="a83f434e56c9b72967bfa46c473928d7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83f434e56c9b72967bfa46c473928d7a">&#9670;&#160;</a></span>isValidBuf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::isValidBuf </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether the given buffer is valid. </p>
+<p >This can change at any moment (set in interrupt). </p>
+
+</div>
+</div>
+<a id="ac69718d4c6fd0fd10065a5f15618b94f" name="ac69718d4c6fd0fd10065a5f15618b94f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac69718d4c6fd0fd10065a5f15618b94f">&#9670;&#160;</a></span>isVoltageAndCurrentSwapped()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::isVoltageAndCurrentSwapped </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>prevBufIndex</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Checks if voltage and current index are swapped. </p>
+<p >Checks if previous voltage samples look more like this buffer voltage samples or current samples. Assumes previous buffer is valid, and of same size as this buffer. </p>
+
+</div>
+</div>
 <a id="a1ca24d82090f52c050f8f6631ba300c7" name="a1ca24d82090f52c050f8f6631ba300c7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1ca24d82090f52c050f8f6631ba300c7">&#9670;&#160;</a></span>powerSampleAdcDone()</h2>
 
@@ -274,7 +1235,7 @@ static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160
         <tr>
           <td class="memname">void PowerSampling::powerSampleAdcDone </td>
           <td>(</td>
-          <td class="paramtype">adc_buffer_id_t&#160;</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
           <td class="paramname"><em>bufIndex</em></td><td>)</td>
           <td></td>
         </tr>
@@ -283,6 +1244,125 @@ static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160
 
 <p>Called when the sample burst is finished. </p>
 <p >Calculates the power usage, updates the state. Sends the samples if the central is subscribed for that. </p>
+
+</div>
+</div>
+<a id="a6773442010a2487dbbd1277e678f4dea" name="a6773442010a2487dbbd1277e678f4dea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6773442010a2487dbbd1277e678f4dea">&#9670;&#160;</a></span>powerSampleFirstStart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::powerSampleFirstStart </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initializes and starts the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a>, also starts interval timer. </p>
+
+</div>
+</div>
+<a id="a86468d2a0588eda428846206378a9a2b" name="a86468d2a0588eda428846206378a9a2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86468d2a0588eda428846206378a9a2b">&#9670;&#160;</a></span>printBuf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::printBuf </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&#160;</td>
+          <td class="paramname"><em>bufIndex</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a501ea59639e70e0f05f012d654a64be6" name="a501ea59639e70e0f05f012d654a64be6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a501ea59639e70e0f05f012d654a64be6">&#9670;&#160;</a></span>removeInvalidBufs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::removeInvalidBufs </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Remove all buffers from queue that are older than the newest invalid buffer. </p>
+<p >What remains is a queue of consecutive valid buffers. </p>
+
+</div>
+</div>
+<a id="af101aa83b21642ccec52957f3e13fda0" name="af101aa83b21642ccec52957f3e13fda0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af101aa83b21642ccec52957f3e13fda0">&#9670;&#160;</a></span>sampleCurrentDone()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::sampleCurrentDone </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fill up the current curve and send it out over bluetooth @type specifies over which characteristic the current curve should be sent. </p>
+
+</div>
+</div>
+<a id="a99aec761a4c6e4d68882c57d5b970305" name="a99aec761a4c6e4d68882c57d5b970305"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99aec761a4c6e4d68882c57d5b970305">&#9670;&#160;</a></span>selectNextPin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::selectNextPin </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Typedefs_8h.html#ab463eb253873a02a8bd88e1a1de1a035">adc_channel_id_t</a>&#160;</td>
+          <td class="paramname"><em>channel</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -303,6 +1383,1674 @@ static <a class="el" href="classPowerSampling.html">PowerSampling</a> &amp;&#160
 
 <p>Starts a new power sample burst. </p>
 <p >Called at a low interval. </p>
+
+</div>
+</div>
+<a id="affbaee2b766f26139818c3352d5b57d3" name="affbaee2b766f26139818c3352d5b57d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#affbaee2b766f26139818c3352d5b57d3">&#9670;&#160;</a></span>storeEnergyUsed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PowerSampling::storeEnergyUsed </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classStore.html" title="A variable size storage utility for objects of type RecordType with absolute maximum MaxItemCount.">Store</a> energy used to IPC ram. </p>
+
+</div>
+</div>
+<a id="ae3e21e24f1b5437031d12bcb25633549" name="ae3e21e24f1b5437031d12bcb25633549"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3e21e24f1b5437031d12bcb25633549">&#9670;&#160;</a></span>TYPIFY() <span class="overload">[1/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PowerSampling::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a422a0dade28008a9f8d7eefb9193f9b9">CONFIG_CURRENT_ADC_ZERO</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Voltage zero from settings. </p>
+
+</div>
+</div>
+<a id="a2726786891708ff89f491165f55f3090" name="a2726786891708ff89f491165f55f3090"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2726786891708ff89f491165f55f3090">&#9670;&#160;</a></span>TYPIFY() <span class="overload">[2/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PowerSampling::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a7b59579f947b36647b2715368085c38f">CONFIG_CURRENT_MULTIPLIER</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Voltage multiplier from settings. </p>
+
+</div>
+</div>
+<a id="adb0d61bc760b5d4c4e715a2c3becd0b9" name="adb0d61bc760b5d4c4e715a2c3becd0b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb0d61bc760b5d4c4e715a2c3becd0b9">&#9670;&#160;</a></span>TYPIFY() <span class="overload">[3/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PowerSampling::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1ad2f94e7368b4eed8d58aa32b166819ce">CONFIG_POWER_ZERO</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current zero from settings. </p>
+
+</div>
+</div>
+<a id="a252b35efeb6cd33d8c40178b3cdb547c" name="a252b35efeb6cd33d8c40178b3cdb547c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a252b35efeb6cd33d8c40178b3cdb547c">&#9670;&#160;</a></span>TYPIFY() <span class="overload">[4/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PowerSampling::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1ae3765e0965e27c30f8baf22dd1c1a690">CONFIG_SOFT_FUSE_CURRENT_THRESHOLD</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a64d6ad07cfbc7bed154a8b5d6796f4bf" name="a64d6ad07cfbc7bed154a8b5d6796f4bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64d6ad07cfbc7bed154a8b5d6796f4bf">&#9670;&#160;</a></span>TYPIFY() <span class="overload">[5/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PowerSampling::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a45ffe51774f8a84a32eaef46bc73b7d4">CONFIG_VOLTAGE_ADC_ZERO</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current multiplier from settings. </p>
+
+</div>
+</div>
+<a id="af62c0e202123f520813991e446dd10a8" name="af62c0e202123f520813991e446dd10a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af62c0e202123f520813991e446dd10a8">&#9670;&#160;</a></span>TYPIFY() <span class="overload">[6/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PowerSampling::TYPIFY </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="cs__Types_8h.html#ae6f00cc15d63d5331e90d1e880a35ae1a755aa20a4564b756492234718a706de4">CONFIG_VOLTAGE_MULTIPLIER</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a45fcfece2784997fdad59afbe26ca33b" name="a45fcfece2784997fdad59afbe26ca33b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45fcfece2784997fdad59afbe26ca33b">&#9670;&#160;</a></span>_adc</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classADC.html">ADC</a>* PowerSampling::_adc</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reference to the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> instance. </p>
+
+</div>
+</div>
+<a id="a59fb9da4bf0e76e8d4ebb94e0a739829" name="a59fb9da4bf0e76e8d4ebb94e0a739829"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59fb9da4bf0e76e8d4ebb94e0a739829">&#9670;&#160;</a></span>_adcChannelSwaps</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcs__adc__channel__swaps__t.html">cs_adc_channel_swaps_t</a> PowerSampling::_adcChannelSwaps</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aabc5eb96483d56a747286a70468a6280" name="aabc5eb96483d56a747286a70468a6280"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabc5eb96483d56a747286a70468a6280">&#9670;&#160;</a></span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct  { ... }  PowerSampling::_adcConfig[2]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae2bc677cadcb58c417a0459ad11f0928" name="ae2bc677cadcb58c417a0459ad11f0928"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2bc677cadcb58c417a0459ad11f0928">&#9670;&#160;</a></span>_adcRestarts</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcs__adc__restarts__t.html">cs_adc_restarts_t</a> PowerSampling::_adcRestarts</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae17892a6d0f1b7a081bf7563736932f2" name="ae17892a6d0f1b7a081bf7563736932f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae17892a6d0f1b7a081bf7563736932f2">&#9670;&#160;</a></span>_avgCurrentRmsMilliAmp</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t PowerSampling::_avgCurrentRmsMilliAmp</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used to send out the average power (in mW). </p>
+
+</div>
+</div>
+<a id="ad7154f30a7603638f3a65d8af796cbe9" name="ad7154f30a7603638f3a65d8af796cbe9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7154f30a7603638f3a65d8af796cbe9">&#9670;&#160;</a></span>_avgPowerDiscount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t PowerSampling::_avgPowerDiscount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3670bbc8bbca1d7aa73bfab35355f8e7" name="a3670bbc8bbca1d7aa73bfab35355f8e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3670bbc8bbca1d7aa73bfab35355f8e7">&#9670;&#160;</a></span>_avgPowerMilliWatt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t PowerSampling::_avgPowerMilliWatt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of times the zero current has been calculated. </p>
+
+</div>
+</div>
+<a id="ad89d4ccef3bba1997b0860c426864fee" name="ad89d4ccef3bba1997b0860c426864fee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad89d4ccef3bba1997b0860c426864fee">&#9670;&#160;</a></span>_avgVoltageRmsMilliVolt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t PowerSampling::_avgVoltageRmsMilliVolt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used for storing the average rms current (in mA). </p>
+
+</div>
+</div>
+<a id="a3e2d870f94dcb81c23629bafb2edd346" name="a3e2d870f94dcb81c23629bafb2edd346"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e2d870f94dcb81c23629bafb2edd346">&#9670;&#160;</a></span>_avgZeroCurrent</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t PowerSampling::_avgZeroCurrent</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used for storing and calculating the average zero voltage value (times 1024). </p>
+
+</div>
+</div>
+<a id="ac2f3b8b10355609584c81d5d182053c9" name="ac2f3b8b10355609584c81d5d182053c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2f3b8b10355609584c81d5d182053c9">&#9670;&#160;</a></span>_avgZeroCurrentDiscount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t PowerSampling::_avgZeroCurrentDiscount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Power zero from settings. </p>
+
+</div>
+</div>
+<a id="a445fad0b0165a55481797e626b60c038" name="a445fad0b0165a55481797e626b60c038"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a445fad0b0165a55481797e626b60c038">&#9670;&#160;</a></span>_avgZeroVoltage</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t PowerSampling::_avgZeroVoltage</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Measured power when there is no load for this board (mW). </p>
+
+</div>
+</div>
+<a id="ace659ee2b33a5985aeb66be7357c1456" name="ace659ee2b33a5985aeb66be7357c1456"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace659ee2b33a5985aeb66be7357c1456">&#9670;&#160;</a></span>_avgZeroVoltageDiscount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t PowerSampling::_avgZeroVoltageDiscount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aab4ea7990f24b77ff8087dd6b2fd8dec" name="aab4ea7990f24b77ff8087dd6b2fd8dec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab4ea7990f24b77ff8087dd6b2fd8dec">&#9670;&#160;</a></span>_boardConfig</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="structboards__config__t.html">boards_config_t</a>* PowerSampling::_boardConfig = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a575fe5e55425ec3722993a3f864c3611" name="a575fe5e55425ec3722993a3f864c3611"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a575fe5e55425ec3722993a3f864c3611">&#9670;&#160;</a></span>_boardPowerZero</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t PowerSampling::_boardPowerZero</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9fe8f2bfde4fdb65fd798e358687f2c1" name="a9fe8f2bfde4fdb65fd798e358687f2c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fe8f2bfde4fdb65fd798e358687f2c1">&#9670;&#160;</a></span>_bufferQueue</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt;<a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a>&gt; PowerSampling::_bufferQueue</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Queue of buffers we can use for processing. </p>
+<p >If queue size == 1:</p><ul>
+<li>buffer[0] = last filtered. If queue size &gt; 1:</li>
+<li>buffer[size] = last unfiltered.</li>
+<li>buffer[size-1] = last filtered.</li>
+<li>buffer[size-2] = previous filtered. </li>
+</ul>
+
+</div>
+</div>
+<a id="a1a51074d4be0b1e9218ab8ac5685c351" name="a1a51074d4be0b1e9218ab8ac5685c351"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a51074d4be0b1e9218ab8ac5685c351">&#9670;&#160;</a></span>_bufSkipCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t PowerSampling::_bufSkipCount = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Count number of buffers that have been skipped for processing. </p>
+
+</div>
+</div>
+<a id="ae80e426df3ac2bb1b93a2d44777213d8" name="ae80e426df3ac2bb1b93a2d44777213d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae80e426df3ac2bb1b93a2d44777213d8">&#9670;&#160;</a></span>_calibratePowerZeroCountDown</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t PowerSampling::_calibratePowerZeroCountDown = 4000 / <a class="el" href="cs__Config_8h.html#a92e77c810a0d25e2ef1f90d24dfefd0a">TICK_INTERVAL_MS</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up whether the IGBT failure detection has started yet. </p>
+
+</div>
+</div>
+<a id="a4720c06519f4285feeda0cd20926b90b" name="a4720c06519f4285feeda0cd20926b90b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4720c06519f4285feeda0cd20926b90b">&#9670;&#160;</a></span>_consecutiveDimmerOvercurrent</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t PowerSampling::_consecutiveDimmerOvercurrent = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used to copy a history to (so it can be used to calculate the median) </p>
+
+</div>
+</div>
+<a id="a026052b37a6e50e2eb5cd6b35fa8bfd3" name="a026052b37a6e50e2eb5cd6b35fa8bfd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a026052b37a6e50e2eb5cd6b35fa8bfd3">&#9670;&#160;</a></span>_consecutiveOvercurrent</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t PowerSampling::_consecutiveOvercurrent = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac1395e1c3d8666e337834c72cbf0d4df" name="ac1395e1c3d8666e337834c72cbf0d4df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1395e1c3d8666e337834c72cbf0d4df">&#9670;&#160;</a></span>_currentMilliAmpThresholdDimmer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">PowerSampling::_currentMilliAmpThresholdDimmer</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current threshold from settings. </p>
+
+</div>
+</div>
+<a id="a6725cec99671f4bd56e2854f33564e24" name="a6725cec99671f4bd56e2854f33564e24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6725cec99671f4bd56e2854f33564e24">&#9670;&#160;</a></span>_currentRmsMilliAmpHist</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt;int32_t&gt;* PowerSampling::_currentRmsMilliAmpHist</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used to store a history of the power. </p>
+
+</div>
+</div>
+<a id="a0c14935181a92043a70aab726035c6be" name="a0c14935181a92043a70aab726035c6be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c14935181a92043a70aab726035c6be">&#9670;&#160;</a></span>_dimmerFailureDetectionStarted</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::_dimmerFailureDetectionStarted = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Keep up whether the last switch off time is valid. </p>
+
+</div>
+</div>
+<a id="a7ae70432b9740c4a7a495d142adc0636" name="a7ae70432b9740c4a7a495d142adc0636"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ae70432b9740c4a7a495d142adc0636">&#9670;&#160;</a></span>_energyUsedmicroJoule</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int64_t PowerSampling::_energyUsedmicroJoule = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current threshold when using dimmer from settings. </p>
+
+</div>
+</div>
+<a id="a0ede562a461892f48196123186256a4d" name="a0ede562a461892f48196123186256a4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ede562a461892f48196123186256a4d">&#9670;&#160;</a></span>_filteredCurrentRmsHistMA</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt;int32_t&gt;* PowerSampling::_filteredCurrentRmsHistMA</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used to store a history of the current_rms. </p>
+
+</div>
+</div>
+<a id="a78be371818ad252e67bf8e992858d7ee" name="a78be371818ad252e67bf8e992858d7ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78be371818ad252e67bf8e992858d7ee">&#9670;&#160;</a></span>_filterParams</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structMedianFilter.html">MedianFilter</a>* PowerSampling::_filterParams</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used for storing the filtered samples. </p>
+
+</div>
+</div>
+<a id="ae8e9382c11d5dd61e042ba5ef83feae4" name="ae8e9382c11d5dd61e042ba5ef83feae4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8e9382c11d5dd61e042ba5ef83feae4">&#9670;&#160;</a></span>_histCopy</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int32_t PowerSampling::_histCopy[<a class="el" href="cs__Config_8h.html#aca75ea57c61b7fe6f46697760e820777">POWER_SAMPLING_RMS_WINDOW_SIZE</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used to store a history of the voltage_rms. </p>
+
+</div>
+</div>
+<a id="a449fcadc9e1eb0f78ea3f3587bdebac3" name="a449fcadc9e1eb0f78ea3f3587bdebac3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a449fcadc9e1eb0f78ea3f3587bdebac3">&#9670;&#160;</a></span>_inputSamples</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="Element_8h.html#a10979058733bad1a0af212977d7bb8ac">PowerVector</a>* PowerSampling::_inputSamples</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used for storing the average rms voltage (in mV). </p>
+
+</div>
+</div>
+<a id="a512bc52b2d12a6766642e68ec40b0e81" name="a512bc52b2d12a6766642e68ec40b0e81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a512bc52b2d12a6766642e68ec40b0e81">&#9670;&#160;</a></span>_isInitialized</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::_isInitialized = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Variable to keep up whether power sampling is initialized. </p>
+
+</div>
+</div>
+<a id="a5e18ce1fe383717b99a112d8b2c86ca8" name="a5e18ce1fe383717b99a112d8b2c86ca8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e18ce1fe383717b99a112d8b2c86ca8">&#9670;&#160;</a></span>_lastBufIndex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> PowerSampling::_lastBufIndex = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abe3b1e9d2bc8f697eab91c94c4360e7c" name="abe3b1e9d2bc8f697eab91c94c4360e7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe3b1e9d2bc8f697eab91c94c4360e7c">&#9670;&#160;</a></span>_lastBufSeqNr</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a> PowerSampling::_lastBufSeqNr = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0877c8b83422ac1a1871b356bca62e00" name="a0877c8b83422ac1a1871b356bca62e00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0877c8b83422ac1a1871b356bca62e00">&#9670;&#160;</a></span>_lastFilteredBufIndex</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a8e3577de7d46db84f058cff9a7357452">adc_buffer_id_t</a> PowerSampling::_lastFilteredBufIndex = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a83c9d7e31b553d84076bb7af76b285c4" name="a83c9d7e31b553d84076bb7af76b285c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83c9d7e31b553d84076bb7af76b285c4">&#9670;&#160;</a></span>_lastSoftfuse</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcs__power__samples__header__t.html">cs_power_samples_header_t</a> PowerSampling::_lastSoftfuse</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a762fb6db01be318df47d835ac415c3a5" name="a762fb6db01be318df47d835ac415c3a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a762fb6db01be318df47d835ac415c3a5">&#9670;&#160;</a></span>_lastSoftfuseSamples</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a> PowerSampling::_lastSoftfuseSamples[<a class="el" href="classAdcBuffer.html#ac7bd9966c599054e6bac16e2712877df">AdcBuffer::getChannelLength</a>()] = {0}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a54f0956f5be6394337c8e908e73a2ca9" name="a54f0956f5be6394337c8e908e73a2ca9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54f0956f5be6394337c8e908e73a2ca9">&#9670;&#160;</a></span>_lastSwitchOffTicks</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t PowerSampling::_lastSwitchOffTicks</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stores the last seen switch state. </p>
+
+</div>
+</div>
+<a id="a189a86f6c0f6d4d4923eefbc667071ed" name="a189a86f6c0f6d4d4923eefbc667071ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a189a86f6c0f6d4d4923eefbc667071ed">&#9670;&#160;</a></span>_lastSwitchOffTicksValid</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::_lastSwitchOffTicksValid = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classRTC.html" title="Wrapper class for RTC functions.">RTC</a> ticks when the switch was last turned off. </p>
+
+</div>
+</div>
+<a id="af32ea824f2e6f91b378232ac44138371" name="af32ea824f2e6f91b378232ac44138371"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af32ea824f2e6f91b378232ac44138371">&#9670;&#160;</a></span>_lastSwitchSamples</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a> PowerSampling::_lastSwitchSamples[<a class="el" href="classPowerSampling.html#a86bbfc55b123a90542b6f1143975b02e">numSwitchSamplesBuffers</a> *<a class="el" href="classAdcBuffer.html#ac7bd9966c599054e6bac16e2712877df">AdcBuffer::getChannelLength</a>()] = {0}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aca2ba4ee2493dc823a50a85ed1718510" name="aca2ba4ee2493dc823a50a85ed1718510"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca2ba4ee2493dc823a50a85ed1718510">&#9670;&#160;</a></span>_lastSwitchSamplesHeader</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structcs__power__samples__header__t.html">cs_power_samples_header_t</a> PowerSampling::_lastSwitchSamplesHeader</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a34e80bc4badedcf58402f7f39e35d504" name="a34e80bc4badedcf58402f7f39e35d504"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34e80bc4badedcf58402f7f39e35d504">&#9670;&#160;</a></span>_lastSwitchState</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="unionswitch__state__t.html">switch_state_t</a> PowerSampling::_lastSwitchState</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Energy used in micro joule. </p>
+
+</div>
+</div>
+<a id="a89c75e1c49204dc24a3b7d14269b0d24" name="a89c75e1c49204dc24a3b7d14269b0d24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89c75e1c49204dc24a3b7d14269b0d24">&#9670;&#160;</a></span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">union  { ... }  PowerSampling::_logsEnabled</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a968fed3a8c3809b2e057a37396df08f8" name="a968fed3a8c3809b2e057a37396df08f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a968fed3a8c3809b2e057a37396df08f8">&#9670;&#160;</a></span>_negativePowerThresholdMilliWatt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float PowerSampling::_negativePowerThresholdMilliWatt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7d2b6ce7d681e469acae708caa1be5b9" name="a7d2b6ce7d681e469acae708caa1be5b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d2b6ce7d681e469acae708caa1be5b9">&#9670;&#160;</a></span>_operationMode</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Types_8h.html#a25bbfb7442459b8d546e1f1551835479">OperationMode</a> PowerSampling::_operationMode</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Operation mode of this device. </p>
+
+</div>
+</div>
+<a id="ad49a1186dfa55b637b9999dfd895c6c1" name="ad49a1186dfa55b637b9999dfd895c6c1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad49a1186dfa55b637b9999dfd895c6c1">&#9670;&#160;</a></span>_outputSamples</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="Element_8h.html#a10979058733bad1a0af212977d7bb8ac">PowerVector</a>* PowerSampling::_outputSamples</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used for storing the samples to be filtered. </p>
+
+</div>
+</div>
+<a id="a31fa462d3b677cea621213952d1f129c" name="a31fa462d3b677cea621213952d1f129c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31fa462d3b677cea621213952d1f129c">&#9670;&#160;</a></span>_powerDiffThresholdMinMilliWatt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float PowerSampling::_powerDiffThresholdMinMilliWatt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a79e8e44d79e689c89c7f1d7b9a472a6a" name="a79e8e44d79e689c89c7f1d7b9a472a6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79e8e44d79e689c89c7f1d7b9a472a6a">&#9670;&#160;</a></span>_powerDiffThresholdPart</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float PowerSampling::_powerDiffThresholdPart</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad7251a37829c83a01511fc87ea1db8d7" name="ad7251a37829c83a01511fc87ea1db8d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7251a37829c83a01511fc87ea1db8d7">&#9670;&#160;</a></span>_powerMilliWattHist</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt;int32_t&gt;* PowerSampling::_powerMilliWattHist</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stores the parameters for the moving median filter. </p>
+
+</div>
+</div>
+<a id="abdcebf436007a9063cc148e0f3813932" name="abdcebf436007a9063cc148e0f3813932"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdcebf436007a9063cc148e0f3813932">&#9670;&#160;</a></span>_recalibrateZeroCurrent</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::_recalibrateZeroCurrent</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether or not the zero voltage value should be recalculated. </p>
+
+</div>
+</div>
+<a id="a765fd6d9b4c20aad0bf0e31a5b5cbf00" name="a765fd6d9b4c20aad0bf0e31a5b5cbf00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a765fd6d9b4c20aad0bf0e31a5b5cbf00">&#9670;&#160;</a></span>_recalibrateZeroVoltage</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::_recalibrateZeroVoltage</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used for storing and calculating the average zero current value (times 1024). </p>
+
+</div>
+</div>
+<a id="a12aeac8a8b48d39ec9985c162e28bcb4" name="a12aeac8a8b48d39ec9985c162e28bcb4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12aeac8a8b48d39ec9985c162e28bcb4">&#9670;&#160;</a></span>_slowAvgPowerCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t PowerSampling::_slowAvgPowerCount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab28dcc662579401fc8ac80c4c794b0a9" name="ab28dcc662579401fc8ac80c4c794b0a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab28dcc662579401fc8ac80c4c794b0a9">&#9670;&#160;</a></span>_slowAvgPowerDiscount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float PowerSampling::_slowAvgPowerDiscount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6167d2555705d7c8ebe1765452a70498" name="a6167d2555705d7c8ebe1765452a70498"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6167d2555705d7c8ebe1765452a70498">&#9670;&#160;</a></span>_slowAvgPowerMilliWatt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float PowerSampling::_slowAvgPowerMilliWatt = 0.0f</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a51785c769fe7a1c7b92f9f68000164e5" name="a51785c769fe7a1c7b92f9f68000164e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51785c769fe7a1c7b92f9f68000164e5">&#9670;&#160;</a></span>_switchHist</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt;<a class="el" href="unionswitch__state__t.html">switch_state_t</a>&gt; PowerSampling::_switchHist</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a366a6214086be0ea4168272000cedf56" name="a366a6214086be0ea4168272000cedf56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a366a6214086be0ea4168272000cedf56">&#9670;&#160;</a></span>_voltageRmsMilliVoltHist</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classCircularBuffer.html">CircularBuffer</a>&lt;int32_t&gt;* PowerSampling::_voltageRmsMilliVoltHist</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used to store a history of the filtered current_rms. </p>
+
+</div>
+</div>
+<a id="af8b89ae54846939c828f8f2ec08d4f54" name="af8b89ae54846939c828f8f2ec08d4f54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af8b89ae54846939c828f8f2ec08d4f54">&#9670;&#160;</a></span>_zeroCurrentCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t PowerSampling::_zeroCurrentCount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number of times the zero voltage has been calculated. </p>
+
+</div>
+</div>
+<a id="afb0e2bca20693cdb29104ec2dba88a38" name="afb0e2bca20693cdb29104ec2dba88a38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb0e2bca20693cdb29104ec2dba88a38">&#9670;&#160;</a></span>_zeroVoltageCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t PowerSampling::_zeroVoltageCount</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Whether or not the zero current value should be recalculated. </p>
+
+</div>
+</div>
+<a id="ae3ac358db377ef5b8596871a54eb6ad3" name="ae3ac358db377ef5b8596871a54eb6ad3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3ac358db377ef5b8596871a54eb6ad3">&#9670;&#160;</a></span>asInt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t PowerSampling::asInt</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab8ce4a0d57c31cf3a3ab7d897dbb1bef" name="ab8ce4a0d57c31cf3a3ab7d897dbb1bef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8ce4a0d57c31cf3a3ab7d897dbb1bef">&#9670;&#160;</a></span>config</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structadc__channel__config__t.html">adc_channel_config_t</a> PowerSampling::config</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a25f4d37ff083c758d1b1d71bb6ac7891" name="a25f4d37ff083c758d1b1d71bb6ac7891"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25f4d37ff083c758d1b1d71bb6ac7891">&#9670;&#160;</a></span>current</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::current</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a16f3a09e8a5cd7a137d7aa81569b1a8e" name="a16f3a09e8a5cd7a137d7aa81569b1a8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16f3a09e8a5cd7a137d7aa81569b1a8e">&#9670;&#160;</a></span>filteredCurrent</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::filteredCurrent</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a07c2deaa5e514241795530546ec5522f" name="a07c2deaa5e514241795530546ec5522f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07c2deaa5e514241795530546ec5522f">&#9670;&#160;</a></span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct  { ... }  PowerSampling::flags</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a42b814ec5b6cd5dbcbfc5ddbe45d8fa6" name="a42b814ec5b6cd5dbcbfc5ddbe45d8fa6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42b814ec5b6cd5dbcbfc5ddbe45d8fa6">&#9670;&#160;</a></span>numFilteredBuffersForProcessing</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t PowerSampling::numFilteredBuffersForProcessing = 4</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a86bbfc55b123a90542b6f1143975b02e" name="a86bbfc55b123a90542b6f1143975b02e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86bbfc55b123a90542b6f1143975b02e">&#9670;&#160;</a></span>numSwitchSamplesBuffers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t PowerSampling::numSwitchSamplesBuffers = 6</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3935dff30b523f1a6acf6a0afdc29db7" name="a3935dff30b523f1a6acf6a0afdc29db7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3935dff30b523f1a6acf6a0afdc29db7">&#9670;&#160;</a></span>numUnfilteredBuffers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t PowerSampling::numUnfilteredBuffers = 1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a98cddee95b50b2652dc7209ce362c893" name="a98cddee95b50b2652dc7209ce362c893"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98cddee95b50b2652dc7209ce362c893">&#9670;&#160;</a></span>pinCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t PowerSampling::pinCount = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a00ea0aae68cd5d0ce977cd674ff85c7a" name="a00ea0aae68cd5d0ce977cd674ff85c7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00ea0aae68cd5d0ce977cd674ff85c7a">&#9670;&#160;</a></span>pinIndex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t PowerSampling::pinIndex = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a385d7ef2b40ad053cc4960ce9fceb154" name="a385d7ef2b40ad053cc4960ce9fceb154"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a385d7ef2b40ad053cc4960ce9fceb154">&#9670;&#160;</a></span>power</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::power</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aad27b62d5945491a5b3f1e9104bfa0b2" name="aad27b62d5945491a5b3f1e9104bfa0b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad27b62d5945491a5b3f1e9104bfa0b2">&#9670;&#160;</a></span>slowAvgPowerConvergedCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint16_t PowerSampling::slowAvgPowerConvergedCount = 1000</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a52683db6f0dee2259776d7daf5ab66f4" name="a52683db6f0dee2259776d7daf5ab66f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52683db6f0dee2259776d7daf5ab66f4">&#9670;&#160;</a></span>switchHistSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t PowerSampling::switchHistSize = 3</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae6ac9f0b4bb808ac1f77dddf0a83150e" name="ae6ac9f0b4bb808ac1f77dddf0a83150e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6ac9f0b4bb808ac1f77dddf0a83150e">&#9670;&#160;</a></span>voltage</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PowerSampling::voltage</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

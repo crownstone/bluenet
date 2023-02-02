@@ -1,8 +1,25 @@
 var classPresenceHandler =
 [
-    [ "ProfileLocation", "structPresenceHandler_1_1ProfileLocation.html", null ],
+    [ "PresenceRecord", "structPresenceHandler_1_1PresenceRecord.html", "structPresenceHandler_1_1PresenceRecord" ],
+    [ "ProfileLocation", "structPresenceHandler_1_1ProfileLocation.html", "structPresenceHandler_1_1ProfileLocation" ],
+    [ "PresenceHandler", "classPresenceHandler.html#aad66883772830e275d6cde66c26185ad", null ],
+    [ "~PresenceHandler", "classPresenceHandler.html#a4b2863578964e1dd47a4c63629dcee1f", null ],
+    [ "clearOldestRecord", "classPresenceHandler.html#a491834471638fd7c4e2f883c7039bb91", null ],
+    [ "dispatchPresenceChangeEvent", "classPresenceHandler.html#a4e4565fe6e614b6c71fdd3b2c4d9f471", null ],
+    [ "dispatchPresenceMutationEvent", "classPresenceHandler.html#ae880c4aa0970ec748e83267838610310", null ],
     [ "getCurrentPresenceDescription", "classPresenceHandler.html#a91af494ca492d6f30fb70d9628f9db4f", null ],
+    [ "getMutationType", "classPresenceHandler.html#a7ba62308ba92c0b8d19f6c7c91f7d8d1", null ],
     [ "handleEvent", "classPresenceHandler.html#a2f9f2149b53cc0857bd04578bcfb0b6e", null ],
+    [ "handlePresenceEvent", "classPresenceHandler.html#ac7eb071b73f3f1c5579f58e867c20aa6", null ],
+    [ "handleProfileLocation", "classPresenceHandler.html#a50819078e268f682dcfd542e70d63462", null ],
     [ "init", "classPresenceHandler.html#ad3378204c706a8e91971a1c31803d0d4", null ],
-    [ "registerPresence", "classPresenceHandler.html#a13e8f929cac9c3316921743259900983", null ]
+    [ "registerPresence", "classPresenceHandler.html#a13e8f929cac9c3316921743259900983", null ],
+    [ "sendMeshMessage", "classPresenceHandler.html#aaa71f3799f0cb9d58bb53f42efd05a6b", null ],
+    [ "tickSecond", "classPresenceHandler.html#acc1791a4fc610c1b44a5f483d14b8a22", null ],
+    [ "_store", "classPresenceHandler.html#a75bc4196da28b3d5157eac97d262a7dd", null ],
+    [ "MAX_RECORDS", "classPresenceHandler.html#ae85d358abbe56b800d88e30ddb274e00", null ],
+    [ "PRESENCE_MESH_SEND_THROTTLE_SECONDS", "classPresenceHandler.html#ae33bad529d080b1bf4c6ef1ddcafe0c8", null ],
+    [ "PRESENCE_MESH_SEND_THROTTLE_SECONDS_VARIATION", "classPresenceHandler.html#aeb6da6c2337194f5e5d373a9cff74548", null ],
+    [ "PRESENCE_TIMEOUT_SECONDS", "classPresenceHandler.html#ab85cb71d245b5ec714bf3e268775c27c", null ],
+    [ "PRESENCE_UNCERTAIN_SECONDS_AFTER_BOOT", "classPresenceHandler.html#abd58daf87e5b8d5afdef785c63722d30", null ]
 ];

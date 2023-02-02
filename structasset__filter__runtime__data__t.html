@@ -114,22 +114,17 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a5c88648611aaba9b6113734d2db01b85"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structasset__filter__runtime__data__t.html#a5c88648611aaba9b6113734d2db01b85">filterId</a></td></tr>
 <tr class="memdesc:a5c88648611aaba9b6113734d2db01b85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Id of a filter.  <a href="structasset__filter__runtime__data__t.html#a5c88648611aaba9b6113734d2db01b85">More...</a><br /></td></tr>
 <tr class="separator:a5c88648611aaba9b6113734d2db01b85"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a60e81db958c05776f1fc2b933e4772"><td class="memItemLeft" ><a id="a5a60e81db958c05776f1fc2b933e4772" name="a5a60e81db958c05776f1fc2b933e4772"></a>
-union {</td></tr>
-<tr class="memitem:a3e14830752dedb6510878d3459cdf07a"><td class="memItemLeft" >
-&#160;&#160;&#160;struct {</td></tr>
-<tr class="memitem:a2ff6a94f93989feb955a80650ea3fe94"><td class="memItemLeft" >
-&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<b>crcCalculated</b>: 1</td></tr>
+<tr class="memitem:a5a60e81db958c05776f1fc2b933e4772"><td class="memItemLeft" >union {</td></tr>
+<tr class="memitem:a3e14830752dedb6510878d3459cdf07a"><td class="memItemLeft" >&#160;&#160;&#160;struct {</td></tr>
+<tr class="memitem:a2ff6a94f93989feb955a80650ea3fe94"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="structasset__filter__runtime__data__t.html#a56a2c2d22b01138d73a5d6521778c047">crcCalculated</a>: 1</td></tr>
 <tr class="separator:a2ff6a94f93989feb955a80650ea3fe94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fafe7ad7715cbfe2a9324c458fc0b08"><td class="memItemLeft" >
-&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<b>committed</b>: 1</td></tr>
+<tr class="memitem:a0fafe7ad7715cbfe2a9324c458fc0b08"><td class="memItemLeft" >&#160;&#160;&#160;&#160;&#160;&#160;bool&#160;&#160;&#160;<a class="el" href="structasset__filter__runtime__data__t.html#aa970c27420e8b2c0df2452a46959e122">committed</a>: 1</td></tr>
 <tr class="separator:a0fafe7ad7715cbfe2a9324c458fc0b08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e14830752dedb6510878d3459cdf07a"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;&#160;&#160;<b>flags</b></td></tr>
+<tr class="memitem:a3e14830752dedb6510878d3459cdf07a"><td class="memItemLeft" valign="top">&#160;&#160;&#160;}&#160;&#160;&#160;<a class="el" href="structasset__filter__runtime__data__t.html#ab13496b558f84c07a9b8620ac569b8c4">flags</a></td></tr>
 <tr class="separator:a3e14830752dedb6510878d3459cdf07a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74b997d6e3b261cb7559325e24ed6f0b"><td class="memItemLeft" >
-&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<b>asInt</b> = 0</td></tr>
+<tr class="memitem:a74b997d6e3b261cb7559325e24ed6f0b"><td class="memItemLeft" >&#160;&#160;&#160;uint8_t&#160;&#160;&#160;<a class="el" href="structasset__filter__runtime__data__t.html#a4815f8620df087dba5bf40a67b774e20">asInt</a> = 0</td></tr>
 <tr class="separator:a74b997d6e3b261cb7559325e24ed6f0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a60e81db958c05776f1fc2b933e4772"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><b>flags</b></td></tr>
+<tr class="memitem:a5a60e81db958c05776f1fc2b933e4772"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structasset__filter__runtime__data__t.html#a5a60e81db958c05776f1fc2b933e4772">flags</a></td></tr>
 <tr class="separator:a5a60e81db958c05776f1fc2b933e4772"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1502bca05f8472cdbc5fbf395675746a"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structasset__filter__runtime__data__t.html#a1502bca05f8472cdbc5fbf395675746a">filterDataSize</a></td></tr>
 <tr class="memdesc:a1502bca05f8472cdbc5fbf395675746a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The size of the tracking_filter_t, including the buffer, excluding sizeof(runtimedata).  <a href="structasset__filter__runtime__data__t.html#a1502bca05f8472cdbc5fbf395675746a">More...</a><br /></td></tr>
@@ -141,6 +136,34 @@ union {</td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Runtime meta data associated to an asset filter that is not persisted to flash. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a4815f8620df087dba5bf40a67b774e20" name="a4815f8620df087dba5bf40a67b774e20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4815f8620df087dba5bf40a67b774e20">&#9670;&#160;</a></span>asInt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t asset_filter_runtime_data_t::asInt = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa970c27420e8b2c0df2452a46959e122" name="aa970c27420e8b2c0df2452a46959e122"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa970c27420e8b2c0df2452a46959e122">&#9670;&#160;</a></span>committed</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool asset_filter_runtime_data_t::committed</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a6982c95d648842228358cd3ecc2c0325" name="a6982c95d648842228358cd3ecc2c0325"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6982c95d648842228358cd3ecc2c0325">&#9670;&#160;</a></span>crc</h2>
 
@@ -158,6 +181,20 @@ union {</td></tr>
 <li>tracking_filter_t::metadata</li>
 <li>tracking_filter_t::filterdata </li>
 </ul>
+
+</div>
+</div>
+<a id="a56a2c2d22b01138d73a5d6521778c047" name="a56a2c2d22b01138d73a5d6521778c047"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56a2c2d22b01138d73a5d6521778c047">&#9670;&#160;</a></span>crcCalculated</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool asset_filter_runtime_data_t::crcCalculated</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -197,6 +234,34 @@ union {</td></tr>
 
 <p>Id of a filter. </p>
 <p >Can be runtime only since it's saved as part of record metadata on flash. (<a class="el" href="classState.html" title="Stores state values in RAM and/or FLASH.">State</a> Id equals filter Id) </p>
+
+</div>
+</div>
+<a id="ab13496b558f84c07a9b8620ac569b8c4" name="ab13496b558f84c07a9b8620ac569b8c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab13496b558f84c07a9b8620ac569b8c4">&#9670;&#160;</a></span> <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct  { ... }  asset_filter_runtime_data_t::flags</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5a60e81db958c05776f1fc2b933e4772" name="a5a60e81db958c05776f1fc2b933e4772"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a60e81db958c05776f1fc2b933e4772">&#9670;&#160;</a></span> <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">union  { ... }  asset_filter_runtime_data_t::flags</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

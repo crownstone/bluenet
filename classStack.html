@@ -104,6 +104,7 @@ $(document).ready(function(){initNavTree('classStack.html',''); initResizable();
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="classStack-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Stack Class Reference</div></div>
 </div><!--header-->
@@ -137,13 +138,12 @@ Collaboration diagram for Stack:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a2c61cfe41b4fd058abe511b1a597a510"><td class="memItemLeft" align="right" valign="top"><a id="a2c61cfe41b4fd058abe511b1a597a510" name="a2c61cfe41b4fd058abe511b1a597a510"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>condition_t</b> { <b>C_STACK_INITIALIZED</b>
-, <b>C_RADIO_INITIALIZED</b>
-, <b>C_SERVICES_INITIALIZED</b>
+<tr class="memitem:a2c61cfe41b4fd058abe511b1a597a510"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a2c61cfe41b4fd058abe511b1a597a510">condition_t</a> { <a class="el" href="classStack.html#a2c61cfe41b4fd058abe511b1a597a510a79e8b9b2266dae7536f56260b5fb8349">C_STACK_INITIALIZED</a>
+, <a class="el" href="classStack.html#a2c61cfe41b4fd058abe511b1a597a510ac11b80705fb098e9730427168dfff44e">C_RADIO_INITIALIZED</a>
+, <a class="el" href="classStack.html#a2c61cfe41b4fd058abe511b1a597a510a35bf0e4bf166919b9d066c400e24d7ba">C_SERVICES_INITIALIZED</a>
  }</td></tr>
 <tr class="separator:a2c61cfe41b4fd058abe511b1a597a510"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ac31c600e9af36c39731b4b5b9a9d4c"><td class="memItemLeft" align="right" valign="top"><a id="a9ac31c600e9af36c39731b4b5b9a9d4c" name="a9ac31c600e9af36c39731b4b5b9a9d4c"></a>
-typedef <a class="el" href="classfixed__tuple.html">fixed_tuple</a>&lt; <a class="el" href="classService.html">Service</a> *, <a class="el" href="classStack.html#ac472f79d0221f4e7b892dc5cfe846829">MAX_SERVICE_COUNT</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>Services_t</b></td></tr>
+<tr class="memitem:a9ac31c600e9af36c39731b4b5b9a9d4c"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classfixed__tuple.html">fixed_tuple</a>&lt; <a class="el" href="classService.html">Service</a> *, <a class="el" href="classStack.html#ac472f79d0221f4e7b892dc5cfe846829">MAX_SERVICE_COUNT</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a9ac31c600e9af36c39731b4b5b9a9d4c">Services_t</a></td></tr>
 <tr class="separator:a9ac31c600e9af36c39731b4b5b9a9d4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -154,65 +154,51 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ada32d485742dd8f9c402bd59bc45319d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ada32d485742dd8f9c402bd59bc45319d">initRadio</a> ()</td></tr>
 <tr class="memdesc:ada32d485742dd8f9c402bd59bc45319d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialization of the radio.  <a href="classStack.html#ada32d485742dd8f9c402bd59bc45319d">More...</a><br /></td></tr>
 <tr class="separator:ada32d485742dd8f9c402bd59bc45319d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac59720a43020d2844a0a9ea190fb90ce"><td class="memItemLeft" align="right" valign="top"><a id="ac59720a43020d2844a0a9ea190fb90ce" name="ac59720a43020d2844a0a9ea190fb90ce"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>initSoftdevice</b> ()</td></tr>
+<tr class="memitem:ac59720a43020d2844a0a9ea190fb90ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ac59720a43020d2844a0a9ea190fb90ce">initSoftdevice</a> ()</td></tr>
 <tr class="separator:ac59720a43020d2844a0a9ea190fb90ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51bc504415727e420f008f49f6134240"><td class="memItemLeft" align="right" valign="top"><a id="a51bc504415727e420f008f49f6134240" name="a51bc504415727e420f008f49f6134240"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>createCharacteristics</b> ()</td></tr>
+<tr class="memitem:a51bc504415727e420f008f49f6134240"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a51bc504415727e420f008f49f6134240">createCharacteristics</a> ()</td></tr>
 <tr class="separator:a51bc504415727e420f008f49f6134240"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27067a43e4e48e570dbe60f8df56214b"><td class="memItemLeft" align="right" valign="top"><a id="a27067a43e4e48e570dbe60f8df56214b" name="a27067a43e4e48e570dbe60f8df56214b"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isDisconnecting</b> ()</td></tr>
-<tr class="memdesc:a27067a43e4e48e570dbe60f8df56214b"><td class="mdescLeft">&#160;</td><td class="mdescRight">In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8. <br /></td></tr>
+<tr class="memitem:a27067a43e4e48e570dbe60f8df56214b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a27067a43e4e48e570dbe60f8df56214b">isDisconnecting</a> ()</td></tr>
+<tr class="memdesc:a27067a43e4e48e570dbe60f8df56214b"><td class="mdescLeft">&#160;</td><td class="mdescRight">In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8.  <a href="classStack.html#a27067a43e4e48e570dbe60f8df56214b">More...</a><br /></td></tr>
 <tr class="separator:a27067a43e4e48e570dbe60f8df56214b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52a04768d69f6f6e97c4219cf161e137"><td class="memItemLeft" align="right" valign="top"><a id="a52a04768d69f6f6e97c4219cf161e137" name="a52a04768d69f6f6e97c4219cf161e137"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isConnected</b> ()</td></tr>
+<tr class="memitem:a52a04768d69f6f6e97c4219cf161e137"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a52a04768d69f6f6e97c4219cf161e137">isConnected</a> ()</td></tr>
 <tr class="separator:a52a04768d69f6f6e97c4219cf161e137"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a941207e8cad83a588e921f2b9d7d80ae"><td class="memItemLeft" align="right" valign="top"><a id="a941207e8cad83a588e921f2b9d7d80ae" name="a941207e8cad83a588e921f2b9d7d80ae"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isConnectedPeripheral</b> ()</td></tr>
+<tr class="memitem:a941207e8cad83a588e921f2b9d7d80ae"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a941207e8cad83a588e921f2b9d7d80ae">isConnectedPeripheral</a> ()</td></tr>
 <tr class="separator:a941207e8cad83a588e921f2b9d7d80ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6660eb6c637ff3202751c4b6d467e473"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a6660eb6c637ff3202751c4b6d467e473">resetConnectionWatchdog</a> ()</td></tr>
 <tr class="memdesc:a6660eb6c637ff3202751c4b6d467e473"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bluenet will automatically disconnect after nothing has been written for some time.  <a href="classStack.html#a6660eb6c637ff3202751c4b6d467e473">More...</a><br /></td></tr>
 <tr class="separator:a6660eb6c637ff3202751c4b6d467e473"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af32569a81c45d93581316d868b8f8763"><td class="memItemLeft" align="right" valign="top"><a id="af32569a81c45d93581316d868b8f8763" name="af32569a81c45d93581316d868b8f8763"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getConnectionHandle</b> ()</td></tr>
+<tr class="memitem:af32569a81c45d93581316d868b8f8763"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#af32569a81c45d93581316d868b8f8763">getConnectionHandle</a> ()</td></tr>
 <tr class="separator:af32569a81c45d93581316d868b8f8763"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8689fb3bdc4db5bc9bd7aaf0e9328b13"><td class="memItemLeft" align="right" valign="top"><a id="a8689fb3bdc4db5bc9bd7aaf0e9328b13" name="a8689fb3bdc4db5bc9bd7aaf0e9328b13"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setClockSource</b> (nrf_clock_lf_cfg_t clockSource)</td></tr>
-<tr class="memdesc:a8689fb3bdc4db5bc9bd7aaf0e9328b13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set initial clock source, not applied unless done before radio init. <br /></td></tr>
+<tr class="memitem:a8689fb3bdc4db5bc9bd7aaf0e9328b13"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a8689fb3bdc4db5bc9bd7aaf0e9328b13">setClockSource</a> (nrf_clock_lf_cfg_t clockSource)</td></tr>
+<tr class="memdesc:a8689fb3bdc4db5bc9bd7aaf0e9328b13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set initial clock source, not applied unless done before radio init.  <a href="classStack.html#a8689fb3bdc4db5bc9bd7aaf0e9328b13">More...</a><br /></td></tr>
 <tr class="separator:a8689fb3bdc4db5bc9bd7aaf0e9328b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a939f8bf7733d720435d79e975937a04d"><td class="memItemLeft" align="right" valign="top"><a id="a939f8bf7733d720435d79e975937a04d" name="a939f8bf7733d720435d79e975937a04d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>updateMinConnectionInterval</b> (uint16_t connectionInterval_1_25_ms)</td></tr>
-<tr class="memdesc:a939f8bf7733d720435d79e975937a04d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set and update the preferred minimum connection interval in units of 1.25 ms. <br /></td></tr>
+<tr class="memitem:a939f8bf7733d720435d79e975937a04d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a939f8bf7733d720435d79e975937a04d">updateMinConnectionInterval</a> (uint16_t connectionInterval_1_25_ms)</td></tr>
+<tr class="memdesc:a939f8bf7733d720435d79e975937a04d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set and update the preferred minimum connection interval in units of 1.25 ms.  <a href="classStack.html#a939f8bf7733d720435d79e975937a04d">More...</a><br /></td></tr>
 <tr class="separator:a939f8bf7733d720435d79e975937a04d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68a4ab4bf307a562d9268b951937d697"><td class="memItemLeft" align="right" valign="top"><a id="a68a4ab4bf307a562d9268b951937d697" name="a68a4ab4bf307a562d9268b951937d697"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>updateMaxConnectionInterval</b> (uint16_t connectionInterval_1_25_ms)</td></tr>
-<tr class="memdesc:a68a4ab4bf307a562d9268b951937d697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set and update the preferred maximum connection interval in units of 1.25 ms. <br /></td></tr>
+<tr class="memitem:a68a4ab4bf307a562d9268b951937d697"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a68a4ab4bf307a562d9268b951937d697">updateMaxConnectionInterval</a> (uint16_t connectionInterval_1_25_ms)</td></tr>
+<tr class="memdesc:a68a4ab4bf307a562d9268b951937d697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set and update the preferred maximum connection interval in units of 1.25 ms.  <a href="classStack.html#a68a4ab4bf307a562d9268b951937d697">More...</a><br /></td></tr>
 <tr class="separator:a68a4ab4bf307a562d9268b951937d697"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade78ae69a6955e9dcc6a6008db81c26c"><td class="memItemLeft" align="right" valign="top"><a id="ade78ae69a6955e9dcc6a6008db81c26c" name="ade78ae69a6955e9dcc6a6008db81c26c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>updateSlaveLatency</b> (uint16_t slaveLatency)</td></tr>
-<tr class="memdesc:ade78ae69a6955e9dcc6a6008db81c26c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set and update the preferred slave latency count. <br /></td></tr>
+<tr class="memitem:ade78ae69a6955e9dcc6a6008db81c26c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ade78ae69a6955e9dcc6a6008db81c26c">updateSlaveLatency</a> (uint16_t slaveLatency)</td></tr>
+<tr class="memdesc:ade78ae69a6955e9dcc6a6008db81c26c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set and update the preferred slave latency count.  <a href="classStack.html#ade78ae69a6955e9dcc6a6008db81c26c">More...</a><br /></td></tr>
 <tr class="separator:ade78ae69a6955e9dcc6a6008db81c26c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a751a7731e79e95731814c5cdf88bddb6"><td class="memItemLeft" align="right" valign="top"><a id="a751a7731e79e95731814c5cdf88bddb6" name="a751a7731e79e95731814c5cdf88bddb6"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>updateConnectionSupervisionTimeout</b> (uint16_t conSupTimeout_10_ms)</td></tr>
-<tr class="memdesc:a751a7731e79e95731814c5cdf88bddb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set and update the preferred connection supervision timeout in units of 10 ms. <br /></td></tr>
+<tr class="memitem:a751a7731e79e95731814c5cdf88bddb6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a751a7731e79e95731814c5cdf88bddb6">updateConnectionSupervisionTimeout</a> (uint16_t conSupTimeout_10_ms)</td></tr>
+<tr class="memdesc:a751a7731e79e95731814c5cdf88bddb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set and update the preferred connection supervision timeout in units of 10 ms.  <a href="classStack.html#a751a7731e79e95731814c5cdf88bddb6">More...</a><br /></td></tr>
 <tr class="separator:a751a7731e79e95731814c5cdf88bddb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab6645fdb07d13154c7016de26322eb44"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ab6645fdb07d13154c7016de26322eb44">addService</a> (<a class="el" href="classService.html">Service</a> *svc)</td></tr>
 <tr class="memdesc:ab6645fdb07d13154c7016de26322eb44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a service to the stack.  <a href="classStack.html#ab6645fdb07d13154c7016de26322eb44">More...</a><br /></td></tr>
 <tr class="separator:ab6645fdb07d13154c7016de26322eb44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd358bba18866f5a76a4f045e5f3173e"><td class="memItemLeft" align="right" valign="top"><a id="afd358bba18866f5a76a4f045e5f3173e" name="afd358bba18866f5a76a4f045e5f3173e"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>initServices</b> ()</td></tr>
-<tr class="memdesc:afd358bba18866f5a76a4f045e5f3173e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register the added services to the softdevice. <br /></td></tr>
+<tr class="memitem:afd358bba18866f5a76a4f045e5f3173e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#afd358bba18866f5a76a4f045e5f3173e">initServices</a> ()</td></tr>
+<tr class="memdesc:afd358bba18866f5a76a4f045e5f3173e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register the added services to the softdevice.  <a href="classStack.html#afd358bba18866f5a76a4f045e5f3173e">More...</a><br /></td></tr>
 <tr class="separator:afd358bba18866f5a76a4f045e5f3173e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a13df03f3f3267f20245a4f62f8c87eb9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a13df03f3f3267f20245a4f62f8c87eb9">startScanning</a> ()</td></tr>
 <tr class="memdesc:a13df03f3f3267f20245a4f62f8c87eb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start scanning for devices.  <a href="classStack.html#a13df03f3f3267f20245a4f62f8c87eb9">More...</a><br /></td></tr>
 <tr class="separator:a13df03f3f3267f20245a4f62f8c87eb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a72e64e1ed8f68f6d2de0724db04482df"><td class="memItemLeft" align="right" valign="top"><a id="a72e64e1ed8f68f6d2de0724db04482df" name="a72e64e1ed8f68f6d2de0724db04482df"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>stopScanning</b> ()</td></tr>
-<tr class="memdesc:a72e64e1ed8f68f6d2de0724db04482df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop scanning for devices. <br /></td></tr>
+<tr class="memitem:a72e64e1ed8f68f6d2de0724db04482df"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a72e64e1ed8f68f6d2de0724db04482df">stopScanning</a> ()</td></tr>
+<tr class="memdesc:a72e64e1ed8f68f6d2de0724db04482df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stop scanning for devices.  <a href="classStack.html#a72e64e1ed8f68f6d2de0724db04482df">More...</a><br /></td></tr>
 <tr class="separator:a72e64e1ed8f68f6d2de0724db04482df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa06d33178d2a12a5fcebb42039a5b42d"><td class="memItemLeft" align="right" valign="top"><a id="aa06d33178d2a12a5fcebb42039a5b42d" name="aa06d33178d2a12a5fcebb42039a5b42d"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isScanning</b> ()</td></tr>
-<tr class="memdesc:aa06d33178d2a12a5fcebb42039a5b42d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if currently scanning. <br /></td></tr>
+<tr class="memitem:aa06d33178d2a12a5fcebb42039a5b42d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#aa06d33178d2a12a5fcebb42039a5b42d">isScanning</a> ()</td></tr>
+<tr class="memdesc:aa06d33178d2a12a5fcebb42039a5b42d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if currently scanning.  <a href="classStack.html#aa06d33178d2a12a5fcebb42039a5b42d">More...</a><br /></td></tr>
 <tr class="separator:aa06d33178d2a12a5fcebb42039a5b42d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4920dc3205f06fbb59c3db0ce7a4e36"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ac4920dc3205f06fbb59c3db0ce7a4e36">onBleEvent</a> (const ble_evt_t *p_ble_evt)</td></tr>
 <tr class="memdesc:ac4920dc3205f06fbb59c3db0ce7a4e36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that handles BLE events.  <a href="classStack.html#ac4920dc3205f06fbb59c3db0ce7a4e36">More...</a><br /></td></tr>
@@ -220,125 +206,227 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>isScanning</b> ()</td
 <tr class="memitem:aebfeabeb184956892555bb1c4114b8b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#aebfeabeb184956892555bb1c4114b8b6">onBleEventInterrupt</a> (const ble_evt_t *p_ble_evt, bool isInterrupt)</td></tr>
 <tr class="memdesc:aebfeabeb184956892555bb1c4114b8b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that handles BLE events on interrupt level.  <a href="classStack.html#aebfeabeb184956892555bb1c4114b8b6">More...</a><br /></td></tr>
 <tr class="separator:aebfeabeb184956892555bb1c4114b8b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95230b267f372b64e9e5283f71bab606"><td class="memItemLeft" align="right" valign="top"><a id="a95230b267f372b64e9e5283f71bab606" name="a95230b267f372b64e9e5283f71bab606"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>secReqTimeoutHandler</b> (void *p_context)</td></tr>
+<tr class="memitem:a95230b267f372b64e9e5283f71bab606"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a95230b267f372b64e9e5283f71bab606">secReqTimeoutHandler</a> (void *p_context)</td></tr>
 <tr class="separator:a95230b267f372b64e9e5283f71bab606"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9016f9e712c1010884fe275887c35663"><td class="memItemLeft" align="right" valign="top"><a id="a9016f9e712c1010884fe275887c35663" name="a9016f9e712c1010884fe275887c35663"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>disconnect</b> ()</td></tr>
+<tr class="memitem:a9016f9e712c1010884fe275887c35663"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a9016f9e712c1010884fe275887c35663">disconnect</a> ()</td></tr>
 <tr class="separator:a9016f9e712c1010884fe275887c35663"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01b9291f52c70ea370cbd05c1ba513fa"><td class="memItemLeft" align="right" valign="top"><a id="a01b9291f52c70ea370cbd05c1ba513fa" name="a01b9291f52c70ea370cbd05c1ba513fa"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>checkCondition</b> (condition_t condition, bool expectation)</td></tr>
+<tr class="memitem:a01b9291f52c70ea370cbd05c1ba513fa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a01b9291f52c70ea370cbd05c1ba513fa">checkCondition</a> (<a class="el" href="classStack.html#a2c61cfe41b4fd058abe511b1a597a510">condition_t</a> condition, bool expectation)</td></tr>
 <tr class="separator:a01b9291f52c70ea370cbd05c1ba513fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classBaseClass"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classBaseClass')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classBaseClass.html">BaseClass&lt; 3 &gt;</a></td></tr>
-<tr class="memitem:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a9e2337c2676bf9fbcca00ab7750bbf14" name="a9e2337c2676bf9fbcca00ab7750bbf14"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:aa8b0502f9dd06a726a07526f4a344354 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#aa8b0502f9dd06a726a07526f4a344354">BaseClass</a> ()</td></tr>
+<tr class="separator:aa8b0502f9dd06a726a07526f4a344354 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a9e2337c2676bf9fbcca00ab7750bbf14">isInitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a9e2337c2676bf9fbcca00ab7750bbf14 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a0290904b966a159231f848cfb5fd97a4" name="a0290904b966a159231f848cfb5fd97a4"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setInitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a0290904b966a159231f848cfb5fd97a4">setInitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a0290904b966a159231f848cfb5fd97a4 inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top"><a id="a4391d2f80e021fc4420fb48278a314ae" name="a4391d2f80e021fc4420fb48278a314ae"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setUninitialized</b> (uint8_t i=0)</td></tr>
+<tr class="memitem:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classBaseClass.html#a4391d2f80e021fc4420fb48278a314ae">setUninitialized</a> (uint8_t i=0)</td></tr>
 <tr class="separator:a4391d2f80e021fc4420fb48278a314ae inherit pub_methods_classBaseClass"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a80061d7fc2af77d97a660f2185c3cc85"><td class="memItemLeft" align="right" valign="top"><a id="a80061d7fc2af77d97a660f2185c3cc85" name="a80061d7fc2af77d97a660f2185c3cc85"></a>
-static <a class="el" href="classStack.html">Stack</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getInstance</b> ()</td></tr>
+<tr class="memitem:a80061d7fc2af77d97a660f2185c3cc85"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classStack.html">Stack</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a80061d7fc2af77d97a660f2185c3cc85">getInstance</a> ()</td></tr>
 <tr class="separator:a80061d7fc2af77d97a660f2185c3cc85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:ac472f79d0221f4e7b892dc5cfe846829"><td class="memItemLeft" align="right" valign="top"><a id="ac472f79d0221f4e7b892dc5cfe846829" name="ac472f79d0221f4e7b892dc5cfe846829"></a>
-static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_SERVICE_COUNT</b> = 5</td></tr>
-<tr class="memdesc:ac472f79d0221f4e7b892dc5cfe846829"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of services (currently set to 5) <br /></td></tr>
+<tr class="memitem:ac472f79d0221f4e7b892dc5cfe846829"><td class="memItemLeft" align="right" valign="top">static const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ac472f79d0221f4e7b892dc5cfe846829">MAX_SERVICE_COUNT</a> = 5</td></tr>
+<tr class="memdesc:ac472f79d0221f4e7b892dc5cfe846829"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of services (currently set to 5)  <a href="classStack.html#ac472f79d0221f4e7b892dc5cfe846829">More...</a><br /></td></tr>
 <tr class="separator:ac472f79d0221f4e7b892dc5cfe846829"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a3c5f678cf2ba670488f11f361649e870"><td class="memItemLeft" align="right" valign="top"><a id="a3c5f678cf2ba670488f11f361649e870" name="a3c5f678cf2ba670488f11f361649e870"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>updateConnParams</b> ()</td></tr>
-<tr class="memdesc:a3c5f678cf2ba670488f11f361649e870"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update connection parameters, can be called when already initialized. <br /></td></tr>
+<tr class="memitem:a3c5f678cf2ba670488f11f361649e870"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a3c5f678cf2ba670488f11f361649e870">updateConnParams</a> ()</td></tr>
+<tr class="memdesc:a3c5f678cf2ba670488f11f361649e870"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update connection parameters, can be called when already initialized.  <a href="classStack.html#a3c5f678cf2ba670488f11f361649e870">More...</a><br /></td></tr>
 <tr class="separator:a3c5f678cf2ba670488f11f361649e870"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab97a096a65864af6cf8aa8a41bcfbb05"><td class="memItemLeft" align="right" valign="top"><a id="ab97a096a65864af6cf8aa8a41bcfbb05" name="ab97a096a65864af6cf8aa8a41bcfbb05"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onConnect</b> (const ble_evt_t *p_ble_evt)</td></tr>
+<tr class="memitem:ab97a096a65864af6cf8aa8a41bcfbb05"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ab97a096a65864af6cf8aa8a41bcfbb05">onConnect</a> (const ble_evt_t *p_ble_evt)</td></tr>
 <tr class="separator:ab97a096a65864af6cf8aa8a41bcfbb05"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a460ac51ca1b495677b296836a031b63c"><td class="memItemLeft" align="right" valign="top"><a id="a460ac51ca1b495677b296836a031b63c" name="a460ac51ca1b495677b296836a031b63c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onDisconnect</b> (const ble_evt_t *p_ble_evt)</td></tr>
+<tr class="memitem:a460ac51ca1b495677b296836a031b63c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a460ac51ca1b495677b296836a031b63c">onDisconnect</a> (const ble_evt_t *p_ble_evt)</td></tr>
 <tr class="separator:a460ac51ca1b495677b296836a031b63c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aadfaffa161c34a7d5a646c3423591222"><td class="memItemLeft" align="right" valign="top"><a id="aadfaffa161c34a7d5a646c3423591222" name="aadfaffa161c34a7d5a646c3423591222"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onGapTimeout</b> (uint8_t src)</td></tr>
+<tr class="memitem:aadfaffa161c34a7d5a646c3423591222"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#aadfaffa161c34a7d5a646c3423591222">onGapTimeout</a> (uint8_t src)</td></tr>
 <tr class="separator:aadfaffa161c34a7d5a646c3423591222"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a47de0931d5d0bfd86f07edb41b582037"><td class="memItemLeft" align="right" valign="top"><a id="a47de0931d5d0bfd86f07edb41b582037" name="a47de0931d5d0bfd86f07edb41b582037"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onConnectionTimeout</b> ()</td></tr>
+<tr class="memitem:a47de0931d5d0bfd86f07edb41b582037"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a47de0931d5d0bfd86f07edb41b582037">onConnectionTimeout</a> ()</td></tr>
 <tr class="separator:a47de0931d5d0bfd86f07edb41b582037"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e15da65593c0634c206853c2b5259d5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a6e15da65593c0634c206853c2b5259d5">onIncomingConnected</a> (const ble_evt_t *p_ble_evt)</td></tr>
 <tr class="memdesc:a6e15da65593c0634c206853c2b5259d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connection request.  <a href="classStack.html#a6e15da65593c0634c206853c2b5259d5">More...</a><br /></td></tr>
 <tr class="separator:a6e15da65593c0634c206853c2b5259d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abfdd8bc52729a8de89271c60469901e9"><td class="memItemLeft" align="right" valign="top"><a id="abfdd8bc52729a8de89271c60469901e9" name="abfdd8bc52729a8de89271c60469901e9"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onIncomingDisconnected</b> (const ble_evt_t *p_ble_evt)</td></tr>
+<tr class="memitem:abfdd8bc52729a8de89271c60469901e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#abfdd8bc52729a8de89271c60469901e9">onIncomingDisconnected</a> (const ble_evt_t *p_ble_evt)</td></tr>
 <tr class="separator:abfdd8bc52729a8de89271c60469901e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff387bf0cee4db116665a7000dde166c"><td class="memItemLeft" align="right" valign="top"><a id="aff387bf0cee4db116665a7000dde166c" name="aff387bf0cee4db116665a7000dde166c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onMemoryRequest</b> (uint16_t connectionHandle)</td></tr>
+<tr class="memitem:aff387bf0cee4db116665a7000dde166c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#aff387bf0cee4db116665a7000dde166c">onMemoryRequest</a> (uint16_t connectionHandle)</td></tr>
 <tr class="separator:aff387bf0cee4db116665a7000dde166c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a646b8b2aab4c04570c2617799ebf8d80"><td class="memItemLeft" align="right" valign="top"><a id="a646b8b2aab4c04570c2617799ebf8d80" name="a646b8b2aab4c04570c2617799ebf8d80"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onMemoryRelease</b> (uint16_t connectionHandle)</td></tr>
+<tr class="memitem:a646b8b2aab4c04570c2617799ebf8d80"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a646b8b2aab4c04570c2617799ebf8d80">onMemoryRelease</a> (uint16_t connectionHandle)</td></tr>
 <tr class="separator:a646b8b2aab4c04570c2617799ebf8d80"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c1b9e23631a8de526b2333fecfa57bc"><td class="memItemLeft" align="right" valign="top"><a id="a8c1b9e23631a8de526b2333fecfa57bc" name="a8c1b9e23631a8de526b2333fecfa57bc"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onWrite</b> (uint16_t connectionHandle, const ble_gatts_evt_write_t &amp;writeEvt)</td></tr>
+<tr class="memitem:a8c1b9e23631a8de526b2333fecfa57bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a8c1b9e23631a8de526b2333fecfa57bc">onWrite</a> (uint16_t connectionHandle, const ble_gatts_evt_write_t &amp;writeEvt)</td></tr>
 <tr class="separator:a8c1b9e23631a8de526b2333fecfa57bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5eb31d387de01d97d081568b69a7a9ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a5eb31d387de01d97d081568b69a7a9ba">onTxComplete</a> (const ble_evt_t *p_ble_evt)</td></tr>
 <tr class="memdesc:a5eb31d387de01d97d081568b69a7a9ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transmission complete event.  <a href="classStack.html#a5eb31d387de01d97d081568b69a7a9ba">More...</a><br /></td></tr>
 <tr class="separator:a5eb31d387de01d97d081568b69a7a9ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5b9744b739eb119d21b6c26971cac48"><td class="memItemLeft" align="right" valign="top"><a id="ac5b9744b739eb119d21b6c26971cac48" name="ac5b9744b739eb119d21b6c26971cac48"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>startConnectionWatchdog</b> ()</td></tr>
+<tr class="memitem:ac5b9744b739eb119d21b6c26971cac48"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ac5b9744b739eb119d21b6c26971cac48">startConnectionWatchdog</a> ()</td></tr>
 <tr class="separator:ac5b9744b739eb119d21b6c26971cac48"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ea224900e5c664b6ee70f6bda1b069a"><td class="memItemLeft" align="right" valign="top"><a id="a1ea224900e5c664b6ee70f6bda1b069a" name="a1ea224900e5c664b6ee70f6bda1b069a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>stopConnectionWatchdog</b> ()</td></tr>
+<tr class="memitem:a1ea224900e5c664b6ee70f6bda1b069a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a1ea224900e5c664b6ee70f6bda1b069a">stopConnectionWatchdog</a> ()</td></tr>
 <tr class="separator:a1ea224900e5c664b6ee70f6bda1b069a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a3a5772f96f8ca4d5491823fe11b4e12c"><td class="memItemLeft" align="right" valign="top"><a id="a3a5772f96f8ca4d5491823fe11b4e12c" name="a3a5772f96f8ca4d5491823fe11b4e12c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>_disconnectingInProgress</b> = false</td></tr>
+<tr class="memitem:a3a5772f96f8ca4d5491823fe11b4e12c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a3a5772f96f8ca4d5491823fe11b4e12c">_disconnectingInProgress</a> = false</td></tr>
 <tr class="separator:a3a5772f96f8ca4d5491823fe11b4e12c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a109b6e1f98d623594bff3e4092ea7aa4"><td class="memItemLeft" align="right" valign="top"><a id="a109b6e1f98d623594bff3e4092ea7aa4" name="a109b6e1f98d623594bff3e4092ea7aa4"></a>
-<a class="el" href="classfixed__tuple.html">Services_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>_services</b></td></tr>
+<tr class="memitem:a109b6e1f98d623594bff3e4092ea7aa4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classStack.html#a9ac31c600e9af36c39731b4b5b9a9d4c">Services_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a109b6e1f98d623594bff3e4092ea7aa4">_services</a></td></tr>
 <tr class="separator:a109b6e1f98d623594bff3e4092ea7aa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63dbcef73e104f8f808d7f7696c5bdb3"><td class="memItemLeft" align="right" valign="top"><a id="a63dbcef73e104f8f808d7f7696c5bdb3" name="a63dbcef73e104f8f808d7f7696c5bdb3"></a>
-nrf_clock_lf_cfg_t&#160;</td><td class="memItemRight" valign="bottom"><b>_clockSource</b></td></tr>
+<tr class="memitem:a63dbcef73e104f8f808d7f7696c5bdb3"><td class="memItemLeft" align="right" valign="top">nrf_clock_lf_cfg_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a63dbcef73e104f8f808d7f7696c5bdb3">_clockSource</a></td></tr>
 <tr class="separator:a63dbcef73e104f8f808d7f7696c5bdb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af70a8ae6667d03bb80b4aed70da4606b"><td class="memItemLeft" align="right" valign="top"><a id="af70a8ae6667d03bb80b4aed70da4606b" name="af70a8ae6667d03bb80b4aed70da4606b"></a>
-ble_gap_conn_params_t&#160;</td><td class="memItemRight" valign="bottom"><b>_connectionParams</b></td></tr>
+<tr class="memitem:af70a8ae6667d03bb80b4aed70da4606b"><td class="memItemLeft" align="right" valign="top">ble_gap_conn_params_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#af70a8ae6667d03bb80b4aed70da4606b">_connectionParams</a></td></tr>
 <tr class="separator:af70a8ae6667d03bb80b4aed70da4606b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab61bf2193d0d24e7c58beedc154886a8"><td class="memItemLeft" align="right" valign="top"><a id="ab61bf2193d0d24e7c58beedc154886a8" name="ab61bf2193d0d24e7c58beedc154886a8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>_scanning</b> = false</td></tr>
+<tr class="memitem:ab61bf2193d0d24e7c58beedc154886a8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ab61bf2193d0d24e7c58beedc154886a8">_scanning</a> = false</td></tr>
 <tr class="separator:ab61bf2193d0d24e7c58beedc154886a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a68dcfb3f6744deb28c75fc7e0606a2"><td class="memItemLeft" align="right" valign="top"><a id="a6a68dcfb3f6744deb28c75fc7e0606a2" name="a6a68dcfb3f6744deb28c75fc7e0606a2"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>_connectionHandle</b> = BLE_CONN_HANDLE_INVALID</td></tr>
+<tr class="memitem:a6a68dcfb3f6744deb28c75fc7e0606a2"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a6a68dcfb3f6744deb28c75fc7e0606a2">_connectionHandle</a> = BLE_CONN_HANDLE_INVALID</td></tr>
 <tr class="separator:a6a68dcfb3f6744deb28c75fc7e0606a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fd57a3b304d3cf8e46d2e4d920bee45"><td class="memItemLeft" align="right" valign="top"><a id="a7fd57a3b304d3cf8e46d2e4d920bee45" name="a7fd57a3b304d3cf8e46d2e4d920bee45"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>_connectionIsOutgoing</b> = false</td></tr>
+<tr class="memitem:a7fd57a3b304d3cf8e46d2e4d920bee45"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a7fd57a3b304d3cf8e46d2e4d920bee45">_connectionIsOutgoing</a> = false</td></tr>
 <tr class="separator:a7fd57a3b304d3cf8e46d2e4d920bee45"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6abc0197ff9613b1c0be8d88c4d2ca67"><td class="memItemLeft" align="right" valign="top"><a id="a6abc0197ff9613b1c0be8d88c4d2ca67" name="a6abc0197ff9613b1c0be8d88c4d2ca67"></a>
-app_timer_t&#160;</td><td class="memItemRight" valign="bottom"><b>_connectionWatchdogTimerData</b></td></tr>
+<tr class="memitem:a6abc0197ff9613b1c0be8d88c4d2ca67"><td class="memItemLeft" align="right" valign="top">app_timer_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a6abc0197ff9613b1c0be8d88c4d2ca67">_connectionWatchdogTimerData</a></td></tr>
 <tr class="separator:a6abc0197ff9613b1c0be8d88c4d2ca67"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0125bfc7466d0ac32d2e9ac6a56eb7e4"><td class="memItemLeft" align="right" valign="top"><a id="a0125bfc7466d0ac32d2e9ac6a56eb7e4" name="a0125bfc7466d0ac32d2e9ac6a56eb7e4"></a>
-app_timer_id_t&#160;</td><td class="memItemRight" valign="bottom"><b>_connectionWatchdogTimerId</b> = NULL</td></tr>
+<tr class="memitem:a0125bfc7466d0ac32d2e9ac6a56eb7e4"><td class="memItemLeft" align="right" valign="top">app_timer_id_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a0125bfc7466d0ac32d2e9ac6a56eb7e4">_connectionWatchdogTimerId</a> = NULL</td></tr>
 <tr class="separator:a0125bfc7466d0ac32d2e9ac6a56eb7e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2fa585ccde3756149b447a365cdbda1c"><td class="memItemLeft" align="right" valign="top"><a id="a2fa585ccde3756149b447a365cdbda1c" name="a2fa585ccde3756149b447a365cdbda1c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>_connectionWatchdogRunning</b> = false</td></tr>
+<tr class="memitem:a2fa585ccde3756149b447a365cdbda1c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a2fa585ccde3756149b447a365cdbda1c">_connectionWatchdogRunning</a> = false</td></tr>
 <tr class="separator:a2fa585ccde3756149b447a365cdbda1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6261f80a46d0ba8efeae473edcb247bd"><td class="memItemLeft" align="right" valign="top"><a id="a6261f80a46d0ba8efeae473edcb247bd" name="a6261f80a46d0ba8efeae473edcb247bd"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scanBuffer</b> [31]</td></tr>
+<tr class="memitem:a6261f80a46d0ba8efeae473edcb247bd"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a6261f80a46d0ba8efeae473edcb247bd">_scanBuffer</a> [31]</td></tr>
 <tr class="separator:a6261f80a46d0ba8efeae473edcb247bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9fb88992956e21d541cf722f50ec8fb4"><td class="memItemLeft" align="right" valign="top"><a id="a9fb88992956e21d541cf722f50ec8fb4" name="a9fb88992956e21d541cf722f50ec8fb4"></a>
-ble_data_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scanBufferStruct</b> = {_scanBuffer, sizeof(_scanBuffer)}</td></tr>
+<tr class="memitem:a9fb88992956e21d541cf722f50ec8fb4"><td class="memItemLeft" align="right" valign="top">ble_data_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a9fb88992956e21d541cf722f50ec8fb4">_scanBufferStruct</a> = {<a class="el" href="classStack.html#a6261f80a46d0ba8efeae473edcb247bd">_scanBuffer</a>, sizeof(<a class="el" href="classStack.html#a6261f80a46d0ba8efeae473edcb247bd">_scanBuffer</a>)}</td></tr>
 <tr class="separator:a9fb88992956e21d541cf722f50ec8fb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a14cd1cba325bead4ff0a91bc6eb0f6f5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a14cd1cba325bead4ff0a91bc6eb0f6f5">Stack</a> ()</td></tr>
+<tr class="memdesc:a14cd1cba325bead4ff0a91bc6eb0f6f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor of the BLE stack on the NRF5 series.  <a href="classStack.html#a14cd1cba325bead4ff0a91bc6eb0f6f5">More...</a><br /></td></tr>
+<tr class="separator:a14cd1cba325bead4ff0a91bc6eb0f6f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad79198deff33f5c20625ac4d8c21a841"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#ad79198deff33f5c20625ac4d8c21a841">Stack</a> (<a class="el" href="classStack.html">Stack</a> const &amp;)</td></tr>
+<tr class="separator:ad79198deff33f5c20625ac4d8c21a841"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa165aceacd2534970e5c1359e71ed9b3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#aa165aceacd2534970e5c1359e71ed9b3">operator=</a> (<a class="el" href="classStack.html">Stack</a> const &amp;)</td></tr>
+<tr class="separator:aa165aceacd2534970e5c1359e71ed9b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40bd5dff912f0e5290777c4b46d17809"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classStack.html#a40bd5dff912f0e5290777c4b46d17809">~Stack</a> ()</td></tr>
+<tr class="memdesc:a40bd5dff912f0e5290777c4b46d17809"><td class="mdescLeft">&#160;</td><td class="mdescRight">The destructor shuts down the stack.  <a href="classStack.html#a40bd5dff912f0e5290777c4b46d17809">More...</a><br /></td></tr>
+<tr class="separator:a40bd5dff912f0e5290777c4b46d17809"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >nRF51822 specific implementation of the BLEStack </p>
 <p >The <a class="el" href="classStack.html" title="nRF51822 specific implementation of the BLEStack">Stack</a> class is a direct descendant from BLEStack. It is implemented as a singleton, such that it can only be allocated once and it can be reached from everywhere in the code, especially in interrupt handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this stack object as an argument w.r.t. this object. This makes dependencies traceable for the user. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="a9ac31c600e9af36c39731b4b5b9a9d4c" name="a9ac31c600e9af36c39731b4b5b9a9d4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ac31c600e9af36c39731b4b5b9a9d4c">&#9670;&#160;</a></span>Services_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef <a class="el" href="classfixed__tuple.html">fixed_tuple</a>&lt;<a class="el" href="classService.html">Service</a>*, <a class="el" href="classStack.html#ac472f79d0221f4e7b892dc5cfe846829">MAX_SERVICE_COUNT</a>&gt; <a class="el" href="classStack.html#a9ac31c600e9af36c39731b4b5b9a9d4c">Stack::Services_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a2c61cfe41b4fd058abe511b1a597a510" name="a2c61cfe41b4fd058abe511b1a597a510"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c61cfe41b4fd058abe511b1a597a510">&#9670;&#160;</a></span>condition_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classStack.html#a2c61cfe41b4fd058abe511b1a597a510">Stack::condition_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a2c61cfe41b4fd058abe511b1a597a510a79e8b9b2266dae7536f56260b5fb8349" name="a2c61cfe41b4fd058abe511b1a597a510a79e8b9b2266dae7536f56260b5fb8349"></a>C_STACK_INITIALIZED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a2c61cfe41b4fd058abe511b1a597a510ac11b80705fb098e9730427168dfff44e" name="a2c61cfe41b4fd058abe511b1a597a510ac11b80705fb098e9730427168dfff44e"></a>C_RADIO_INITIALIZED&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a2c61cfe41b4fd058abe511b1a597a510a35bf0e4bf166919b9d066c400e24d7ba" name="a2c61cfe41b4fd058abe511b1a597a510a35bf0e4bf166919b9d066c400e24d7ba"></a>C_SERVICES_INITIALIZED&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a14cd1cba325bead4ff0a91bc6eb0f6f5" name="a14cd1cba325bead4ff0a91bc6eb0f6f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14cd1cba325bead4ff0a91bc6eb0f6f5">&#9670;&#160;</a></span>Stack() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStack.html">Stack::Stack</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor of the BLE stack on the NRF5 series. </p>
+<p >The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. However, the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the <a class="el" href="classStack.html#a891e74e94124bd2f19d94b8cd0c0ddc8" title="Initialization of the BLE stack.">init()</a> function. </p>
+
+</div>
+</div>
+<a id="ad79198deff33f5c20625ac4d8c21a841" name="ad79198deff33f5c20625ac4d8c21a841"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad79198deff33f5c20625ac4d8c21a841">&#9670;&#160;</a></span>Stack() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStack.html">Stack::Stack</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classStack.html">Stack</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a40bd5dff912f0e5290777c4b46d17809" name="a40bd5dff912f0e5290777c4b46d17809"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40bd5dff912f0e5290777c4b46d17809">&#9670;&#160;</a></span>~Stack()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Stack::~Stack </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The destructor shuts down the stack. </p>
+<p >TODO: The SoftDevice should be disabled as well. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a id="ab6645fdb07d13154c7016de26322eb44" name="ab6645fdb07d13154c7016de26322eb44"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab6645fdb07d13154c7016de26322eb44">&#9670;&#160;</a></span>addService()</h2>
 
@@ -357,6 +445,118 @@ ble_data_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scanBufferStru
 
 <p>Add a service to the stack. </p>
 <p >This does not yet add it to the softdevice. </p>
+
+</div>
+</div>
+<a id="a01b9291f52c70ea370cbd05c1ba513fa" name="a01b9291f52c70ea370cbd05c1ba513fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01b9291f52c70ea370cbd05c1ba513fa">&#9670;&#160;</a></span>checkCondition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Stack::checkCondition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classStack.html#a2c61cfe41b4fd058abe511b1a597a510">condition_t</a>&#160;</td>
+          <td class="paramname"><em>condition</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>expectation</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a51bc504415727e420f008f49f6134240" name="a51bc504415727e420f008f49f6134240"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51bc504415727e420f008f49f6134240">&#9670;&#160;</a></span>createCharacteristics()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::createCharacteristics </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9016f9e712c1010884fe275887c35663" name="a9016f9e712c1010884fe275887c35663"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9016f9e712c1010884fe275887c35663">&#9670;&#160;</a></span>disconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::disconnect </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af32569a81c45d93581316d868b8f8763" name="af32569a81c45d93581316d868b8f8763"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af32569a81c45d93581316d868b8f8763">&#9670;&#160;</a></span>getConnectionHandle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t Stack::getConnectionHandle </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a80061d7fc2af77d97a660f2185c3cc85" name="a80061d7fc2af77d97a660f2185c3cc85"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80061d7fc2af77d97a660f2185c3cc85">&#9670;&#160;</a></span>getInstance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classStack.html">Stack</a> &amp; Stack::getInstance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -406,6 +606,114 @@ ble_data_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scanBufferStru
 </div><div class="memdoc">
 
 <p>Initialization of the radio. </p>
+
+</div>
+</div>
+<a id="afd358bba18866f5a76a4f045e5f3173e" name="afd358bba18866f5a76a4f045e5f3173e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd358bba18866f5a76a4f045e5f3173e">&#9670;&#160;</a></span>initServices()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::initServices </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Register the added services to the softdevice. </p>
+
+</div>
+</div>
+<a id="ac59720a43020d2844a0a9ea190fb90ce" name="ac59720a43020d2844a0a9ea190fb90ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac59720a43020d2844a0a9ea190fb90ce">&#9670;&#160;</a></span>initSoftdevice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::initSoftdevice </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a52a04768d69f6f6e97c4219cf161e137" name="a52a04768d69f6f6e97c4219cf161e137"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52a04768d69f6f6e97c4219cf161e137">&#9670;&#160;</a></span>isConnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Stack::isConnected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a941207e8cad83a588e921f2b9d7d80ae" name="a941207e8cad83a588e921f2b9d7d80ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a941207e8cad83a588e921f2b9d7d80ae">&#9670;&#160;</a></span>isConnectedPeripheral()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Stack::isConnectedPeripheral </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a27067a43e4e48e570dbe60f8df56214b" name="a27067a43e4e48e570dbe60f8df56214b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27067a43e4e48e570dbe60f8df56214b">&#9670;&#160;</a></span>isDisconnecting()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Stack::isDisconnecting </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8. </p>
+
+</div>
+</div>
+<a id="aa06d33178d2a12a5fcebb42039a5b42d" name="aa06d33178d2a12a5fcebb42039a5b42d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa06d33178d2a12a5fcebb42039a5b42d">&#9670;&#160;</a></span>isScanning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Stack::isScanning </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns true if currently scanning. </p>
 
 </div>
 </div>
@@ -469,6 +777,109 @@ ble_data_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scanBufferStru
 
 </div>
 </div>
+<a id="ab97a096a65864af6cf8aa8a41bcfbb05" name="ab97a096a65864af6cf8aa8a41bcfbb05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab97a096a65864af6cf8aa8a41bcfbb05">&#9670;&#160;</a></span>onConnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::onConnect </td>
+          <td>(</td>
+          <td class="paramtype">const ble_evt_t *&#160;</td>
+          <td class="paramname"><em>p_ble_evt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a47de0931d5d0bfd86f07edb41b582037" name="a47de0931d5d0bfd86f07edb41b582037"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47de0931d5d0bfd86f07edb41b582037">&#9670;&#160;</a></span>onConnectionTimeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::onConnectionTimeout </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a460ac51ca1b495677b296836a031b63c" name="a460ac51ca1b495677b296836a031b63c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a460ac51ca1b495677b296836a031b63c">&#9670;&#160;</a></span>onDisconnect()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::onDisconnect </td>
+          <td>(</td>
+          <td class="paramtype">const ble_evt_t *&#160;</td>
+          <td class="paramname"><em>p_ble_evt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aadfaffa161c34a7d5a646c3423591222" name="aadfaffa161c34a7d5a646c3423591222"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aadfaffa161c34a7d5a646c3423591222">&#9670;&#160;</a></span>onGapTimeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::onGapTimeout </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>src</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a6e15da65593c0634c206853c2b5259d5" name="a6e15da65593c0634c206853c2b5259d5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6e15da65593c0634c206853c2b5259d5">&#9670;&#160;</a></span>onIncomingConnected()</h2>
 
@@ -495,6 +906,84 @@ ble_data_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scanBufferStru
 
 <p>Connection request. </p>
 <p >On a connection request send it to all services. </p>
+
+</div>
+</div>
+<a id="abfdd8bc52729a8de89271c60469901e9" name="abfdd8bc52729a8de89271c60469901e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abfdd8bc52729a8de89271c60469901e9">&#9670;&#160;</a></span>onIncomingDisconnected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::onIncomingDisconnected </td>
+          <td>(</td>
+          <td class="paramtype">const ble_evt_t *&#160;</td>
+          <td class="paramname"><em>p_ble_evt</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a646b8b2aab4c04570c2617799ebf8d80" name="a646b8b2aab4c04570c2617799ebf8d80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a646b8b2aab4c04570c2617799ebf8d80">&#9670;&#160;</a></span>onMemoryRelease()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::onMemoryRelease </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aff387bf0cee4db116665a7000dde166c" name="aff387bf0cee4db116665a7000dde166c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff387bf0cee4db116665a7000dde166c">&#9670;&#160;</a></span>onMemoryRequest()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::onMemoryRequest </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -527,6 +1016,68 @@ ble_data_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scanBufferStru
 
 </div>
 </div>
+<a id="a8c1b9e23631a8de526b2333fecfa57bc" name="a8c1b9e23631a8de526b2333fecfa57bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c1b9e23631a8de526b2333fecfa57bc">&#9670;&#160;</a></span>onWrite()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::onWrite </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const ble_gatts_evt_write_t &amp;&#160;</td>
+          <td class="paramname"><em>writeEvt</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa165aceacd2534970e5c1359e71ed9b3" name="aa165aceacd2534970e5c1359e71ed9b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa165aceacd2534970e5c1359e71ed9b3">&#9670;&#160;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classStack.html">Stack</a> const &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a6660eb6c637ff3202751c4b6d467e473" name="a6660eb6c637ff3202751c4b6d467e473"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6660eb6c637ff3202751c4b6d467e473">&#9670;&#160;</a></span>resetConnectionWatchdog()</h2>
 
@@ -547,6 +1098,69 @@ ble_data_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scanBufferStru
 
 </div>
 </div>
+<a id="a95230b267f372b64e9e5283f71bab606" name="a95230b267f372b64e9e5283f71bab606"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95230b267f372b64e9e5283f71bab606">&#9670;&#160;</a></span>secReqTimeoutHandler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::secReqTimeoutHandler </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>p_context</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8689fb3bdc4db5bc9bd7aaf0e9328b13" name="a8689fb3bdc4db5bc9bd7aaf0e9328b13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8689fb3bdc4db5bc9bd7aaf0e9328b13">&#9670;&#160;</a></span>setClockSource()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::setClockSource </td>
+          <td>(</td>
+          <td class="paramtype">nrf_clock_lf_cfg_t&#160;</td>
+          <td class="paramname"><em>clockSource</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set initial clock source, not applied unless done before radio init. </p>
+
+</div>
+</div>
+<a id="ac5b9744b739eb119d21b6c26971cac48" name="ac5b9744b739eb119d21b6c26971cac48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5b9744b739eb119d21b6c26971cac48">&#9670;&#160;</a></span>startConnectionWatchdog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::startConnectionWatchdog </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a13df03f3f3267f20245a4f62f8c87eb9" name="a13df03f3f3267f20245a4f62f8c87eb9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a13df03f3f3267f20245a4f62f8c87eb9">&#9670;&#160;</a></span>startScanning()</h2>
 
@@ -564,6 +1178,446 @@ ble_data_t&#160;</td><td class="memItemRight" valign="bottom"><b>_scanBufferStru
 
 <p>Start scanning for devices. </p>
 <p >Only call the following functions with a S120 or S130 device that can play a central role. The following functions are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone developer. </p>
+
+</div>
+</div>
+<a id="a1ea224900e5c664b6ee70f6bda1b069a" name="a1ea224900e5c664b6ee70f6bda1b069a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ea224900e5c664b6ee70f6bda1b069a">&#9670;&#160;</a></span>stopConnectionWatchdog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::stopConnectionWatchdog </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a72e64e1ed8f68f6d2de0724db04482df" name="a72e64e1ed8f68f6d2de0724db04482df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72e64e1ed8f68f6d2de0724db04482df">&#9670;&#160;</a></span>stopScanning()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::stopScanning </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Stop scanning for devices. </p>
+
+</div>
+</div>
+<a id="a751a7731e79e95731814c5cdf88bddb6" name="a751a7731e79e95731814c5cdf88bddb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a751a7731e79e95731814c5cdf88bddb6">&#9670;&#160;</a></span>updateConnectionSupervisionTimeout()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::updateConnectionSupervisionTimeout </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>conSupTimeout_10_ms</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set and update the preferred connection supervision timeout in units of 10 ms. </p>
+
+</div>
+</div>
+<a id="a3c5f678cf2ba670488f11f361649e870" name="a3c5f678cf2ba670488f11f361649e870"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c5f678cf2ba670488f11f361649e870">&#9670;&#160;</a></span>updateConnParams()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::updateConnParams </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Update connection parameters, can be called when already initialized. </p>
+
+</div>
+</div>
+<a id="a68a4ab4bf307a562d9268b951937d697" name="a68a4ab4bf307a562d9268b951937d697"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68a4ab4bf307a562d9268b951937d697">&#9670;&#160;</a></span>updateMaxConnectionInterval()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::updateMaxConnectionInterval </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionInterval_1_25_ms</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set and update the preferred maximum connection interval in units of 1.25 ms. </p>
+
+</div>
+</div>
+<a id="a939f8bf7733d720435d79e975937a04d" name="a939f8bf7733d720435d79e975937a04d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a939f8bf7733d720435d79e975937a04d">&#9670;&#160;</a></span>updateMinConnectionInterval()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::updateMinConnectionInterval </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>connectionInterval_1_25_ms</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set and update the preferred minimum connection interval in units of 1.25 ms. </p>
+
+</div>
+</div>
+<a id="ade78ae69a6955e9dcc6a6008db81c26c" name="ade78ae69a6955e9dcc6a6008db81c26c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade78ae69a6955e9dcc6a6008db81c26c">&#9670;&#160;</a></span>updateSlaveLatency()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Stack::updateSlaveLatency </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>slaveLatency</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set and update the preferred slave latency count. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a63dbcef73e104f8f808d7f7696c5bdb3" name="a63dbcef73e104f8f808d7f7696c5bdb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63dbcef73e104f8f808d7f7696c5bdb3">&#9670;&#160;</a></span>_clockSource</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">nrf_clock_lf_cfg_t Stack::_clockSource</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6a68dcfb3f6744deb28c75fc7e0606a2" name="a6a68dcfb3f6744deb28c75fc7e0606a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a68dcfb3f6744deb28c75fc7e0606a2">&#9670;&#160;</a></span>_connectionHandle</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t Stack::_connectionHandle = BLE_CONN_HANDLE_INVALID</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7fd57a3b304d3cf8e46d2e4d920bee45" name="a7fd57a3b304d3cf8e46d2e4d920bee45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7fd57a3b304d3cf8e46d2e4d920bee45">&#9670;&#160;</a></span>_connectionIsOutgoing</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Stack::_connectionIsOutgoing = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af70a8ae6667d03bb80b4aed70da4606b" name="af70a8ae6667d03bb80b4aed70da4606b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af70a8ae6667d03bb80b4aed70da4606b">&#9670;&#160;</a></span>_connectionParams</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ble_gap_conn_params_t Stack::_connectionParams</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2fa585ccde3756149b447a365cdbda1c" name="a2fa585ccde3756149b447a365cdbda1c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fa585ccde3756149b447a365cdbda1c">&#9670;&#160;</a></span>_connectionWatchdogRunning</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Stack::_connectionWatchdogRunning = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6abc0197ff9613b1c0be8d88c4d2ca67" name="a6abc0197ff9613b1c0be8d88c4d2ca67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6abc0197ff9613b1c0be8d88c4d2ca67">&#9670;&#160;</a></span>_connectionWatchdogTimerData</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_t Stack::_connectionWatchdogTimerData</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0125bfc7466d0ac32d2e9ac6a56eb7e4" name="a0125bfc7466d0ac32d2e9ac6a56eb7e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0125bfc7466d0ac32d2e9ac6a56eb7e4">&#9670;&#160;</a></span>_connectionWatchdogTimerId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">app_timer_id_t Stack::_connectionWatchdogTimerId = NULL</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3a5772f96f8ca4d5491823fe11b4e12c" name="a3a5772f96f8ca4d5491823fe11b4e12c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a5772f96f8ca4d5491823fe11b4e12c">&#9670;&#160;</a></span>_disconnectingInProgress</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Stack::_disconnectingInProgress = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6261f80a46d0ba8efeae473edcb247bd" name="a6261f80a46d0ba8efeae473edcb247bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6261f80a46d0ba8efeae473edcb247bd">&#9670;&#160;</a></span>_scanBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t Stack::_scanBuffer[31]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9fb88992956e21d541cf722f50ec8fb4" name="a9fb88992956e21d541cf722f50ec8fb4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fb88992956e21d541cf722f50ec8fb4">&#9670;&#160;</a></span>_scanBufferStruct</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ble_data_t Stack::_scanBufferStruct = {<a class="el" href="classStack.html#a6261f80a46d0ba8efeae473edcb247bd">_scanBuffer</a>, sizeof(<a class="el" href="classStack.html#a6261f80a46d0ba8efeae473edcb247bd">_scanBuffer</a>)}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab61bf2193d0d24e7c58beedc154886a8" name="ab61bf2193d0d24e7c58beedc154886a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab61bf2193d0d24e7c58beedc154886a8">&#9670;&#160;</a></span>_scanning</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Stack::_scanning = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a109b6e1f98d623594bff3e4092ea7aa4" name="a109b6e1f98d623594bff3e4092ea7aa4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a109b6e1f98d623594bff3e4092ea7aa4">&#9670;&#160;</a></span>_services</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classStack.html#a9ac31c600e9af36c39731b4b5b9a9d4c">Services_t</a> Stack::_services</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac472f79d0221f4e7b892dc5cfe846829" name="ac472f79d0221f4e7b892dc5cfe846829"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac472f79d0221f4e7b892dc5cfe846829">&#9670;&#160;</a></span>MAX_SERVICE_COUNT</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint8_t Stack::MAX_SERVICE_COUNT = 5</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Maximum number of services (currently set to 5) </p>
 
 </div>
 </div>

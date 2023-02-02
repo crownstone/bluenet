@@ -1,4 +1,5 @@
 <map id="ExactMatchFilter" name="ExactMatchFilter">
-<area shape="rect" id="node1" title=" " alt="" coords="5,79,136,104"/>
-<area shape="rect" id="node2" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="15,5,127,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="72,108,203,133"/>
+<area shape="rect" id="node2" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,13,117,38"/>
+<area shape="rect" id="node3" href="$structexact__match__filter__data__t.html" title="Data content of the exact match filter." alt="" coords="141,5,285,45"/>
 </map>

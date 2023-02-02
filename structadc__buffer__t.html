@@ -123,21 +123,51 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:abda00e2306b4e559732bd644463fe4b5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__buffer__t.html#abda00e2306b4e559732bd644463fe4b5">valid</a> = false</td></tr>
 <tr class="memdesc:abda00e2306b4e559732bd644463fe4b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether this buffer has valid data.  <a href="structadc__buffer__t.html#abda00e2306b4e559732bd644463fe4b5">More...</a><br /></td></tr>
 <tr class="separator:abda00e2306b4e559732bd644463fe4b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9b996bad665b09199e3a6924bbf9ecb8"><td class="memItemLeft" align="right" valign="top">adc_buffer_seq_nr_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__buffer__t.html#a9b996bad665b09199e3a6924bbf9ecb8">seqNr</a> = 0</td></tr>
+<tr class="memitem:a9b996bad665b09199e3a6924bbf9ecb8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__buffer__t.html#a9b996bad665b09199e3a6924bbf9ecb8">seqNr</a> = 0</td></tr>
 <tr class="memdesc:a9b996bad665b09199e3a6924bbf9ecb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sequence number.  <a href="structadc__buffer__t.html#a9b996bad665b09199e3a6924bbf9ecb8">More...</a><br /></td></tr>
 <tr class="separator:a9b996bad665b09199e3a6924bbf9ecb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae19e6a05970919407a78ee75ca24e1db"><td class="memItemLeft" align="right" valign="top"><a id="ae19e6a05970919407a78ee75ca24e1db" name="ae19e6a05970919407a78ee75ca24e1db"></a>
-<a class="el" href="structadc__channel__config__result__t.html">adc_channel_config_result_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> [CS_ADC_NUM_CHANNELS]</td></tr>
-<tr class="memdesc:ae19e6a05970919407a78ee75ca24e1db"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> config that was used to sample this buffer. <br /></td></tr>
+<tr class="memitem:ae19e6a05970919407a78ee75ca24e1db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structadc__channel__config__result__t.html">adc_channel_config_result_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__buffer__t.html#ae19e6a05970919407a78ee75ca24e1db">config</a> [<a class="el" href="cs__Config_8h.html#a6b59a7de2956b2f655a029b61ee19194">CS_ADC_NUM_CHANNELS</a>]</td></tr>
+<tr class="memdesc:ae19e6a05970919407a78ee75ca24e1db"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> config that was used to sample this buffer.  <a href="structadc__buffer__t.html#ae19e6a05970919407a78ee75ca24e1db">More...</a><br /></td></tr>
 <tr class="separator:ae19e6a05970919407a78ee75ca24e1db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed83786f07546b28b7962a53344d49a4"><td class="memItemLeft" align="right" valign="top"><a id="aed83786f07546b28b7962a53344d49a4" name="aed83786f07546b28b7962a53344d49a4"></a>
-adc_sample_value_t *&#160;</td><td class="memItemRight" valign="bottom"><b>samples</b> = nullptr</td></tr>
-<tr class="memdesc:aed83786f07546b28b7962a53344d49a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the samples. <br /></td></tr>
+<tr class="memitem:aed83786f07546b28b7962a53344d49a4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structadc__buffer__t.html#aed83786f07546b28b7962a53344d49a4">samples</a> = nullptr</td></tr>
+<tr class="memdesc:aed83786f07546b28b7962a53344d49a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the samples.  <a href="structadc__buffer__t.html#aed83786f07546b28b7962a53344d49a4">More...</a><br /></td></tr>
 <tr class="separator:aed83786f07546b28b7962a53344d49a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Struct communicated from the <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> class when it's done sampling a buffer. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="ae19e6a05970919407a78ee75ca24e1db" name="ae19e6a05970919407a78ee75ca24e1db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae19e6a05970919407a78ee75ca24e1db">&#9670;&#160;</a></span>config</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structadc__channel__config__result__t.html">adc_channel_config_result_t</a> adc_buffer_t::config[<a class="el" href="cs__Config_8h.html#a6b59a7de2956b2f655a029b61ee19194">CS_ADC_NUM_CHANNELS</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The <a class="el" href="classADC.html" title="Analog-Digital conversion.">ADC</a> config that was used to sample this buffer. </p>
+
+</div>
+</div>
+<a id="aed83786f07546b28b7962a53344d49a4" name="aed83786f07546b28b7962a53344d49a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed83786f07546b28b7962a53344d49a4">&#9670;&#160;</a></span>samples</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#aaf08b5d17c634ec08bc73d9f93ea5edf">adc_sample_value_t</a>* adc_buffer_t::samples = nullptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Pointer to the samples. </p>
+
+</div>
+</div>
 <a id="a9b996bad665b09199e3a6924bbf9ecb8" name="a9b996bad665b09199e3a6924bbf9ecb8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9b996bad665b09199e3a6924bbf9ecb8">&#9670;&#160;</a></span>seqNr</h2>
 
@@ -145,7 +175,7 @@ adc_sample_value_t *&#160;</td><td class="memItemRight" valign="bottom"><b>sampl
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">adc_buffer_seq_nr_t adc_buffer_t::seqNr = 0</td>
+          <td class="memname"><a class="el" href="cs__Typedefs_8h.html#a77edfcb10e5ee6cd972506099c9754a2">adc_buffer_seq_nr_t</a> adc_buffer_t::seqNr = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">

@@ -99,6 +99,7 @@ $(document).ready(function(){initNavTree('classWatchdog.html',''); initResizable
 <div class="header">
   <div class="summary">
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classWatchdog-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Watchdog Class Reference</div></div>
 </div><!--header-->
@@ -111,18 +112,20 @@ $(document).ready(function(){initNavTree('classWatchdog.html',''); initResizable
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aa4dec63fe9f815a3c6fbb5e00734be95"><td class="memItemLeft" align="right" valign="top"><a id="aa4dec63fe9f815a3c6fbb5e00734be95" name="aa4dec63fe9f815a3c6fbb5e00734be95"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>init</b> ()</td></tr>
-<tr class="memdesc:aa4dec63fe9f815a3c6fbb5e00734be95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the watchdog timer. <br /></td></tr>
+<tr class="memitem:aa4dec63fe9f815a3c6fbb5e00734be95"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWatchdog.html#aa4dec63fe9f815a3c6fbb5e00734be95">init</a> ()</td></tr>
+<tr class="memdesc:aa4dec63fe9f815a3c6fbb5e00734be95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Init the watchdog timer.  <a href="classWatchdog.html#aa4dec63fe9f815a3c6fbb5e00734be95">More...</a><br /></td></tr>
 <tr class="separator:aa4dec63fe9f815a3c6fbb5e00734be95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af75d1295eae06baf04649b1c98fc175c"><td class="memItemLeft" align="right" valign="top"><a id="af75d1295eae06baf04649b1c98fc175c" name="af75d1295eae06baf04649b1c98fc175c"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>start</b> ()</td></tr>
-<tr class="memdesc:af75d1295eae06baf04649b1c98fc175c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the watchdog timer. <br /></td></tr>
+<tr class="memitem:af75d1295eae06baf04649b1c98fc175c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWatchdog.html#af75d1295eae06baf04649b1c98fc175c">start</a> ()</td></tr>
+<tr class="memdesc:af75d1295eae06baf04649b1c98fc175c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the watchdog timer.  <a href="classWatchdog.html#af75d1295eae06baf04649b1c98fc175c">More...</a><br /></td></tr>
 <tr class="separator:af75d1295eae06baf04649b1c98fc175c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83f8eccfb8887690f73e29927f879323"><td class="memItemLeft" align="right" valign="top"><a id="a83f8eccfb8887690f73e29927f879323" name="a83f8eccfb8887690f73e29927f879323"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>kick</b> ()</td></tr>
-<tr class="memdesc:a83f8eccfb8887690f73e29927f879323"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restart the watchdog timer. <br /></td></tr>
+<tr class="memitem:a83f8eccfb8887690f73e29927f879323"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWatchdog.html#a83f8eccfb8887690f73e29927f879323">kick</a> ()</td></tr>
+<tr class="memdesc:a83f8eccfb8887690f73e29927f879323"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restart the watchdog timer.  <a href="classWatchdog.html#a83f8eccfb8887690f73e29927f879323">More...</a><br /></td></tr>
 <tr class="separator:a83f8eccfb8887690f73e29927f879323"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:ad0989e3207fac08c01851220fd597675"><td class="memItemLeft" align="right" valign="top">static nrfx_wdt_channel_id&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWatchdog.html#ad0989e3207fac08c01851220fd597675">_channelId</a></td></tr>
+<tr class="separator:ad0989e3207fac08c01851220fd597675"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Class that implements the watchdog timer. </p>
@@ -131,7 +134,112 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>kick</b> ()</t
 <li>Reboot on timeout.</li>
 <li>When rebooted by timeout, RESETREAS will have the DOG bit set. </li>
 </ul>
-</div><hr/>The documentation for this class was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="aa4dec63fe9f815a3c6fbb5e00734be95" name="aa4dec63fe9f815a3c6fbb5e00734be95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4dec63fe9f815a3c6fbb5e00734be95">&#9670;&#160;</a></span>init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void Watchdog::init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Init the watchdog timer. </p>
+
+</div>
+</div>
+<a id="a83f8eccfb8887690f73e29927f879323" name="a83f8eccfb8887690f73e29927f879323"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83f8eccfb8887690f73e29927f879323">&#9670;&#160;</a></span>kick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void Watchdog::kick </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Restart the watchdog timer. </p>
+
+</div>
+</div>
+<a id="af75d1295eae06baf04649b1c98fc175c" name="af75d1295eae06baf04649b1c98fc175c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af75d1295eae06baf04649b1c98fc175c">&#9670;&#160;</a></span>start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void Watchdog::start </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Start the watchdog timer. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad0989e3207fac08c01851220fd597675" name="ad0989e3207fac08c01851220fd597675"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0989e3207fac08c01851220fd597675">&#9670;&#160;</a></span>_channelId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">nrfx_wdt_channel_id Watchdog::_channelId</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>source/include/drivers/<a class="el" href="cs__Watchdog_8h_source.html">cs_Watchdog.h</a></li>
 </ul>
 </div><!-- contents -->

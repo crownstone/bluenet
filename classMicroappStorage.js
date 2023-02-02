@@ -1,11 +1,27 @@
 var classMicroappStorage =
 [
+    [ "MicroappStorage", "classMicroappStorage.html#aa146955da9072b02fef7e32af41c52a5", null ],
+    [ "MicroappStorage", "classMicroappStorage.html#a6d41212c8f4c0c8020325fa7333daee5", null ],
     [ "erase", "classMicroappStorage.html#a263b4447f1262cf942d2abab900c20ec", null ],
     [ "getAppHeader", "classMicroappStorage.html#af11bb173bbbadb5a690c081355688bda", null ],
+    [ "getInstance", "classMicroappStorage.html#aa5d79f4bdac9251ee93bc7886518bec7", null ],
     [ "getStartInstructionAddress", "classMicroappStorage.html#afea0ec40dc1d6402ec0337c3816f4634", null ],
     [ "handleFileStorageEvent", "classMicroappStorage.html#a3714e98182c3d7c34f2f9e171c18205a", null ],
     [ "init", "classMicroappStorage.html#a26379a15471e09d7428269dbad523338", null ],
+    [ "isErased", "classMicroappStorage.html#a27b44300efd0b80b00ce730e0a2fdb3b", null ],
     [ "isErased", "classMicroappStorage.html#af6adb58e5214d21ad2c214bda11dfb06", null ],
+    [ "onFlashWritten", "classMicroappStorage.html#a79698dc8ead712d81348a553e84455e7", null ],
+    [ "operator=", "classMicroappStorage.html#af8fd2de866df1cde0c370ef5f545659e", null ],
+    [ "printHeader", "classMicroappStorage.html#a51cb664bd286ee89803fce67e59634a7", null ],
+    [ "resetChunkVars", "classMicroappStorage.html#ad89cd833ba153b916fac9b849ed0807b", null ],
     [ "validateApp", "classMicroappStorage.html#a237ccf3b7bb00136a73efef1d5bf1e67", null ],
-    [ "writeChunk", "classMicroappStorage.html#adbcb5700cf0f7b1425ec2f032a89321a", null ]
+    [ "write", "classMicroappStorage.html#a0536f8288dabc444d5269dcabed41488", null ],
+    [ "writeChunk", "classMicroappStorage.html#adbcb5700cf0f7b1425ec2f032a89321a", null ],
+    [ "writeNextChunkPart", "classMicroappStorage.html#af7f48df8a6e575f95b4cea7df8bc9b1c", null ],
+    [ "_chunkData", "classMicroappStorage.html#a7a3d964d7c5ed8fc925ee033815c6b81", null ],
+    [ "_chunkFlashAddress", "classMicroappStorage.html#ab9682478ac99f666c1347ade0b3cba3a", null ],
+    [ "_chunkSize", "classMicroappStorage.html#a69b348eaa0911d1d2e179fd4180216ee", null ],
+    [ "_chunkWritten", "classMicroappStorage.html#a9607cb30ef8f50ad4c0c0dedd87fcf07", null ],
+    [ "_writeBuffer", "classMicroappStorage.html#a5d8667ef701dc4188c45327735a8b3ee", null ],
+    [ "_writing", "classMicroappStorage.html#a2cf79a9fe57eb6a91808408e73dabb3e", null ]
 ];
