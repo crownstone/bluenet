@@ -9,8 +9,8 @@ Investigate the `source/.clang-format` (<https://github.com/crownstone/bluenet/b
 
 Support for autoformatting in IDEs is widespread.
 E.g.:
-- This [Eclipse plugin](https://marketplace.eclipse.org/content/cppstyle) enables formatting files on save or selected pieces of code using `ctrl+shift+f`.
-- Commandline tools such as `python3 -m pip install clang-format` are also available.
+- For Eclipse, there is a cppstyle plugin that enables formatting files on save or selected pieces of code using `ctrl+shift+f`.
+- Command-line tools such as `python3 -m pip install clang-format` are also available.
 
 Always run the formatter before committing.
 

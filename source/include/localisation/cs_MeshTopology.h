@@ -16,8 +16,57 @@
 #include <localisation/cs_MeshTopologyResearch.h>
 #endif
 
-class MeshTopology : EventListener {
+/**
+ * Keeps track of the rssi distance of this crownstone to
+ * the crownstones in its direct environment.
+ *
+ * Several related commands are available over UART.
+ */
+class MeshTopology: EventListener {
+	/**
+	 * Set this to true to make every crownstone in the sphere to send a noop message
+	 * on every tick, and make every crownstone respond with a neighbor message with that rssi.
+	 *
+	 * (This gives the highest possible frequency trip wire)
+	 */
+	static constexpr bool TripwireResearch = false;
+
 public:
+	/**
+	 * Initializes the class:
+	 * - Reads State.
+	 * - Allocates buffer.
+	 * - Starts listening for events.
+	 */
+	cs_ret_code_t init();
+
+	/**
+	 * Commands handled:
+	 *  - CMD_MESH_TOPO_GET_RSSI
+	 *  - CMD_MESH_TOPO_RESET
+	 *  - CMD_MESH_TOPO_GET_MAC
+	 *
+	 * Internal usage:
+	 *  - EVT_RECV_MESH_MSG
+	 *  - EVT_TICK
+	 */
+	void handleEvent(event_t &evt);
+
+	/**
+	 * Get the MAC address of a neighbouring crownstone.
+	 *
+	 * @param[in] stoneId    The stone ID of the crownstone.
+	 *
+	 * @return ERR_WAIT_FOR_SUCCESS    When the MAC address is requested. Wait for EVT_MESH_TOPO_MAC_RESULT.
+	 *                                 However, there will be no event if it times out.
+	 * @return ERR_NOT_FOUND           When the stone is not a known neighbour.
+	 */
+	cs_ret_code_t getMacAddress(stone_id_t stoneId);
+
+	// --------------------------------
+	// ---------- parameters ----------
+	// --------------------------------
+
 	/**
 	 * Maximum number of neighbours in the list.
 	 */
@@ -47,24 +96,6 @@ public:
 	 */
 	static constexpr uint16_t FAST_INTERVAL_TIMEOUT_SECONDS            = 5 * 60;
 
-	/**
-	 * Initializes the class:
-	 * - Reads State.
-	 * - Allocates buffer.
-	 * - Starts listening for events.
-	 */
-	cs_ret_code_t init();
-
-	/**
-	 * Get the MAC address of a neighbouring crownstone.
-	 *
-	 * @param[in] stoneId    The stone ID of the crownstone.
-	 *
-	 * @return ERR_WAIT_FOR_SUCCESS    When the MAC address is requested. Wait for EVT_MESH_TOPO_MAC_RESULT.
-	 *                                 However, there will be no event if it times out.
-	 * @return ERR_NOT_FOUND           When the stone is not a known neighbour.
-	 */
-	cs_ret_code_t getMacAddress(stone_id_t stoneId);
 
 private:
 	static constexpr uint8_t INDEX_NOT_FOUND = 0xFF;
@@ -78,6 +109,10 @@ private:
 		int8_t rssiChannel39;
 		uint8_t lastSeenSecondsAgo;
 	};
+
+	// ---------------------------------------
+	// ---------- runtime variables ----------
+	// ---------------------------------------
 
 	/**
 	 * Stone ID of this crownstone, read on init.
@@ -119,6 +154,10 @@ private:
 	 */
 	uint8_t _msgCount = 0;
 
+	// -------------------------------------
+	// ---------- private methods ----------
+	// -------------------------------------
+
 	/**
 	 * Resets the stored topology.
 	 */
@@ -133,6 +172,11 @@ private:
 	 * Update the data of a node in the list.
 	 */
 	void updateNeighbour(neighbour_node_t& node, stone_id_t id, int8_t rssi, uint8_t channel);
+
+	/**
+	 * sets the three rssi values to RSSI_INIT
+	 */
+	void clearNeighbourRssi(neighbour_node_t& node);
 
 	/**
 	 * Find a neighbour in the list.
@@ -155,29 +199,47 @@ private:
 	void sendNext();
 
 	/**
+	 * Sends a neighbour message for the given node over the mesh.
+	 * No checks are executed.
+	 *
+	 * Returns the message struct for convenience.
+	 */
+	cs_mesh_model_msg_neighbour_rssi_t sendNeighbourMessageOverMesh(neighbour_node_t& node);
+
+	/**
 	 * Sends the RSSI to a neighbour over UART.
 	 */
 	void sendRssiToUart(stone_id_t reveiverId, cs_mesh_model_msg_neighbour_rssi_t& packet);
 
-	// Event handlers
+	// ------------------------------------
+	// ---------- event handlers ----------
+	// ------------------------------------
+
 	void onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet);
+
 	cs_ret_code_t onStoneMacMsg(MeshMsgEvent& meshMsg);
+
+	/**
+	 * Handles mesh messages:
+	 *  - CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI
+	 *  - CS_MESH_MODEL_TYPE_STONE_MAC
+	 *
+	 *  Also calls `add` if .hops == 0, regarless of the packet type.
+	 */
 	void onMeshMsg(MeshMsgEvent& packet, cs_result_t& result);
+
+	/**
+	 * neighbors are removed from the list when their individual countdown expires.
+	 * See TIMEOUT_SECONDS.
+	 */
 	void onTickSecond();
 
 	/**
-	 * Print all neighbours.
+	 * Prints all neighbours.
 	 */
 	void print();
 
-public:
-	/**
-	 * Internal usage.
-	 */
-	void handleEvent(event_t& evt);
-
 #if BUILD_MESH_TOPOLOGY_RESEARCH == 1
-private:
 	MeshTopologyResearch _research;
 #endif
 };
