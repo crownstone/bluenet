@@ -97,3 +97,20 @@ make create_release_in_repository
 ```
 
 This will copy all `.zip`, `.elf`, `.bin`, files, as well as configuration files.
+
+
+## Release to cloud
+
+Now release the firmware to the cloud, so app users actually use the new firmware.
+For this, use the [cloud-firmware-management](https://github.com/crownstone/cloud-firmware-management) tool.
+
+*TODO: Right now, the MongoDB cannot be accessed over the internet directly, this requires an ssh tunnel. The cloud-firmware-management tool assumes MongoDB access over the internet.*
+
+Follow the install instructions, and once it's running, browse http://localhost:3000.
+There, you can add or edit releases.
+
+- Make sure the version string is correct, it should match the version string that the firmware returns.
+- Make sure to set the correct dependencies, the app uses this for the correct upgrade order from old releases.
+- Make sure to set the correct minimal app version, there might be changes that an old app version cannot deal with.
+
+Always first test as alpha release. Test if a Crownstone with old firmware (1.1.0) can be updated all the way to this new release.
