@@ -224,12 +224,13 @@ static const uint8_t DEFAULT_DIM_VALUE           = 40;
  * supplies a maximum and a minimum wanted interval. The connection interval must be between 7.5 ms and 4 s.
  * See https://devzone.nordicsemi.com/question/161154/minimum-connection-interval/
  *
- * If the connection interval is equal to RF_SDH_BLE_GAP_EVENT_LENGTH, the connection can take up 100% of the radio time, leaving none for the mesh.
+ * If the connection interval is equal to NRF_SDH_BLE_GAP_EVENT_LENGTH, the connection can take up 100% of the radio time, leaving none for the mesh.
  * The shortest timeslot the mesh uses is 3.8ms (TIMESLOT_BASE_LENGTH_SHORT_US),
- * so we could consider setting MIN_CONNECTION_INTERVAL to 4 * 1.25 ms larger than RF_SDH_BLE_GAP_EVENT_LENGTH.
+ * so we could consider setting MIN_CONNECTION_INTERVAL to 4 * 1.25 ms larger than NRF_SDH_BLE_GAP_EVENT_LENGTH.
+ * NRF_SDH_BLE_GAP_EVENT_LENGTH is by default equal to 6.
  */
 #define MIN_CONNECTION_INTERVAL                  6   // In units of 1.25ms.
-#define MAX_CONNECTION_INTERVAL                  16  // In units of 1.25ms.
+#define MAX_CONNECTION_INTERVAL                  16  // In units of 1.25ms. (20 ms)
 
 /*
  * This timeout determines the timeout from the last data exchange till a link is considered lost. A Central will not

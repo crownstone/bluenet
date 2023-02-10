@@ -41,6 +41,8 @@ extern "C" {
 #define PCA10100 42
 // Nordic dev board for the nRF52840
 #define PCA10056 43
+// Nordic USB dongle for the nRF52840
+#define PCA10059 44
 
 // Rectangular beacons from China.
 #define GUIDESTONE 100
@@ -167,66 +169,70 @@ uint8_t GetGpioPin(uint8_t major, uint8_t minor);
  * Configure pins for control relays, IGBTs, LEDs, UART, current sensing, etc.
  */
 typedef struct {
-	// The hardware board type (number).
+	//! The hardware board type (number).
 	uint32_t hardwareBoard;
 
-	// GPIO pin to control the IGBTs.
+	//! GPIO pin to control the IGBTs.
 	uint8_t pinDimmer;
 
-	// GPIO pin to enable the IGBT circuit.
+	//! GPIO pin to enable the IGBT circuit.
 	uint8_t pinEnableDimmer;
 
-	// GPIO to debug the relay: turns on when relay is turned on, and vice versa. Inverted when LEDs are inverted.
+	//! GPIO to debug the relay: turns on when relay is turned on, and vice versa. Inverted when LEDs are inverted.
 	uint8_t pinRelayDebug;
 
-	// GPIO pin to switch the relay on.
+	//! GPIO pin to switch the relay on.
 	uint8_t pinRelayOn;
 
-	// GPIO pin to switch the relay off.
+	//! GPIO pin to switch the relay off.
 	uint8_t pinRelayOff;
 
-	// Analog input pins to read the current with different gains (if present).
+	//! Analog input pins to read the current with different gains (if present).
 	uint8_t pinAinCurrent[GAIN_COUNT];
 
-	// Analog input pins to read the voltage with different gains (if present).
+	//! Analog input pins to read the voltage with different gains (if present).
 	uint8_t pinAinVoltage[GAIN_COUNT];
 
-	// Analog input pins to read the voltage after the load with different gains (if present).
+	//! Analog input pins to read the voltage after the load with different gains (if present).
 	uint8_t pinAinVoltageAfterLoad[GAIN_COUNT];
 
-	// Analog input pin to read 'zero' / offset (to be used for both current and voltage measurements).
+	//! Analog input pin to read 'zero' / offset (to be used for both current and voltage measurements).
 	uint8_t pinAinZeroRef;
 
-	// Analog input pin to read the dimmer temperature.
+	//! Analog input pin to read the dimmer temperature.
 	uint8_t pinAinDimmerTemp;
 
-	// Analog input pin to measure EARTH
+	//! Analog input pin to measure EARTH
 	uint8_t pinAinEarth;
 
-	// GPIO pin to get zero-crossing information for current.
+	//! GPIO pin to get zero-crossing information for current.
 	uint8_t pinCurrentZeroCrossing;
 
-	// GPIO pin to get zero-crossing information for voltage.
+	//! GPIO pin to get zero-crossing information for voltage.
 	uint8_t pinVoltageZeroCrossing;
 
-	// GPIO pin to receive UART.
+	//! GPIO pin to receive UART.
 	uint8_t pinRx;
 
-	// GPIO pin to send UART.
+	//! GPIO pin to send UART.
 	uint8_t pinTx;
 
-	// GPIO pins that can be used as GPIO by the user, for example microapps.
+	//! GPIO pins that can be used as GPIO by the user, for example microapps.
 	uint8_t pinGpio[GPIO_INDEX_COUNT];
 
-	// GPIO pins of buttons (on dev. kit).
+	//! GPIO pins of buttons (on dev. kit).
 	uint8_t pinButton[BUTTON_COUNT];
 
-	// GPIO pins of LEDs.
+	//! GPIO pins of LEDs.
 	uint8_t pinLed[LED_COUNT];
 
+	//! JTAG / SWD pins for flashing.
 	struct __attribute__((__packed__)) {
+		//! Chip select pin
 		uint8_t cs;
+		//! Clock pin
 		uint8_t clk;
+		//! Data pins
 		uint8_t dio[4];
 	} pinFlash;
 
@@ -235,11 +241,11 @@ typedef struct {
 		//! True if the dimmer is inverted (setting gpio high turns dimmer off).
 		bool dimmerInverted : 1;
 
-		// True if the board should have UART enabled by default.
+		//! True if the board should have UART enabled by default.
 		bool enableUart : 1;
 
-		// True if the board has LEDs that should be enabled by default.
-		// Some boards do have LEDs, but cannot deliver enough power when also listening (scanning / meshing).
+		//! True if the board has LEDs that should be enabled by default.
+		//! Some boards do have LEDs, but cannot deliver enough power when also listening (scanning / meshing).
 		bool enableLeds : 1;
 
 		//! True if LED is off when GPIO is set high.
@@ -248,20 +254,20 @@ typedef struct {
 		//! True if the temperature sensor of the dimmer is inverted (NTC).
 		bool dimmerTempInverted : 1;
 
-		// True if the NFC pins (p0.09 and p0.10) are used as GPIO.
+		//! True if the NFC pins (p0.09 and p0.10) are used as GPIO.
 		bool usesNfcPins : 1;
 
-		// True if the Crownstone has a more accurate power measurement.
+		//! True if the Crownstone has a more accurate power measurement.
 		bool hasAccuratePowerMeasurement : 1;
 
-		// True if the Crownstone can try dimming at boot, because it has an accurate enough power measurement,
-		// and a lower startup time of the dimmer circuit.
+		//! True if the Crownstone can try dimming at boot, because it has an accurate enough power measurement,
+		//! and a lower startup time of the dimmer circuit.
 		bool canTryDimmingOnBoot : 1;
 
-		// True if the Crownstone can dim immediately after a warm boot.
+		//! True if the Crownstone can dim immediately after a warm boot.
 		bool canDimOnWarmBoot : 1;
 
-		// True if the dimmer can be on when the pins are floating (during boot).
+		//! True if the dimmer can be on when the pins are floating (during boot).
 		bool dimmerOnWhenPinsFloat : 1;
 	} flags;
 

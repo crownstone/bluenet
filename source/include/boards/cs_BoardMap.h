@@ -243,6 +243,7 @@ static cs_uicr_data_t mapBoardToUicrData(uint32_t boardVersion) {
 		case PCA10036:
 		case PCA10040:
 		case PCA10056:
+		case PCA10059:
 		case PCA10100: {
 			data.productRegionFamily.fields.productType   = PRODUCT_DEV_BOARD;
 			data.productRegionFamily.fields.region        = 0xFF;

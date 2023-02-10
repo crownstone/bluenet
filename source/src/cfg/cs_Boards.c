@@ -46,6 +46,7 @@
 #include <boards/cs_GuideStone.h>
 #include <boards/cs_PCA10040.h>
 #include <boards/cs_PCA10056.h>
+#include <boards/cs_PCA10059.h>
 #include <boards/cs_UsbDongle.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
@@ -196,6 +197,7 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 		case PCA10036:
 		case PCA10040: asPca10040(config); break;
 		case PCA10056: asPca10056(config); break;
+		case PCA10059: asPca10059(config); break;
 		case PCA10100:
 			// should not be
 			asPca10040(config);

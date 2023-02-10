@@ -844,7 +844,7 @@ void Stack::onIncomingConnected(const ble_evt_t* p_ble_evt) {
 }
 
 void Stack::onIncomingDisconnected(const ble_evt_t* p_ble_evt) {
-	LOGi("Device disconnected");
+	LOGi("Incoming device disconnect");
 
 	for (Service* service : _services) {
 		service->onBleEvent(p_ble_evt);

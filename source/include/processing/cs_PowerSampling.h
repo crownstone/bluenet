@@ -18,6 +18,9 @@
 
 typedef void (*ps_zero_crossing_cb_t)();
 
+/**
+ * Sample power.
+ */
 class PowerSampling : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
