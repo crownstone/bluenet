@@ -29,7 +29,7 @@ class MeshTopology: EventListener {
 	 *
 	 * (This gives the highest possible frequency trip wire)
 	 */
-	static constexpr bool TripwireResearch = false;
+	static constexpr bool TripwireResearch = true;
 
 public:
 	/**
@@ -75,26 +75,26 @@ public:
 	/**
 	 * Time after last seen, before a neighbour is removed from the list.
 	 */
-	static constexpr uint8_t TIMEOUT_SECONDS                           = 3 * 60;
+	static constexpr uint8_t TIMEOUT_SECONDS                           = 60;
 
 	/**
 	 * Interval at which a mesh messages is sent for each neighbour.
 	 */
-	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR      = 5 * 60;
-	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST = 10;
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR      = 5 ;
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST = 1;
 
 	/**
 	 * Interval at which a no-hop noop message is sent.
 	 *
 	 * Should be lower than TIMEOUT_SECONDS, so that a message is sent before timeout.
 	 */
-	static constexpr uint16_t SEND_NOOP_INTERVAL_SECONDS               = 1 * 60;
-	static constexpr uint16_t SEND_NOOP_INTERVAL_SECONDS_FAST          = 10;
+	static constexpr uint16_t SEND_NOOP_INTERVAL_SECONDS               = 5;
+	static constexpr uint16_t SEND_NOOP_INTERVAL_SECONDS_FAST          = 1;
 
 	/**
 	 * After a reset, the FAST intervals will be used instead, for this amount of seconds.
 	 */
-	static constexpr uint16_t FAST_INTERVAL_TIMEOUT_SECONDS            = 5 * 60;
+	static constexpr uint16_t FAST_INTERVAL_TIMEOUT_SECONDS            = 60;
 
 
 private:
