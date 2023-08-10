@@ -47,7 +47,7 @@ static void meshEventHandler(const nrf_mesh_evt_t* p_evt);
  * This struct must be statically allocated. The event handler can be set statically. The node and is_removed fields
  * are set internally.
  */
-static nrf_mesh_evt_handler_t meshEventHandlerStruct = {.evt_cb = meshEventHandler, nullptr, false};
+static nrf_mesh_evt_handler_t meshEventHandlerStruct = {.evt_cb{meshEventHandler}, .node{nullptr}, .is_removed{false}};
 
 #if MESH_PERSISTENT_STORAGE == 2
 

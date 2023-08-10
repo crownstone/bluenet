@@ -45,7 +45,7 @@ public:
 	 *  - remove_reference to avoid complications
 	 *  - decltype doesn't dereference the nullptr
 	 */
-	typedef typename std::remove_reference<decltype(((RecordType*)nullptr)->id())>::type IdType;
+	typedef typename std::remove_reference<decltype((std::declval<RecordType*>())->id())>::type IdType;
 
 	/**
 	 * invalidate all records.
