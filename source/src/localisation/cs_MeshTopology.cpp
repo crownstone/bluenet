@@ -200,7 +200,16 @@ void MeshTopology::sendNext() {
 			node.id,
 			node.lastSeenSecondsAgo);
 
-	cs_mesh_model_msg_neighbour_rssi_t meshPayload = sendNeighbourMessageOverMesh(node);
+	// Sent RSSI of neighbour over the mesh
+	cs_mesh_model_msg_neighbour_rssi_t meshPayload = {
+				.type = 0,
+				.neighbourId = node.id,
+				.rssiChannel37 = node.rssiChannel37,
+				.rssiChannel38 = node.rssiChannel38,
+				.rssiChannel39 = node.rssiChannel39,
+				.lastSeenSecondsAgo = node.lastSeenSecondsAgo,
+				.counter = _msgCount++
+	};
 
 	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
@@ -218,32 +227,6 @@ void MeshTopology::sendNext() {
 
 	// Send next item in the list next time.
 	_nextSendIndex++;
-}
-
-
-cs_mesh_model_msg_neighbour_rssi_t MeshTopology::sendNeighbourMessageOverMesh(neighbour_node_t& node) {
-	cs_mesh_model_msg_neighbour_rssi_t meshPayload = {
-				.type = 0,
-				.neighbourId = node.id,
-				.rssiChannel37 = node.rssiChannel37,
-				.rssiChannel38 = node.rssiChannel38,
-				.rssiChannel39 = node.rssiChannel39,
-				.lastSeenSecondsAgo = node.lastSeenSecondsAgo,
-				.counter = _msgCount++
-		};
-
-		TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
-		meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
-		meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
-		meshMsg.urgency = CS_MESH_URGENCY_LOW;
-		meshMsg.flags.flags.doNotRelay = false;
-		meshMsg.payload = reinterpret_cast<uint8_t*>(&meshPayload);
-		meshMsg.size = sizeof(meshPayload);
-
-		event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
-		event.dispatch();
-
-		return meshPayload;
 }
 
 void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {
@@ -264,6 +247,7 @@ void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neigh
 void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet) {
 	// Send to UART.
 	sendRssiToUart(id, packet);
+	LOGi("Stone %d sees %d, [%d, %d, %d]", id, packet.neighbourId, packet.rssiChannel37, packet.rssiChannel38, packet.rssiChannel39);
 }
 
 cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
@@ -337,17 +321,17 @@ void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 		if(packet.type == CS_MESH_MODEL_TYPE_CMD_NOOP) {
 			neighbour_node_t node = {};
 			clearNeighbourRssi(node);
-			updateNeighbour(node, packet.srcStoneId, packet.rssi, packet.channel);
+			updateNeighbour(node, packet.srcStoneId, 
+			packet.rssi, packet.channel);
 			sendNeighbourMessageOverMesh(node);
 		}
 	}
-
 
 	add(packet.srcStoneId, packet.rssi, packet.channel);
 }
 
 void MeshTopology::onTickSecond() {
-	LOGMeshTopologyVerbose("onTickSecond nextSendIndex=%u", _nextSendIndex);
+	LOGMeshTopologyInfo("onTickSecond nextSendIndex=%u", _nextSendIndex);
 	print();
 	[[maybe_unused]] bool change = false;
 	for (uint8_t i = 0; i < _neighbourCount; /**/) {
@@ -404,7 +388,7 @@ void MeshTopology::onTickSecond() {
 
 void MeshTopology::print() {
 	for (uint8_t i = 0; i < _neighbourCount; ++i) {
-		LOGMeshTopologyVerbose(
+		LOGMeshTopologyInfo(
 				"index=%u id=%u rssi=[%i, %i, %i] secondsAgo=%u",
 				i,
 				_neighbours[i].id,
