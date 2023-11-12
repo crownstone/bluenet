@@ -14,7 +14,8 @@
 #include <util/cs_Variance.h>
 
 /**
- *
+ * @brief Edge class
+ * 
  */
 class Edge {
 public:
@@ -23,16 +24,45 @@ public:
 	stone_id_t source;
 	stone_id_t target;
 	int8_t rssi;
+	float distance; // TODO: add conversion distance from rssi
+
+	/**
+	 * @brief Compare two edges.
+	 * 
+	 * @param other 
+	 * @return true 
+	 * @return false 
+	 */
+	bool compare(const Edge &other) const;
 };
 
+/**
+ * @brief Triangle class
+ * 
+ */
 class Triangle {
 public:
 	static constexpr uint8_t NUM_EDGES = 3;
 
 	/**
+	 * @brief Construct a new Triangle object of three edge pointers
+	 * 
+	 * @param adj_edge1 
+	 * @param adj_edge2 
+	 * @param opposite_edge 
+	 */
+	Triangle(Edge *adj_edge1, Edge *adj_edge2, Edge *opposite_edge) : edges{adj_edge1, adj_edge2, opposite_edge} {}
+    // OR
+	Triangle(Edge *base_edge, Edge *adj_edge, Edge *opposite_edge) : base_edge(base_edge), adj_edge(adj_edge), opposite_edge(opposite_edge) {}
+	
+	/**
 	 * Edges that make up the triangle.
 	 */
 	Edge edges[NUM_EDGES];
+	// OR
+	Edge *base_edge;
+	Edge *adj_edge;
+	Edge *opposite_edge;
 
 	/**
 	 * Gets the area of the triangle.
@@ -50,14 +80,13 @@ public:
 	float getAltitude();
 
 	/**
-	 *
+	 * @brief Get the Alitude Base Position of the Altitude's x position to the target crownstone.
+	 * 
+	 * @param target 
+	 * @return float 
 	 */
-	float getBaseLeftSegment();
+	float getAlitudeBasePositionTo(stone_id_t targetID);
 
-	/**
-	 *
-	 */
-	float getBaseRightSegment();
 };
 
 class MeshTopologyResearch : public EventListener {

@@ -24,3 +24,4 @@ nohup.out
 **/CMakeBuild.overwrite.config
 **/CMakeBuild.runtime.config
 docs/html
+venv/
