@@ -12,6 +12,56 @@
 #include <structs/cs_PacketsInternal.h>
 #include <util/cs_Coroutine.h>
 #include <util/cs_Variance.h>
+#include <util/cs_Math.h>
+
+/**
+ * @brief Transformations class
+ * 
+ */
+class Transformations {
+public:
+
+	/**
+	 * @brief Convert RSSI to distance.
+	 * 
+	 * @param rssi 
+	 * @return float 
+	 */
+	static float rssToDistance(int8_t rssi);
+
+	/**
+	 * @brief Roll transformation.
+	 * 
+	 * @param phi 
+	 * @return std::vector<float> 
+	 */
+	static std::vector<float> roll(float phi);
+
+	/**
+	 * @brief Pitch transformation.
+	 * 
+	 * @param theta 
+	 * @return std::vector<float> 
+	 */
+	static std::vector<float> pitch(float theta); 
+
+	/**
+	 * @brief Yaw transformation.
+	 * 
+	 * @param psi 
+	 * @return std::vector<float> 
+	 */
+    static std::vector<float> yaw(float psi);
+
+	/**
+	 * @brief Multiply two matrices or matrix with vector
+	 * 
+	 * @param matrix 
+	 * @param matvec 
+	 * @return std::vector<float> 
+	 */
+	std::vector<float> matrix3_multiply(const std::vector<float>& matrix, const std::vector<float>& vectMatrix);
+};
 
 /**
  * @brief Edge class
@@ -64,6 +114,8 @@ public:
 	Edge *adj_edge;
 	Edge *opposite_edge;
 
+	// TODO: add triangle id, needed?
+
 	/**
 	 * Gets the area of the triangle.
 	 */
@@ -87,6 +139,32 @@ public:
 	 */
 	float getAlitudeBasePositionTo(stone_id_t targetID);
 
+	/**
+	 * @brief Returns the third node of the triangle based on the base edge.
+	 * Base edge is alway self->otherNode
+	 * 
+	 * @param baseEdge 
+	 * @return stone_id_t 
+	 */
+	stone_id_t getThirdNode(Edge& baseEdge); 
+
+	/**
+	 * @brief Get the Other outgoing base edge
+	 * 
+	 * @param baseEdge 
+	 * @return Edge pointer 
+	 */
+	Edge* getOtherBase(Edge& baseEdge);
+
+	/**
+	 * @brief Get a specific edge from the triangle.
+	 * 
+	 * @param source 
+	 * @param target 
+	 * @return Edge pointer
+	 */
+	Edge* getEdge(stone_id_t source, stone_id_t target);
+	
 };
 
 class MeshTopologyResearch : public EventListener {
