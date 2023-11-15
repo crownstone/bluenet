@@ -167,6 +167,11 @@ public:
 	
 };
 
+/**
+ * @brief Tetrahedon class
+ * maybe needed
+ */
+
 class MeshTopologyResearch : public EventListener {
 public:
 	enum TopologyDiscoveryState {
@@ -176,15 +181,30 @@ public:
 		TOPOLOGY_DONE, // The topology is discovered and valid 
 	};
 
-	MeshTopologyResearch();
+	// MeshTopology has list of neighbours, private variable, neighbour got stone id, rssi, lastseen. 
+	// Rssi is stored in buffer cs_result_t
+	// Reuse this by making it public??
 
-	/**
-	 */
+	// array of neighbours (surrounding nodes, sorted on RSSI)
+	// Neighbour* neighbourList;
+
+	// array of pointers to edges called edgeList (formed after conformation with other node)
+	// Edge* edgeList;
+
+	// array of pointers to triangles called triangleList (formed after conformation with other node)
+	// Triangle* triangleList;
+
+	MeshTopologyResearch();
 	void handleEvent(event_t& evt);
 
-	/**
-	 */
 	void init();
+	void triangles();
+	void topology();
+
+
 
 private:
+
+	// all the procedure functions?
+
 };
