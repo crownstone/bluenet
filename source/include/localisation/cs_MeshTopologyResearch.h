@@ -194,13 +194,20 @@ public:
 	 */
 	void handleEvent(event_t& evt);
 
+	int stateFunc(); // TOOD: give a reasonable name
+
 	void init();
 	void triangles();
 	void topology();
 
-
-
 	Coroutine routine;
+	TopologyDiscoveryState state = TopologyDiscoveryState::SCAN_FOR_NEIGHBORS;
+
+	static constexpr int MAX_NEIGHBOURS = 10;
+	std::optional<Edge> edgeList[MAX_NEIGHBOURS];
+
+	static constexpr int MAX_TRIANGLES = 10;
+	std::optional<Triangle> trianglesList[MAX_TRIANGLES];
 
 private:
 

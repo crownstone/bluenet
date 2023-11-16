@@ -37,7 +37,6 @@ std::vector<float> yaw(float psi) {
 std::vector<float> matrix3_multiply(const std::vector<float>& matrix, const std::vector<float>& vectMatrix) {
 	size_t size = vectMatrix.size();
 	std::vector<float> result(size, 0.0);
-
 	if (size == 3) {
 		for (size_t i = 0; i < 3; ++i) {
 			for (size_t j = 0; j < 3; ++j) {
@@ -179,14 +178,47 @@ Edge* Triangle::getEdge(stone_id_t source, stone_id_t target) {
 
 /************************************   MeshTopologyResearch   ***********************************/
 
-MeshTopologyResearch::MeshTopologyResearch() : routine([this]() { return Coroutine::delayMs(1000); }) {}
+MeshTopologyResearch::MeshTopologyResearch() : routine([this]() { return stateFunc(); }) {
+
+}
+
+void MeshTopologyResearch::handleEvent(event_t& evt) {
+	routine.handleEvent(evt);
+
+	switch (evt.type) {
+		case CS_TYPE::EVT_RECV_MESH_MSG: {
+			// get the packet data
+			// auto packet = CS_TYPE_CAST(EVT_RECV_MESH_MSG, evt.data);
+			// do something with the packet
+			break;
+		}
+		default:
+			break;
+	}
+}
 
 void MeshTopologyResearch::init() {
-	TYPIFY(CONFIG_CROWNSTONE_ID) state_id;
-	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &state_id, sizeof(state_id));
-
-	// int MAX_NEIGHBOURS = 10;
-	// edgeList[] = new Edge*[MAX_NEIGHBOURS];
-
 	listen();
+}
+
+// returns how many ticks the next routine will be called
+int MeshTopologyResearch::stateFunc() {
+
+	switch (state) {
+		case TopologyDiscoveryState::SCAN_FOR_NEIGHBORS:
+			// check if we have enough neighbors?
+			// if yes: go to next state
+			// if no: don't go to next statue (return  Coroutine::delayMs(1000); )
+			break;
+		case TopologyDiscoveryState::BUILD_TOPOLOGY:
+			// you might now sent out mesh messages:
+			// to sent a message (also take a look at docs/tutorials/ADD_MESH_MSG.md)
+			// event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &eventData, sizeof(eventData));
+			// EventDispatcher::getInstance().dispatch(cmd);
+			break;
+		// TODO: handle other cases
+		default: LOGe("Unhandeled state: %d", state);
+	}
+
+	return Coroutine::delayMs(100);
 }
