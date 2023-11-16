@@ -10,7 +10,52 @@
 #include <localisation/cs_MeshTopologyResearch.h>
 #include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
-#include <util/cs_math.h>
+
+/************************************   Transformations   ****************************************/
+
+// TODO: in math file later maybe
+
+float rssToDistance(int8_t rssi) {
+	return std::pow(10, (-69.1 - rssi) / 10 * 2.05);
+}
+
+std::vector<float> roll(float phi) {
+	phi = M_PI * phi / 180.0;
+	return {1, 0, 0, 0, std::cos(phi), -std::sin(phi), 0, std::sin(phi), std::cos(phi)};
+}
+
+std::vector<float> pitch(float theta) {
+	theta = M_PI * theta / 180.0;
+	return {std::cos(theta), 0, std::sin(theta), 0, 1, 0, -std::sin(theta), 0, std::cos(theta)};
+}
+
+std::vector<float> yaw(float psi) {
+	psi = M_PI * psi / 180.0;
+	return {std::cos(psi), -std::sin(psi), 0, std::sin(psi), std::cos(psi), 0, 0, 0, 1};
+}
+
+std::vector<float> matrix3_multiply(const std::vector<float>& matrix, const std::vector<float>& vectMatrix) {
+	size_t size = vectMatrix.size();
+	std::vector<float> result(size, 0.0);
+
+	if (size == 3) {
+		for (size_t i = 0; i < 3; ++i) {
+			for (size_t j = 0; j < 3; ++j) {
+				result[i] += matrix[i * 3 + j] * vectMatrix[j];
+			}
+		}
+	}
+	if (size == 9) {
+		for (size_t i = 0; i < 3; ++i) {
+			for (size_t j = 0; j < 3; ++j) {
+				for (size_t k = 0; k < 3; ++k) {
+					result[i * 3 + j] += matrix[i * 3 + k] * vectMatrix[k * 3 + j];
+				}
+			}
+		}
+	}
+	return result;
+}
 
 /******************************************   Edge   *********************************************/
 
@@ -35,12 +80,11 @@ float Triangle::getArea() {
 	float a   = opposite_edge->distance;
 	float b   = adj_edge->distance;
 	float c   = base_edge->distance;
+
 	float s   = (a + b + c) / 2;
 	float div = s * (s - a) * (s - b) * (s - c);
-	if (div < 0) {
-		div = 0;
-	}
-	return std::sqrt(div);
+
+	return std::sqrt(CsMath::max(div, 0));
 }
 
 /**
@@ -52,14 +96,10 @@ float Triangle::getAngle() {
 	float a = opposite_edge->distance;
 	float b = adj_edge->distance;
 	float c = base_edge->distance;
+
 	float p = (std::pow(b, 2) + std::pow(c, 2) - std::pow(a, 2)) / (2 * b * c);
-	if (p < -1.0) {
-		p = -1.0;
-	}
-	if (p > 1.0) {
-		p = 1.0;
-	}
-	return std::acos(p) * (180 / M_PI);
+
+	return std::acos(CsMath::clamp(p, -1, 1)) * (180 / M_PI);
 }
 
 /**
@@ -90,35 +130,63 @@ float Triangle::getAlitudeBasePositionTo(stone_id_t targetID) {
 		basePositionX = std::pow(adj_edge->distance, 2) - hASquared;
 	}
 
-	if (basePositionX < 0) {
-		basePositionX = 0.0;
-	}
+	return CsMath::max(basePositionX, 0);
+}
 
-	return basePositionX;
+/**
+ * @brief Returns the third node of the triangle based on the base edge.
+ * Base edge is alway self->otherNode
+ *
+ * @param baseEdge
+ * @return stone_id_t
+ */
+stone_id_t Triangle::getThirdNode(Edge& baseEdge) {
+	return getOtherBase(baseEdge)->target;
+}
+
+/**
+ * @brief Get the Other outgoing base edge
+ *
+ * @param baseEdge
+ * @return Edge pointer
+ */
+Edge* Triangle::getOtherBase(Edge& baseEdge) {
+	if (baseEdge.compare(*base_edge)) {
+		return adj_edge;
+	}
+	return base_edge;
+}
+
+/**
+ * @brief Get a specific edge from the triangle.
+ *
+ * @param source
+ * @param target
+ * @return Edge pointer
+ */
+Edge* Triangle::getEdge(stone_id_t source, stone_id_t target) {
+	if (base_edge->source == source && base_edge->target == target) {
+		return base_edge;
+	}
+	if (adj_edge->source == source && adj_edge->target == target) {
+		return adj_edge;
+	}
+	if (opposite_edge->source == source && opposite_edge->target == target) {
+		return opposite_edge;
+	}
+	return nullptr;
 }
 
 /************************************   MeshTopologyResearch   ***********************************/
 
-MeshTopologyResearch::MeshTopologyResearch()
-		: routine([this]() {
-			LOGi("Routine started");
-
-			unsigned long long int a = 0, b = 1, c, i;
-			for (i = 0; i < 100000000; ++i) {
-				c = a + b;
-				a = b;
-				b = c;
-			}
-
-			LOGi("Routine done scramble=%d", c % 2 == 0);
-
-			return 100;
-		}) {}
+MeshTopologyResearch::MeshTopologyResearch() : routine([this]() { return Coroutine::delayMs(1000); }) {}
 
 void MeshTopologyResearch::init() {
-	LOGi("init");
 	TYPIFY(CONFIG_CROWNSTONE_ID) state_id;
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &state_id, sizeof(state_id));
+
+	// int MAX_NEIGHBOURS = 10;
+	// edgeList[] = new Edge*[MAX_NEIGHBOURS];
 
 	listen();
 }
