@@ -331,7 +331,7 @@ void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 }
 
 void MeshTopology::onTickSecond() {
-	LOGMeshTopologyInfo("onTickSecond nextSendIndex=%u", _nextSendIndex);
+	LOGMeshTopologyDebug("onTickSecond nextSendIndex=%u", _nextSendIndex);
 	print();
 	[[maybe_unused]] bool change = false;
 	for (uint8_t i = 0; i < _neighbourCount; /**/) {
@@ -388,7 +388,7 @@ void MeshTopology::onTickSecond() {
 
 void MeshTopology::print() {
 	for (uint8_t i = 0; i < _neighbourCount; ++i) {
-		LOGMeshTopologyInfo(
+		LOGMeshTopologyDebug(
 				"index=%u id=%u rssi=[%i, %i, %i] secondsAgo=%u",
 				i,
 				_neighbours[i].id,

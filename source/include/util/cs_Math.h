@@ -14,6 +14,8 @@
 
 namespace CsMath {
 
+#define M_PI 3.14159265358979323846
+
 /**
  * returns lhs+rhs, clamping return values that would roll over
  * to the min/max values of lhs.

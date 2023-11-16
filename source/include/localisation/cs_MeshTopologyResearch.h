@@ -42,8 +42,6 @@ public:
  */
 class Triangle {
 public:
-	static constexpr uint8_t NUM_EDGES = 3;
-
 	/**
 	 * @brief Construct a new Triangle object of three edge pointers
 	 * 
@@ -51,15 +49,11 @@ public:
 	 * @param adj_edge2 
 	 * @param opposite_edge 
 	 */
-	Triangle(Edge *adj_edge1, Edge *adj_edge2, Edge *opposite_edge) : edges{adj_edge1, adj_edge2, opposite_edge} {}
-    // OR
 	Triangle(Edge *base_edge, Edge *adj_edge, Edge *opposite_edge) : base_edge(base_edge), adj_edge(adj_edge), opposite_edge(opposite_edge) {}
 	
 	/**
 	 * Edges that make up the triangle.
 	 */
-	Edge edges[NUM_EDGES];
-	// OR
 	Edge *base_edge;
 	Edge *adj_edge;
 	Edge *opposite_edge;
@@ -102,11 +96,15 @@ public:
 
 	/**
 	 */
-	void handleEvent(event_t& evt);
+	void handleEvent(event_t& evt) {
+		routine.handleEvent(evt);
+	}
 
 	/**
 	 */
 	void init();
+
+	Coroutine routine;
 
 private:
 };
