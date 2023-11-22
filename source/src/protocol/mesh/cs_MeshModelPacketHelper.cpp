@@ -66,6 +66,9 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI: return payloadSize == sizeof(cs_mesh_model_msg_neighbour_rssi_t);
 		case CS_MESH_MODEL_TYPE_CTRL_CMD: return payloadSize >= sizeof(cs_mesh_model_msg_ctrl_cmd_header_t);
 
+		case CS_MESH_MODEL_TYPE_NODE_REQUEST: return payloadSize == sizeof(cs_mesh_model_msg_node_request_t);
+		case CS_MESH_MODEL_TYPE_ALTITUDE_REQUEST: return payloadSize == sizeof(cs_mesh_model_msg_altitude_request_t);
+
 		case CS_MESH_MODEL_TYPE_MICROAPP: return true;
 		case CS_MESH_MODEL_TYPE_UNKNOWN: return false;
 	}

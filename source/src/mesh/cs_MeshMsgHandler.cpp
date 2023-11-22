@@ -145,6 +145,12 @@ void MeshMsgHandler::handleMsg(MeshMsgEvent& msg) {
 		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI: {
 			break;
 		}
+		case CS_MESH_MODEL_TYPE_NODE_REQUEST: {
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_ALTITUDE_REQUEST: {
+			break;
+		}
 		case CS_MESH_MODEL_TYPE_CTRL_CMD: {
 			handleControlCommand(msg);
 			// Return instead of break, as this function already sets the reply.

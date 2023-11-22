@@ -16,7 +16,7 @@
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFiltering.h>
-#include <localisation/cs_MeshTopology.h>
+// #include <localisation/cs_MeshTopology.h>
 #include <presence/cs_PresenceHandler.h>
 #include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
@@ -33,6 +33,10 @@
 #include <time/cs_SystemTime.h>
 #include <tracking/cs_TrackedDevices.h>
 #include <test/cs_TestAccess.h>
+
+#if BUILD_MESH_TOPOLOGY_RESEARCH == 1
+#include <localisation/cs_MeshTopologyResearch.h>
+#endif
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
@@ -358,7 +362,12 @@ private:
 
 	// TODO: allocate and init only in normal mode.
 	TrackedDevices _trackedDevices;
-	MeshTopology _meshTopology;
+	
+	// MeshTopology _meshTopology;
+# if BUILD_MESH_TOPOLOGY_RESEARCH == 1
+	MeshTopologyResearch _meshTopologyResearch;
+# endif
+
 	AssetFiltering _assetFiltering;
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;

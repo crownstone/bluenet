@@ -92,6 +92,9 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_CTRL_CMD             = 29,  // Payload: cs_mesh_model_msg_ctrl_cmd_header_ext_t + payload
 	CS_MESH_MODEL_TYPE_ASSET_INFO_ID        = 30,  // Payload: cs_mesh_model_msg_asset_report_id_t
 
+	CS_MESH_MODEL_TYPE_NODE_REQUEST         = 31,  // Payload: cs_mesh_model_msg_node_request_t
+	CS_MESH_MODEL_TYPE_ALTITUDE_REQUEST     = 32,  // Payload: cs_mesh_model_msg_altitude_request_t
+
 	CS_MESH_MODEL_TYPE_MICROAPP             = 200,  // Payload: anything.
 	CS_MESH_MODEL_TYPE_UNKNOWN              = 255
 };
@@ -321,4 +324,17 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_asset_filter_version_t {
 	asset_filter_cmd_protocol_t protocol;
 	uint16_t masterVersion;
 	uint32_t masterCrc;
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_node_request_t {
+	stone_id_t targetNodeID;
+	int8_t meanRSSI;
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_altitude_request_t {
+	// stone_id_t baseEdge_source;  // can skip? you already know the sender ID
+	stone_id_t baseEdge_target;
+	stone_id_t targetID;  // get alitude base position to targetID
+	float altitude;
+	float basePositionX;
 };

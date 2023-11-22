@@ -49,11 +49,6 @@ set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 # Create a more explicit name for this variable
 set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
 
-# With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
-# With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.
-
-project(${BOARD_TARGET} NONE)
-
 if(NOT VERBOSITY)
 	set(VERBOSITY 0)
 endif()
@@ -157,6 +152,11 @@ set(BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${B
 load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
+
+# With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
+# With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.
+
+project(${BOARD_TARGET} NONE)
 
 # From now on you can use information from the config files, not above!
 
