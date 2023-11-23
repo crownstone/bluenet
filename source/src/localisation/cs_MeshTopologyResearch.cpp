@@ -11,7 +11,6 @@
 #include <logging/cs_Logger.h>
 #include <protocol/cs_RssiAndChannel.h>
 #include <storage/cs_State.h>
-#include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
 
 #define LOGresearchInfo LOGi
@@ -82,9 +81,9 @@ float* matrix3_multiply(const float* matrix, const float* vectMatrix, size_t siz
 // float testr[9] = {1.0, 1.0, 1.0,    1.0, 1.0, 0,   0, 1.0, 1.0};
 // print all 9 values of the array
 // float* test = matrix3_multiply(roll(25), testr, 3);
-// LOGresearchInfo("Array %f,%f,%f",test[0],test[1],test[2]);
-// LOGresearchInfo("Array %f,%f,%f :: %f,%f,%f ::
-// %f,%f,%f",test[0],test[1],test[2],test[3],test[4],test[5],test[6],test[7],test[8]);
+// LOGresearchInfo("Array %.3f,%.3f,%.3f",test[0],test[1],test[2]);
+// LOGresearchInfo("Array %.3f,%.3f,%.3f :: %.3f,%.3f,%.3f ::
+// %.3f,%.3f,%.3f",test[0],test[1],test[2],test[3],test[4],test[5],test[6],test[7],test[8]);
 
 /******************************************   Edge   *********************************************/
 
@@ -112,9 +111,9 @@ bool Edge::compare(const Edge* other) const {
 // Edge* edge1 = new Edge(0,1,-75);
 // Edge* edge2 = new Edge(0,2,-75);
 // Edge* edge3 = new Edge(1,2,-75);
-// LOGresearchInfo("Distance edge1 = %f", edge1->distance);
-// LOGresearchInfo("Distance edge2 = %f", edge2->distance);
-// LOGresearchInfo("Distance edge3 = %f", edge3->distance);
+// LOGresearchInfo("Distance edge1 = %.3f", edge1->distance);
+// LOGresearchInfo("Distance edge2 = %.3f", edge2->distance);
+// LOGresearchInfo("Distance edge3 = %.3f", edge3->distance);
 // Edge* dupl = new Edge(1,0,-75);
 // if ( edge1->compare(dupl)) {
 // 	LOGresearchInfo("TRUE");
@@ -240,15 +239,15 @@ Edge* Triangle::getEdge(stone_id_t source, stone_id_t target) {
 
 // Triangle* triangle = new Triangle(edge1,edge2,edge3);
 
-// LOGresearchInfo("Area = %f",triangle->getArea());
-// LOGresearchInfo("Angle = %f",triangle->getAngle());
-// LOGresearchInfo("Altitude = %f",triangle->getAltitude());
-// LOGresearchInfo("AltitudeBasePositionTo 1= %f",triangle->getAlitudeBasePositionTo(1));
-// LOGresearchInfo("AltitudeBasePositionTo 2= %f",triangle->getAlitudeBasePositionTo(2));
+// LOGresearchInfo("Area = %.3f",triangle->getArea());
+// LOGresearchInfo("Angle = %.3f",triangle->getAngle());
+// LOGresearchInfo("Altitude = %.3f",triangle->getAltitude());
+// LOGresearchInfo("AltitudeBasePositionTo 1= %.3f",triangle->getAlitudeBasePositionTo(1));
+// LOGresearchInfo("AltitudeBasePositionTo 2= %.3f",triangle->getAlitudeBasePositionTo(2));
 
-// LOGresearchInfo("Edge 1 distance = %f",(triangle->getEdge(0,1))->distance);
-// LOGresearchInfo("Edge 2 distance = %f",(triangle->getEdge(0,2))->distance);
-// LOGresearchInfo("Edge 3 distance = %f",(triangle->getEdge(1,2))->distance);
+// LOGresearchInfo("Edge 1 distance = %.3f",(triangle->getEdge(0,1))->distance);
+// LOGresearchInfo("Edge 2 distance = %.3f",(triangle->getEdge(0,2))->distance);
+// LOGresearchInfo("Edge 3 distance = %.3f",(triangle->getEdge(1,2))->distance);
 
 // LOGresearchInfo("Other base edge (not 0-1)=
 // %d-%d",(triangle->getOtherBase(*edge1))->source,(triangle->getOtherBase(*edge1))->target); LOGresearchInfo("Third
@@ -259,6 +258,27 @@ Edge* Triangle::getEdge(stone_id_t source, stone_id_t target) {
 MeshTopologyResearch::MeshTopologyResearch() : routine([this]() { return stateFunc(); }) {}
 
 cs_ret_code_t MeshTopologyResearch::init() {
+
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
+
+	surNodeList = new (std::nothrow) sur_node_t[MAX_SURROUNDING];
+	if (surNodeList == nullptr) {
+		LOGresearchInfo("No space for surNodeList");
+		return ERR_NO_SPACE;
+	}
+
+	edgeList = new (std::nothrow) Edge[MAX_EDGES];
+	if (edgeList == nullptr) {
+		LOGresearchInfo("No space for edgeList");
+		return ERR_NO_SPACE;
+	}
+
+	trianglesList = new (std::nothrow) Triangle[MAX_TRIANGLES];
+	if (trianglesList == nullptr) {
+		LOGresearchInfo("No space for trianglesList");
+		return ERR_NO_SPACE;
+	}	
+
 	reset();
 	listen();
 
@@ -266,26 +286,68 @@ cs_ret_code_t MeshTopologyResearch::init() {
 }
 
 void MeshTopologyResearch::reset() {
-	LOGresearchInfo("FULL RESET");
+	LOGresearchInfo("Full Topology Reset");
 
 	// Reset all counters.
 	_surNodeCount  = 0;
 	_edgeCount     = 0;
 	_triangleCount = 0;
 
-	// Reset all lists.
-	for (int i = 0; i < MAX_SURROUNDING; ++i) {
-		surNodeList[i].reset();
-	}
-	for (int i = 0; i < MAX_EDGES; ++i) {
-		edgeList[i].reset();
-	}
-	for (int i = 0; i < MAX_TRIANGLES; ++i) {
-		trianglesList[i].reset();
+}
+
+/**
+ * @brief Print all surrounding nodes
+ */
+void MeshTopologyResearch::printSurNodes() {
+	LOGresearchInfo("Surrounding nodes (%d):", _surNodeCount);
+	for (int i = 0; i < _surNodeCount; ++i) {
+		LOGresearchInfo(
+				"id=%u, rssi=[%i, %i, %i], mean=[%i], counter=[%u], secondsAgo=%u",
+				surNodeList[i].id,
+				surNodeList[i].rssiChannel37,
+				surNodeList[i].rssiChannel38,
+				surNodeList[i].rssiChannel39,
+				surNodeList[i].rollingAverageRssi,
+				surNodeList[i].count,
+				surNodeList[i].lastSeenSecondsAgo);
 	}
 }
 
-// returns how many ticks the next routine will be called
+/**
+ * @brief Print all edges
+ */
+void MeshTopologyResearch::printEdges() {
+	LOGresearchInfo("Edges (%d):", _edgeCount);
+	for (int i = 0; i < _edgeCount; ++i) {
+		LOGresearchInfo(
+				"source=%u, target=%u, rssi=%i, distance=%.3f",
+				edgeList[i].source,
+				edgeList[i].target,
+				edgeList[i].rssi,
+				edgeList[i].distance);
+	}
+}
+
+/**
+ * @brief Print all triangles
+ */
+void MeshTopologyResearch::printTriangles() {
+	LOGresearchInfo("Triangles: (%d)", _triangleCount);
+	for (int i = 0; i < MAX_TRIANGLES; ++i) {
+		LOGresearchInfo(
+				"id=%u, area=%.3f, angle=%.3f, altitude=%.3f",
+				trianglesList[i].id,
+				trianglesList[i].getArea(),
+				trianglesList[i].getAngle(),
+				trianglesList[i].getAltitude());
+	}
+}
+
+/**
+ * @brief States of the federated topolgoy algorithm and transitions conditions
+ *
+ * @return int: returns how many ticks the next routine will be called
+ */
 int MeshTopologyResearch::stateFunc() {
 
 	switch (state) {
@@ -296,7 +358,10 @@ int MeshTopologyResearch::stateFunc() {
 			// check if we have enough neighbors?
 			// if yes: go to next state
 			// if no: don't go to next statue (return  Coroutine::delayMs(1000); )
-			{ break; }
+			{	
+				printSurNodes();
+				break;
+			}
 
 		case TopologyDiscoveryState::BUILD_TRIANGLES:
 			// Mesh messages: CMD_MESH_TOPO_RS_edgeConfirmation,
@@ -319,9 +384,14 @@ int MeshTopologyResearch::stateFunc() {
 		default: LOGe("Unhandeled state: %d", state); break;
 	}
 
-	return Coroutine::delayMs(1000);
+	return Coroutine::delayMs(5000);
 }
 
+/**
+ * @brief Handles all events
+ *
+ * @param evt
+ */
 void MeshTopologyResearch::handleEvent(event_t& evt) {
 	routine.handleEvent(evt);
 
@@ -343,11 +413,11 @@ void MeshTopologyResearch::handleEvent(event_t& evt) {
 			evt.result.returnCode = ERR_SUCCESS;
 			break;
 		}
-		case CS_TYPE::CMD_MESH_TOPO_GET_RSSI: {
-			auto packet = CS_TYPE_CAST(CMD_MESH_TOPO_GET_RSSI, evt.data);
-			getRssi(*packet, evt.result);
-			break;
-		}
+		// case CS_TYPE::CMD_MESH_TOPO_GET_RSSI: {
+		// 	auto packet = CS_TYPE_CAST(CMD_MESH_TOPO_GET_RSSI, evt.data);
+		// 	getRssi(*packet, evt.result);
+		// 	break;
+		// }
 		default: break;
 	}
 }
@@ -356,9 +426,9 @@ void MeshTopologyResearch::handleEvent(event_t& evt) {
 
 /**
  * @brief processes all the neighbour RSSI messages of the mesh
- * 
- * @param id 
- * @param packet 
+ *
+ * @param id
+ * @param packet
  */
 void MeshTopologyResearch::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 	if (packet.type == CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI) {
@@ -379,13 +449,44 @@ void MeshTopologyResearch::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) 
 		// onAltitudeRequest(packet.srcStoneId, payload);
 		return;
 	}
+	// every packet that is received should be added as a surrounding Node, to get a starting list of surNodes
+	addSurNode(packet.srcStoneId, packet.rssi, packet.channel);
+}
+
+/**
+ * @brief Construct a new Neighbour-RSSI-message via Mesh
+ *
+ * @param surNode
+ */
+void MeshTopologyResearch::sendNeighbourRSSIviaMesh(sur_node_t& surNode) {
+
+	// Sent RSSI of neighbour over the mesh
+	cs_mesh_model_msg_neighbour_rssi_t meshPayload = {
+			.type               = 0,
+			.neighbourId        = surNode.id,
+			.rssiChannel37      = surNode.rssiChannel37,
+			.rssiChannel38      = surNode.rssiChannel38,
+			.rssiChannel39      = surNode.rssiChannel39,
+			.lastSeenSecondsAgo = surNode.lastSeenSecondsAgo,
+			.counter            = _msgCount++};
+
+	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
+	meshMsg.type                   = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
+	meshMsg.reliability            = CS_MESH_RELIABILITY_LOWEST;
+	meshMsg.urgency                = CS_MESH_URGENCY_LOW;
+	meshMsg.flags.flags.doNotRelay = false;
+	meshMsg.payload                = reinterpret_cast<uint8_t*>(&meshPayload);
+	meshMsg.size                   = sizeof(meshPayload);
+
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+	event.dispatch();
 }
 
 /**
  * @brief Get the Mean of the RSSI packet
- * 
- * @param packet 
- * @return uint8_t 
+ *
+ * @param packet
+ * @return uint8_t
  */
 uint8_t MeshTopologyResearch::getMean(cs_mesh_model_msg_neighbour_rssi_t& packet) {
 	int8_t meanRSSI = 0;
@@ -409,40 +510,13 @@ uint8_t MeshTopologyResearch::getMean(cs_mesh_model_msg_neighbour_rssi_t& packet
 }
 
 /**
- * @brief 
- * 
- * @param id 
- * @param packet 
- * @param channel 
+ * @brief Log the neighbourRSSI messages send over the MESH
+ *
+ * @param OGsenderID
+ * @param packet
  */
-void MeshTopologyResearch::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet) {
-	// Add surNode   
-	addSurNode(id, getMean(packet));
-	// Send to UART.
-	sendRssiToUart(id, packet);
-	// LOGi("Stone %d sees %d, [%d, %d, %d]", id, packet.neighbourId, packet.rssiChannel37, packet.rssiChannel38,
-	// packet.rssiChannel39);
-}
-
-/**
- * @brief Send RSSI to uart
- * 
- * @param receiverId 
- * @param packet 
- */
-void MeshTopologyResearch::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {
-	LOGresearchInfo("sendRssiToUart receiverId=%u senderId=%u", receiverId, packet.neighbourId);
-	mesh_topology_neighbour_rssi_uart_t uartMsg = {
-			.type               = 0,
-			.receiverId         = receiverId,
-			.senderId           = packet.neighbourId,
-			.rssiChannel37      = packet.rssiChannel37,
-			.rssiChannel38      = packet.rssiChannel38,
-			.rssiChannel39      = packet.rssiChannel39,
-			.lastSeenSecondsAgo = packet.lastSeenSecondsAgo,
-			.msgNumber          = packet.counter};
-	UartHandler::getInstance().writeMsg(
-			UART_OPCODE_TX_NEIGHBOUR_RSSI, reinterpret_cast<uint8_t*>(&uartMsg), sizeof(uartMsg));
+void MeshTopologyResearch::onNeighbourRssi(stone_id_t OGsenderID, cs_mesh_model_msg_neighbour_rssi_t& packet) {
+	LOGresearchInfo("Stone %d sees %d, mean RSSI[%d]", OGsenderID, packet.neighbourId, getMean(packet));
 }
 
 /**
@@ -453,7 +527,7 @@ void MeshTopologyResearch::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_m
  */
 uint8_t MeshTopologyResearch::findSurNode(stone_id_t id) {
 	for (uint8_t index = 0; index < _surNodeCount; ++index) {
-		if (surNodeList[index].has_value() && surNodeList[index].value().id == id) {
+		if (surNodeList[index].id == id) {
 			return index;
 		}
 	}
@@ -468,7 +542,7 @@ uint8_t MeshTopologyResearch::findSurNode(stone_id_t id) {
  */
 uint8_t MeshTopologyResearch::findEdge(stone_id_t id) {
 	for (uint8_t index = 0; index < _edgeCount; ++index) {
-		if (edgeList[index].has_value() && edgeList[index].value().target == id) {
+		if (edgeList[index].target == id) {
 			return index;
 		}
 	}
@@ -483,7 +557,7 @@ uint8_t MeshTopologyResearch::findEdge(stone_id_t id) {
  */
 uint8_t MeshTopologyResearch::findTriangle(triangle_id_t id) {
 	for (uint8_t index = 0; index < _triangleCount; ++index) {
-		if (trianglesList[index].has_value() && trianglesList[index].value().id == id) {
+		if (trianglesList[index].id == id) {
 			return index;
 		}
 	}
@@ -491,29 +565,44 @@ uint8_t MeshTopologyResearch::findTriangle(triangle_id_t id) {
 }
 
 /**
- * @brief Add a Node to the surNodeList, if not itself or RSSI > -85
+ * @brief clears the RSSI stats values to RSSI_INIT and zero
+ *
+ * @param node
+ */
+void MeshTopologyResearch::clearSurNodeRSSIinfo(sur_node_t& node) {
+	node.rssiChannel37      = RSSI_INIT;
+	node.rssiChannel38      = RSSI_INIT;
+	node.rssiChannel39      = RSSI_INIT;
+	node.rollingAverageRssi = RSSI_INIT;
+	node.count              = 0;
+	LOGresearchInfo("node RSSI cleared");
+}
+
+/**
+ * @brief Add a Node to the surNodeList, if not addressed to self or RSSI > -85
  *
  * @param source
  * @param target
  * @param rssi
  */
-void MeshTopologyResearch::addSurNode(stone_id_t id, int8_t rssi) {
-	if (id == 0 || rssi > -85) {
+void MeshTopologyResearch::addSurNode(stone_id_t id, int8_t rssi, uint8_t channel) {
+	if (id == 0 || id == _myId || rssi < -70) {
 		return;
 	}
 
 	uint8_t index = findSurNode(id);
 	if (index == INDEX_NOT_FOUND) {
 		if (_surNodeCount < MAX_SURROUNDING) {
-			updateSurNode(surNodeList[_surNodeCount].value(), id, rssi);
+			clearSurNodeRSSIinfo(surNodeList[_surNodeCount]);
+			updateSurNode(surNodeList[_surNodeCount], id, rssi, channel);
 			_surNodeCount++;
 		}
 		else {
-			LOGe("Can't add id=%u", id);
+			LOGi("Can't add id=%u", id);
 		}
 	}
 	else {
-		updateSurNode(surNodeList[index].value(), id, rssi);
+		updateSurNode(surNodeList[index], id, rssi, channel);
 	}
 }
 /**
@@ -524,37 +613,51 @@ void MeshTopologyResearch::addSurNode(stone_id_t id, int8_t rssi) {
  * @param id
  * @param rssi
  */
-void MeshTopologyResearch::updateSurNode(sur_node_t& node, stone_id_t id, int8_t rssi) {
-	node.id                 = id;
+void MeshTopologyResearch::updateSurNode(sur_node_t& node, stone_id_t id, int8_t rssi, uint8_t channel) {
+	node.id = id;
+	switch (channel) {
+		case 37: {
+			node.rssiChannel37 = rssi;
+			break;
+		}
+		case 38: {
+			node.rssiChannel38 = rssi;
+			break;
+		}
+		case 39: {
+			node.rssiChannel39 = rssi;
+			break;
+		}
+	}
 	node.rollingAverageRssi = (node.rollingAverageRssi * node.count + rssi) / (node.count + 1);
 	node.count++;
 	node.lastSeenSecondsAgo = 0;
 }
 
-/**
- * @brief Copy RSSI of stoneID into a result buffer
- *
- * @param stoneId
- * @param result
- */
-void MeshTopologyResearch::getRssi(stone_id_t stoneId, cs_result_t& result) {
-	uint8_t index = findSurNode(stoneId);
-	if (index == INDEX_NOT_FOUND) {
-		result.returnCode = ERR_NOT_FOUND;
-		return;
-	}
+// /**
+//  * @brief Copy RSSI of stoneID into a result buffer
+//  *
+//  * @param stoneId
+//  * @param result
+//  */
+// void MeshTopologyResearch::getRssi(stone_id_t stoneId, cs_result_t& result) {
+// 	uint8_t index = findSurNode(stoneId);
+// 	if (index == INDEX_NOT_FOUND) {
+// 		result.returnCode = ERR_NOT_FOUND;
+// 		return;
+// 	}
 
-	int8_t rssi = surNodeList[index].value().rollingAverageRssi;
+// 	int8_t rssi = surNodeList[index].value().rollingAverageRssi;
 
-	if (result.buf.len < sizeof(rssi)) {
-		result.returnCode = ERR_BUFFER_TOO_SMALL;
-		return;
-	}
-	// Copy to result buf.
-	result.buf.data[0] = *reinterpret_cast<uint8_t*>(&rssi);
-	result.dataSize    = sizeof(rssi);
-	result.returnCode  = ERR_SUCCESS;
-}
+// 	if (result.buf.len < sizeof(rssi)) {
+// 		result.returnCode = ERR_BUFFER_TOO_SMALL;
+// 		return;
+// 	}
+// 	// Copy to result buf.
+// 	result.buf.data[0] = *reinterpret_cast<uint8_t*>(&rssi);
+// 	result.dataSize    = sizeof(rssi);
+// 	result.returnCode  = ERR_SUCCESS;
+// }
 
 /**
  * @brief Add a Edge to the EdgeList
@@ -571,7 +674,9 @@ void MeshTopologyResearch::addEdge(stone_id_t source, stone_id_t target, int8_t 
 	uint8_t index = findEdge(target);
 	if (index == INDEX_NOT_FOUND) {
 		if (_edgeCount < MAX_EDGES) {
-			edgeList[_edgeCount] = Edge(source, target, rssi);
+			edgeList[_edgeCount].source = source;
+			edgeList[_edgeCount].target = target;
+			edgeList[_edgeCount].rssi   = rssi;
 			_edgeCount++;
 		}
 		else {
@@ -579,7 +684,8 @@ void MeshTopologyResearch::addEdge(stone_id_t source, stone_id_t target, int8_t 
 		}
 	}
 	else {
-		// nothing
+		// nothing or update rollingMeanRSSI??
+		// edgeList[index].rssi = rssi;
 		return;
 	}
 }
