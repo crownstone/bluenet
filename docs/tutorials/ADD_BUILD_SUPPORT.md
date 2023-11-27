@@ -35,7 +35,7 @@ The code you have written and which interfaces with the Nordic code also has to 
 
 ```
 IF (BUILD_TWI)
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Twi.cpp")
+	LIST(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/drivers/cs_Twi.cpp")
 ENDIF()
 ```
 

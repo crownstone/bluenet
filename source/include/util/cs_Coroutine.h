@@ -6,8 +6,10 @@
  */
 #pragma once
 
+#include <common/cs_Types.h>
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Timer.h>
+#include <events/cs_Event.h>
 
 #include <functional>
 

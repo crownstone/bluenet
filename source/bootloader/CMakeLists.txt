@@ -15,14 +15,7 @@ MESSAGE(STATUS "bootloader: Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 #######################################################################################################################
 
-SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
-SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
-SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
-SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
-SET(CONFIG_DIR                               "config"      CACHE STRING "The config main directory")
-SET(BOARD_TARGET                             "unset"       CACHE STRING "The board target")
-SET(BOOTLOADER_START_ADDRESS                 "unset"       CACHE STRING "Start address of bootloader")
-SET(BOOTLOADER_LENGTH                        "unset"       CACHE STRING "Size of bootloader")
+set(BLUENET_SOURCE_BOOTLOADER ${BLUENET_SOURCE_DIR}/bootloader)
 
 #######################################################################################################################
 # Show variables
@@ -117,14 +110,14 @@ IF (BUILD_MESH_BOOTLOADER)
 ELSE()
 	# Set the main file to use for this application
 	#SET(MAIN_FILE "${NRF5_DIR}/examples/dfu/secure_bootloader/main.c")
-	SET(MAIN_FILE "${CMAKE_SOURCE_DIR}/bootloader/main.c")
+	SET(MAIN_FILE "${BLUENET_SOURCE_DIR}/bootloader/main.c")
 
-	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/dfu_public_key.c")
-	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/cfg/cs_Boards.c")
-	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/dev_info_service.c")
-	#LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/cs_IpcRamData.c")
-	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/shared/ipc/cs_IpcRamData.c")
-	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/drivers/cs_Uicr.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${BLUENET_SOURCE_DIR}/bootloader/dfu_public_key.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${BLUENET_SOURCE_DIR}/src/cfg/cs_Boards.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${BLUENET_SOURCE_DIR}/bootloader/dev_info_service.c")
+	#LIST(APPEND BOOTLOADER_SOURCE_FILES "${BLUENET_SOURCE_DIR}/bootloader/cs_IpcRamData.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${BLUENET_SOURCE_DIR}/shared/ipc/cs_IpcRamData.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${BLUENET_SOURCE_DIR}/src/drivers/cs_Uicr.c")
 
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
 	set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
@@ -156,7 +149,7 @@ ELSE()
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/crypto/nrf_crypto_init.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/crypto/nrf_crypto_shared.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/ble/common/ble_srv_common.c")
-	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/nrf_bootloader.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${BLUENET_SOURCE_DIR}/bootloader/nrf_bootloader.c")
 #	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/nrf_bootloader.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/nrf_bootloader_app_start.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/nrf_bootloader_app_start_final.c")
@@ -169,7 +162,7 @@ ELSE()
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/crypto/backend/nrf_sw/nrf_sw_backend_hash.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/dfu/dfu-cc.pb.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/dfu/nrf_dfu.c")
-	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/nrf_dfu_ble.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${BLUENET_SOURCE_DIR}/bootloader/nrf_dfu_ble.c")
 #	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/ble_dfu/nrf_dfu_ble.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/dfu/nrf_dfu_flash.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/dfu/nrf_dfu_handling_error.c")
@@ -222,9 +215,9 @@ ELSE()
 		MESSAGE(STATUS "bootloader: SERIAL log disabled")
 	ENDIF()
 
-	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
-	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/bootloader")
-	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/shared")
+	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${BLUENET_SOURCE_DIR}/include")
+	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${BLUENET_SOURCE_DIR}/bootloader")
+	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${BLUENET_SOURCE_DIR}/shared")
 
 	# Add include folder for generated header files of parent project
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_CURRENT_BINARY_DIR}/../include")
@@ -332,31 +325,33 @@ MESSAGE(STATUS "Set bootloader build type: ${BOOTLOADER_BUILD_TYPE}")
 message(STATUS "Bootloader version: ${BOOTLOADER_VERSION_MAJOR}")
 
 message(STATUS "bootloader: Configure nrf_symbols.ld file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld")
+configure_file("${BLUENET_SOURCE_BOOTLOADER}/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld")
 
 message(STATUS "bootloader: Configure cs_BootloaderConfig.cpp file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_BootloaderConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
+configure_file("${BLUENET_SOURCE_BOOTLOADER}/cs_BootloaderConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 
 message(STATUS "bootloader: Configure cs_SharedConfig.cpp file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c")
+configure_file("${BLUENET_SOURCE_BOOTLOADER}/../shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c")
 
 message(STATUS "bootloader: Configure cs_config.h file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_config.h")
+configure_file("${BLUENET_SOURCE_BOOTLOADER}/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_config.h")
 
 message(STATUS "bootloader: Generate cs_MemoryLayout.h")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/bootloader/cs_MemoryLayout.h")
+configure_file("${BLUENET_SOURCE_BOOTLOADER}/../shared/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/bootloader/cs_MemoryLayout.h")
 
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES} ${GENERATED_SOURCES})
 
 # Setting properties like this does not work, perhaps CMake finds it difficult to find the right compiler
-# target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+# target_compile_featcures(${PROJECT_NAME} PRIVATE cxx_std_11)
 
 # Use .elf extension by default
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" SUFFIX ".elf")
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES 
+					  OUTPUT_NAME "${PROJECT_NAME}" 
+					  SUFFIX ".elf")
 
 MESSAGE(STATUS "bootloader: Bootloader parameters: ${BOOTLOADER_START_ADDRESS}, ${BOOTLOADER_LENGTH}")
 
@@ -420,7 +415,7 @@ SET_SOURCE_FILES_PROPERTIES(${BOOTLOADER_SOURCE_FILES}
 )
 
 SET(FILE_MEMORY_LAYOUT "-Tsecure_bootloader_gcc_nrf52.ld")
-SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/bootloader/")
+SET(PATH_FILE_MEMORY "-L${BLUENET_SOURCE_DIR}/bootloader/")
 SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
 SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${CMAKE_CURRENT_BINARY_DIR}")
 SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
