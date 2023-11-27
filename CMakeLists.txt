@@ -306,7 +306,7 @@ FetchContent_Declare(
 )
 FetchContent_GetProperties(${NORDIC_SDK_TARGET})
 if(NOT ${NORDIC_SDK_TARGET}_POPULATED)
-    # FetchContent_Populate(${NORDIC_SDK_TARGET})
+    FetchContent_Populate(${NORDIC_SDK_TARGET})
 endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
@@ -321,7 +321,7 @@ FetchContent_Declare(
 )
 FetchContent_GetProperties(${MESH_SDK_TARGET})
 if(NOT ${MESH_SDK_TARGET}_POPULATED)
-    # FetchContent_Populate(${MESH_SDK_TARGET})
+    FetchContent_Populate(${MESH_SDK_TARGET})
 endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
