@@ -14,7 +14,8 @@
 #include <util/cs_Math.h>
 #include <util/cs_Variance.h>
 
-// typedef uint8_t edge_id_t;
+typedef uint8_t uint8_t;
+
 typedef uint8_t triangle_id_t;
 
 /**
@@ -89,7 +90,6 @@ public:
  */
 class Edge {
 public:
-
 	Edge() = default;
 
 	/**
@@ -122,7 +122,6 @@ public:
  */
 class Triangle {
 public:
-
 	Triangle() = default;
 
 	/**
@@ -204,7 +203,8 @@ class MeshTopologyResearch : public EventListener {
 public:
 	enum TopologyDiscoveryState {
 		SCAN_FOR_NEIGHBORS,  // Wait for all crownstones that are discoverable my the node to be found
-		BUILD_TRIANGLES,  // With the crownstones that are discoverable, start discovering where we can build triangles
+		BUILD_EDGES,      // With the crownstones that are discoverable, start discovering where we can build edges
+		BUILD_TRIANGLES,  // If enough edges, we can build triangles
 		BUILD_TOPOLOGY,   // With the discovered triangles begin building a topology
 		TOPOLOGY_DONE,    // The topology is discovered and valid
 	};
@@ -214,7 +214,7 @@ public:
 		int8_t rssiChannel37;
 		int8_t rssiChannel38;
 		int8_t rssiChannel39;
-		float rollingAverageRssi;
+		int8_t rollingAverageRssi;
 		uint8_t count;
 		uint8_t lastSeenSecondsAgo;
 	};
@@ -244,26 +244,27 @@ public:
 	 */
 	cs_ret_code_t init();
 
-	void triangles();
-	void topology();
-
 	Coroutine routine;
-	TopologyDiscoveryState state         = TopologyDiscoveryState::SCAN_FOR_NEIGHBORS;
+
+	TopologyDiscoveryState state             = TopologyDiscoveryState::SCAN_FOR_NEIGHBORS;
+
+	/**
+	 * Time after last seen, before a neighbour is removed from the list.
+	 */
+	static constexpr uint8_t TIMEOUT_SECONDS = 3 * 60;
 
 	// array of neighbours (surrounding nodes, sorted on RSSI)
-	static constexpr int MAX_SURROUNDING = 10;
-	sur_node_t* surNodeList = nullptr;
-	// std::optional<sur_node_t> surNodeList[MAX_SURROUNDING];
+	static constexpr int MAX_SURROUNDING     = 2;
+	sur_node_t* surNodeList                  = nullptr;
 
 	// array of edges (automatic sorted on RSSI due to sorted neighbour list)
-	static constexpr int MAX_EDGES = 5;
-	Edge* edgeList = nullptr;
-	// std::optional<Edge> edgeList[MAX_EDGES];
+	static constexpr int MAX_EDGES           = 5;
+	Edge* edgeList                           = nullptr;
 
 	// array of triangles (sorted on area/or other metric)
-	static constexpr int MAX_TRIANGLES = 5;
-	Triangle* trianglesList = nullptr;
-	// std::optional<Triangle> trianglesList[MAX_TRIANGLES];
+	static constexpr int MAX_TRIANGLES       = 5;
+	Edge* oppositeEdgeList                   = nullptr;
+	Triangle* trianglesList                  = nullptr;
 
 private:
 	/**
@@ -272,17 +273,18 @@ private:
 	stone_id_t _myId                         = 0;
 
 	/**
-	 * Next index of the surrounding node list to send via the mesh.
-	 */
-	uint8_t _nextSendIndex                   = 0;
-
-	/**
-	 * Overflowing message counter.
+	 * Number of RSSI messages send via the mesh.
 	 */
 	uint8_t _msgCount                        = 0;
 
+	/**
+	 * Next index of the surrounding node list to send via the mesh.
+	 */
+	uint8_t _nextPrint                       = 0;
+
 	uint8_t _surNodeCount                    = 0;
 	uint8_t _edgeCount                       = 0;
+	uint8_t _oppositeEdgeCount               = 0;
 	uint8_t _triangleCount                   = 0;
 
 	static constexpr uint8_t INDEX_NOT_FOUND = 0xFF;
@@ -298,25 +300,33 @@ private:
 	 * @brief Find a surrounding node in the surNodeList.
 	 * SurNodeList contains more neighbours than the edgeList.
 	 * @param id
-	 * @return uint8_t
+	 * @return uint8_t (index)
 	 */
 	uint8_t findSurNode(stone_id_t id);
 
 	/**
 	 * @brief Find an edge in the edgeList.
-	 * EdgeLists consist solely of the SurNodes associated with formed edges
+	 * EdgeList consist solely of the SurNodes associated with formed edges
 	 * @param id
-	 * @return uint8_t
+	 * @return uint8_t (index)
 	 */
 	uint8_t findEdge(stone_id_t id);
 
 	/**
-	 * @brief Find a triangle in the trianglesList.
-	 *
+	 * @brief Find an edge in the oppositeEdgeList.
 	 * @param id
-	 * @return uint8_t
+	 * @return uint8_t (index)
 	 */
-	uint8_t findTriangle(triangle_id_t id);
+	uint8_t findOppositeEdge(stone_id_t id);
+
+	/**
+	 * @brief Find a triangle in the triangleList.
+	 * 
+	 * @param base_src 
+	 * @param base_dst 
+	 * @return uint8_t (index)
+	 */
+	uint8_t findTriangle(stone_id_t base_src, stone_id_t base_dst);
 
 	/**
 	 * @brief Print all surrounding nodes
@@ -365,6 +375,12 @@ private:
 	void onMeshMsg(MeshMsgEvent& packet, cs_result_t& result);
 
 	/**
+	 * @brief Tick Timer scheduler: remove surNodes when they are not seen for a while
+	 *
+	 */
+	void onTickSecond();
+
+	/**
 	 * clears the RSSI stats values to RSSI_INIT and zero
 	 * @param node
 	 */
@@ -390,6 +406,11 @@ private:
 	void updateSurNode(sur_node_t& node, stone_id_t id, int8_t rssi, uint8_t channel);
 
 	/**
+	 * @brief Sort the surNodeList on RSSI
+	 */
+	void sortSurNodeList();
+
+	/**
 	 * @brief Copy RSSI of stoneID into a result buffer
 	 *
 	 * @param stoneId
@@ -398,11 +419,99 @@ private:
 	void getRssi(stone_id_t stoneId, cs_result_t& result);
 
 	/**
+	 * @brief send Neighbour RSSI message to Uart
+	 */
+	void sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet);
+
+	/**
 	 * @brief Add an edge to the edgelist
+	 *
+	 * -@param source (always self)
+	 * @param target
+	 * @param rssi
+	 *
+	 * @return Edge pointer
+	 */
+	Edge* addEdge(stone_id_t target, int8_t rssi);
+
+	/**
+	 * @brief Add an edge to the oppositeEdgelist
 	 *
 	 * @param source
 	 * @param target
 	 * @param rssi
+	 *
+	 * @return Edge pointer
 	 */
-	void addEdge(stone_id_t source, stone_id_t target, int8_t rssi);
+	Edge* addOppositeEdge(stone_id_t source, stone_id_t target, int8_t rssi);
+
+	/**
+	 * @brief Create a Edge With target surNode
+	 *
+	 * @param surNode
+	 * @return cs_ret_code_t
+	 */
+	cs_ret_code_t createEdgeWith(sur_node_t& target);
+
+	/**
+	 * @brief Corrects the base position of the triangle based on the angle of the triangle
+	 * 
+	 * @param altiX 
+	 * @param self_angle 
+	 * @return float 
+	 */
+	float basePositionCorrection(float altiX, float angle);
+
+	/**
+	 * @brief Create a Triangle With baseEdge and adjEdge
+	 *
+	 * @param baseEdge
+	 * @param adjEdge
+	 */
+	bool createTriangleWith(Edge* baseEdge, Edge* adjEdge);
+
+	/**
+	 * @brief send request for the rssi of the target crownstone from the stoneID
+	 * 
+	 * @param askId 
+	 * @param searchId 
+	 * @return cs_ret_code_t 
+	 */
+	cs_ret_code_t requestNodeSearch(stone_id_t askId, stone_id_t searchId);
+
+	/**
+	 * @brief handle the node requests messages
+	 * @return cs_ret_code_t 
+	 */
+	cs_ret_code_t onNodeRequest(MeshMsgEvent& meshMsg);
+
+	/**
+	 * @brief send request for the altitude of the target crownstone from the stoneID
+	 * 
+	 * @param askId 
+	 * @param searchId 
+	 * @return cs_ret_code_t 
+	 */
+	cs_ret_code_t requestAltitude(stone_id_t askId, stone_id_t base_other, stone_id_t searchId);
+
+	/**
+	 * @brief Handles the altitude request
+	 * 
+	 * @param meshMsg 
+	 * @return cs_ret_code_t 
+	 */
+	cs_ret_code_t onAltitudeRequest(MeshMsgEvent& meshMsg);
+
+	/**
+	 * @brief Calculates the angle between two triangles with the same base edge
+	 * 
+	 * @param defaultOtherNode 
+	 * @param otherNode 
+	 * @param base_altiX 
+	 * @param base_altiH 
+	 * @param altiX 
+	 * @param altiH 
+	 * @return float 
+	 */
+	float calculateMapAngle(stone_id_t defaultOtherNode, stone_id_t otherNode, float base_altiX, float base_altiH, float altiX, float altiH);
 };

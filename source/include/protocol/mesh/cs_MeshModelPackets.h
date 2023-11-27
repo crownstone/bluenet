@@ -327,13 +327,12 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_asset_filter_version_t {
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_node_request_t {
-	stone_id_t targetNodeID;
-	int8_t meanRSSI;
+	stone_id_t targetId;
+	int8_t rssi;
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_altitude_request_t {
-	// stone_id_t baseEdge_source;  // can skip? you already know the sender ID
-	stone_id_t baseEdge_target;
+	stone_id_t baseEdge_other; // _mySelfId <=> baseEdge_other
 	stone_id_t targetID;  // get alitude base position to targetID
 	float altitude;
 	float basePositionX;

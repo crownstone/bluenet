@@ -46,40 +46,40 @@ void MeshTopology::reset() {
 	_fastIntervalCountdown = FAST_INTERVAL_TIMEOUT_SECONDS;
 }
 
-// cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
-// 	LOGMeshTopologyInfo("getMacAddress %u", stoneId);
-// 	uint8_t index = find(stoneId);
-// 	if (index == INDEX_NOT_FOUND) {
-// 		LOGMeshTopologyInfo("Not a neighbour");
-// 		return ERR_NOT_FOUND;
-// 	}
+cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
+	LOGMeshTopologyInfo("getMacAddress %u", stoneId);
+	uint8_t index = find(stoneId);
+	if (index == INDEX_NOT_FOUND) {
+		LOGMeshTopologyInfo("Not a neighbour");
+		return ERR_NOT_FOUND;
+	}
 
-// 	cs_mesh_model_msg_stone_mac_t request;
-// 	request.type               = 0;
-// 	request.connectionProtocol = CS_CONNECTION_PROTOCOL_VERSION;
-// 	memset(request.reserved, 0, sizeof(request.reserved));
+	cs_mesh_model_msg_stone_mac_t request;
+	request.type               = 0;
+	request.connectionProtocol = CS_CONNECTION_PROTOCOL_VERSION;
+	memset(request.reserved, 0, sizeof(request.reserved));
 
-// 	cs_mesh_msg_t meshMsg;
-// 	meshMsg.type                    = CS_MESH_MODEL_TYPE_STONE_MAC;
-// 	meshMsg.flags.flags.broadcast   = false;
-// 	meshMsg.flags.flags.acked       = true;
-// 	meshMsg.flags.flags.useKnownIds = false;
-// 	meshMsg.flags.flags.doNotRelay  = true;
-// 	meshMsg.reliability             = 3;  // Low timeout, we expect a result quickly.
-// 	meshMsg.urgency                 = CS_MESH_URGENCY_LOW;
-// 	meshMsg.idCount                 = 1;
-// 	meshMsg.targetIds               = &stoneId;
-// 	meshMsg.payload                 = reinterpret_cast<uint8_t*>(&request);
-// 	meshMsg.size                    = sizeof(request);
+	cs_mesh_msg_t meshMsg;
+	meshMsg.type                    = CS_MESH_MODEL_TYPE_STONE_MAC;
+	meshMsg.flags.flags.broadcast   = false;
+	meshMsg.flags.flags.acked       = true;
+	meshMsg.flags.flags.useKnownIds = false;
+	meshMsg.flags.flags.doNotRelay  = true;
+	meshMsg.reliability             = 3;  // Low timeout, we expect a result quickly.
+	meshMsg.urgency                 = CS_MESH_URGENCY_LOW;
+	meshMsg.idCount                 = 1;
+	meshMsg.targetIds               = &stoneId;
+	meshMsg.payload                 = reinterpret_cast<uint8_t*>(&request);
+	meshMsg.size                    = sizeof(request);
 
-// 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
-// 	event.dispatch();
-// 	if (event.result.returnCode != ERR_SUCCESS) {
-// 		return event.result.returnCode;
-// 	}
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+	event.dispatch();
+	if (event.result.returnCode != ERR_SUCCESS) {
+		return event.result.returnCode;
+	}
 
-// 	return ERR_WAIT_FOR_SUCCESS;
-// }
+	return ERR_WAIT_FOR_SUCCESS;
+}
 
 void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 	if (id == 0 || id == _myId) {
@@ -229,20 +229,20 @@ void MeshTopology::sendNext() {
 	_nextSendIndex++;
 }
 
-// void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {
-// 	LOGMeshTopologyDebug("sendRssiToUart receiverId=%u senderId=%u", receiverId, packet.neighbourId);
-// 	mesh_topology_neighbour_rssi_uart_t uartMsg = {
-// 			.type               = 0,
-// 			.receiverId         = receiverId,
-// 			.senderId           = packet.neighbourId,
-// 			.rssiChannel37      = packet.rssiChannel37,
-// 			.rssiChannel38      = packet.rssiChannel38,
-// 			.rssiChannel39      = packet.rssiChannel39,
-// 			.lastSeenSecondsAgo = packet.lastSeenSecondsAgo,
-// 			.msgNumber          = packet.counter};
-// 	UartHandler::getInstance().writeMsg(
-// 			UART_OPCODE_TX_NEIGHBOUR_RSSI, reinterpret_cast<uint8_t*>(&uartMsg), sizeof(uartMsg));
-// }
+void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {
+	LOGMeshTopologyDebug("sendRssiToUart receiverId=%u senderId=%u", receiverId, packet.neighbourId);
+	mesh_topology_neighbour_rssi_uart_t uartMsg = {
+			.type               = 0,
+			.receiverId         = receiverId,
+			.senderId           = packet.neighbourId,
+			.rssiChannel37      = packet.rssiChannel37,
+			.rssiChannel38      = packet.rssiChannel38,
+			.rssiChannel39      = packet.rssiChannel39,
+			.lastSeenSecondsAgo = packet.lastSeenSecondsAgo,
+			.msgNumber          = packet.counter};
+	UartHandler::getInstance().writeMsg(
+			UART_OPCODE_TX_NEIGHBOUR_RSSI, reinterpret_cast<uint8_t*>(&uartMsg), sizeof(uartMsg));
+}
 
 void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet) {
 	// Send to UART.
