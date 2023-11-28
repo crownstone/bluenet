@@ -7,7 +7,6 @@
 #
 # Copyright © 2013 Crownstone
 #######################################################################################################################
-
 cmake_minimum_required(VERSION 3.13)
 
 if(COMMAND cmake_policy)
@@ -24,9 +23,15 @@ set(PROJECT_NAME ${APPLICATION_SHORTHAND})
 # Set the main file to use for this application
 set(MAIN_FILE "cs_Crownstone.cpp")
 
+set(BLUENET_DIR ${CMAKE_SOURCE_DIR})
+set(BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(BLUENET_SRC_DIR ${BLUENET_SOURCE_DIR}/src)
+set(BLUENET_INCLUDE_DIR ${BLUENET_SOURCE_DIR}/include)
+set(BLUENET_BINARY_DIR ${CMAKE_BINARY_DIR}/${BOARD_TARGET})
+
 # The directory with additional CMake files
-set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
-set(DEFAULT_CONF_GDB_PATH ${CMAKE_SOURCE_DIR}/conf/gdb)
+set(DEFAULT_CONF_CMAKE_PATH ${BLUENET_SOURCE_DIR}/conf/cmake)
+set(DEFAULT_CONF_GDB_PATH ${BLUENET_SOURCE_DIR}/conf/gdb)
 
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${DEFAULT_CONF_CMAKE_PATH}/override_cxx.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${DEFAULT_CONF_CMAKE_PATH}/override_c.cmake)
@@ -37,9 +42,9 @@ project(${PROJECT_NAME})
 # Other search directories for cmake
 set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
 set(THIRD_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules/third)
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH};${DEFAULT_MODULES_PATH};${THIRD_MODULES_PATH}")
-
-message(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
+set(CMAKE_CONF_CMAKE_PATH ${DEFAULT_CONF_CMAKE_PATH})
+set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} ${CMAKE_CONF_CMAKE_PATH} ${DEFAULT_MODULES_PATH} ${THIRD_MODULES_PATH})
+message(STATUS "Search for FindX files in: ${CMAKE_MODULE_PATH}")
 
 set(COMPILE_FOR_HOST FALSE)
 
@@ -67,14 +72,6 @@ endif()
 if(NOT BOARD_TARGET)
 	set(BOARD_TARGET "default")
 endif()
-
-set(VERBOSITY                                "4"           CACHE STRING "Verbosity")
-set(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
-set(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
-set(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")
-set(PASS_FILE                                "crownstone/firmware/dfu_pkg_signing_key" CACHE STRING "Pass file (containing key")
-set(KEY_FILE                                 "temp.key"    CACHE STRING "Pass file (containing key")
-set(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch to superuser")
 
 # Actually the deployment should not contain this information
 math(EXPR SWO_PORT       "${GDB_PORT}+1")
@@ -119,9 +116,6 @@ set(BOOTLOADER "_bootloader_.hex")
 # Include source files
 #######################################################################################################################
 
-# Source directory
-set(SOURCE_DIR "src")
-
 # Get all includes from nordic
 set(INCLUDE_BASE_DIR ${NRF5_DIR})
 message(STATUS "INCLUDE_BASE_DIR: ${INCLUDE_BASE_DIR}")
@@ -137,7 +131,10 @@ include(crownstone.src)                # deprecated: choose appropriate file fro
 include(crownstone-platform-independent.src)
 include(crownstone-platform-nrf52.src)
 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
+include(crownstone.defs)
+include(colors)
+
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/${MAIN_FILE}")
 
 LogListV("Include Crownstone file: " FOLDER_SOURCE)
 
@@ -174,6 +171,12 @@ foreach(FILE_REL IN LISTS NRF5SDK_PLATFORM_NRF52_SOURCE_REL)
 		BLUENET_SOURCE_NRF5SDK_PLATFORM_NRF52_ABS 
 		${NRF5_DIR}/${FILE_REL})
 endforeach()
+
+# Make also depend on helper files
+set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${BLUENET_SOURCE_DIR}/conf/cmake/crownstone.defs.cmake")
+set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${BLUENET_SOURCE_DIR}/conf/cmake/crownstone.src.cmake")
+
+set(INCLUDE_ONLY_SECTIONS "")
 
 ###################################################
 # Include mesh
@@ -218,6 +221,9 @@ endif()
 # For Visual Studio and perhaps other IDEs group the files
 source_group("Source files" FILES ${FOLDER_SOURCE})
 source_group("Header files" FILES ${FOLDER_HEADER})
+
+# Visual Studio Code gets confused with the nrfSDK, adding this define seems to fix that 
+add_definitions(-D__STATIC_INLINE="static inline")
 
 # Show which directories are actually included to the user
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY include_directories)
@@ -272,9 +278,11 @@ add_subdirectory(bootloader)
 # Configure bluenet
 #######################################################################################################################
 
-set(DEFAULT_CONFIG_FILE "${CMAKE_SOURCE_DIR}/conf/cmake/CMakeBuild.config.default")
+set(DEFAULT_CONFIG_FILE "${BLUENET_SOURCE_DIR}/conf/cmake/CMakeBuild.config.default")
 set(TARGET_CONFIG_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config")
 set(TARGET_CONFIG_OVERWRITE_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config")
+
+message(STATUS "Looking for config file: ${TARGET_CONFIG_FILE}")
 
 if(NOT EXISTS "${TARGET_CONFIG_FILE}")
 	message(FATAL_ERROR "There should be a CMakeBuild.config file in the ${CONFIG_DIR}/${BOARD_TARGET} directory")
@@ -340,7 +348,7 @@ math(EXPR FLASH_MICROAPP_LENGTH "${FLASH_MICROAPP_PAGES} * 1024" OUTPUT_FORMAT H
 
 set(TEMPLATE_DIR ${WORKSPACE_DIR}/scripts/templates)
 message(STATUS "Generate build-status.txt script")
-configure_file(${TEMPLATE_DIR}/build-status.txt.in ${CMAKE_BINARY_DIR}/build-status.txt)
+configure_file(${TEMPLATE_DIR}/build-status.txt.in ${BLUENET_BINARY_DIR}/build-status.txt)
 
 message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
@@ -377,13 +385,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/bootloader/VERSION)
 
 # Reconfigure cmake to get up-to-date GIT_SHA1
-set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/.git/index")
-
-# Make also depend on helper files
-set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.defs.cmake")
-set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.src.cmake")
-
-set(INCLUDE_ONLY_SECTIONS "")
+set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${BLUENET_DIR}/.git/index")
 
 # https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -402,14 +404,14 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E echo "** Display build status"
-	COMMAND cat ${CMAKE_BINARY_DIR}/build-status.txt
+	COMMAND cat ${BLUENET_BINARY_DIR}/build-status.txt
 	DEPENDS display_build_status
 	COMMENT "Display build status"
 )
 
 add_custom_target(display_build_status
 	COMMAND ${CMAKE_COMMAND} -E echo "** Display build status"
-	COMMAND cat ${CMAKE_BINARY_DIR}/build-status.txt
+	COMMAND cat ${BLUENET_BINARY_DIR}/build-status.txt
 	COMMENT "Display build status"
 )
 
@@ -536,7 +538,7 @@ add_custom_target(debug_bootloader
 	)
 
 add_custom_target(write_application
-	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${PROJECT_NAME}.hex" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${BLUENET_BINARY_DIR}/${PROJECT_NAME}.hex" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	DEPENDS ${PROJECT_NAME}.hex
 	COMMENT "Flashes application to remote target board (takes a while)"
 	)
@@ -630,7 +632,7 @@ add_custom_target(write_config
 set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
 include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
 message(STATUS "Get version for hardware board \"${HARDWARE_BOARD}\"")
-load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
+load_hardware_version(${CMAKE_SOURCE_DIR}/source/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
 message(STATUS "Got ${LOAD_BOARD_HARDWARE_VERSION}")
 include(${DEFAULT_MODULES_PATH}/hex.cmake)
 to_hex_raw(${LOAD_BOARD_HARDWARE_VERSION} HARDWARE_BOARD_HEX 8 "0x")
@@ -649,8 +651,8 @@ add_custom_target(increment_application_version
 	DEPENDS write_runtime_config
 	)
 	
-set(BOOTLOADER_HEX_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
-set(BOOTLOADER_BIN_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.bin")
+set(BOOTLOADER_HEX_FILE "${BLUENET_BINARY_DIR}/bootloader/bootloader_settings.hex")
+set(BOOTLOADER_BIN_FILE "${BLUENET_BINARY_DIR}/bootloader/bootloader_settings.bin")
 
 if(NRF_DEVICE STREQUAL "NRF52832_XXAA")
 	set(NRFUTIL_FAMILY "NRF52")
@@ -663,8 +665,8 @@ endif()
 add_custom_target(build_bootloader_settings
 	COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 	COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
-	COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-	COMMAND nrfutil settings generate --family ${NRFUTIL_FAMILY} --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}"
+	COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${BLUENET_BINARY_DIR}"
+	COMMAND nrfutil settings generate --family ${NRFUTIL_FAMILY} --application "${BLUENET_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}"
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${BOOTLOADER_HEX_FILE} -O binary ${BOOTLOADER_BIN_FILE}
 	COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${BOOTLOADER_HEX_FILE}"
 	COMMENT "Create bootloader settings"
@@ -691,7 +693,7 @@ add_custom_target(merge_bootloader_settings
 	COMMAND ${CMAKE_COMMAND} -E echo "** Use mergehex to combine bootloader with bootloader settings"
 	COMMAND ${CMAKE_COMMAND} -E echo "      Note that the settings can only be build with info from the application"
 	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND mergehex -m ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex -o ${CMAKE_BINARY_DIR}/bootloader/bootloader_with_settings.hex
+	COMMAND mergehex -m ${BLUENET_BINARY_DIR}/bootloader/bootloader.hex ${BLUENET_BINARY_DIR}/bootloader/bootloader_settings.hex -o ${BLUENET_BINARY_DIR}/bootloader/bootloader_with_settings.hex
 	COMMENT "Merges bootloader with bootloader settings"
 	)
 
@@ -721,8 +723,8 @@ add_custom_target(generate_dfu_package_all
 	COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 	COMMAND pass ${PASS_FILE} > ${KEY_FILE} USES_TERMINAL
 	COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-	COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --sd-id $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip'" VERBATIM USES_TERMINAL
-	COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --sd-id $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip" VERBATIM USES_TERMINAL
+	COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --sd-id $(cat softdevice_id) --key-file ${KEY_FILE} --application ${BLUENET_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${BLUENET_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip'" VERBATIM USES_TERMINAL
+	COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --sd-id $(cat softdevice_id) --key-file ${KEY_FILE} --application ${BLUENET_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${BLUENET_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip" VERBATIM USES_TERMINAL
 	COMMAND ${CMAKE_COMMAND} -E make_directory dfu
 	COMMAND ${CMAKE_COMMAND} -E copy all_dfu.zip dfu/${FIRMWARE_DFU_ZIP}
 	COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
@@ -743,8 +745,8 @@ add_custom_target(generate_dfu_package_application
 	COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 	COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 	COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-	COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip'" VERBATIM USES_TERMINAL
-	COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip" VERBATIM USES_TERMINAL
+	COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --application ${BLUENET_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip'" VERBATIM USES_TERMINAL
+	COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --application ${BLUENET_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip" VERBATIM USES_TERMINAL
 	COMMAND ${CMAKE_COMMAND} -E make_directory dfu
 	COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip dfu/${APPLICATION_DFU_ZIP}
 	COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
@@ -765,8 +767,8 @@ add_custom_target(generate_dfu_package_bootloader
 	COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 	COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 	COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-	COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip'" VERBATIM USES_TERMINAL
-	COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip" VERBATIM USES_TERMINAL
+	COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --bootloader ${BLUENET_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip'" VERBATIM USES_TERMINAL
+	COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --bootloader ${BLUENET_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip" VERBATIM USES_TERMINAL
 	COMMAND ${CMAKE_COMMAND} -E make_directory dfu
 	COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip dfu/${BOOTLOADER_DFU_ZIP}
 	COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
@@ -793,13 +795,13 @@ else()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Copy to release repository \"${RELEASE_REPOSITORY_DIRECTORY}\""
 			COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY}/bin
-			COMMAND ${CMAKE_COMMAND} -E echo "   Copy from ${CMAKE_BINARY_DIR}"
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/crownstone*.zip ${RELEASE_REPOSITORY_DIRECTORY}/bin
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/crownstone*.zip.sha1 ${RELEASE_REPOSITORY_DIRECTORY}/bin
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex ${RELEASE_REPOSITORY_DIRECTORY}/bin/bootloader-settings.hex
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/crownstone.elf ${RELEASE_REPOSITORY_DIRECTORY}/bin
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/crownstone.hex ${RELEASE_REPOSITORY_DIRECTORY}/bin
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/crownstone.bin ${RELEASE_REPOSITORY_DIRECTORY}/bin
+			COMMAND ${CMAKE_COMMAND} -E echo "   Copy from ${BLUENET_BINARY_DIR}"
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/dfu/crownstone*.zip ${RELEASE_REPOSITORY_DIRECTORY}/bin
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/dfu/crownstone*.zip.sha1 ${RELEASE_REPOSITORY_DIRECTORY}/bin
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/bootloader/bootloader_settings.hex ${RELEASE_REPOSITORY_DIRECTORY}/bin/bootloader-settings.hex
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/crownstone.elf ${RELEASE_REPOSITORY_DIRECTORY}/bin
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/crownstone.hex ${RELEASE_REPOSITORY_DIRECTORY}/bin
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/crownstone.bin ${RELEASE_REPOSITORY_DIRECTORY}/bin
 			COMMAND ${CMAKE_COMMAND} -E copy ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} ${RELEASE_REPOSITORY_DIRECTORY}/bin/softdevice.hex
 			COMMAND ${CMAKE_COMMAND} -E echo "   Copy release config file from ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}"
 			COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY}/config
@@ -823,11 +825,11 @@ else()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Copy to release repository \"${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}\""
 			COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
-			COMMAND ${CMAKE_COMMAND} -E echo "   Copy from ${CMAKE_BINARY_DIR}"
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/bootloader*.zip ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/bootloader*.zip.sha1 ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader.elf ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
-			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+			COMMAND ${CMAKE_COMMAND} -E echo "   Copy from ${BLUENET_BINARY_DIR}"
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/dfu/bootloader*.zip ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/dfu/bootloader*.zip.sha1 ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/bootloader/bootloader.elf ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+			COMMAND ${CMAKE_COMMAND} -E copy ${BLUENET_BINARY_DIR}/bootloader/bootloader.hex ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
 			COMMAND ${CMAKE_COMMAND} -E copy ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin/softdevice.hex
 			COMMAND ${CMAKE_COMMAND} -E echo "   Copy release config file from ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}"
 			COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/config
@@ -840,28 +842,28 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.elf)
 
 set(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
-set(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
+set(PATH_FILE_MEMORY "-L${BLUENET_INCLUDE_DIR}/third/nrf/")
 set(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
 set(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
 
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" SUFFIX ".elf")
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME} SUFFIX ".elf")
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
 # We actually do not need the file without extension
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
 
 # TARGETS are not accepted from other directoreis
-install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
-install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
-install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.elf" DESTINATION .)
-install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" DESTINATION .)
-if(EXISTS "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
-	install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" DESTINATION .)
+install(FILES "${BLUENET_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
+install(FILES "${BLUENET_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
+install(FILES "${BLUENET_BINARY_DIR}/bootloader/bootloader.elf" DESTINATION .)
+install(FILES "${BLUENET_BINARY_DIR}/bootloader/bootloader.hex" DESTINATION .)
+if(EXISTS "${BLUENET_BINARY_DIR}/bootloader/bootloader_settings.hex")
+	install(FILES "${BLUENET_BINARY_DIR}/bootloader/bootloader_settings.hex" DESTINATION .)
 endif()
 install(FILES "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" DESTINATION .)
-install(DIRECTORY "${CMAKE_BINARY_DIR}/dfu" DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
+install(DIRECTORY "${BLUENET_BINARY_DIR}/dfu" DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
 
-set(FILE_LIST_VARIABLES "${CMAKE_BINARY_DIR}/list_variables.txt")
+set(FILE_LIST_VARIABLES "${BLUENET_BINARY_DIR}/list_variables.txt")
 file(WRITE ${FILE_LIST_VARIABLES} "")
 message(STATUS "Write variables to ${FILE_LIST_VARIABLES}")
 get_cmake_property(_variableNames VARIABLES)

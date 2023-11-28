@@ -47,8 +47,8 @@ MESSAGE(STATUS "PATH is set to: ${PATH}")
 LIST(APPEND CMAKE_PROGRAM_PATH ${COMPILER_PATH}/bin)
 
 # Specify the cross compiler, linker, etc.
-SET(CMAKE_C_COMPILER                   ${COMPILER_PATH}/bin/${COMPILER_TYPE}gcc)
-SET(CMAKE_CXX_COMPILER                 ${COMPILER_PATH}/bin/${COMPILER_TYPE}g++)
+SET(CMAKE_C_COMPILER                   ${COMPILER_PATH}/bin/${COMPILER_TYPE}gcc CACHE PATH "Path to the C compiler")
+SET(CMAKE_CXX_COMPILER                 ${COMPILER_PATH}/bin/${COMPILER_TYPE}g++ CACHE PATH "Path to the C++ compiler")
 SET(CMAKE_ASM_COMPILER                 ${COMPILER_PATH}/bin/${COMPILER_TYPE}as)
 SET(CMAKE_LINKER                       ${COMPILER_PATH}/bin/${COMPILER_TYPE}ld)
 SET(CMAKE_READELF                      ${COMPILER_PATH}/bin/${COMPILER_TYPE}readelf)
@@ -87,7 +87,7 @@ SET(RELEASE_FLAGS "-g0")
 #   * no-builtin             do not use abs, strcpy, and other built-in functions
 #   * short-enums            use a single byte for an enum if possible
 # 
-SET(DEFAULT_CXX_FLAGS       "-std=c++17 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
+SET(DEFAULT_CXX_FLAGS       "-std=c++17 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")  
 SET(DEFAULT_C_FLAGS         "")
 SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -Wall -Werror -fdiagnostics-color=always -fno-strict-aliasing -fno-builtin -fshort-enums -Wno-error=format -Wno-error=unused-function")
 
@@ -115,14 +115,11 @@ SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS            "")
 SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "")
 
 # The directory with some of the FindXXX modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake;${DEFAULT_MODULES_PATH};${DEFAULT_CONF_CMAKE_PATH}")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/conf ${CMAKE_SOURCE_DIR}/conf/cmake ${DEFAULT_MODULES_PATH} ${DEFAULT_CONF_CMAKE_PATH})
 
 MESSAGE(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 MESSAGE(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
-MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
-
-INCLUDE(crownstone.defs)
-INCLUDE(colors)
+MESSAGE(STATUS "Search for FindX files in: ${CMAKE_MODULE_PATH}")
 
 # Collect flags that have to do with optimization
 # We are optimizing for SIZE for now. If size turns out to be abundant, enable -O3 optimization.

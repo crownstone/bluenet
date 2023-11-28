@@ -5,6 +5,7 @@ downloads/
 tmp/
 stamp/
 tools/
+venv/
 tags
 .cproject
 .project
