@@ -47,6 +47,9 @@ endif()
 # Overwrite the typical install prefix
 set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 
+# Add cross-compilation flags
+set(CMAKE_TOOLCHAIN_FILE ${BLUENET_SOURCE_DIR}/arm.toolchain.cmake)
+
 # Create a more explicit name for this variable
 set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
 
@@ -311,7 +314,7 @@ endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
-message(STATUS "Configuring ${MESH_SDK_TARGET} target: ${MESH_SDK_GIT_TAG}")
+message(STATUS "Configuring ${MESH_SDK_TARGET} target")
 FetchContent_Declare(
     ${MESH_SDK_TARGET}
     GIT_REPOSITORY ${MESH_SDK_REPOSITORY}
@@ -380,7 +383,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_
 
 # We have added some commands to remove windows line endings and to set the exec bit
 # Reported at https://devzone.nordicsemi.com/f/nordic-q-a/47429/bug-windows-line-ending-characters
-add_custom_target(micro_eec
+add_custom_target(micro_ecc
 	COMMAND sed -i='' 's/\\r//g' build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${COMPILER_PATH}/bin/" "VERBOSE=0 MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
@@ -400,7 +403,7 @@ project(${BOARD_TARGET} NONE)
 
 if(NOT FACTORY_IMAGE)
 	add_subdirectory(${BLUENET_SOURCE_DIR} ${BOARD_TARGET})
-	add_custom_target(bluenet DEPENDS bootloader micro_eec target_depend crownstone)
+	add_custom_target(bluenet DEPENDS micro_ecc target_depend bootloader crownstone)
 endif()
 
 set(BOARD_CONFIG_DIR_FULL "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}")
