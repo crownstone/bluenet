@@ -248,7 +248,7 @@ public:
 	TopologyDiscoveryState state             = TopologyDiscoveryState::SCAN_FOR_NEIGHBORS;
 
 	bool SCAN_FOR_NEIGHBORS_FINISHED = false;
-	static constexpr uint8_t TIMEOUT_SEND_NEIGHBOURS   =  10; // 5 * 60;
+	static constexpr uint8_t TIMEOUT_SEND_NEIGHBOURS   = 2 * 60;
 
 	bool test = false;
 
@@ -258,15 +258,15 @@ public:
 	static constexpr uint8_t TIMEOUT_SECONDS = 3 * 60;
 
 	// array of neighbours (surrounding nodes, sorted on RSSI)
-	static constexpr int MAX_SURROUNDING     = 5;
+	static constexpr int MAX_SURROUNDING     = 10;
 	sur_node_t* surNodeList                  = nullptr;
 
 	// array of edges (automatic sorted on RSSI due to sorted neighbour list)
-	static constexpr int MAX_EDGES           = 4;
+	static constexpr int MAX_EDGES           = 5;
 	Edge* edgeList                           = nullptr;
 
 	// array of triangles (sorted on area/or other metric)
-	static constexpr int MAX_TRIANGLES       = 2;
+	static constexpr int MAX_TRIANGLES       = 5;
 	Edge* oppositeEdgeList                   = nullptr;
 	Triangle* trianglesList                  = nullptr;
 
@@ -281,13 +281,16 @@ private:
 	 */
 	uint8_t _msgCount                        = 0;
 
+	uint8_t _currentEdgeIndex 				 = 0;
+
+	uint8_t _nextSendIndex 					 = 0;
+	uint8_t _scanNeighbourTimer 				 = 0;
+	uint8_t _sendRssiTimer 				 	 = 0;
 	/**
-	 * Next index of the surrounding node list to send via the mesh.
+	 * Interval at which a mesh messages is sent for each neighbour.
 	 */
-	uint8_t _nextPrint                       = 0;
-
-	uint8_t _sendNeighbours 				 = 0;
-
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST      = 5;
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_SLOW      = 50;
 
 	/**
 	 * Index of surrounding nodes, edges, opposite edges and triangles -List.
@@ -362,11 +365,9 @@ private:
 	void onNeighbourRssi(stone_id_t OGsenderID, cs_mesh_model_msg_neighbour_rssi_t& packet);
 
 	/**
-	 * @brief Construct a new Neighbour-RSSI-message via Mesh
-	 *
-	 * @param surNode
+	 * @brief Sends the RSSI of 1 surNode over the mesh and UART.
 	 */
-	void sendNeighbourRSSIviaMesh(sur_node_t& surNode);
+	void sendNextSurNode();
 
 	/**
 	 * @brief Get the Mean of the RSSI packet
@@ -467,10 +468,10 @@ private:
 	/**
 	 * @brief Create a Edge With target surNode
 	 *
-	 * @param surNode
+	 * @param stone_id_t targetID
 	 * @return cs_ret_code_t
 	 */
-	cs_ret_code_t createEdgeWith(sur_node_t& target);
+	cs_ret_code_t createEdgeWith(stone_id_t targetID);
 
 	/**
 	 * @brief Corrects the base position of the triangle based on the angle of the triangle

@@ -23,7 +23,7 @@
 // TODO: in math file later maybe
 
 float rssiToDistance(int8_t rssi) {
-	return std::pow(10.0, (-69.1 - rssi) / 10.0 * 2.05);
+	return pow(10, (((-1 * rssi) - 69.1) / (10.0 * 2.05)));
 }
 
 float* roll(float phi) {
@@ -300,6 +300,10 @@ void MeshTopologyResearch::reset() {
 	_edgeCount         = 0;
 	_oppositeEdgeCount = 0;
 	_triangleCount     = 0;
+
+	// Reset some timers
+	_scanNeighbourTimer = 0;
+	_sendRssiTimer  = 0;
 }
 
 /**
@@ -324,14 +328,10 @@ void MeshTopologyResearch::printSurNodes() {
  * @brief Print all edges
  */
 void MeshTopologyResearch::printEdges() {
-	LOGresearchInfo("Edges (%d):", _edgeCount);
+	LOGresearchInfo("Edges of [%u]::(%d):", _myId, _edgeCount);
 	for (int i = 0; i < _edgeCount; ++i) {
 		LOGresearchInfo(
-				"source=%u, target=%u, rssi=%i, distance=%.3f",
-				edgeList[i].source,
-				edgeList[i].target,
-				edgeList[i].rssi,
-				edgeList[i].distance);
+				"-> target=%u, rssi=%i, distance=%.3f", edgeList[i].target, edgeList[i].rssi, edgeList[i].distance);
 	}
 }
 
@@ -359,14 +359,16 @@ int MeshTopologyResearch::stateFunc() {
 
 	switch (state) {
 		case TopologyDiscoveryState::SCAN_FOR_NEIGHBORS: {
-			addSurNode(1, -40, 37);
-			addSurNode(2, -40, 37);
-			addSurNode(3, -50, 37);
-			addSurNode(4, -50, 37);
+			// addSurNode(1, -40, 37);
+			// addSurNode(2, -40, 37);
+			// addSurNode(3, -50, 37);
+			// addSurNode(4, -50, 37);
 
 			printSurNodes();
 
 			if (SCAN_FOR_NEIGHBORS_FINISHED) {
+				LOGresearchInfo("Scan for neighbours finished");
+				sortSurNodeList();
 				state = TopologyDiscoveryState::BUILD_EDGES;
 			}
 			break;
@@ -374,21 +376,36 @@ int MeshTopologyResearch::stateFunc() {
 
 		case TopologyDiscoveryState::BUILD_EDGES: {
 			// waiting state, request surNode to make edges
-			addEdge(1, -40);
-			addEdge(2, -40);
-			addEdge(3, -50);
-			addEdge(4, -50);
+			// addEdge(1, -70);
+			// addEdge(2, -70);
+			// addEdge(3, -70);
+			// addEdge(4, -70);
 
+			// if (_edgeCount == 0) { // sends two EdgeRequests
+			// 	createEdgeWith(surNodeList[_currentEdgeIndex].id);
+			// 	createEdgeWith(surNodeList[_currentEdgeIndex+1].id);
+			// 	_currentEdgeIndex = _currentEdgeIndex + 2;
+			// }
+
+			if (_currentEdgeIndex <= MAX_EDGES) {
+				addEdge(surNodeList[_currentEdgeIndex].id, surNodeList[_currentEdgeIndex].rollingAverageRssi);
+				_currentEdgeIndex++;
+			}
+			// if (_currentEdgeIndex == MAX_EDGES) {
+			// 	_currentEdgeIndex = 0;
+			// }
+
+			printSurNodes();
 			printEdges();
 			// after two edges are made, try make opposite edge
-			addOppositeEdge(1,2,-40);
+			// addOppositeEdge(1,2,-40);
 
-			if (test == false){
-				test = true;
-			} else {
-				addOppositeEdge(1,3,-50);
-				test = false;
-			}
+			// if (test == false){
+			// 	test = true;
+			// } else {
+			// 	addOppositeEdge(1,3,-50);
+			// 	test = false;
+			// }
 
 			// For each opposite edge a triangle can be made
 
@@ -401,15 +418,16 @@ int MeshTopologyResearch::stateFunc() {
 
 		case TopologyDiscoveryState::BUILD_TRIANGLES: {
 			LOGresearchInfo("Build Triangles");
-			
-			while (_oppositeEdgeCount > _triangleCount){
+
+			while (_oppositeEdgeCount > _triangleCount) {
 				createTriangleWith(&oppositeEdgeList[_triangleCount]);
 			}
 			// process the opposite edges and make triangles
 
 			if (_triangleCount == MAX_TRIANGLES) {
 				state = TopologyDiscoveryState::BUILD_TOPOLOGY;
-			} else {
+			}
+			else {
 				state = TopologyDiscoveryState::BUILD_EDGES;
 			}
 			break;
@@ -419,13 +437,13 @@ int MeshTopologyResearch::stateFunc() {
 			// ook een soort van "timer" bouwt dan kun je na een bepaalde tijd weer terug naar de sending state - zo
 			// probeer je te mitigeren dat sommige messages niet altijd aankomen case
 
-		case TopologyDiscoveryState::BUILD_TOPOLOGY: { 
+		case TopologyDiscoveryState::BUILD_TOPOLOGY: {
 			// make adjacent triangles, so they can be mapped, just 1 map is needed with the best edge as base
 			// or do it for each edge, and compare/rotate the coordmaps to get final one
 			printTriangles();
 
 			state = TopologyDiscoveryState::TOPOLOGY_DONE;
-			break; 
+			break;
 		}
 
 		case TopologyDiscoveryState::TOPOLOGY_DONE: {
@@ -437,16 +455,16 @@ int MeshTopologyResearch::stateFunc() {
 
 		case TopologyDiscoveryState::LOCALISATION: {
 			// localise the tracked device inside a tetrahedron
-			if(test == false){
+			if (test == false) {
 				LOGresearchInfo("Localisation process started");
 			}
 			break;
 		}
 
 		default: {
-			LOGe("Unhandeled state: %d", state); 
+			LOGe("Unhandeled state: %d", state);
 			break;
-		} 
+		}
 	}
 
 	return Coroutine::delayMs(5000);
@@ -514,7 +532,7 @@ void MeshTopologyResearch::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) 
 	// // Localisation in a tetrahedron, 3 nodes are asked for the RSSI of the Tracked device
 	// if (packet.type == CS_MESH_MODEL_TYPE_TRACKED_REQUEST) {
 	// 	onTrackedRequest(packet); // RSSI values to tracked device should be stored, other function will use these
-	// // values to determine the location 	
+	// // values to determine the location
 	// 	return;
 	// }
 
@@ -532,13 +550,17 @@ void MeshTopologyResearch::onTickSecond() {
 	for (uint8_t i = 0; i < _surNodeCount; /**/) {
 		surNodeList[i].lastSeenSecondsAgo++;
 		if (surNodeList[i].lastSeenSecondsAgo == TIMEOUT_SECONDS) {
-			//TODO: uncomment this
-			// change = true;
-			// // Remove item, by shifting all items after this item.
-			// _surNodeCount--;
-			// for (uint8_t j = i; j < _surNodeCount; ++j) {
-			// 	_neighbours[j] = _neighbours[j + 1];
-			// }
+			// TODO: uncomment this
+			 change = true;
+			 // Remove item, by shifting all items after this item.
+			 _surNodeCount--;
+			 for (uint8_t j = i; j < _surNodeCount; ++j) {
+			 	surNodeList[j] = surNodeList[j + 1];
+			 }
+			// Also change shift the next send index.
+			if (_nextSendIndex > i) {
+				_nextSendIndex--;
+			}
 		}
 		else {
 			i++;
@@ -547,13 +569,25 @@ void MeshTopologyResearch::onTickSecond() {
 	if (change) {
 		sortSurNodeList();
 	}
-	// if (++_nextPrint == 10) {
-	// 	printSurNodes();
-	// 	_nextPrint = 0;
-	// }
-	if (++_sendNeighbours == TIMEOUT_SEND_NEIGHBOURS) {
+
+	if (state == TopologyDiscoveryState::SCAN_FOR_NEIGHBORS) {
+		if (++_sendRssiTimer == SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST) {
+			sendNextSurNode();
+			_sendRssiTimer = 0;
+		}
+	}
+	else {
+		if (++_sendRssiTimer == SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_SLOW) {
+			sendNextSurNode();
+			_sendRssiTimer = 0;
+		}
+	}
+
+	if (_scanNeighbourTimer == TIMEOUT_SEND_NEIGHBOURS) {
 		SCAN_FOR_NEIGHBORS_FINISHED = true;
-		_sendNeighbours             = 0;
+	}
+	else {
+		_scanNeighbourTimer++;
 	}
 }
 
@@ -562,11 +596,21 @@ void MeshTopologyResearch::onTickSecond() {
 //***************************************************************************************************************//
 
 /**
- * @brief Construct a new Neighbour-RSSI-message via Mesh
- *
- * @param surNode
+ * @brief Sends the RSSI of 1 surNode over the mesh and UART.
  */
-void MeshTopologyResearch::sendNeighbourRSSIviaMesh(sur_node_t& surNode) {
+void MeshTopologyResearch::sendNextSurNode() {
+
+	if (_surNodeCount == 0) {
+		// Nothing to send.
+		return;
+	}
+
+	// Make sure index is valid.
+	if (_nextSendIndex >= _surNodeCount) {
+		_nextSendIndex = 0;
+	}
+
+	auto& surNode = surNodeList[_nextSendIndex];
 
 	// Sent RSSI of neighbour over the mesh
 	cs_mesh_model_msg_neighbour_rssi_t meshPayload = {
@@ -588,6 +632,12 @@ void MeshTopologyResearch::sendNeighbourRSSIviaMesh(sur_node_t& surNode) {
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
+
+	// Also send over UART.
+	sendRssiToUart(_myId, meshPayload);
+
+	// Send next item in the list next time.
+	_nextSendIndex++;
 }
 
 /**
@@ -709,7 +759,7 @@ void MeshTopologyResearch::clearSurNodeRSSIinfo(sur_node_t& node) {
  * @param rssi
  */
 void MeshTopologyResearch::addSurNode(stone_id_t id, int8_t rssi, uint8_t channel) {
-	if (id == 0 || id == _myId || rssi < -70) {
+	if (id == 0 || id == _myId || rssi < -75) {
 		return;
 	}
 
@@ -781,7 +831,11 @@ void MeshTopologyResearch::updateSurNode(sur_node_t& node, stone_id_t id, int8_t
  * @param packet
  */
 void MeshTopologyResearch::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {
-	LOGresearchInfo("sendRssiToUart receiverId=%u senderId=%u", receiverId, packet.neighbourId);
+	if (receiverId == _myId) {
+		LOGresearchInfo("sendRssiToUart(sent) receiverId=%u senderId=%u", receiverId, packet.neighbourId);
+	} else {
+		LOGresearchInfo("sendRssiToUart(receive) receiverId=%u senderId=%u", receiverId, packet.neighbourId);	
+	}
 	mesh_topology_neighbour_rssi_uart_t uartMsg = {
 			.type               = 0,
 			.receiverId         = receiverId,
@@ -835,9 +889,9 @@ Edge* MeshTopologyResearch::addEdge(stone_id_t target, int8_t rssi) {
 	uint8_t index = findEdge(target);
 	if (index == INDEX_NOT_FOUND) {
 		if (_edgeCount < MAX_EDGES) {
-			edgeList[_edgeCount].source = _myId;
-			edgeList[_edgeCount].target = target;
-			edgeList[_edgeCount].rssi   = rssi;
+			edgeList[_edgeCount].source   = _myId;
+			edgeList[_edgeCount].target   = target;
+			edgeList[_edgeCount].rssi     = rssi;
 			edgeList[_edgeCount].distance = rssiToDistance(rssi);
 			_edgeCount++;
 			return &edgeList[_edgeCount - 1];
@@ -848,7 +902,7 @@ Edge* MeshTopologyResearch::addEdge(stone_id_t target, int8_t rssi) {
 		}
 	}
 	else {
-		edgeList[index].rssi = (edgeList[index].rssi + rssi) / 2;
+		edgeList[index].rssi     = (edgeList[index].rssi + rssi) / 2;
 		edgeList[index].distance = (edgeList[index].distance + rssiToDistance(rssi)) / 2;
 		return &edgeList[index];
 	}
@@ -869,9 +923,9 @@ Edge* MeshTopologyResearch::addOppositeEdge(stone_id_t source, stone_id_t target
 	uint8_t index = findOppositeEdge(target);
 	if (index == INDEX_NOT_FOUND) {
 		if (_edgeCount < MAX_TRIANGLES) {
-			oppositeEdgeList[_oppositeEdgeCount].source = source;
-			oppositeEdgeList[_oppositeEdgeCount].target = target;
-			oppositeEdgeList[_oppositeEdgeCount].rssi   = rssi;
+			oppositeEdgeList[_oppositeEdgeCount].source   = source;
+			oppositeEdgeList[_oppositeEdgeCount].target   = target;
+			oppositeEdgeList[_oppositeEdgeCount].rssi     = rssi;
 			oppositeEdgeList[_oppositeEdgeCount].distance = rssiToDistance(rssi);
 			_oppositeEdgeCount++;
 			return &oppositeEdgeList[_oppositeEdgeCount - 1];
@@ -882,7 +936,7 @@ Edge* MeshTopologyResearch::addOppositeEdge(stone_id_t source, stone_id_t target
 		}
 	}
 	else {
-		oppositeEdgeList[index].rssi = (oppositeEdgeList[index].rssi + rssi) / 2;
+		oppositeEdgeList[index].rssi     = (oppositeEdgeList[index].rssi + rssi) / 2;
 		oppositeEdgeList[index].distance = (oppositeEdgeList[index].distance + rssiToDistance(rssi)) / 2;
 		return &oppositeEdgeList[index];
 	}
@@ -921,17 +975,17 @@ Triangle* MeshTopologyResearch::addTriangle(Edge* baseEdge, Edge* adjEdge, Edge*
 /**
  * @brief Create a Edge With target surNode
  *
- * @param surNode
+ * @param stone_id_t targetID
  * @return cs_ret_code_t
  */
-cs_ret_code_t MeshTopologyResearch::createEdgeWith(sur_node_t& target) {
-	uint8_t index = findSurNode(target.id);
+cs_ret_code_t MeshTopologyResearch::createEdgeWith(stone_id_t targetID) {
+	uint8_t index = findSurNode(targetID);  // extra check if function is called directly
 	if (index == INDEX_NOT_FOUND) {
 		LOGresearchInfo("Edge cant be made with non existing surNode");
 		return ERR_NOT_FOUND;
 	}
 	// send message
-	return requestNodeSearch(target.id, _myId);
+	return requestNodeSearch(targetID, _myId);
 }
 
 /**
@@ -1002,12 +1056,17 @@ cs_ret_code_t MeshTopologyResearch::onNodeRequest(MeshMsgEvent& meshMsg) {
 			// make edge
 			// if target is self, make edge with source
 			if (packet.targetId == _myId) {
-				addEdge(meshMsg.srcStoneId, packet.rssi);
+				uint8_t index = findSurNode(meshMsg.srcStoneId);
+				addEdge(meshMsg.srcStoneId, (packet.rssi + surNodeList[index].rollingAverageRssi) / 2);
 			}
 			// if target is other: store somewhre it will be needed for triangle creation
 			else {
 				// Opposite Edge from one side, store this temporarily
 				addOppositeEdge(meshMsg.srcStoneId, packet.targetId, packet.rssi);
+				// Opposite Edge from other side, store this temporarily
+				// addOppositeEdge(meshMsg.srcStoneId, packet.targetId, packet.rssi);
+				// the results is now the mean of the two opposite edge nodes RSSI values
+				// butt we can only make triangle when both messages have arrived
 			}
 
 			break;
