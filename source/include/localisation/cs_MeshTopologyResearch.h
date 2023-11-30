@@ -14,8 +14,6 @@
 #include <util/cs_Math.h>
 #include <util/cs_Variance.h>
 
-typedef uint8_t uint8_t;
-
 typedef uint8_t triangle_id_t;
 
 /**
@@ -207,6 +205,7 @@ public:
 		BUILD_TRIANGLES,  // If enough edges, we can build triangles
 		BUILD_TOPOLOGY,   // With the discovered triangles begin building a topology
 		TOPOLOGY_DONE,    // The topology is discovered and valid
+		LOCALISATION,    // The topology is used for localisation
 	};
 
 	struct __attribute__((__packed__)) sur_node_t {
@@ -248,21 +247,26 @@ public:
 
 	TopologyDiscoveryState state             = TopologyDiscoveryState::SCAN_FOR_NEIGHBORS;
 
+	bool SCAN_FOR_NEIGHBORS_FINISHED = false;
+	static constexpr uint8_t TIMEOUT_SEND_NEIGHBOURS   =  10; // 5 * 60;
+
+	bool test = false;
+
 	/**
 	 * Time after last seen, before a neighbour is removed from the list.
 	 */
 	static constexpr uint8_t TIMEOUT_SECONDS = 3 * 60;
 
 	// array of neighbours (surrounding nodes, sorted on RSSI)
-	static constexpr int MAX_SURROUNDING     = 2;
+	static constexpr int MAX_SURROUNDING     = 5;
 	sur_node_t* surNodeList                  = nullptr;
 
 	// array of edges (automatic sorted on RSSI due to sorted neighbour list)
-	static constexpr int MAX_EDGES           = 5;
+	static constexpr int MAX_EDGES           = 4;
 	Edge* edgeList                           = nullptr;
 
 	// array of triangles (sorted on area/or other metric)
-	static constexpr int MAX_TRIANGLES       = 5;
+	static constexpr int MAX_TRIANGLES       = 2;
 	Edge* oppositeEdgeList                   = nullptr;
 	Triangle* trianglesList                  = nullptr;
 
@@ -282,6 +286,12 @@ private:
 	 */
 	uint8_t _nextPrint                       = 0;
 
+	uint8_t _sendNeighbours 				 = 0;
+
+
+	/**
+	 * Index of surrounding nodes, edges, opposite edges and triangles -List.
+	 */
 	uint8_t _surNodeCount                    = 0;
 	uint8_t _edgeCount                       = 0;
 	uint8_t _oppositeEdgeCount               = 0;
@@ -445,6 +455,15 @@ private:
 	 */
 	Edge* addOppositeEdge(stone_id_t source, stone_id_t target, int8_t rssi);
 
+
+	/**
+	 * @brief Add a triangle to the triangleList
+	 *
+	 * @param Triangle*
+	 * @return Triangle pointer
+	 */
+	Triangle* addTriangle(Edge* baseEdge, Edge* adjEdge, Edge* oppositeEdge);
+
 	/**
 	 * @brief Create a Edge With target surNode
 	 *
@@ -463,12 +482,11 @@ private:
 	float basePositionCorrection(float altiX, float angle);
 
 	/**
-	 * @brief Create a Triangle With baseEdge and adjEdge
+	 * @brief Create a Triangle With baseEdge and adjEdge and oppositeEdge
 	 *
-	 * @param baseEdge
-	 * @param adjEdge
+	 * @param oppositeEdge
 	 */
-	bool createTriangleWith(Edge* baseEdge, Edge* adjEdge);
+	void createTriangleWith(Edge* oppositeEdge);
 
 	/**
 	 * @brief send request for the rssi of the target crownstone from the stoneID
