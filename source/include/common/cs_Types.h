@@ -408,6 +408,7 @@ enum class CS_TYPE : uint16_t {
 	CMD_MESH_TOPO_RESET,       // Reset the stored mesh topology.
 	CMD_MESH_TOPO_GET_RSSI,    // Get the RSSI to a stoneId. The RSSI is set in the result.
 
+
 	EVT_TWI_INIT,    // TWI initialisation.
 	EVT_TWI_WRITE,   // TWI write.
 	EVT_TWI_READ,    // TWI read (request).

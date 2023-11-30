@@ -68,6 +68,17 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS> {
 	using type = behaviour_settings_t;
 };
 
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_NODE_REQUEST> {
+	using type = cs_mesh_model_msg_node_request_t;
+};
+
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ALTITUDE_REQUEST> {
+	using type = cs_mesh_model_msg_altitude_request_t;
+};
+
+
 class MeshMsgEvent {
 public:
 	//! Message type.

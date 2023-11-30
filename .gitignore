@@ -5,6 +5,7 @@ downloads/
 tmp/
 stamp/
 tools/
+venv/
 tags
 .cproject
 .project
@@ -24,3 +25,4 @@ nohup.out
 **/CMakeBuild.overwrite.config
 **/CMakeBuild.runtime.config
 docs/html
+venv/

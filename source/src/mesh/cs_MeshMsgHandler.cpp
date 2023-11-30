@@ -145,6 +145,12 @@ void MeshMsgHandler::handleMsg(MeshMsgEvent& msg) {
 		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI: {
 			break;
 		}
+		case CS_MESH_MODEL_TYPE_NODE_REQUEST: {
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_ALTITUDE_REQUEST: {
+			break;
+		}
 		case CS_MESH_MODEL_TYPE_CTRL_CMD: {
 			handleControlCommand(msg);
 			// Return instead of break, as this function already sets the reply.
@@ -357,18 +363,19 @@ void MeshMsgHandler::checkStateReceived() {
 	}
 	_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
 	_lastReceivedState.state.data.type                = SERVICE_DATA_DATA_TYPE_EXT_STATE;
-#if CS_SERIAL_NRF_LOG_ENABLED == 0
-	LOGi("Received state: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u rssi=%i",
-		 _lastReceivedState.state.data.extState.id,
-		 _lastReceivedState.state.data.extState.switchState,
-		 _lastReceivedState.state.data.extState.flags.asInt,
-		 _lastReceivedState.state.data.extState.temperature,
-		 _lastReceivedState.state.data.extState.powerFactor,
-		 _lastReceivedState.state.data.extState.powerUsageReal,
-		 _lastReceivedState.state.data.extState.energyUsed,
-		 _lastReceivedState.state.data.extState.partialTimestamp,
-		 _lastReceivedState.state.data.extState.rssi);
-#endif
+// TODO: uncomment later on
+// #if CS_SERIAL_NRF_LOG_ENABLED == 0
+// 	LOGi("Received state: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u rssi=%i",
+// 		 _lastReceivedState.state.data.extState.id,
+// 		 _lastReceivedState.state.data.extState.switchState,
+// 		 _lastReceivedState.state.data.extState.flags.asInt,
+// 		 _lastReceivedState.state.data.extState.temperature,
+// 		 _lastReceivedState.state.data.extState.powerFactor,
+// 		 _lastReceivedState.state.data.extState.powerUsageReal,
+// 		 _lastReceivedState.state.data.extState.energyUsed,
+// 		 _lastReceivedState.state.data.extState.partialTimestamp,
+// 		 _lastReceivedState.state.data.extState.rssi);
+// #endif
 	// Reset parts received
 	_lastReceivedState.partsReceivedBitmask         = 0;
 

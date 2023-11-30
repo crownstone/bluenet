@@ -603,8 +603,13 @@ void Crownstone::startOperationMode(const OperationMode& mode) {
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();
 
-			_meshTopology.init();
+			// _meshTopology.init();
 
+# if BUILD_MESH_TOPOLOGY_RESEARCH == 1
+			LOGi("Started Mesh Topology Research");
+			_meshTopologyResearch.init();
+# endif
+			
 			_assetFiltering.init();
 
 			break;

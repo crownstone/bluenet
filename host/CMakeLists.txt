@@ -22,7 +22,7 @@ LOGd("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 LOGd("DEFAULT_CONFIG_FILE: ${DEFAULT_CONFIG_FILE}")
 
 
-set(DEFAULT_CXX_FLAGS        "-std=c++17 -Wno-write-strings -fno-exceptions -Wformat=0")
+set(DEFAULT_CXX_FLAGS        "-std=c++20 -Wno-write-strings -fno-exceptions -Wformat=0")
 set(DEFAULT_C_FLAGS          "-std=gnu99")
 set(DEFAULT_C_AND_CXX_FLAGS  "-g3 -Wall")
 
@@ -33,6 +33,7 @@ set(CMAKE_C_AND_CXX_FLAGS    "${DEFAULT_C_AND_CXX_FLAGS}"       CACHE STRING "C 
 set(CMAKE_BLUENET_MOCK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../mock/source)
 set(CMAKE_BLUENET_SOURCE_DIR_MOCK ${CMAKE_BLUENET_MOCK_DIR}/src)
 set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
+set(BLUENET_SRC_DIR ${CMAKE_BLUENET_SOURCE_DIR}/src)
 
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
 

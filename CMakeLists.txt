@@ -13,10 +13,6 @@ option(REQUIRE_JLINK                             "Require JLink"                
 option(REQUIRE_PYTHON                            "Require python"                        OFF)
 option(BUILD_OFFLINE                             "Build offline"                         OFF)
 
-if(NOT CONFIG_DIR)
-	set(CONFIG_DIR "config")
-endif()
-
 if(NOT BOARD_TARGET)
 	set(BOARD_TARGET "default")
 endif()
@@ -26,8 +22,13 @@ if($ENV{VERBOSE})
 endif()
 
 set(WORKSPACE_DIR                                ${CMAKE_CURRENT_LIST_DIR})
+set(BLUENET_SOURCE_DIR 						 	 ${WORKSPACE_DIR}/source)
 set(DEFAULT_CONF_CMAKE_PATH                      ${WORKSPACE_DIR}/source/conf/cmake)
 set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modules)
+
+if(NOT CONFIG_DIR)
+	set(CONFIG_DIR "config")
+endif()
 
 set(RELEASE_REPOSITORY                           ${WORKSPACE_DIR}/../bluenet-release CACHE STRING "Release repository")
 set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-release-candidate CACHE STRING "Release candidate repository")
@@ -46,27 +47,15 @@ endif()
 # Overwrite the typical install prefix
 set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 
+# Add cross-compilation flags
+set(CMAKE_TOOLCHAIN_FILE ${BLUENET_SOURCE_DIR}/arm.toolchain.cmake)
+
 # Create a more explicit name for this variable
 set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
-
-# With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
-# With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.
-
-project(${BOARD_TARGET} NONE)
 
 if(NOT VERBOSITY)
 	set(VERBOSITY 0)
 endif()
-
-list(APPEND CMAKE_BLUENET_ARGS "-DVERBOSITY:STRING=${VERBOSITY}")
-list(APPEND CMAKE_BLUENET_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
-list(APPEND CMAKE_BLUENET_ARGS "-DRELEASE_REPOSITORY:STRING=${RELEASE_REPOSITORY}")
-list(APPEND CMAKE_BLUENET_ARGS "-DRELEASE_CANDIDATE_REPOSITORY:STRING=${RELEASE_CANDIDATE_REPOSITORY}")
-list(APPEND CMAKE_BLUENET_ARGS "-DCONFIG_DIR:STRING=${CONFIG_DIR}")
-list(APPEND CMAKE_BLUENET_ARGS "-DBOARD_TARGET:STRING=${BOARD_TARGET}")
-list(APPEND CMAKE_BLUENET_ARGS "-DDEFAULT_CONF_CMAKE_PATH:STRING=${DEFAULT_CONF_CMAKE_PATH}")
-list(APPEND CMAKE_BLUENET_ARGS "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
-list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 
 #######################################################################################################################
 # Load modules
@@ -83,9 +72,9 @@ message(STATUS "Source dir ${CMAKE_SOURCE_DIR}")
 message(STATUS "Build dir ${CMAKE_BINARY_DIR}")
 message(STATUS "Installation dir with binaries ${CMAKE_INSTALL_PREFIX}")
 
-set(BLUENET_CMAKE_MODULES_PATH "${CMAKE_SOURCE_DIR}/source/conf/cmake/modules/")
+set(BLUENET_CMAKE_MODULES_PATH "${BLUENET_SOURCE_DIR}/conf/cmake/modules/")
 message(STATUS "Search for CMake modules in ${BLUENET_CMAKE_MODULES_PATH}")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${BLUENET_CMAKE_MODULES_PATH}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${BLUENET_CMAKE_MODULES_PATH})
 
 # FindGit and FindWget are standard cmake modules, see
 # https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html
@@ -96,7 +85,7 @@ endif()
 
 find_package(Wget)
 if(NOT WGET_FOUND)
-	message(FATAL_ERROR "Installation requires wget, install with something like `sudo apt install wget`")
+        message(FATAL_ERROR "Installation requires wget, install with something like `sudo apt install wget`")
 endif()
 
 find_package(gcc_arm_none_eabi)
@@ -140,7 +129,7 @@ if(REQUIRE_PYTHON)
 endif()
 
 include(ExternalProject)
-
+include(FetchContent)
 include(load_configuration)
 include(git_info)
 include(compilation_info)
@@ -310,30 +299,33 @@ list(APPEND CMAKE_BLUENET_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FI
 # Download dependencies
 #######################################################################################################################
 
-message(STATUS "Configure ${NORDIC_SDK_TARGET} target")
-ExternalProject_Add(${NORDIC_SDK_TARGET}
-	GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
-	GIT_TAG ${NORDIC_SDK_GIT_TAG}
-	GIT_CONFIG advice.detachedHead=false
+message(STATUS "Configuring ${NORDIC_SDK_TARGET} target")
+FetchContent_Declare(
+    ${NORDIC_SDK_TARGET}
+    GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
+    GIT_TAG ${NORDIC_SDK_GIT_TAG}
+    GIT_CONFIG advice.detachedHead=false
 	SOURCE_DIR ${NRF5_DIR}
-	CONFIGURE_COMMAND ""
-	BUILD_COMMAND ""
-	INSTALL_COMMAND ""
-	)
+)
+FetchContent_GetProperties(${NORDIC_SDK_TARGET})
+if(NOT ${NORDIC_SDK_TARGET}_POPULATED)
+    FetchContent_Populate(${NORDIC_SDK_TARGET})
+endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
-message(STATUS "Configure ${MESH_SDK_TARGET} target")
-ExternalProject_Add(${MESH_SDK_TARGET}
-	GIT_REPOSITORY ${MESH_SDK_REPOSITORY}
-	GIT_TAG ${MESH_SDK_GIT_TAG}
-	GIT_CONFIG advice.detachedHead=false
-	SOURCE_DIR ${MESH_SDK_DIR}
-	CONFIGURE_COMMAND ""
-	BUILD_COMMAND ""
-	INSTALL_COMMAND ""
-	PATCH_COMMAND ""
-	)
+message(STATUS "Configuring ${MESH_SDK_TARGET} target")
+FetchContent_Declare(
+    ${MESH_SDK_TARGET}
+    GIT_REPOSITORY ${MESH_SDK_REPOSITORY}
+    GIT_TAG ${MESH_SDK_GIT_TAG}
+    GIT_CONFIG advice.detachedHead=false
+	SOURCE_DIR ${MESH_SDK_DIR} 
+)
+FetchContent_GetProperties(${MESH_SDK_TARGET})
+if(NOT ${MESH_SDK_TARGET}_POPULATED)
+    FetchContent_Populate(${MESH_SDK_TARGET})
+endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
@@ -376,10 +368,7 @@ if(FACTORY_IMAGE)
 endif()
 
 # Setting INSTALL_DIR is not sufficient, also CMAKE_INSTALL_PREFIX is required
-list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_INSTALL_PREFIX:FILEPATH=${WORKSPACE_DIR}/bin/${BOARD_TARGET}")
-
-# Add cross-compilation flags
-list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
+set(CMAKE_INSTALL_PREFIX ${WORKSPACE_DIR}/bin/${BOARD_TARGET})
 
 if(VERBOSITY GREATER 5)
 	message(STATUS "list: ${CMAKE_BLUENET_ARGS}")
@@ -394,43 +383,27 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_
 
 # We have added some commands to remove windows line endings and to set the exec bit
 # Reported at https://devzone.nordicsemi.com/f/nordic-q-a/47429/bug-windows-line-ending-characters
-add_custom_target(micro_eec
-	COMMAND sed -i 's/\\r//g' build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
+add_custom_target(micro_ecc
+	COMMAND sed -i='' 's/\\r//g' build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${COMPILER_PATH}/bin/" "VERBOSE=0 MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
-	COMMENT "Build micro-eec"
-	DEPENDS
-	${NORDIC_SDK_TARGET}
-	)
+	COMMENT "Build micro-eec")
 
 add_custom_target(target_depend
 	COMMAND cd ${BOARD_TARGET} && test -f "Makefile" && make depend || echo "-- First install"
-	COMMENT "Run make depend in target directory"
-	DEPENDS
-	${NORDIC_SDK_TARGET}
-	${MESH_SDK_TARGET}
-	)
+	COMMENT "Run make depend in target directory")
 
 #######################################################################################################################
-# Build bluenet as external project
+# Build bluenet
 #######################################################################################################################
+
+# With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
+# With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.
+project(${BOARD_TARGET} NONE)
 
 if(NOT FACTORY_IMAGE)
-	# Note that some more dependencies might be added later on by add_dependencies()
-	LogListV("CMAKE_BLUENET_ARGS: " CMAKE_BLUENET_ARGS)
-	ExternalProject_Add(bluenet
-		SOURCE_DIR ${WORKSPACE_DIR}/source
-		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
-		INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
-		STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/stamp
-		TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/tmp
-		CMAKE_CACHE_ARGS "${CMAKE_BLUENET_ARGS}"
-		CMAKE_ARGS "${CMAKE_BLUENET_ARGS}"
-		BUILD_ALWAYS 1
-		DEPENDS
-			micro_eec
-			target_depend
-		)
+	add_subdirectory(${BLUENET_SOURCE_DIR} ${BOARD_TARGET})
+	add_custom_target(bluenet DEPENDS micro_ecc target_depend bootloader crownstone)
 endif()
 
 set(BOARD_CONFIG_DIR_FULL "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}")
@@ -480,22 +453,6 @@ add_custom_target(${READ_SOFTDEVICE_VERSION_TARGET}
 	DEPENDS ${NRFJPROG_TARGET}
 	)
 
-set(ERASE_TARGET erase)
-message(STATUS "Configure ${ERASE_TARGET} target")
-add_custom_target(${ERASE_TARGET}
-	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=ERASE" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
-	COMMENT "Erase everything on target board"
-	DEPENDS ${NRFJPROG_TARGET}
-	)
-
-set(RESET_TARGET reset)
-message(STATUS "Configure ${RESET_TARGET} target")
-add_custom_target(${RESET_TARGET}
-	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=RESET" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
-	COMMENT "Reset target board"
-	DEPENDS ${NRFJPROG_TARGET}
-	)
-
 #######################################################################################################################
 # Forward commands for a particular board towards its build directory
 #######################################################################################################################
@@ -508,48 +465,6 @@ add_custom_target(${BOARD_TARGET}
 	DEPENDS
 	bluenet
 	COMMENT "Build application"
-	)
-
-set(DEBUG_APPLICATION_TARGET debug_application)
-message(STATUS "Configure ${DEBUG_APPLICATION_TARGET} target")
-add_custom_target(${DEBUG_APPLICATION_TARGET}
-	COMMAND make debug_application
-	WORKING_DIRECTORY ${BOARD_TARGET}
-	DEPENDS
-	bluenet
-	COMMENT "Debug application ${BOARD_TARGET}"
-	)
-
-set(WRITE_BOARD_VERSION_TARGET write_board_version)
-message(STATUS "Configure ${WRITE_BOARD_VERSION_TARGET} target")
-add_custom_target(${WRITE_BOARD_VERSION_TARGET}
-	COMMAND make write_board_version
-	WORKING_DIRECTORY ${BOARD_TARGET}
-	DEPENDS
-	${NRFJPROG_TARGET}
-	bluenet
-	COMMENT "Write board version for ${BOARD_TARGET}"
-	)
-
-set(WRITE_APPLICATION_TARGET write_application)
-message(STATUS "Configure ${WRITE_APPLICATION_TARGET} target")
-add_custom_target(${WRITE_APPLICATION_TARGET}
-	COMMAND make write_application
-	WORKING_DIRECTORY ${BOARD_TARGET}
-	DEPENDS
-	${NRFJPROG_TARGET}
-	bluenet
-	COMMENT "Write application to ${BOARD_TARGET}"
-	)
-
-set(WRITE_BOOTLOADER_TARGET write_bootloader)
-message(STATUS "Configure ${WRITE_BOOTLOADER_TARGET} target")
-add_custom_target(${WRITE_BOOTLOADER_TARGET}
-	COMMAND make write_bootloader
-	WORKING_DIRECTORY ${BOARD_TARGET}
-	DEPENDS
-	bluenet
-	COMMENT "Write bootloader to ${BOARD_TARGET}"
 	)
 
 #######################################################################################################################
@@ -756,7 +671,6 @@ list(APPEND CMAKE_BLUENET_HOST_ARGS "-DBOARD_TARGET_OVERWRITE_CONFIGURATION_FILE
 if(COMPILE_FOR_HOST)
 	message(STATUS "Configure ${NORDIC_SDK_HOST_TARGET} target (tag:=${NORDIC_SDK_HOST_GIT_TAG})")
 
-	
 	LogListV("CMAKE_BLUENET_HOST_ARGS: " CMAKE_BLUENET_HOST_ARGS)
 	ExternalProject_Add(${NORDIC_SDK_HOST_TARGET}
 		GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}

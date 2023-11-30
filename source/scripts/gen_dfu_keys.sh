@@ -8,7 +8,7 @@ source $path/_utils.sh
 key_to_pass=true
 if [ $key_to_pass ]; then
 	cs_info "Storing private key in pass"
-	key_file=$(mktemp -u --suffix=cs)
+	key_file=$(mktemp -u /tmp/tempfile.XXXXXX.cs)
 	checkError
 	trap "rm -f $key_file" EXIT
 else

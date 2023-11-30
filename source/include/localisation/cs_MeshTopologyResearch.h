@@ -11,190 +11,526 @@
 #include <protocol/cs_MeshTopologyPackets.h>
 #include <structs/cs_PacketsInternal.h>
 #include <util/cs_Coroutine.h>
+#include <util/cs_Math.h>
 #include <util/cs_Variance.h>
 
-#include <cstdint>
-#include <map>
+typedef uint8_t triangle_id_t;
 
 /**
- * This class/component keeps track of the rssi distance of a
- * crownstone to its neighbors (i.e. those within zero hop distance
- * on the mesh).
+ * @brief Transformations class
  *
- * At configurable intervals it will broadcast its acquired data in a burst
- * over the mesh so that a hub, or other interested connected devices
- * can retrieve it.
  */
-class MeshTopologyResearch : public EventListener {
+class Transformations {
 public:
-	MeshTopologyResearch();
+	/**
+	 * @brief Convert RSSI to distance.
+	 *
+	 * @param rssi
+	 * @return float
+	 */
+	static float rssiToDistance(int8_t rssi);
 
 	/**
-	 * Handles the following events:
-	 * CS_TICK:
-	 *   Coroutine for rssi data updates.
+	 * @brief Roll transformation.
 	 *
+	 * @param phi
+	 * @return std::vector<float>
+	 */
+	static float* roll(float phi);
+
+	/**
+	 * @brief Pitch transformation.
 	 *
-	 * CS_TYPE_EVT_RECV_MESH_MSG of types:
-	 *   - CS_MESH_MODEL_TYPE_RSSI_PING
-	 *   - CS_MESH_MODEL_TYPE_RSSI_DATA
+	 * @param theta
+	 * @return std::vector<float>
+	 */
+	static float* pitch(float theta);
+
+	/**
+	 * @brief Yaw transformation.
 	 *
-	 * (Will propagate data over UART for the hub to use it.)
+	 * @param psi
+	 * @return std::vector<float>
+	 */
+	static float* yaw(float psi);
+
+	/**
+	 * @brief Mirror X-value transformation.
+	 * @return float*
+	 */
+	static float* mirrorX();
+
+	/**
+	 * @brief Mirror Y-value transformation.
+	 * @return float*
+	 */
+	static float* mirrorY();
+
+	/**
+	 * @brief Mirror Z-value transformation.
+	 * @return float*
+	 */
+	static float* mirrorZ();
+
+	/**
+	 * @brief Multiply two matrices or matrix with vector
+	 *
+	 * @param matrix
+	 * @param matvec
+	 * @return std::vector<float>
+	 */
+	float* matrix3_multiply(const float* matrix, const float* vectMatrix, size_t size);
+};
+
+/**
+ * @brief Edge class
+ *
+ */
+class Edge {
+public:
+	Edge() = default;
+
+	/**
+	 * @brief Construct a new Edge object of two stone IDs and an RSSI value.
+	 *
+	 * @param source
+	 * @param target
+	 * @param rssi
+	 */
+	Edge(stone_id_t source, stone_id_t target, int8_t rssi);
+
+	stone_id_t source;
+	stone_id_t target;
+	int8_t rssi;
+	float distance;
+
+	/**
+	 * @brief Compare two edges.
+	 *
+	 * @param other
+	 * @return true
+	 * @return false
+	 */
+	bool compare(const Edge* other) const;
+};
+
+/**
+ * @brief Triangle class
+ *
+ */
+class Triangle {
+public:
+	Triangle() = default;
+
+	/**
+	 * @brief Construct a new Triangle object of three edge pointers
+	 *
+	 * @param adj_edge1
+	 * @param adj_edge2
+	 * @param opposite_edge
+	 */
+	Triangle(Edge* base_edge, Edge* adj_edge, Edge* opposite_edge)
+			: base_edge(base_edge), adj_edge(adj_edge), opposite_edge(opposite_edge) {}
+
+	/**
+	 * Edges that make up the triangle.
+	 */
+	Edge* base_edge;
+	Edge* adj_edge;
+	Edge* opposite_edge;
+
+	// TODO: add triangle id, needed?
+	triangle_id_t id = 0;
+
+	/**
+	 * Gets the area of the triangle.
+	 */
+	float getArea();
+
+	/**
+	 * Get the angle to the triangle w.r.t. the current crownstone.
+	 */
+	float getAngle();
+
+	/**
+	 * Get the altitude of the triangle.
+	 */
+	float getAltitude();
+
+	/**
+	 * @brief Get the Alitude Base Position of the Altitude's x position to the target crownstone.
+	 *
+	 * @param target
+	 * @return float
+	 */
+	float getAlitudeBasePositionTo(stone_id_t targetID);
+
+	/**
+	 * @brief Returns the third node of the triangle based on the base edge.
+	 * Base edge is alway self->otherNode
+	 *
+	 * @param baseEdge
+	 * @return stone_id_t
+	 */
+	stone_id_t getThirdNode(Edge& baseEdge);
+
+	/**
+	 * @brief Get the Other outgoing base edge
+	 *
+	 * @param baseEdge
+	 * @return Edge pointer
+	 */
+	Edge* getOtherBase(Edge& baseEdge);
+
+	/**
+	 * @brief Get a specific edge from the triangle.
+	 *
+	 * @param source
+	 * @param target
+	 * @return Edge pointer
+	 */
+	Edge* getEdge(stone_id_t source, stone_id_t target);
+};
+
+/**
+ * @brief Tetrahedon class
+ * maybe needed
+ */
+
+class MeshTopologyResearch : public EventListener {
+public:
+	enum TopologyDiscoveryState {
+		SCAN_FOR_NEIGHBORS,  // Wait for all crownstones that are discoverable my the node to be found
+		BUILD_EDGES,      // With the crownstones that are discoverable, start discovering where we can build edges
+		BUILD_TRIANGLES,  // If enough edges, we can build triangles
+		BUILD_TOPOLOGY,   // With the discovered triangles begin building a topology
+		TOPOLOGY_DONE,    // The topology is discovered and valid
+		LOCALISATION,    // The topology is used for localisation
+	};
+
+	struct __attribute__((__packed__)) sur_node_t {
+		stone_id_t id;
+		int8_t rssiChannel37;
+		int8_t rssiChannel38;
+		int8_t rssiChannel39;
+		int8_t rollingAverageRssi;
+		uint8_t count;
+		uint8_t lastSeenSecondsAgo;
+	};
+
+	MeshTopologyResearch();
+
+	virtual ~MeshTopologyResearch() noexcept {};
+
+	/**
+	 * Commands handled:
+	 *  - CMD_MESH_TOPO_GET_RSSI
+	 *  - CMD_MESH_TOPO_RESET
+	 *  - CMD_MESH_TOPO_GET_MAC
+	 *
+	 * Internal usage:
+	 *  - EVT_RECV_MESH_MSG
 	 */
 	void handleEvent(event_t& evt);
 
+	int stateFunc();  // TOOD: give a reasonable name
+
 	/**
-	 * Obtains the stone_id_t of this crownstone to use for forwarded ping messages.
+	 * Initializes the class:
+	 * - Get stone ID.
+	 * - Allocate and Reset all buffers.
+	 * - Starts listening for events.
 	 */
-	void init();
+	cs_ret_code_t init();
+
+	Coroutine routine;
+
+	TopologyDiscoveryState state             = TopologyDiscoveryState::SCAN_FOR_NEIGHBORS;
+
+	bool SCAN_FOR_NEIGHBORS_FINISHED = false;
+	static constexpr uint8_t TIMEOUT_SEND_NEIGHBOURS   = 2 * 60;
+
+	bool test = false;
+
+	/**
+	 * Time after last seen, before a neighbour is removed from the list.
+	 */
+	static constexpr uint8_t TIMEOUT_SECONDS = 3 * 60;
+
+	// array of neighbours (surrounding nodes, sorted on RSSI)
+	static constexpr int MAX_SURROUNDING     = 10;
+	sur_node_t* surNodeList                  = nullptr;
+
+	// array of edges (automatic sorted on RSSI due to sorted neighbour list)
+	static constexpr int MAX_EDGES           = 5;
+	Edge* edgeList                           = nullptr;
+
+	// array of triangles (sorted on area/or other metric)
+	static constexpr int MAX_TRIANGLES       = 5;
+	Edge* oppositeEdgeList                   = nullptr;
+	Triangle* trianglesList                  = nullptr;
 
 private:
-	stone_id_t my_id                                                     = 0xff;
-
-	// stores the relevant history, per neighbor stone_id.
-	static constexpr uint8_t CHANNEL_COUNT                               = 3;
-	static constexpr uint8_t CHANNEL_START                               = 37;
-
-	// TODO: change maps to object for small ram memory footprint optimization
-	std::map<stone_id_t, VarianceAggregator> variance_map[CHANNEL_COUNT] = {};
-
-	// will be set to true by coroutine to flush data after startup.
-	bool boot_sequence_finished                                          = false;
-
-	// loop variables to keep track of outside of coroutine for the burst loop
-	stone_id_t last_stone_id_broadcasted_in_burst                        = 0;
-
-	// --------------- Coroutine parameters ---------------
-
-	Coroutine flushRoutine;
-
-	struct TimingSettings {
-		/**
-		 * When flushAggregatedRssiData is in the flushing phase,
-		 * only variance_map entries that have accumulated this many samples will
-		 * be included.
-		 */
-		uint8_t min_samples_to_trigger_burst;
-
-		/**
-		 * Period between sending data in 'burst mode'.
-		 */
-		uint32_t burst_period_ms;
-
-		/**
-		 * This value determines the period between end and start of bursts.
-		 */
-		uint32_t accumulation_period_ms;
-
-		/**
-		 * When boot sequence period expires, a flush (burst) of the rssi data will be
-		 * triggered.
-		 */
-		uint32_t boot_sequence_period_ms;
-	};
-
-	static constexpr TimingSettings Settings = {
-#ifdef DEBUG
-			.min_samples_to_trigger_burst = 20,
-			.burst_period_ms              = 500,
-			.accumulation_period_ms       = 2 * 60 * 1000,
-			.boot_sequence_period_ms      = 1 * 60 * 1000
-#else
-			.min_samples_to_trigger_burst = 20,
-			.burst_period_ms              = 5,
-			.accumulation_period_ms       = 30 * 60 * 1000,
-			.boot_sequence_period_ms      = 1 * 60 * 1000,
-#endif
-	};
-
-	// -------------------- Methods --------------------
+	/**
+	 * Stone ID of this crownstone, read on init.
+	 */
+	stone_id_t _myId                         = 0;
 
 	/**
-	 * Coroutine method:
-	 * To prevent the mesh from flooding, flushing is throttled.
-	 * - Flush period: 30 minutes
-	 * - Burst period: 5 milliseconds
+	 * Number of RSSI messages send via the mesh.
+	 */
+	uint8_t _msgCount                        = 0;
+
+	uint8_t _currentEdgeIndex 				 = 0;
+
+	uint8_t _nextSendIndex 					 = 0;
+	uint8_t _scanNeighbourTimer 				 = 0;
+	uint8_t _sendRssiTimer 				 	 = 0;
+	/**
+	 * Interval at which a mesh messages is sent for each neighbour.
+	 */
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST      = 5;
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_SLOW      = 50;
+
+	/**
+	 * Index of surrounding nodes, edges, opposite edges and triangles -List.
+	 */
+	uint8_t _surNodeCount                    = 0;
+	uint8_t _edgeCount                       = 0;
+	uint8_t _oppositeEdgeCount               = 0;
+	uint8_t _triangleCount                   = 0;
+
+	static constexpr uint8_t INDEX_NOT_FOUND = 0xFF;
+
+	static constexpr int8_t RSSI_INIT        = 0;  // Should be in protocol
+
+	/**
+	 * Resets the stored topology.
+	 */
+	void reset();
+
+	/**
+	 * @brief Find a surrounding node in the surNodeList.
+	 * SurNodeList contains more neighbours than the edgeList.
+	 * @param id
+	 * @return uint8_t (index)
+	 */
+	uint8_t findSurNode(stone_id_t id);
+
+	/**
+	 * @brief Find an edge in the edgeList.
+	 * EdgeList consist solely of the SurNodes associated with formed edges
+	 * @param id
+	 * @return uint8_t (index)
+	 */
+	uint8_t findEdge(stone_id_t id);
+
+	/**
+	 * @brief Find an edge in the oppositeEdgeList.
+	 * @param id
+	 * @return uint8_t (index)
+	 */
+	uint8_t findOppositeEdge(stone_id_t id);
+
+	/**
+	 * @brief Find a triangle in the triangleList.
+	 * 
+	 * @param base_src 
+	 * @param base_dst 
+	 * @return uint8_t (index)
+	 */
+	uint8_t findTriangle(stone_id_t base_src, stone_id_t base_dst);
+
+	/**
+	 * @brief Print all surrounding nodes
+	 */
+	void printSurNodes();
+
+	/**
+	 * @brief Print all edges
+	 */
+	void printEdges();
+
+	/**
+	 * @brief Print all triangles
+	 */
+	void printTriangles();
+
+	/**
+	 * @brief processes all the neighbour RSSI messages of the mesh
 	 *
-	 * Broadcasts a rssi_data_message_t for each of the pairs of crownstones
-	 * in the local maps, together with the (oriented) average rssi value
-	 * between those stones. After that, clear all the maps.
+	 * @param id
+	 * @param packet
+	 */
+	void onNeighbourRssi(stone_id_t OGsenderID, cs_mesh_model_msg_neighbour_rssi_t& packet);
+
+	/**
+	 * @brief Sends the RSSI of 1 surNode over the mesh and UART.
+	 */
+	void sendNextSurNode();
+
+	/**
+	 * @brief Get the Mean of the RSSI packet
+	 *
+	 * @param packet
+	 * @return uint8_t
+	 */
+	static uint8_t getMean(cs_mesh_model_msg_neighbour_rssi_t& packet);
+
+	/**
+	 * Handles mesh messages:
+	 *  - CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI
+	 *  - CS_MESH_MODEL_TYPE_NODE_REQUEST
+	 *  - CS_MESH_MODEL_TYPE_ALTITUDE_REQUEST
+	 */
+	void onMeshMsg(MeshMsgEvent& packet, cs_result_t& result);
+
+	/**
+	 * @brief Tick Timer scheduler: remove surNodes when they are not seen for a while
 	 *
 	 */
-	uint32_t flushAggregatedRssiData();
+	void onTickSecond();
 
 	/**
-	 * Returns the 3 bit descriptor of the given variance as defined
-	 * in cs_PacketsInternal.h.
+	 * clears the RSSI stats values to RSSI_INIT and zero
+	 * @param node
 	 */
-	inline uint8_t getVarianceRepresentation(float standard_deviation);
+	void clearSurNodeRSSIinfo(sur_node_t& node);
 
 	/**
-	 * Returns the 7 bit representation of the given mean as defined
-	 * in cs_PacketsInternal.h.
-	 */
-	inline uint8_t getMeanRssiRepresentation(float mean);
-
-	/**
-	 * Returns the 6 bit representation of the given count as defined
-	 * in cs_PacketsInternal.h.
-	 */
-	inline uint8_t getCountRepresentation(uint32_t count);
-
-	// --------------- generating rssi data --------------
-
-	/**
-	 * Dispatches an event of type CMD_SEND_MESH_MSG
-	 * in order to send a CS_MESH_MODEL_TYPE_RSSI_PING.
-	 */
-	void sendPingRequestOverMesh();
-
-	/**
-	 * Dispatches an event of type CMD_SEND_MESH_MSG
-	 * in order to send a CMD_SEND_MESH_MSG_NOOP.
+	 * @brief Add a surrounding node to the surNodeList
 	 *
-	 * (This nop will be handled by receiveGenericMeshMessage)
+	 * @param id
+	 * @param rssi
+	 * @param channel
 	 */
-	void sendPingResponseOverMesh();
+	void addSurNode(stone_id_t id, int8_t rssi, uint8_t channel);
 
 	/**
-	 * If the ping message is a request that has not hopped,
-	 *  - sendPingResponseOverMesh()
-	 */
-	void receivePingMessage(MeshMsgEvent& mesh_msg_evt);
-
-	// ------------- communicating rssi data -------------
-
-	/**
-	 * Dispatches an event of type CMD_SEND_MESH_MSG
-	 * in order to send a CS_MESH_MODEL_TYPE_RSSI_DATA.
-	 */
-	void sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message);
-
-	/**
-	 * Writes a message of type UART_OPCODE_TX_RSSI_DATA_MESSAGE
-	 * with the given parameter as data.
-	 */
-	void sendRssiDataOverUart(rssi_data_message_t* rssi_data_message);
-
-	/**
-	 * Any received rssi_data_message_t will be sendRssiDataOverUart.
+	 * @brief Update a surrounding node in the surNodeList or add a new one to the list
+	 * (helperfunction of addSurNode)
 	 *
-	 * Assumes mesh_msg_event is of type CS_MESH_MODEL_TYPE_RSSI_DATA.
+	 * @param node
+	 * @param id
+	 * @param rssi
 	 */
-	void receiveRssiDataMessage(MeshMsgEvent& mesh_msg_evt);
-
-	// ------------- recording mesh messages -------------
-
-	/**
-	 * If the event was no-hop:
-	 * 	- recordRssiValue(args...)
-	 */
-	void receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt);
+	void updateSurNode(sur_node_t& node, stone_id_t id, int8_t rssi, uint8_t channel);
 
 	/**
-	 * Saves rssi value to last received map and variance recorder map.
-	 * If the long term recorder has accumulated a lot of data, it will
-	 * be reduced to prevent overflow.
+	 * @brief Sort the surNodeList on RSSI
 	 */
-	void recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel);
+	void sortSurNodeList();
+
+	/**
+	 * @brief Copy RSSI of stoneID into a result buffer
+	 *
+	 * @param stoneId
+	 * @param result
+	 */
+	void getRssi(stone_id_t stoneId, cs_result_t& result);
+
+	/**
+	 * @brief send Neighbour RSSI message to Uart
+	 */
+	void sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet);
+
+	/**
+	 * @brief Add an edge to the edgelist
+	 *
+	 * -@param source (always self)
+	 * @param target
+	 * @param rssi
+	 *
+	 * @return Edge pointer
+	 */
+	Edge* addEdge(stone_id_t target, int8_t rssi);
+
+	/**
+	 * @brief Add an edge to the oppositeEdgelist
+	 *
+	 * @param source
+	 * @param target
+	 * @param rssi
+	 *
+	 * @return Edge pointer
+	 */
+	Edge* addOppositeEdge(stone_id_t source, stone_id_t target, int8_t rssi);
+
+
+	/**
+	 * @brief Add a triangle to the triangleList
+	 *
+	 * @param Triangle*
+	 * @return Triangle pointer
+	 */
+	Triangle* addTriangle(Edge* baseEdge, Edge* adjEdge, Edge* oppositeEdge);
+
+	/**
+	 * @brief Create a Edge With target surNode
+	 *
+	 * @param stone_id_t targetID
+	 * @return cs_ret_code_t
+	 */
+	cs_ret_code_t createEdgeWith(stone_id_t targetID);
+
+	/**
+	 * @brief Corrects the base position of the triangle based on the angle of the triangle
+	 * 
+	 * @param altiX 
+	 * @param self_angle 
+	 * @return float 
+	 */
+	float basePositionCorrection(float altiX, float angle);
+
+	/**
+	 * @brief Create a Triangle With baseEdge and adjEdge and oppositeEdge
+	 *
+	 * @param oppositeEdge
+	 */
+	void createTriangleWith(Edge* oppositeEdge);
+
+	/**
+	 * @brief send request for the rssi of the target crownstone from the stoneID
+	 * 
+	 * @param askId 
+	 * @param searchId 
+	 * @return cs_ret_code_t 
+	 */
+	cs_ret_code_t requestNodeSearch(stone_id_t askId, stone_id_t searchId);
+
+	/**
+	 * @brief handle the node requests messages
+	 * @return cs_ret_code_t 
+	 */
+	cs_ret_code_t onNodeRequest(MeshMsgEvent& meshMsg);
+
+	/**
+	 * @brief send request for the altitude of the target crownstone from the stoneID
+	 * 
+	 * @param askId 
+	 * @param searchId 
+	 * @return cs_ret_code_t 
+	 */
+	cs_ret_code_t requestAltitude(stone_id_t askId, stone_id_t base_other, stone_id_t searchId);
+
+	/**
+	 * @brief Handles the altitude request
+	 * 
+	 * @param meshMsg 
+	 * @return cs_ret_code_t 
+	 */
+	cs_ret_code_t onAltitudeRequest(MeshMsgEvent& meshMsg);
+
+	/**
+	 * @brief Calculates the angle between two triangles with the same base edge
+	 * 
+	 * @param defaultOtherNode 
+	 * @param otherNode 
+	 * @param base_altiX 
+	 * @param base_altiH 
+	 * @param altiX 
+	 * @param altiH 
+	 * @return float 
+	 */
+	float calculateMapAngle(stone_id_t defaultOtherNode, stone_id_t otherNode, float base_altiX, float base_altiH, float altiX, float altiH);
 };

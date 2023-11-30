@@ -51,7 +51,7 @@ MESSAGE(STATUS "[test/adc_test/CMakeLists.txt]: Compiler: ${CMAKE_C_COMPILER}")
 
 set(TEST test_adc)
 
-set(TEST_SOURCE_DIR "test/nrf5")
+set(TEST_BLUENET_SRC_DIR "test/nrf5")
 
 # Reset_Handler, etc.
 LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
@@ -107,41 +107,41 @@ LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/integration/nrfx/legacy/nrf_drv_uart.c")
 
 list(APPEND FOLDER_SOURCE "${NORDIC_SOURCE}")
 
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartCommandHandler.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartConnection.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartHandler.cpp")
+LIST(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/uart/cs_UartCommandHandler.cpp")
+LIST(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/uart/cs_UartConnection.cpp")
+LIST(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/uart/cs_UartHandler.cpp")
 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cfg/cs_Boards.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Handlers.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Error.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/util/cs_Syscalls.c")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/cfg/cs_Boards.c")
+LIST(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/common/cs_Handlers.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/util/cs_Error.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/util/cs_BleError.cpp")
 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Serial.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Timer.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/drivers/cs_ADC.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/drivers/cs_Serial.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/drivers/cs_Timer.cpp")
 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Stack.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/ble/cs_Stack.cpp")
 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_PowerSampling.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_RecognizeSwitch.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_State.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_EventDispatcher.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/processing/cs_PowerSampling.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/processing/cs_RecognizeSwitch.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/storage/cs_State.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/drivers/cs_Storage.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/events/cs_EventDispatcher.cpp")
 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_ScheduleEntriesAccessor.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/structs/cs_ScheduleEntriesAccessor.cpp")
 
 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/third/SortMedian.cc")
 
 # Somehow the following files are pulled in as well..., not nice..., should not be necessary
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_UUID.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_UartProtocol.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_EventDispatcher.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/ble/cs_UUID.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/protocol/cs_UartProtocol.cpp")
+list(APPEND FOLDER_SOURCE "${BLUENET_SRC_DIR}/events/cs_EventDispatcher.cpp")
 
 set(TEST_SOURCE_FILES "${FOLDER_SOURCE}")
 
-set(SOURCE_FILES ${TEST_SOURCE_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES}) 
+set(SOURCE_FILES ${TEST_BLUENET_SRC_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES}) 
 add_executable(${TEST} ${SOURCE_FILES} ${TEST}.tmp)
 add_test(NAME ${TEST} COMMAND ${TEST})
 
@@ -212,7 +212,7 @@ set(TEST_SOURCE_FILES "${FOLDER_SOURCE}")
 
 INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/pwm/")
 
-set(SOURCE_FILES ${TEST_SOURCE_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES}) 
+set(SOURCE_FILES ${TEST_BLUENET_SRC_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES}) 
 add_executable(${TEST} ${SOURCE_FILES} ${TEST}.tmp)
 add_test(NAME ${TEST} COMMAND ${TEST})
 
@@ -296,7 +296,7 @@ set(TEST_SOURCE_FILES "${FOLDER_SOURCE}")
 
 INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/pwm/")
 
-set(SOURCE_FILES ${TEST_SOURCE_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES}) 
+set(SOURCE_FILES ${TEST_BLUENET_SRC_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES}) 
 add_executable(${TEST} ${SOURCE_FILES} ${TEST}.tmp)
 add_test(NAME ${TEST} COMMAND ${TEST})
 

@@ -12,9 +12,9 @@
 
 #include <cstdint>
 
-#if BUILD_MESH_TOPOLOGY_RESEARCH == 1
-#include <localisation/cs_MeshTopologyResearch.h>
-#endif
+// #if BUILD_MESH_TOPOLOGY_RESEARCH == 1
+// #include <localisation/cs_MeshTopologyResearch.h>
+// #endif
 
 /**
  * Keeps track of the rssi distance of this crownstone to
@@ -239,7 +239,7 @@ private:
 	 */
 	void print();
 
-#if BUILD_MESH_TOPOLOGY_RESEARCH == 1
-	MeshTopologyResearch _research;
-#endif
+// #if BUILD_MESH_TOPOLOGY_RESEARCH == 1
+// 	MeshTopologyResearch _research;
+// #endif
 };

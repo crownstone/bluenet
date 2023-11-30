@@ -48,7 +48,7 @@ CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED=0
 CS_SERIAL_NRF_LOG_PIN_TX=6
 
 # Default values for the UART client
-UART_DEVICE="/dev/ttyACM0"
+UART_DEVICE="/dev/cu.usbmodem0006829986701"
 UART_BAUDRATE=230400
 
 # The different boards that can be used (from cs_Boards.h):

@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <protocol/cs_UartMsgTypes.h>
+
 /**
  * Returns the 32 bits DJB2 hash of the reversed file name, up to the first '/'.
  */

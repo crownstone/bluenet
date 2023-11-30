@@ -658,7 +658,7 @@ void MeshCore::getFlashPages(void*& startAddress, void*& endAddress) {
 	endAddress                  = (void*)endAddr;
 }
 
-cs_ret_code_t Mesh::eraseAllPages() {
+cs_ret_code_t MeshCore::eraseAllPages() {
 	void* startAddress = NULL;
 	void* endAddress   = NULL;
 	getFlashPages(startAddress, endAddress);
