@@ -23,7 +23,7 @@ The best way is to first [fork](https://github.com/crownstone/bluenet/fork) the 
 
 Create a workspace folder where all the necessary files and folders will be stored, e.g.
 
-    mkdir -p ~/workspace
+    mkdir -p ~/workspace && cd ~/workspace
 
 and download the code:
 
