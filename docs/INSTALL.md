@@ -34,6 +34,24 @@ and set the correct upstream:
     cd bluenet
     git remote add upstream git@github.com:crownstone/bluenet.git
 
+## Install additional needed packages
+
+In order to build Bluenet a cross compiler is needed. Download and install `gcc-arm-none-eabi` using the download script:
+
+    ./scripts/download/download-ubuntu-gcc-arm-none-eabi.sh ~/workspace
+
+If you want to flash the build binaries to an nRF chip, you'll also need `nrfjprog` and `J-Link`. Otherwise set `REQUIRE_NRFJPROG` and `REQUIRE_JLINK` to `NO` in `CMakeLists.txt`.
+
+Download and install the `nRF Command Line Tools` containing nrfjprog using the download script:
+
+    ./scripts/download/download-ubuntu-nrf-cli-tools.sh ~/workspace
+
+Install J-Link as well afterwards:
+
+    sudo apt install /opt/nrf-command-line-tools/share/JLink_Linux_*.deb
+
+Now everything should be ready to start a build.
+
 ## Setup
 
 The installation uses CMake. To start, you can simply use:
