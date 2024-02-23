@@ -5,17 +5,14 @@ usage="$0 <workspace path>"
 WORKSPACE_DIR=${1:? "Usage: $usage"}
 
 ARCH=$(dpkg --print-architecture)
-if [ "$ARCH" == "armhf" ]; then
-	ARCH="arm"
-fi
 
-SEGGER_DOWNLOAD_URL=https://www.segger.com/downloads/jlink
+NORDIC_DOWNLOAD_URL="https://nsscprodmedia.blob.core.windows.net/prod/software-and-other-downloads/desktop-software/nrf-command-line-tools/sw/versions-10-x-x/10-24-0"
 
-DEB_FILE="JLink_Linux_V794k_${ARCH}.deb"
+DEB_FILE="nrf-command-line-tools_10.24.0_${ARCH}.deb"
 declare -A MD5
-MD5=( ["arm"]="4c2ccd326cae510b0798c525e705577b" ["arm64"]="1f895a0ea4aeba658d1247ce335b4d9e" ["i386"]="c39f3e1f581da2e712709163d5fa6b76" ["x86_64"]="e001bf6e53f1bab1c44438dc5fefb38a" )
+MD5=( ["armhf"]="8d52a5fb10e7ed7d93aefb2a143f9571" ["arm64"]="c218aad31c324aaea0ea535f0b844efd" ["amd64"]="426f5550963e57b0f897c3ae7f4136fb" )
 
-DOWNLOAD_URL="$SEGGER_DOWNLOAD_URL/$DEB_FILE"
+DOWNLOAD_URL="$NORDIC_DOWNLOAD_URL/$DEB_FILE"
 
 DOWNLOAD_DIR="$WORKSPACE_DIR/downloads"
 mkdir -p "$DOWNLOAD_DIR"
@@ -32,7 +29,7 @@ fi
 if [ $SKIP_DOWNLOAD -eq 1 ]; then
 	echo "Skip download. Already file with proper checksum downloaded."
 else
-	wget --no-verbose --show-progress --progress=dot:giga --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" "$DOWNLOAD_URL"
+	wget --no-verbose --show-progress --progress=dot:giga --timestamping "$DOWNLOAD_URL"
 	md5=($(md5sum "$DEB_FILE"))
 	if [ "$md5" != "${MD5[$ARCH]}" ]; then
 		echo "Checksum incorrect: $md5 != ${MD5[$ARCH]}"
